@@ -64,6 +64,7 @@ html-first/
     html-first-port.md       hf-port.md
     html-first-review.md     hf-review.md
     html-first-prototype.md  hf-prototype.md
+    html-first-close.md      hf-close.md
   hooks/
     hooks.json
     session-start
@@ -128,7 +129,10 @@ in a public package.
 | 6 | Port to Figma | `/html-first-port <wp>` | `figma-screens.md`, `figma-elements.md` | Manual, hook-blocked without 5a |
 | 7 | Review | `/html-first-review [wp] [--fix]` | `review-gates.md` | Manual |
 | 8 | Prototype | `/html-first-prototype` | `figma-screens.md`, `review-gates.md` | Manual |
-| 9 | Closeout | inside step 1 | `review-gates.md` | Manual |
+| 9 | Closeout | `/html-first-close` | `review-gates.md` | Manual |
+
+`/html-first` covers steps 1 through 4, which happen in one sitting. Steps 5 through 9 are separate
+entry points because they recur over days and the session will not survive that.
 
 ### Step 1, intake
 
@@ -294,7 +298,7 @@ Ordered by dependency, not by visibility.
 3. `figma-elements.md`, `figma-screens.md`, and both scripts. Lifted from the existing archive and
    scrubbed. Hardest content, already written.
 4. `skills/design-flow/SKILL.md`.
-5. The five commands plus their five aliases.
+5. The six commands plus their six aliases.
 6. `research.md`, `html-prototype.md`, `review-gates.md`. New writing.
 7. `README.md`, `LICENSE`, `CHANGELOG.md`.
 
