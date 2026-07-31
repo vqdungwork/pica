@@ -6,7 +6,7 @@
 
 Prototype in HTML. Port to Figma on approval. Verify by measurement, never by eye.
 
-[![version](https://img.shields.io/badge/version-0.1.0-1f2328)](https://github.com/vqdungwork/pica/releases)
+[![version](https://img.shields.io/badge/status-design%20complete-d97706)](https://github.com/vqdungwork/pica/releases)
 [![licence](https://img.shields.io/badge/licence-MIT-1f2328)](LICENSE)
 [![requires](https://img.shields.io/badge/requires-Claude%20Code-1f2328)](https://claude.com/claude-code)
 [![figma](https://img.shields.io/badge/Figma-optional-1f2328)](#requirements)
@@ -36,6 +36,13 @@ collapse into the same pass so nothing is auditable, and the file gets declared 
 against itself.
 
 `pica` fixes the order of operations and refuses to trust the eye.
+
+## Status
+
+**Not yet installable.** The design is complete and documented below, but the plugin itself is still
+being built: the skills, commands and hooks are not in this repo yet. The install block is what it
+will be, not what works today. Watch the repo or check
+[the spec](docs/specs/2026-07-31-design-flow-design.md) for the full design.
 
 ## Install
 
