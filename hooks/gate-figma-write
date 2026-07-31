@@ -1,0 +1,166 @@
+#!/usr/bin/env python3
+"""
+PreToolUse gate for mcp__figma__use_figma.
+
+Four things this makes impossible rather than merely discouraged:
+
+  1. writing to Figma for a work package whose HTML the human has not approved
+  2. writing to Figma while a review is running in report mode
+  3. writing to Figma after delivery
+  4. writing to Figma without the Figma Plugin API rules loaded
+
+A hook is a shell script. It cannot know that a human said yes out loud, so authority
+lives in .pica/state.json, written by the pica commands and read here.
+
+If there is no .pica/state.json, this is not a pica project and the gate stays out of
+the way entirely.
+
+Reads the hook payload on stdin, writes a permission decision on stdout.
+Requires python3.
+"""
+
+import json
+import os
+import re
+import sys
+
+# Plugin API calls that mutate the document. Read-only scripts use getters, find*,
+# and getNodeByIdAsync, none of which appear here.
+WRITE_SIGNATURES = [
+    r"figma\.create[A-Z]",
+    r"figma\.combineAsVariants",
+    r"figma\.group\s*\(",
+    r"figma\.variables\.create",
+    r"\.appendChild\s*\(",
+    r"\.insertChild\s*\(",
+    r"\.remove\s*\(\s*\)",
+    r"\.resize(WithoutConstraints)?\s*\(",
+    r"\.clone\s*\(\s*\)",
+    r"\.setValueForMode\s*\(",
+    r"\.setBoundVariable(ForPaint)?\s*\(",
+    r"\.setProperties\s*\(",
+    r"\.addComponentProperty\s*\(",
+    r"\.resetOverrides\s*\(",
+    r"\.createInstance\s*\(",
+    r"\.setRangeFont",
+    r"\.setSharedPluginData\s*\(",
+    r"\.reactions\s*=",
+    r"\.(characters|name|visible|opacity|fills|strokes|effects|cornerRadius)\s*=[^=]",
+    r"\.(x|y|rotation|itemSpacing|layoutMode|layoutSizing\w+|layoutGrow|layoutWrap)\s*=[^=]",
+    r"\.(padding(Top|Bottom|Left|Right))\s*=[^=]",
+    r"\.(primaryAxisAlignItems|counterAxisAlignItems|primaryAxisSizingMode|counterAxisSizingMode)\s*=[^=]",
+    r"\.(textAlignHorizontal|textAlignVertical|textAutoResize|textTruncation)\s*=[^=]",
+    r"\.(fontName|fontSize|lineHeight|letterSpacing|textStyleId)\s*=[^=]",
+    r"\.(clipsContent|overflowDirection|layoutPositioning|constrainProportions)\s*=[^=]",
+]
+WRITE_RE = re.compile("|".join(WRITE_SIGNATURES))
+
+
+def deny(reason):
+    json.dump({
+        "hookSpecificOutput": {
+            "hookEventName": "PreToolUse",
+            "permissionDecision": "deny",
+            "permissionDecisionReason": reason,
+        }
+    }, sys.stdout)
+    sys.exit(0)
+
+
+def allow():
+    # Emit nothing and exit clean: no opinion, normal permission flow continues.
+    sys.exit(0)
+
+
+def find_state(start):
+    """Walk up from cwd looking for .pica/state.json, so the gate works from subdirectories."""
+    d = os.path.abspath(start or os.getcwd())
+    while True:
+        candidate = os.path.join(d, ".pica", "state.json")
+        if os.path.isfile(candidate):
+            return candidate
+        parent = os.path.dirname(d)
+        if parent == d:
+            return None
+        d = parent
+
+
+def main():
+    try:
+        payload = json.load(sys.stdin)
+    except Exception:
+        allow()
+
+    tool_input = payload.get("tool_input") or {}
+    code = ""
+    for key in ("code", "script", "js", "source"):
+        v = tool_input.get(key)
+        if isinstance(v, str):
+            code += "\n" + v
+
+    is_write = bool(WRITE_RE.search(code))
+
+    state_path = find_state(payload.get("cwd"))
+    if not state_path:
+        # Not a pica project. Stay out of the way.
+        allow()
+
+    try:
+        with open(state_path) as fh:
+            state = json.load(fh)
+    except Exception as e:
+        deny(
+            f"pica: .pica/state.json exists at {state_path} but could not be parsed ({e}). "
+            "Figma writes are blocked until it is valid, because the approval gates cannot be "
+            "checked without it."
+        )
+
+    # Gate 4 applies to reads as well as writes: the API rules prevent silent-wrong-result
+    # failures on both.
+    skill_names = str(tool_input.get("skillNames") or "")
+    if "figma-use" not in skill_names:
+        deny(
+            "pica: load the figma-use skill before calling use_figma, and pass "
+            'skillNames: "figma-use" on the call. It carries the Plugin API contract, and '
+            "skipping it causes failures that return success and produce wrong results."
+        )
+
+    if not is_write:
+        allow()
+
+    if state.get("delivered") is True:
+        deny(
+            "pica: this project is delivered and its Figma file is frozen. Writes are blocked. "
+            "If something is wrong, report it; do not repair it. To reopen deliberately, set "
+            '"delivered": false in .pica/state.json and say so to the user first.'
+        )
+
+    review = state.get("activeReview") or {}
+    if review.get("mode") == "report":
+        deny(
+            "pica: a review is running in report mode, which changes nothing by design. "
+            "Finish the report, hand it to the user, and let them decide what to fix. "
+            "Run /pica-review --fix if they have already asked for fixes."
+        )
+
+    auth = state.get("writeAuthorization") or {}
+    if auth.get("granted") is not True:
+        wps = state.get("workPackages") or {}
+        unapproved = [k for k, v in wps.items() if not (v or {}).get("htmlApproved")]
+        hint = ""
+        if unapproved:
+            hint = (
+                " Work packages with no HTML approval yet: " + ", ".join(sorted(unapproved)) + "."
+            )
+        deny(
+            "pica: no write authorization is active, so this Figma write is blocked. Writes are "
+            "granted by /pica (foundations), /pica-port (an approved work package), "
+            "/pica-review --fix, or /pica-prototype. If you are porting, the package's HTML must be "
+            "approved by the user first." + hint
+        )
+
+    allow()
+
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,18 @@
+{
+  "name": "pica",
+  "description": "Design workflow for Claude Code: prototype in HTML, port to Figma on approval, verify by measurement",
+  "owner": {
+    "name": "Dung Vuong"
+  },
+  "plugins": [
+    {
+      "name": "pica",
+      "description": "A gated design workflow. HTML is the source of truth, Figma is verified against it by measurement, and the gates are enforced by hooks rather than by good intentions.",
+      "version": "0.1.0",
+      "source": "./",
+      "author": {
+        "name": "Dung Vuong"
+      }
+    }
+  ]
+}

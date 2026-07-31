@@ -6,7 +6,7 @@
 
 Prototype in HTML. Port to Figma on approval. Verify by measurement, never by eye.
 
-[![version](https://img.shields.io/badge/status-design%20complete-d97706)](https://github.com/vqdungwork/pica/releases)
+[![version](https://img.shields.io/badge/version-0.1.0-1f2328)](https://github.com/vqdungwork/pica/releases)
 [![licence](https://img.shields.io/badge/licence-MIT-1f2328)](LICENSE)
 [![requires](https://img.shields.io/badge/requires-Claude%20Code-1f2328)](https://claude.com/claude-code)
 [![figma](https://img.shields.io/badge/Figma-optional-1f2328)](#requirements)
@@ -36,13 +36,6 @@ collapse into the same pass so nothing is auditable, and the file gets declared 
 against itself.
 
 `pica` fixes the order of operations and refuses to trust the eye.
-
-## Status
-
-**Not yet installable.** The design is complete and documented below, but the plugin itself is still
-being built: the skills, commands and hooks are not in this repo yet. The install block is what it
-will be, not what works today. Watch the repo or check
-[the spec](docs/specs/2026-07-31-design-flow-design.md) for the full design.
 
 ## Install
 
@@ -373,8 +366,9 @@ said yes out loud.
 
 | Tier | Needs | Gives you |
 |:--|:--|:--|
-| **Core** | nothing | Steps 1, 2, 3, 5, 7 (HTML side), 9 |
+| **Core** | `bash` and `python3`, for the hooks | Steps 1, 2, 3, 5, 7 (HTML side), 9 |
 | **Figma** | the Figma MCP server | Steps 4, 6, 7 (Figma side), 8 |
+| **Measured diff** | playwright | The HTML capture harness that step 6 diffs against |
 | **Enhanced** | [superpowers](https://github.com/obra/superpowers) | Stronger intake and planning, plus the agent panel |
 
 **The core tier works with nothing else installed.** If you never touch Figma, the whole HTML flow
