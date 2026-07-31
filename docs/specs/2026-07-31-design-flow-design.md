@@ -1,4 +1,4 @@
-# html-first: Design Flow Package
+# pica: Design Flow Package
 
 Date: 2026-07-31
 Status: awaiting review
@@ -9,7 +9,7 @@ Provenance: extracted from one real client design pilot (24h fixed-scope mobile 
 A distributable Claude Code plugin that carries a gated design workflow: prototype in HTML, port to
 Figma only on approval, verify Figma against the HTML by measurement rather than by eye.
 
-Published publicly as `html-first`, installable in two lines by anyone.
+Published publicly as `pica`, installable in two lines by anyone.
 
 ## 2. Decisions
 
@@ -21,7 +21,7 @@ Published publicly as `html-first`, installable in two lines by anyone.
 | D4 | Prototype scope | Flow wiring plus component interactions. Motion excluded. |
 | D5 | Audience | Public, open source. Requires full scrubbing of client-identifying content. |
 | D6 | First release | Everything, versioned 0.1.0, with provenance stated honestly in the README. |
-| D7 | Name | `html-first`. Commands ship as explicit `/html-first-*` with short `/hf-*` aliases. |
+| D7 | Name | `pica`, the typographic unit. Commands are `/pica-*`. No aliases: the name is already short enough that a second command layer would only add files to maintain. |
 
 ## 3. Why this exists
 
@@ -43,7 +43,7 @@ This history is the package's only evidence. It is one project. The README must 
 ## 4. Repository layout
 
 ```
-html-first/
+pica/
   .claude-plugin/
     marketplace.json
     plugin.json
@@ -59,12 +59,12 @@ html-first/
       capture-html-reference.mjs
       figma-audit.js
   commands/
-    html-first.md            hf.md
-    html-first-wp.md         hf-wp.md
-    html-first-port.md       hf-port.md
-    html-first-review.md     hf-review.md
-    html-first-prototype.md  hf-prototype.md
-    html-first-close.md      hf-close.md
+    pica.md
+    pica-wp.md
+    pica-port.md
+    pica-review.md
+    pica-prototype.md
+    pica-close.md
   hooks/
     hooks.json
     session-start
@@ -73,8 +73,8 @@ html-first/
   README.md  LICENSE  CHANGELOG.md
 ```
 
-The `hf-*.md` files are thin aliases that defer to their `html-first-*` counterparts. Explicit names
-are discoverable in the command list; short names are usable daily.
+Six commands, no aliases. `pica` is short enough to type in full, so a second command layer would
+add files to maintain and two names to document for no gain.
 
 All internal paths resolve through `${CLAUDE_PLUGIN_ROOT}`. No absolute or home-relative paths
 anywhere, since those break on every machine but the author's.
@@ -86,14 +86,14 @@ The package assumes model judgement is unreliable. Reliability is layered delibe
 | Layer | Fires | Carries | Bypassable |
 |---|---|---|---|
 | `SessionStart` hook | Always, on `startup`, `clear` and `compact` | `dispatcher.md` | No |
-| `/html-first-*` commands | When typed, deterministic thereafter | Flow order and its gates | Yes, by not typing them |
+| `/pica-*` commands | When typed, deterministic thereafter | Flow order and its gates | Yes, by not typing them |
 | `PreToolUse` hooks | On every matching tool call | The two hard gates | No |
 
 Rationale: the same instruction given in prose decayed inside a single long session on the source
 project, agreed on day one and needing to be re-demanded on day two. Anything that must never be
 skipped belongs in a hook, not in a rule file.
 
-The skill itself (`html-first:design-flow`) is model-invoked and therefore unreliable. It is not
+The skill itself (`pica:design-flow`) is model-invoked and therefore unreliable. It is not
 depended on. The dispatcher is what makes the flow present.
 
 ## 6. `dispatcher.md`
@@ -108,7 +108,7 @@ Content, in priority order:
 3. Reviews report by default. Fixing requires a separate instruction.
 4. Never modify a delivered artefact.
 5. Self-review before handing anything back.
-6. For design work, run `/html-first`.
+6. For design work, run `/pica`.
 
 Excluded: any personal stylistic preference. Those belong in the user's own memory or CLAUDE.md, not
 in a public package.
@@ -118,17 +118,17 @@ in a public package.
 | # | Step | Entry | Rules | Trigger |
 |---|---|---|---|---|
 | 0 | Dispatcher injected | `hooks/session-start` | none | Auto |
-| 1 | Intake | `/html-first` | `research.md` | Manual |
-| 2 | Research and tokens | inside `/html-first` | `research.md` | Auto after gate 1 |
-| 3 | UI kit HTML | inside `/html-first` | `html-prototype.md` | Auto after gate 2 |
-| 4 | Foundations port | inside `/html-first` | `figma-elements.md` | Conditional on Figma in scope |
-| 5 | Work package | `/html-first-wp <name>` | `html-prototype.md`, `review-gates.md` | Manual |
-| 6 | Port to Figma | `/html-first-port <wp>` | `figma-screens.md`, `figma-elements.md` | Manual, hook-blocked without gate 5 |
-| 7 | Review | `/html-first-review [wp] [--fix]` | `review-gates.md` | Manual |
-| 8 | Prototype | `/html-first-prototype` | `figma-screens.md`, `review-gates.md` | Manual |
-| 9 | Closeout | `/html-first-close` | `review-gates.md` | Manual |
+| 1 | Intake | `/pica` | `research.md` | Manual |
+| 2 | Research and tokens | inside `/pica` | `research.md` | Auto after gate 1 |
+| 3 | UI kit HTML | inside `/pica` | `html-prototype.md` | Auto after gate 2 |
+| 4 | Foundations port | inside `/pica` | `figma-elements.md` | Conditional on Figma in scope |
+| 5 | Work package | `/pica-wp <name>` | `html-prototype.md`, `review-gates.md` | Manual |
+| 6 | Port to Figma | `/pica-port <wp>` | `figma-screens.md`, `figma-elements.md` | Manual, hook-blocked without gate 5 |
+| 7 | Review | `/pica-review [wp] [--fix]` | `review-gates.md` | Manual |
+| 8 | Prototype | `/pica-prototype` | `figma-screens.md`, `review-gates.md` | Manual |
+| 9 | Closeout | `/pica-close` | `review-gates.md` | Manual |
 
-`/html-first` covers steps 1 through 4, which happen in one sitting. Steps 5 through 9 are separate
+`/pica` covers steps 1 through 4, which happen in one sitting. Steps 5 through 9 are separate
 entry points because they recur over days and the session will not survive that.
 
 ---
@@ -161,7 +161,7 @@ Never fail silently, because a silent failure looks identical to a working insta
 
 **Purpose.** Convert a brief into a contract before any work starts.
 
-**Entry.** `/html-first`, typed by the user.
+**Entry.** `/pica`, typed by the user.
 
 **Rules loaded.** `research.md`.
 
@@ -185,12 +185,12 @@ Never fail silently, because a silent failure looks identical to a working insta
 4. Produce 2 to 3 delivery options, each costed in the **same table** with a comparable total.
 5. Tier every work package `standard` or `complex` against the criteria in step 5, and present the
    labels for confirmation.
-6. Create the project skeleton: `docs/`, `html/`, `.audit/`, `.hf/state.json`.
+6. Create the project skeleton: `docs/`, `html/`, `.audit/`, `.pica/state.json`.
 7. Open three parallel artefacts that run for the life of the project: the effort log, the reasoning
    log, and the annotation list.
 
 **Outputs.** `docs/contract.md`, `docs/exclusions.md`, the costed options table, tier labels,
-`.hf/state.json` initialised.
+`.pica/state.json` initialised.
 
 **Gate 1.** The user approves the contract, the exclusions list, one option, and the tier labels.
 Nothing proceeds until all four are approved.
@@ -290,7 +290,7 @@ reassigned. Ignoring the return value silently applies nothing.
 
 **Purpose.** Design one coherent slice, in the cheap medium, to an agreed standard.
 
-**Entry.** `/html-first-wp <name>`, typed per package.
+**Entry.** `/pica-wp <name>`, typed per package.
 
 **Rules loaded.** `html-prototype.md`, `review-gates.md`.
 
@@ -342,7 +342,7 @@ entries, and for complex packages `docs/<wp>-options-report.md`.
 
 **Purpose.** Reproduce approved HTML in Figma to handoff grade, and prove it matches.
 
-**Entry.** `/html-first-port <wp>`, typed by the user.
+**Entry.** `/pica-port <wp>`, typed by the user.
 
 **Rules loaded.** `figma-screens.md`, `figma-elements.md`. `figma-use` before the first write.
 
@@ -386,7 +386,7 @@ obvious to measurement.
 
 **Purpose.** Find defects by measurement, and separate finding from fixing.
 
-**Entry.** `/html-first-review [wp] [--fix]`, typed by the user.
+**Entry.** `/pica-review [wp] [--fix]`, typed by the user.
 
 **Rules loaded.** `review-gates.md`.
 
@@ -431,7 +431,7 @@ divergence had piled up.
 
 **Purpose.** Make behaviour reviewable, not just appearance.
 
-**Entry.** `/html-first-prototype`, typed after screens are delivered.
+**Entry.** `/pica-prototype`, typed after screens are delivered.
 
 **Rules loaded.** `figma-screens.md`, `review-gates.md`.
 
@@ -458,7 +458,7 @@ than improvising them.
 
 **Purpose.** Prove the delivery matches the brief, and hand over something a developer can build from.
 
-**Entry.** `/html-first-close`, typed by the user.
+**Entry.** `/pica-close`, typed by the user.
 
 **Rules loaded.** `review-gates.md`.
 
@@ -486,7 +486,7 @@ overridden.
 
 ---
 
-## 9. `.hf/state.json`
+## 9. `.pica/state.json`
 
 The hooks are shell scripts. They cannot know that a human verbally approved a work package, so
 approval has to be on disk.
@@ -569,7 +569,7 @@ Structure:
    battle-tested part. Version 0.1.0 for that reason.
 5. **The flow**, as the overview table from section 7.
 6. **Dependency tiers**, section 12, with the core-needs-nothing point made explicitly.
-7. **Command reference**, explicit names with the short aliases noted.
+7. **Command reference**, all six commands with their arguments.
 8. **The rules**, one paragraph per module with a link.
 9. **What the hooks enforce**, and why hooks rather than instructions.
 10. **Not included:** motion design, code generation, design token export to code, anything
@@ -586,12 +586,12 @@ Ordered by dependency, not by visibility.
 
 1. Repo skeleton, `plugin.json`, `marketplace.json`. Installable while empty; verify install works
    before adding content.
-2. Hooks: `dispatcher.md`, `session-start`, `hooks.json`, and `.hf/state.json` handling. The
+2. Hooks: `dispatcher.md`, `session-start`, `hooks.json`, and `.pica/state.json` handling. The
    reliability layer comes first because everything else assumes it fires.
 3. `figma-elements.md`, `figma-screens.md`, and both scripts. Lifted from the existing archive and
    scrubbed. Hardest content, already written.
 4. `skills/design-flow/SKILL.md`.
-5. The six commands plus their six aliases.
+5. The six commands.
 6. `research.md`, `html-prototype.md`, `review-gates.md`. New writing.
 7. `README.md`, `LICENSE`, `CHANGELOG.md`.
 
@@ -601,7 +601,7 @@ Ordered by dependency, not by visibility.
   appear in a fresh session.
 - With no Figma MCP and no superpowers installed, the core flow runs end to end and states clearly
   which steps are unavailable.
-- A `use_figma` write is denied when the target package is not approved in `.hf/state.json`.
+- A `use_figma` write is denied when the target package is not approved in `.pica/state.json`.
 - A `use_figma` write is denied while a review is active in report mode.
 - A `use_figma` write is denied after `delivered` is set.
 - `grep` across the published repo returns no client name, no Figma file key, no issue-tracker host,

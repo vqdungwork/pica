@@ -1,8 +1,11 @@
-# html-first
+# pica
 
 **Design workflow for Claude Code. Prototype in HTML, port to Figma, verify by measurement.**
 
 Version 0.1.0
+
+A pica is the unit designers have measured type in for six centuries. The name is the whole argument:
+designs are checked against a measurement, not against an impression.
 
 ---
 
@@ -19,8 +22,8 @@ This package fixes the order of operations and refuses to trust the eye.
 ## Install
 
 ```
-/plugin marketplace add vqdung/html-first
-/plugin install html-first@html-first
+/plugin marketplace add vqdung/pica
+/plugin install pica@pica
 ```
 
 Restart Claude Code. The workflow announces itself at the start of every session from then on. You do
@@ -40,18 +43,15 @@ single design system and a single Figma file. That is why this is `0.1.0` and no
 | # | Step | Command | Runs |
 |---|---|---|---|
 | 0 | Workflow loaded | none | Automatically, every session |
-| 1 | Intake | `/html-first` | Once per project |
+| 1 | Intake | `/pica` | Once per project |
 | 2 | Research and tokens | inside step 1 | Once per project |
 | 3 | UI kit in HTML | inside step 1 | Once per project |
 | 4 | Foundations into Figma | inside step 1 | Only if Figma is in scope |
-| 5 | Work package | `/html-first-wp <name>` | Once per package |
-| 6 | Port to Figma | `/html-first-port <wp>` | Once per package, after approval |
-| 7 | Review | `/html-first-review [wp]` | After every port |
-| 8 | Prototype | `/html-first-prototype` | Once, after screens land |
-| 9 | Closeout | `/html-first-close` | Once, at handover |
-
-Every command has a short alias: `/hf`, `/hf-wp`, `/hf-port`, `/hf-review`, `/hf-prototype`,
-`/hf-close`.
+| 5 | Work package | `/pica-wp <name>` | Once per package |
+| 6 | Port to Figma | `/pica-port <wp>` | Once per package, after approval |
+| 7 | Review | `/pica-review [wp]` | After every port |
+| 8 | Prototype | `/pica-prototype` | Once, after screens land |
+| 9 | Closeout | `/pica-close` | Once, at handover |
 
 ---
 
@@ -63,11 +63,11 @@ decayed by day two inside one long session. Rules that live only in prose get fo
 
 Six lines, always present: HTML wins when HTML and Figma disagree, never port without approval,
 reviews report before they fix, never modify a delivered file, self-review before handing back, and
-run `/html-first` for design work.
+run `/pica` for design work.
 
 ### Step 1. Intake
 
-`/html-first` refuses to start without five things:
+`/pica` refuses to start without five things:
 
 - the brief, raw and unedited
 - your sources, each labelled `use` or `ignore`
@@ -234,7 +234,7 @@ Four things are enforced by hook rather than by instruction, because instruction
 - no Figma write after delivery
 - no Figma write before the Figma API rules are loaded
 
-Approvals live in `.hf/state.json` in your project. A hook is a shell script; it cannot know you said
+Approvals live in `.pica/state.json` in your project. A hook is a shell script; it cannot know you said
 yes out loud.
 
 ## Requirements
