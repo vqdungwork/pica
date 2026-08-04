@@ -424,6 +424,19 @@ chip.setProperties({ [propId]: true });
 `addComponentProperty` returns an id like `"icon#213:0"`. Keep it; `setProperties` needs the exact
 string.
 
+**Check whether the element is already there before you build anything.** The most common version of this
+problem is not a missing icon — it is an icon that exists in every variant, sits `visible: false`, and has
+**no property wired to it**, so no instance can switch it on.
+
+That is a two-line fix mistaken for a modelling problem. On one file every `input` variant already carried
+an `icon/eye` inside its field row, correctly placed and centred, with `componentPropertyReferences: {}`.
+Because it could not be toggled, five screens got an 18x18 eye positioned absolutely on the canvas
+instead, which then drifted 16px in the error state and came back as client feedback.
+
+So before adding a hidden child to five variants, read the variants: name, `visible`, and
+`componentPropertyReferences`. If the child is there, all you owe it is
+`addComponentProperty` plus a reference on each variant.
+
 ## Propagation: children yes, overridden properties no
 
 **New children added to a component DO propagate to existing instances.** Worth stating, because it
