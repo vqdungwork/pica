@@ -206,6 +206,12 @@ almost all noise), then colour-clash (36 hits, mostly noise) before anyone went 
 At the third miss, stop writing detectors and find a source of truth: a surviving correct example, the
 design's own convention, the human.
 
+**6. Scope token checks to product pages.** A cover's 96px margin, an audit board's 48px gutter and a
+spec table's 12/14 cell padding are not design-system values. Checking them means the audit can never
+return zero, and an audit that always reports something is an audit nobody reads. Declare the
+documentation pages and skip them — the first run of these checks produced roughly 900 findings, **every
+one of them** on a cover, an audit board or a handoff table.
+
 **Corollary on false positives.** Structural detectors must exclude documentation. Frames inside an
 annotation or kit-coverage board carry component *names* as labels and read as detached instances; a white
 glyph on a coloured logo circle reads as a contrast clash because the coloured layer is a sibling, not an
@@ -260,11 +266,11 @@ Everything must return zero. `scripts/figma-audit.js` runs it as one call.
 | Unbound border width | strokes present and **none of the five** `strokeWeight` keys bound, with a matching `STROKE_FLOAT` token |
 | Unbound fills and strokes | SOLID paint with no `boundVariables.color` and a token matching its **RGBA** |
 | Unregistered raw values | anything raw with no matching token **and** no entry in `rawValueExemptions` |
-| Flattened translucency | bound SOLID paint at `opacity 1` sitting inside an IMAGE-filled node, or whose own icon or label shares its exact colour |
+| Flattened translucency | **advisory, not zero.** Bound SOLID paint at `opacity 1` over artwork, named as a true overlay or carrying a same-colour child. The gate is the baseline diff, because a name cannot tell you what was meant to be translucent |
 | Baseline delta | any resolved RGBA change against the pre-pass baseline that is not a recorded decision |
-| Un-centred icons in controls | horizontal frame containing an icon child with `counterAxisAlignItems !== "CENTER"` |
+| Un-centred icons in controls | horizontal frame with an icon child and `counterAxisAlignItems !== "CENTER"`, **unless a `*-slot` child is present**, which centres on the field deliberately |
 | Fixed-height text riding high | `textAutoResize === "NONE"`, `textAlignVertical === "TOP"`, `height % lineHeight !== 0` |
-| Unequal sibling heights | row of peers (nav tabs, segments, tiles) where any `layoutSizingVertical !== "FILL"` and heights differ |
+| Unequal sibling heights | 3+ children **sharing a name stem** (`tab …`, `seg-…`) with differing heights and any `layoutSizingVertical !== "FILL"` |
 | Unpinned screen chrome | bottom chrome whose `constraints.vertical !== "MAX"`, or whose gap to the frame bottom is non-zero |
 | Un-centred button labels | `textAlignHorizontal !== "CENTER"` inside a button instance |
 | Wrong button sizing | full-width size in an auto-layout parent not set to FILL |

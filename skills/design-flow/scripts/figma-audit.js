@@ -29,17 +29,50 @@ const VIEWPORT_H      = 812;
 const SCREEN_W        = 375;                // mobile portrait width; landscape is height === SCREEN_W
 const BANNED_CHARS    = [","];              // project-specific
 
+// Pages whose geometry is documentation rather than product. Token-binding checks are SKIPPED here:
+// a spec table's cell padding and a cover's 96px margin are not design-system values, and reporting
+// them means the audit can never return zero, which turns every run into noise.
+const DOC_PAGES = ["📕", "🔍 01", "📋 09"];
+
 // Deliberate raw values. Mirror .pica/state.json rawValueExemptions, with a reason recorded there.
 // Anything raw and NOT listed here is reported, which is what makes "raw only where no token exists"
 // an auditable rule rather than an aspiration.
 const RAW_EXEMPT = {
   radius:  [],
-  padding: [],
+  padding: [2, 18, 48, 56, 60],             // rail hairline; pl-next; Foundations swatch gutter and
+                                            // label inset; landscape fs- inset
   stroke:  [],                              // SVG icon artwork weights are excluded structurally, not listed
-  fill:    ["#1877f2", "#1976d2", "#ffc107", "#4caf50", "#ff3d00"],   // third-party brand marks
+  fill:    ["#1877f2", "#1976d2", "#ffc107", "#4caf50", "#ff3d00",    // third-party brand marks
+            "#b8b8b8"],                     // media placeholder grey
 };
-const ICON_RE    = /icon|chevron|arrow|eye|clear|close|check|caret|play|pause|search|toggle/i;
-const OVERLAY_RE = /scrim|overlay|backdrop|pill|track|ring|badge|duration|count|watch|buffer/i;
+/**
+ * Icon-ish names, matched on word boundaries.
+ *
+ * Substring matching is wrong here: `play` matches `replay-grid` and `replay-card`, so a grid of replay
+ * cards reported itself as an un-centred icon row. Anchor each term.
+ */
+const ICON_RE = /(^|[^a-z])(icon|chevron|arrow|eye|clear|close|check|caret|play|pause|search|toggle)([^a-z]|$)/i;
+
+// Annotation frames are documentation wherever they live. Their label rows are BASELINE or MIN by
+// design and their spacing is prose layout, so token and alignment checks skip them.
+const isAnnotation = (n) => {
+  let top = n;
+  while (top.parent && top.parent.type !== "PAGE") top = top.parent;
+  return /^▸|annotation/i.test(top.name || "");
+};
+
+/**
+ * True overlay names only.
+ *
+ * An earlier draft included pill|track|ring|badge|duration|count|watch and produced 8 findings of which
+ * 6 were false: brand-coloured badges (secondary/300, error-700) and status rings (#eaeafc, #f7f7f7)
+ * are legitimately opaque. Element names do not tell you whether something is translucent.
+ *
+ * The reliable signal is the same-colour child, which proves the element is invisible. Everything else
+ * is a candidate for review, not a defect — the real gate on flattening is the baseline diff in
+ * capture-baseline.js, because it compares against what the file used to render.
+ */
+const OVERLAY_RE = /scrim|overlay|backdrop|buffer/i;
 // ---------------------------------------------------------------------------
 
 const cols = await figma.variables.getLocalVariableCollectionsAsync();
@@ -162,6 +195,7 @@ for (const pg of figma.root.children) {
   await figma.setCurrentPageAsync(pg);                       // MANDATORY, or instances are invisible
   const isScreen = SCREEN_PREFIXES.some(p => pg.name.indexOf(p) === 0);
   const skipContrast = SKIP_CONTRAST.some(p => pg.name.indexOf(p) === 0);
+  const isDocPage = DOC_PAGES.some(p => pg.name.indexOf(p) === 0);
 
   const tops = pg.children.map(c => ({ n: c.name, x: c.x, y: c.y, x2: c.x + c.width, y2: c.y + c.height }));
   for (let i = 0; i < tops.length; i++) for (let j = i + 1; j < tops.length; j++) {
@@ -219,7 +253,8 @@ for (const pg of figma.root.children) {
 
     // ---- geometry token binding (0.2.0) ------------------------------------
     // COMPONENT_SET is the variant-set wrapper: its radius and padding are editor chrome, not design.
-    if (n.type !== "COMPONENT_SET" && n.type !== "SECTION") {
+    // Documentation pages are skipped: see DOC_PAGES.
+    if (!isDocPage && !isAnnotation(n) && n.type !== "COMPONENT_SET" && n.type !== "SECTION") {
       const bv = n.boundVariables || {};
 
       for (const k of RADII) {
@@ -256,10 +291,18 @@ for (const pg of figma.root.children) {
         }
       }
 
-      // Flattened translucency: a bound paint that resolved to opaque while sitting over artwork.
-      // Two corroborations keep this precise — an overlay-ish name, or a child of the same colour,
-      // which proves the element is invisible rather than merely opaque.
-      if (Array.isArray(n.fills) && n.fills.length) {
+      /**
+       * Flattened translucency: a bound paint that resolved to opaque while sitting over artwork.
+       *
+       * ADVISORY, not a zero-gate. Names do not tell you what should be translucent, so this returns
+       * candidates for review. The actual gate is the baseline diff in capture-baseline.js.
+       *
+       * The screen frame itself is excluded — a top-level frame is 375x812 and opaque by definition,
+       * whereas a full-bleed scrim is a child of one. Without this, every screen containing a white
+       * status-bar glyph reported itself.
+       */
+      const topLevel = !n.parent || n.parent.type === "PAGE" || n.parent.type === "SECTION";
+      if (!topLevel && Array.isArray(n.fills) && n.fills.length) {
         const f = n.fills.find(x => x.type === "SOLID" && x.visible !== false);
         const opaque = f && (f.opacity === undefined || f.opacity >= 0.999);
         if (f && opaque && f.boundVariables && f.boundVariables.color && overArt(n)) {
@@ -277,9 +320,19 @@ for (const pg of figma.root.children) {
     }
 
     // ---- vertical alignment (0.2.0) ---------------------------------------
-    if (n.type === "FRAME" && n.layoutMode === "HORIZONTAL" && n.counterAxisAlignItems !== "CENTER"
-        && (n.children || []).some(c => c.type === "VECTOR" || ICON_RE.test(c.name || "")))
-      R.iconRowNotCentred.push(where + " " + n.counterAxisAlignItems);
+    /**
+     * A row holding an icon should centre it — unless the icon is wrapped in a *-slot, which is the
+     * documented pattern for centring on a field rather than on the whole control. A slot-wrapped row
+     * is deliberately MAX-aligned, so flagging it is wrong.
+     * Documentation pages are excluded: their label rows are BASELINE or MIN by design.
+     */
+    if (!isDocPage && !isAnnotation(n) && n.type === "FRAME" && n.layoutMode === "HORIZONTAL"
+        && n.counterAxisAlignItems !== "CENTER") {
+      const kids = n.children || [];
+      const hasIcon = kids.some(c => c.type === "VECTOR" || ICON_RE.test(c.name || ""));
+      const slotted = kids.some(c => /-slot$/i.test(c.name || ""));
+      if (hasIcon && !slotted) R.iconRowNotCentred.push(where + " " + n.counterAxisAlignItems);
+    }
 
     if (n.type === "TEXT" && n.textAutoResize === "NONE" && n.textAlignVertical === "TOP") {
       const seg = n.getStyledTextSegments(["lineHeight"])[0];
@@ -288,12 +341,24 @@ for (const pg of figma.root.children) {
         R.textRidingHigh.push(where + " h=" + Math.round(n.height) + " lh=" + lh);
     }
 
-    // a row of three or more peers should be one height, achieved with FILL not luck
-    if (n.type === "FRAME" && n.layoutMode === "HORIZONTAL") {
+    /**
+     * A row of peers should be one height, achieved with FILL rather than luck.
+     *
+     * "Three or more children of differing height" alone is far too loose: it flagged 29 rows that were
+     * simply mixed content — a rail of 221px cards beside a 24px label, a top bar of 44px buttons beside
+     * a 1px divider. Those are not peers.
+     *
+     * Peers share a name stem: `tab Overview` / `tab Exercises` / `tab TV`, `seg-one` / `seg-two`.
+     * Require that, and the check finds nav tabs and segmented controls and nothing else.
+     */
+    if (!isDocPage && !isAnnotation(n) && n.type === "FRAME" && n.layoutMode === "HORIZONTAL") {
       const kids = (n.children || []).filter(c => c.type === "FRAME" || c.type === "INSTANCE");
       if (kids.length >= 3) {
+        const stem = (s) => String(s || "").trim().toLowerCase().split(/[\s\-_/]+/)[0];
+        const stems = new Set(kids.map(c => stem(c.name)));
+        const arePeers = stems.size === 1 && [...stems][0].length > 1;
         const hs = [...new Set(kids.map(c => Math.round(c.height)))];
-        if (hs.length > 1 && kids.some(c => c.layoutSizingVertical !== "FILL"))
+        if (arePeers && hs.length > 1 && kids.some(c => c.layoutSizingVertical !== "FILL"))
           R.unequalSiblings.push(where + " " + hs.join("/"));
       }
     }
@@ -413,8 +478,9 @@ return {
   radiusUnbound: cap(R.radiusUnbound), paddingUnbound: cap(R.paddingUnbound),
   strokeWeightUnbound: cap(R.strokeWeightUnbound), colourUnbound: cap(R.colourUnbound),
   rawUnregistered: cap(R.rawUnregistered, 10),
-  // translucency and alignment
-  flattenedTranslucency: cap(R.flattened), iconRowNotCentred: cap(R.iconRowNotCentred),
+  // advisory: candidates for review, not a zero-gate. The gate is the capture-baseline.js diff.
+  flattenedTranslucencyCandidates: cap(R.flattened),
+  iconRowNotCentred: cap(R.iconRowNotCentred),
   textRidingHigh: cap(R.textRidingHigh), unequalSiblingHeights: cap(R.unequalSiblings),
   bannedChars: R.banned, placeholderText: cap(R.placeholder),
   orphanNodes: cap(R.orphans), detachedInstances: R.detached,
