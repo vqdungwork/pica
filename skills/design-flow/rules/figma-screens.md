@@ -72,6 +72,20 @@ Accept the duplication, name the clones by flow (`A01 welcome`, `B02 player play
 `C04 live now`), and say in the page legend that the source pages remain the reference for specs. Add
 named flow starting points so Present mode offers a real menu.
 
+**Re-sync the clones after every fix, and audit that you did.** A clone is a copy, so a structural fix on
+a source screen does **not** reach it. This is the single most reliable source of late divergence, because
+the prototype is what a client clicks through while the source pages are what you have been reviewing.
+
+It bit one project twice: the clones missed a whole token-binding pass, and later missed a slot wrapper
+that re-centred two controls, so the prototype still showed a 10px misalignment the source had lost.
+
+Component-level fixes **do** propagate, because the clones hold instances. Frame-level fixes do not.
+Anything you fix by editing a screen frame — a wrapper, a constraint, a position, a paint on a local shape
+— needs doing twice.
+
+Audit it by measuring, not by remembering: pick the property you changed and compare each clone against
+its source. Do not compare names or child counts, which match while the geometry diverges.
+
 Then audit for **dead ends**: every frame should have at least one outgoing reaction, or be a
 deliberate terminal state. A flow that ends nowhere reads as unfinished. Closing the last frame of an
 onboarding flow back to home also makes the flows read as one continuous story.
@@ -198,6 +212,13 @@ slot.primaryAxisAlignItems = 'CENTER';
 slot.counterAxisAlignItems = 'CENTER';
 slot.setBoundVariable('height', inputHeightVar);  // tracks the field if it ever changes
 ```
+
+**Give the trailing icon a gap.** A field row whose value text is `FILL` puts the text box flush against
+the icon at `itemSpacing: 0`, which looks fine with a short placeholder and collides the moment the value
+is long. Bind the row's `itemSpacing` to a token — `input/gap` aliasing the spacing scale, alongside
+`input/height` and `input/padding-x`. Note that you cannot verify this by measuring the component while
+the icon is hidden: a hidden child does not participate in auto-layout, so its box overlaps the FILL text
+and the measured gap comes back negative. Measure a live instance with the icon switched on.
 
 ## A trailing icon belongs inside the component
 
