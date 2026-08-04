@@ -302,11 +302,34 @@ from a live count in the same script that writes them, so the parts always add t
 - [ ] Zero detached instances; zero raw shapes in screens beyond images, scrims and indicators
 - [ ] Contrast computed and passing, with any exception measured from the render and written down
 - [ ] Prototype has no dead ends
-- [ ] Every deviation from the HTML is either fixed or recorded as a decision with a reason
+- [ ] Every deviation from the HTML is either fixed or listed in `deviations` with a reason and a name
+- [ ] Nothing in `exclusions` exists in the file
+- [ ] Every number published in the file recounts correctly from the file
 
 ## Deviating from the HTML
 
-The HTML wins by default. Two cases where it does not, and both must be **written down**:
+The HTML wins by default. Two cases where it does not, and both go in the **`deviations` register** in
+`.pica/state.json` — not into prose, because a deviation recorded only in a review document cannot be
+distinguished from a defect on the next run:
+
+```json
+{ "deviations": [
+  { "node": "29:119", "prop": "y", "html": 369, "figma": 389,
+    "why": "client approved moving the CTA below the checkbox on 12 Mar", "by": "client" },
+  { "node": "28:4", "prop": "cornerRadius", "html": 16, "figma": 14,
+    "why": "HTML was off-token; 14 is the agreed hero radius", "by": "html-fix-pending" }
+] }
+```
+
+The geometry diff reads it: a delta above tolerance that **is** registered is reported as a decision, and
+one that is not is reported as a finding. Without the register the definition of done below is
+unfalsifiable, because "recorded as a decision" has nowhere to be recorded.
+
+Two rules on entries. `why` names the **person or the reason**, never "intentional" — the point is that a
+stranger can audit it. And `by: "html-fix-pending"` is a promise: the HTML gets corrected, the entry gets
+deleted. A register that only grows is a backlog pretending to be documentation.
+
+The two cases:
 
 1. **The HTML is accidentally off-token.** A missing `line-height` falling back to `normal`, an inline
    `height:160px` where every sibling uses 150. Fix the HTML; do not copy the mistake into the design

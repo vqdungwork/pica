@@ -70,12 +70,30 @@ Write `.pica/state.json`:
   "delivered": false,
   "workPackages": {},
   "activeReview": null,
-  "writeAuthorization": null
+  "writeAuthorization": null,
+  "exclusions": [],
+  "bannedChars": [],
+  "rawValueExemptions": [],
+  "deviations": []
 }
 ```
 
 Populate `workPackages` with one entry per package: `{ "tier": "standard", "htmlApproved": false,
 "ported": false }`.
+
+The last four are **registers**, and they are what make later judgement calls checkable rather than
+aspirational. Two are filled now, two accumulate:
+
+- **`exclusions`** — a short matchable name for each thing the brief rules out, alongside the prose in
+  `docs/exclusions.md`. `["settings", "profile", "onboarding video"]`. The audit compares frame names
+  against these, because on the source project a ruled-out screen got designed anyway and was only caught
+  two days later by a human re-reading the brief.
+- **`bannedChars`** — declared here rather than buried in the audit script's config, since it is a project
+  fact established at intake.
+- **`rawValueExemptions`** — starts empty, grows during the port when a value genuinely has no token.
+- **`deviations`** — starts empty, grows when the human approves Figma differing from the HTML.
+
+A register with no entries is a valid state and means something: nothing has been excused yet.
 
 Open three artefacts that run for the life of the project, and say they exist:
 

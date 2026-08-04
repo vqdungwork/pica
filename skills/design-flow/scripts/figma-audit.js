@@ -34,7 +34,13 @@ const BANNED_CHARS    = [","];              // project-specific
 // them means the audit can never return zero, which turns every run into noise.
 const DOC_PAGES = ["📕", "🔍 01", "📋 09"];
 
-// Deliberate raw values. Mirror .pica/state.json rawValueExemptions, with a reason recorded there.
+// Populated from .pica/state.json before pasting. State is authoritative; this block is a copy the
+// Figma sandbox can see, because it has no filesystem access.
+const EXCLUSIONS = [];                      // short names the brief ruled out, e.g. ["settings", "profile"]
+const DEVIATIONS = [];                      // [{ node, prop, html, figma, why, by }]
+
+// Deliberate raw values, copied from .pica/state.json rawValueExemptions where the reasons live.
+// State is authoritative; never edit this block alone or the two drift and the reasons are lost.
 // Anything raw and NOT listed here is reported, which is what makes "raw only where no token exists"
 // an auditable rule rather than an aspiration.
 const RAW_EXEMPT = {
@@ -187,7 +193,9 @@ const R = { overflow: [], ovals: [], clippedShadow: 0, clippedRail: 0, overlaps:
   // 0.2.0: geometry token binding, translucency integrity, vertical alignment
   radiusUnbound: [], paddingUnbound: [], strokeWeightUnbound: [], colourUnbound: [],
   rawUnregistered: [], flattened: [], iconRowNotCentred: [], textRidingHigh: [],
-  unequalSiblings: [], chromeUnpinned: [], screenFrames: 0 };
+  unequalSiblings: [], chromeUnpinned: [], screenFrames: 0,
+  // 0.2.0: published-number recount, and the exclusions register
+  claims: [], componentCount: 0, topFrameNames: [], staleCounts: [], excludedBuilt: [] };
 
 const instanceRefs = [];
 
@@ -216,6 +224,7 @@ for (const pg of figma.root.children) {
     const cr = typeof n.cornerRadius === "number" ? n.cornerRadius : null;   // can be figma.mixed
 
     if (n.reactions && n.reactions.length) R.links += n.reactions.length;
+    if (n.type === "COMPONENT" || n.type === "COMPONENT_SET") R.componentCount++;
     if (n.type === "INSTANCE") instanceRefs.push(n);
     if (n.width !== undefined && n.height !== undefined && (n.width < 1 || n.height < 1)
         && n.visible !== false && n.type !== "VECTOR") R.tiny++;
@@ -367,6 +376,7 @@ for (const pg of figma.root.children) {
       const chars = String(n.characters);
       if (BANNED_CHARS.some(ch => chars.indexOf(ch) >= 0)) R.banned++;
       if (/PASTE HERE|TODO|TBD|FIXME|lorem ipsum/i.test(chars)) R.placeholder.push(where);
+      if (/\d/.test(chars) && chars.length < 400) R.claims.push({ where, text: chars });
       if (n.fontName === figma.mixed) R.mixedFont++;
       else { const k = n.fontName.family + "/" + n.fontName.style; R.fonts[k] = (R.fonts[k] || 0) + 1; }
 
@@ -418,6 +428,8 @@ for (const pg of figma.root.children) {
       && (Math.round(n.width) === SCREEN_W || Math.round(n.height) === SCREEN_W)
       && Math.max(n.width, n.height) >= 300);
   R.screenFrames += frames.length;
+  for (const c of pg.children.flatMap(c2 => c2.type === "SECTION" ? c2.children : [c2]))
+    if (c.type === "FRAME") R.topFrameNames.push(c.name || "");
   for (const f of frames) {
     const hi = (f.children || []).find(c => /home-indicator/i.test(c.name || ""));
     if (!hi) { R.hiMissing.push(f.name + " " + Math.round(f.width) + "x" + Math.round(f.height)); continue; }
@@ -440,6 +452,45 @@ for (const pg of figma.root.children) {
 
 // last, because it forces instance reconciliation and can discard unpersisted overrides
 for (const n of instanceRefs) { try { await n.getMainComponentAsync(); } catch (e) { R.detached++; } }
+
+/**
+ * Recount every number published in the file.
+ *
+ * 0.1.0 listed this check and never implemented it, so a cover claiming "45 designed screens" while
+ * counting five annotation boards passed. Now it reads the claims out of the text and recounts.
+ *
+ * Only claims it can verify are checked. An unrecognised noun is ignored rather than guessed at.
+ */
+const CLAIM_RE = /(\d[\d,]*)\s*(?:\+\s*)?(designed\s+)?(screens?|frames?|components?|variables?|tokens?|prototype\s+links?|links?)\b/gi;
+const actual = {
+  screens: R.screens,
+  frames: R.screens,
+  components: R.componentCount,
+  variables: Object.keys(raw).length,
+  tokens: Object.keys(raw).length,
+  links: R.links,
+  "prototype links": R.links,
+};
+for (const c of R.claims) {
+  let m;
+  CLAIM_RE.lastIndex = 0;
+  while ((m = CLAIM_RE.exec(c.text)) !== null) {
+    const n = parseInt(m[1].replace(/,/g, ""), 10);
+    const noun = m[3].toLowerCase().replace(/\s+/g, " ");
+    const real = actual[noun];
+    if (real === undefined || !isFinite(n)) continue;
+    if (n !== real) R.staleCounts.push(c.where + ' claims ' + n + ' ' + noun + ', file has ' + real);
+  }
+}
+
+// Anything the brief ruled out must not exist in the file.
+if (EXCLUSIONS.length) {
+  for (const nm of R.topFrameNames) {
+    const low = nm.toLowerCase();
+    for (const ex of EXCLUSIONS) if (low.indexOf(String(ex).toLowerCase()) >= 0)
+      R.excludedBuilt.push(nm + ' matches exclusion "' + ex + '"');
+  }
+}
 
 /**
  * Impossible family/style pairs.
@@ -482,6 +533,7 @@ return {
   flattenedTranslucencyCandidates: cap(R.flattened),
   iconRowNotCentred: cap(R.iconRowNotCentred),
   textRidingHigh: cap(R.textRidingHigh), unequalSiblingHeights: cap(R.unequalSiblings),
+  staleCounts: cap(R.staleCounts), excludedButBuilt: cap(R.excludedBuilt),
   bannedChars: R.banned, placeholderText: cap(R.placeholder),
   orphanNodes: cap(R.orphans), detachedInstances: R.detached,
   mixedFontNodes: R.mixedFont, unboundHalfGreyFills: R.unboundHalfGrey,

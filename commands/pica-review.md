@@ -53,6 +53,11 @@ Tolerance roughly 3px.
 
 Diff element boxes by class name too. Text runs say where things are; containers say why.
 
+**A delta above tolerance is a finding unless it is in the `deviations` register.** Read `deviations` from
+`.pica/state.json` and classify each delta as *finding* or *recorded decision*. Never resolve one by
+deciding it looks intentional — that judgement is exactly what the register exists to capture, and an
+unrecorded deviation is indistinguishable from a defect on the next run.
+
 ### 2. Text bindings
 
 Every text node resolves to a defined text style; every style resolves to variables; family, size,

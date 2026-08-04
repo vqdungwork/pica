@@ -88,10 +88,29 @@ and the failure modes that skill does not cover.
 
 ## State
 
-`.pica/state.json` holds what the hooks read: `figmaInScope`, `delivered`, per-package `tier`,
-`htmlApproved` and `ported`, plus `activeReview` and `writeAuthorization`. The commands write it.
+`.pica/state.json` holds two kinds of thing. The commands write both.
+
+**Read by the hooks**, to gate writes: `figmaInScope`, `delivered`, per-package `tier`, `htmlApproved`
+and `ported`, plus `activeReview` and `writeAuthorization`.
+
+**Read by the audit**, to make judgement calls checkable: `rawValueExemptions`, `exclusions`,
+`deviations`, `bannedChars`.
 
 A hook is a shell script. It cannot know the human said yes out loud, so approvals have to be on disk.
+
+## A rule with no register is a preference
+
+If the flow says something "must be written down", it needs a **named key in state** and something that
+reads it. Otherwise the rule is unfalsifiable: nobody can tell a deliberate exception from an oversight,
+including you a week later.
+
+This is why the audit reads `exclusions` and `deviations` rather than trusting that a document mentions
+them. Prose artefacts stay — `docs/exclusions.md` is what the human reads — but the machine-checkable
+list lives in state alongside it.
+
+The audit runs inside Figma and has **no filesystem access**, so it cannot read state directly. State is
+authoritative; populate the script's config block from it before pasting. Never edit the register in the
+script only, or the two will drift.
 
 ## Scripts
 

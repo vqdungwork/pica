@@ -14,7 +14,12 @@ Both the contract and the plan are copies, and copies drift. On the source proje
 scored deliverable that had been missed entirely: the brief asked for design reasoning, and nothing in
 the plan carried it.
 
-Read `docs/exclusions.md` again too, and check nothing excluded was built.
+Read `docs/exclusions.md` again too, and **check nothing excluded was built** — by comparing, not by
+recalling. Copy `exclusions` from `.pica/state.json` into the audit's `EXCLUSIONS` config and let it match
+frame names for you. Prose is what the client reads; the register is what gets checked.
+
+If a match comes back, it is one of two things and you have to say which: the brief was misread, or the
+scope genuinely changed and nobody updated the exclusions. The second is fine. The first is a finding.
 
 ## 2. Required versus present
 
@@ -26,7 +31,13 @@ Write `docs/required-vs-present.md`. Every deliverable the brief names, in a tab
 **Gaps are stated, not quietly omitted.** A gap the human knows about is a decision; a gap they discover
 at the walkthrough is a failure.
 
-Recount every number from the file. Do not carry forward a count from an earlier document.
+**Recount every number from the file, in the same script that writes it.** Do not carry a count forward
+from an earlier document. The audit now parses claims out of the file's own text and recounts them, so a
+cover reading "45 designed screens" is checked against the actual frame count rather than trusted — that
+exact claim was once counting five annotation boards.
+
+Also empty the registers deliberately. Every `deviations` entry marked `by: "html-fix-pending"` is a
+promise to correct the HTML; keep it open at handover and it becomes a defect the client inherits.
 
 ## 3. The handoff page
 

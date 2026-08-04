@@ -78,7 +78,10 @@ bulk-binding.
 ## Raw values need a register, or the rule is unauditable
 
 "Raw values only where no suitable token exists" is the right rule and it is meaningless without a list.
-Keep the exemptions in `.pica/state.json` under `rawValueExemptions`, with a reason each:
+
+`.pica/state.json` is the **authoritative** home, under `rawValueExemptions`, with a reason each. The
+audit runs inside Figma and cannot read the filesystem, so populate its config block from state before
+pasting — never the other way round, or the two drift and the reasons are lost.
 
 ```json
 { "rawValueExemptions": [

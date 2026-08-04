@@ -56,6 +56,23 @@ horizontally and said nothing about vertical centring anywhere.
 - **Audit integrity**, five rules from real false clean results: report what your filter excluded, never
   write an empty `catch`, never compare floats with `===`, assert the intended value rather than
   "different from broken", and stop after three failed detectors.
+- **Registers, because a rule with no register is a preference.** Reviewing 0.1.0 against its own standard
+  found six rules that said something "must be written down" with nowhere to write it, so nothing could
+  check them. `state.json` now carries `exclusions`, `deviations`, `rawValueExemptions` and `bannedChars`
+  alongside the keys the hooks read, and the audit reads them:
+  - **`deviations`** closes the biggest hole. "Every deviation from the HTML is recorded as a decision with
+    a reason" was in the definition of done and was unfalsifiable. The geometry diff now classifies each
+    delta as a finding or a recorded decision, entries name a person rather than saying "intentional", and
+    `by: "html-fix-pending"` is a promise that gets closed before handover.
+  - **`exclusions`** gets a matchable form beside the prose in `docs/exclusions.md`, and closeout compares
+    frame names against it. This is the check that would have caught the ruled-out screen that got designed
+    anyway on the source project.
+  - **`bannedChars`** moves from the audit script's config to intake, where the fact is actually
+    established.
+- **The published-number recount is now implemented.** 0.1.0 listed it as a check and shipped no code, so
+  a cover claiming "45 designed screens" while counting five annotation boards would still pass. The audit
+  parses claims out of the file's own text and recounts screens, components, variables and prototype links.
+  Unrecognised nouns are ignored rather than guessed at, and phrases like "Step 4 of 7" are not claims.
 - **12 new audit checks** and 3 new definition-of-done items.
 
 ### Changed
