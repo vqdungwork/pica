@@ -6,7 +6,7 @@
 
 Prototype in HTML. Port to Figma on approval. Verify by measurement, never by eye.
 
-[![version](https://img.shields.io/badge/version-0.1.0-1f2328)](https://github.com/vqdungwork/pica/releases)
+[![version](https://img.shields.io/badge/version-0.2.0-1f2328)](https://github.com/vqdungwork/pica/releases)
 [![licence](https://img.shields.io/badge/licence-MIT-1f2328)](LICENSE)
 [![requires](https://img.shields.io/badge/requires-Claude%20Code-1f2328)](https://claude.com/claude-code)
 [![figma](https://img.shields.io/badge/Figma-optional-1f2328)](#requirements)
@@ -194,6 +194,15 @@ finding, not a shortcut.
 Variables first, in two layers: primitives, then semantic aliases. Scopes set explicitly on every
 variable, because the default pollutes every property picker in the file.
 
+The primitives are `Colors`, `Spacing`, `Radius`, **`Border`** and `Typography`. `Border` is the one
+people forget, and its absence is not a small gap: with no `STROKE_FLOAT` scale there is nothing to bind a
+border width to, so every stroke in the file stays a raw number and a client reviewing token coverage
+finds it immediately.
+
+Any translucent surface gets its **own** token carrying the alpha — `scrim`, `overlay/pill`,
+`overlay/control`. Binding a paint's colour makes the variable's RGBA authoritative and **overwrites the
+paint's opacity**, so alpha held as a manual opacity on a bound paint does not survive.
+
 Text styles stitched from variables rather than literal values, with **font weight as a numeric
 variable**. Swap a typeface later and the hierarchy cannot collapse.
 
@@ -282,7 +291,7 @@ Two modes. **Report is the default and changes nothing.** Fixing requires `--fix
 
 While a report-mode review is running, every Figma write is denied.
 
-Seven check families, all measured:
+Ten check families, all measured:
 
 1. **Geometry against the HTML reference**, per frame, position and size
 2. **Text bindings**: every node resolving to a style, every style to variables, and **unbound nodes
@@ -294,6 +303,15 @@ Seven check families, all measured:
 5. **Touch targets** against platform minimums, noting where the drawn box is deliberately smaller
 6. **Reuse decay**: detached instances, inline duplication, locals duplicating a global
 7. **Prototype**: dead ends, wrong targets, states with no way in or out
+8. **Hygiene**: placeholders, banned characters, home indicators, and every published number recounted
+9. **Geometry token binding**: all four corner radii individually, all four padding sides, border width,
+   and every fill and stroke matched on **RGBA** — with anything raw needing a registered reason
+10. **Appearance preserved**: a binding that changes what a node renders is a defect, caught by diffing
+    an appearance baseline rather than by counting bindings
+
+That last one exists because the other nine can all pass on a file that renders wrongly. A token-binding
+pass once bound ~2,000 properties, reported zero unbound on every page, and had silently flattened 38
+translucent surfaces to opaque.
 
 Reviews run **per package, immediately after its port**. Never saved for the end.
 
@@ -315,7 +333,11 @@ Its own review loop then checks behaviour: dead ends, links to the wrong target,
 states with no way in or out, and interactions the screens imply but the prototype does not offer.
 Repeat until it comes back empty.
 
-Motion is out of scope for 0.1.0, and the flow says so rather than improvising it.
+Motion is out of scope for 0.2.0, and the flow says so rather than improvising it.
+
+Prototype pages hold **clones**, because Figma cannot link across pages. Component-level fixes reach them
+automatically; frame-level fixes do not, so the review re-measures each clone against its source rather
+than assuming they match.
 
 </details>
 
@@ -400,11 +422,19 @@ Six modules, each written to be read on its own.
 This was extracted from **one** real client design pilot: a fixed-scope mobile app redesign delivered
 against a 24 hour cap. Every rule in it earns its place from a specific failure on that project.
 
-That is its strength and its limit. One project is not evidence that this generalises, and you will
-hit cases it has never seen.
+`0.2.0` adds a second round of evidence from the same file: the client's review of that pilot, and the
+repair pass afterwards. The client raised two items — incomplete variable bindings, and icons not centred
+in inputs — and **`0.1.0` would have caught neither.** It bound type thoroughly and geometry not at all,
+and it had no `Border` collection, so there was nothing to bind a border width to in the first place.
 
-The HTML half is the better tested half. The Figma rules work, but they have been exercised against a
-single design system in a single file. Hence `0.1.0`, and not `1.0`.
+The repair pass then introduced a worse defect than the ones it fixed, by flattening every translucent
+surface it bound. Both facts are why `0.2.0` exists, and both are written into the rules.
+
+That is its strength and its limit. Two rounds on one file is not evidence that this generalises, and you
+will hit cases it has never seen.
+
+The HTML half is still the better tested half. The Figma rules work, but they have been exercised against a
+single design system in a single file. Hence `0.2.0`, and not `1.0`.
 
 ## Not included
 
