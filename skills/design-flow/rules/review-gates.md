@@ -281,7 +281,8 @@ Everything must return zero. `scripts/figma-audit.js` runs it as one call.
 | Placeholder text | `PASTE HERE`, `TODO`, `TBD`, `lorem ipsum` |
 | Banned characters | project-specific, declared at intake |
 | Conflicting weight spellings | one normalised weight with more than one spelling |
-| Stale published counts | any number claimed in the file must be recounted from the file |
+| Stale published counts | claims parsed from the file's own text and recounted against live counts of screens, components, variables and links. Unrecognised nouns are ignored rather than guessed at |
+| Excluded work built anyway | any top-level frame name matching an entry in the `exclusions` register |
 
 ## Recount every number you publish
 

@@ -1,7 +1,10 @@
 # pica: Design Flow Package
 
 Date: 2026-07-31
-Status: awaiting review
+Status: **implemented as 0.1.0. Partly superseded by 0.2.0 — this document is kept as the original design
+record and is no longer current.** The `state.json` schema below predates the `exclusions`, `deviations`,
+`rawValueExemptions` and `bannedChars` registers, the home-indicator rule changed for hug frames, and the
+rules gained a sixth module. See `CHANGELOG.md` for what moved and why.
 Provenance: extracted from one real client design pilot (24h fixed-scope mobile redesign, Jul 2026)
 
 ## 1. Objective
