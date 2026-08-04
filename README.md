@@ -92,6 +92,7 @@ The amber diamonds are **your** gates. Nothing crosses one without you.
 | 7 | Review | `/pica-review [wp]` | After every port |
 | 8 | Prototype | `/pica-prototype` | Once, after screens land |
 | 9 | Closeout | `/pica-close` | Once, at handover |
+| — | Feedback triage | `/pica-feedback` | Whenever someone else's review lands |
 
 ---
 
@@ -367,7 +368,7 @@ said yes out loud.
 | Tier | Needs | Gives you |
 |:--|:--|:--|
 | **Core** | `bash` and `python3`, for the hooks | Steps 1, 2, 3, 5, 7 (HTML side), 9 |
-| **Figma** | the Figma MCP server | Steps 4, 6, 7 (Figma side), 8 |
+| **Figma** | the Figma MCP server, plus a Dev or Full seat | Steps 4, 6, 7 (Figma side), 8 |
 | **Measured diff** | playwright | The HTML capture harness that step 6 diffs against |
 | **Enhanced** | [superpowers](https://github.com/obra/superpowers) | Stronger intake and planning, plus the agent panel |
 
@@ -375,17 +376,24 @@ said yes out loud.
 still runs, and the Figma steps say clearly that they are unavailable rather than failing halfway
 through.
 
+**The Figma tier needs enough MCP calls to finish.** The rate limits are real and they do not degrade
+gracefully — they return a paywall message where you expected data, mid-task. A **View or Collab seat gets
+6 calls per month**, which is not enough to port anything; Dev and Full seats get 200 to 600 per day. Run
+`whoami`, which is exempt from the limits, and size the work to the budget before starting. See
+`rules/figma-mcp.md`.
+
 ## The rules
 
-Five modules, each written to be read on its own.
+Six modules, each written to be read on its own.
 
 | Module | Covers |
 |:--|:--|
 | `research.md` | Research before designing, audit breadth, token extraction with provenance |
 | `html-prototype.md` | Frame size, the single tabbed review page, the interactive and full-height pair, real assets, state matrices |
-| `figma-elements.md` | Two token layers, explicit scopes, numeric font weights, styles stitched from variables, global versus local component tiers |
-| `figma-screens.md` | Frames, states, FILL versus HUG, the circle rule, alignment measured against HTML, and the Plugin API calls that fail silently |
-| `review-gates.md` | The self-review checklist, report versus fix, complexity criteria, panel lenses, and what "zero" means |
+| `figma-elements.md` | Token layers including `Border`, binding geometry as well as type, alpha living in the token, numeric font weights, font-package forensics, global versus local component tiers |
+| `figma-screens.md` | Frames, states, FILL versus HUG, vertical centring, screen-chrome pinning, the circle rule, alignment measured against HTML, and the Plugin API calls that fail silently |
+| `figma-mcp.md` | Rate limits and the call budget, `page.loadAsync` for whole-file reads in one call, write discipline |
+| `review-gates.md` | The self-review checklist, report versus fix, complexity criteria, panel lenses, appearance baselines, audit integrity, and what "zero" means |
 
 ## Where this came from
 

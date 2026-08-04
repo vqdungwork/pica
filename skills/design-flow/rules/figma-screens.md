@@ -32,9 +32,14 @@ A screen taller than the viewport ships as **two frames**:
 
 1. **Interactive.** Fixed viewport height, real `overflowDirection: VERTICAL` scrolling inside it,
    bottom nav pinned, home indicator present.
-2. **Hug.** Height grows to full content so a reviewer sees everything at once. **No home indicator**,
-   because it is a content board rather than a viewport, and no empty container left behind where one
-   was removed.
+2. **Hug.** Height grows to full content so a reviewer sees everything at once. It still carries the
+   home indicator, bottom-pinned like every other screen, and no empty container left behind where
+   something was removed.
+
+*Changed in 0.2.0.* Earlier guidance omitted the indicator on hug frames on the grounds that a content
+board is not a viewport. In review that read as an oversight rather than a decision — a reviewer scanning
+for consistency sees a missing element, not a rationale. Every screen frame now carries it, which also
+removes a per-frame judgement call from the audit.
 
 Never present a "scrolled" duplicate showing a mid-scroll position. It reads as a third state that
 does not exist.
@@ -163,6 +168,104 @@ A `LEFT`-aligned label looks perfectly fine while it fits, because the label hug
 centres it. It reveals itself only when a longer string wraps to two lines and goes ragged-left, which
 is exactly the string you did not test. Fourteen buttons in one file were `LEFT` and none of them
 looked wrong.
+
+## Icons inside controls centre on the control
+
+Horizontal centring gets a rule and vertical centring gets forgotten, so vertical is what clients find.
+The example that came back from a real review: **the eye toggle in a password field.**
+
+Any icon sharing a row with text inside a control — a trailing eye, a clear button, a chevron, a unit
+toggle — sits in a horizontal auto-layout with `counterAxisAlignItems = "CENTER"`. Audit it: for every
+horizontal frame containing an icon child, flag `counterAxisAlignItems !== "CENTER"`.
+
+**Centre on the field, not on the component.** An `input` is usually label + field + error message
+stacked, so the component's own vertical centre is nowhere near the field's. Two unit toggles measured
+10px low against their fields for exactly this reason: the row was `MAX`-aligned to the input's full
+height. Neither `MAX` nor `CENTER` on that row is right, because the label is in the average.
+
+Give the sibling a slot the height of the field and centre inside it, with the height bound to the same
+token the field uses:
+
+```js
+const slot = figma.createAutoLayout('VERTICAL', { name: 'unit-toggle-slot' });
+slot.fills = [];
+row.insertChild(row.children.indexOf(toggle), slot);
+slot.appendChild(toggle);                        // load fonts first, see API trap 8
+slot.counterAxisSizingMode = 'AUTO';
+slot.primaryAxisSizingMode = 'FIXED';
+slot.resize(slot.width, 56);
+slot.primaryAxisAlignItems = 'CENTER';
+slot.counterAxisAlignItems = 'CENTER';
+slot.setBoundVariable('height', inputHeightVar);  // tracks the field if it ever changes
+```
+
+## A trailing icon belongs inside the component
+
+The eye icon that came back in client feedback was an 18x18 frame **positioned absolutely on the screen**
+rather than living in the input. It measured 4px low on four screens and **16px high on the fifth**,
+because the error state pushes the field down 20px and a hard-pinned icon does not follow.
+
+That is the whole failure mode: an element positioned relative to the canvas cannot track a sibling that
+moves. Absolute positioning is correct for chrome that pins to a **frame edge** and wrong for anything
+that must stay with a **sibling**.
+
+The fix is a trailing-icon slot on the component with a boolean property, per the instance-children rule
+in [figma-elements.md](figma-elements.md). Repositioning the overlay is a symptom fix: it re-centres the
+five copies you can see and breaks again on the next state you add.
+
+## Centring a text box is not centring its glyphs
+
+A text node with `textAutoResize = "NONE"` holds a fixed box, and `textAlignVertical = "TOP"` puts the
+glyphs at the top of it. Centre that box on a target and the **box** is centred while the text still
+rides high.
+
+A sticker label measured 0.0px off its circle's centre and still looked wrong: a 64x40 box holding two
+lines at 14px line-height is 28px of glyphs, so **12px of dead space** sat at the bottom and the text was
+6px high.
+
+Set `textAlignVertical = "CENTER"` on any fixed-height text. Detect the condition structurally:
+
+```js
+n.textAutoResize === 'NONE' && n.textAlignVertical === 'TOP' && (n.height % lineHeightPx) !== 0
+```
+
+A non-zero remainder means the box does not hold a whole number of lines, so there is slack, so the
+alignment matters. `HEIGHT` auto-resize with TOP is fine — the box hugs, so there is no slack.
+
+## Siblings that must match height use FILL
+
+Nav tabs, segmented options, stat tiles: anything read as a row of equals. If they `HUG`, any child-count
+difference changes their height. A `bottom-nav` measured 38px on inactive tabs and 44 or 45 on active
+ones, because the active tab carries a dot the others lack — and the two active variants disagreed with
+each other by a pixel.
+
+Set `layoutSizingVertical = "FILL"` on each sibling so all take the container's inner height.
+
+**Keep the content top-aligned.** Switching the tabs to `primaryAxisAlignItems = "CENTER"` equalises the
+boxes and then misaligns the icons, because the active tab's extra child shifts its content up. `MIN`
+keeps icons and labels on a shared baseline with the dot hanging below.
+
+## Screen chrome pins to the edge it belongs to
+
+Status bars, bottom navs and home indicators are positioned against a **frame edge**, so they need
+constraints that say so:
+
+```js
+hi.constraints = { horizontal: 'STRETCH', vertical: 'MAX' };   // full width, bottom
+if (parent.layoutMode !== 'NONE') hi.layoutPositioning = 'ABSOLUTE';   // required in auto-layout
+```
+
+`ABSOLUTE` is what makes this work on a hug frame, where a flow child would be pushed below the content
+instead of overlaying the nav's safe-area padding. It is also the reason the hug exception existed at all,
+and why it is no longer needed.
+
+All 68 home indicators in one file sat at `MIN/MIN` — pinned to the **top**. They looked correct only
+because every frame happened to be 812 tall. Audit `constraints.vertical === 'MAX'` on bottom chrome, and
+check the bottom gap is zero rather than trusting the y value.
+
+A last note on layering: the indicator overlaps the bottom nav's lower padding, and that is correct. The
+nav reserves that padding as the safe-area inset; iOS draws the indicator over it. Do not "fix" the
+overlap by adding height.
 
 ## Stale fixed heights are the most damaging defect
 
@@ -318,9 +421,19 @@ Every text mutation, including `characters`, `fontName`, `fontSize`, `letterSpac
 and `textStyleId`, throws `"Cannot write to node with unloaded font"` when the resolved family cannot
 be loaded.
 
-**Locally installed fonts are invisible to a cloud plugin runtime.** `listAvailableFontsAsync()` will
-not list them, and `loadFontAsync` fails. So while a brand font sourced from the designer's machine is
-active, the file is effectively **read-only for text**.
+**A font the runtime cannot see makes the file read-only for text.** Two distinct causes, and only one of
+them is permanent:
+
+- **Installed during the session.** Figma caches the available-font list at launch, so a font installed
+  while it is running stays invisible until a full quit and relaunch. Recoverable. The tell is an
+  unchanged font count between calls.
+- **Not reachable by this runtime at all.** A cloud plugin context does not see the designer's local
+  fonts. Not recoverable from the runtime; the flip has to happen in the Figma UI.
+
+Check which one you have before asking anyone to reinstall: look at the OS font directory, then at
+`listAvailableFontsAsync()` after a relaunch. See
+[figma-elements.md](figma-elements.md) for the font-package forensics, because a family that appears
+"missing" is often present under a different family name.
 
 The one exception is `setBoundVariable("fontWeight", v)`, which is permitted.
 
@@ -352,7 +465,17 @@ node.fills = [f];
 
 Dropping `boundVariables` on the round-trip silently unbinds the paint.
 
-## 11. Work in small calls
+## 11. Binding a paint's colour overwrites its opacity
+
+`setBoundVariableForPaint` makes the variable's **RGBA** authoritative, so the paint's own `opacity` is
+replaced by the token's alpha. A paint at `0.30` bound to an opaque token comes back at `1.0`, with no
+error and no warning.
+
+This is the single most destructive trap in this file, because a bulk token-binding pass flattens every
+translucent surface it touches and still audits as success. Full treatment, including the alpha-token
+architecture that avoids it, in [figma-elements.md](figma-elements.md).
+
+## 12. Work in small calls
 
 Large scripts fail in ways that are hard to attribute, and a 20KB result gets truncated mid-JSON.
 Return compact shapes: arrays rather than objects, short strings, rounded numbers. Split wide reads

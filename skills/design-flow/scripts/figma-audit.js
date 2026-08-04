@@ -1,16 +1,24 @@
 /**
  * Full Figma hygiene audit. Paste as the `code` argument of a single use_figma call.
  *
- * Everything should return zero. Configure SCREEN_PREFIXES and SKIP_PREFIXES for the file,
- * then read verification.md for how to interpret the two known false-positive classes
- * (text over sibling artwork, and alpha that never reaches opaque).
+ * Everything should return zero. Configure the block below for the file, then read
+ * rules/review-gates.md for how to interpret the known false-positive classes (text over sibling
+ * artwork, alpha that never reaches opaque, and documentation frames that carry component names).
  *
  * Notes on why it is written this way:
- *   - setCurrentPageAsync before every traversal, or instance children are invisible
+ *   - setCurrentPageAsync before every traversal, or instance children are invisible. This is the one
+ *     place worth spending a page switch per page: page.loadAsync() is cheaper and fine for shallow
+ *     reads, but this audit needs deep instance traversal. See rules/figma-mcp.md.
  *   - cornerRadius / fontName can be figma.mixed, so numeric reads are guarded
- *   - SECTION nodes have no layout properties
+ *   - SECTION nodes have no layout properties; COMPONENT_SET geometry is editor chrome
  *   - variable-bound paints report a stale cached colour, so colours are resolved through aliases
+ *   - token colours are keyed by RGBA, not RGB, so a 45% scrim is not mistaken for opaque black
+ *   - binding strokeWeight leaves strokeWeight itself undefined, so all five keys are checked
  *   - getMainComponentAsync forces instance reconciliation, which is why detach detection is last
+ *
+ * This audit proves structure. It does NOT prove appearance was preserved: run
+ * capture-baseline.js before any bulk mutation and diff after, or a pass can flatten every
+ * translucent surface in the file and still return zero here.
  */
 
 // ---- configure -------------------------------------------------------------
@@ -18,7 +26,20 @@ const SCREEN_PREFIXES = ["🧩 03", "📱 04", "🏠 05", "▶️ 06", "📺 07"
 const SKIP_CONTRAST   = ["🔍 01"];          // capture/audit pages of someone else's UI
 const PROTOTYPE_PAGE  = "🔀 08";
 const VIEWPORT_H      = 812;
+const SCREEN_W        = 375;                // mobile portrait width; landscape is height === SCREEN_W
 const BANNED_CHARS    = [","];              // project-specific
+
+// Deliberate raw values. Mirror .pica/state.json rawValueExemptions, with a reason recorded there.
+// Anything raw and NOT listed here is reported, which is what makes "raw only where no token exists"
+// an auditable rule rather than an aspiration.
+const RAW_EXEMPT = {
+  radius:  [],
+  padding: [],
+  stroke:  [],                              // SVG icon artwork weights are excluded structurally, not listed
+  fill:    ["#1877f2", "#1976d2", "#ffc107", "#4caf50", "#ff3d00"],   // third-party brand marks
+};
+const ICON_RE    = /icon|chevron|arrow|eye|clear|close|check|caret|play|pause|search|toggle/i;
+const OVERLAY_RE = /scrim|overlay|backdrop|pill|track|ring|badge|duration|count|watch|buffer/i;
 // ---------------------------------------------------------------------------
 
 const cols = await figma.variables.getLocalVariableCollectionsAsync();
@@ -46,6 +67,39 @@ const ratio = (a, b) => { const l1 = lum(a), l2 = lum(b), hi = Math.max(l1, l2),
   return (hi + 0.05) / (lo + 0.05); };
 const mix = (f, b, a) => ({ r: f.r * a + b.r * (1 - a), g: f.g * a + b.g * (1 - a), b: f.b * a + b.b * (1 - a) });
 const hex = (c) => "#" + [c.r, c.g, c.b].map(x => Math.round(x * 255).toString(16).padStart(2, "0")).join("");
+
+// ---- token scales, for geometry binding -------------------------------------
+// resolve() only returns colours; geometry needs the raw resolved value whatever its type
+const resolveAny = (id, d = 0) => {
+  const v = raw[id]; if (!v || d > 8) return null;
+  const x = v.valuesByMode[modeOf[id]];
+  if (x && x.type === "VARIABLE_ALIAS") return resolveAny(x.id, d + 1);
+  return x;
+};
+const numScale = (name) => {
+  const s = new Set(), c = cols.find(x => x.name === name);
+  if (c) for (const id of c.variableIds) { const v = resolveAny(id); if (typeof v === "number") s.add(v); }
+  return s;
+};
+const SPACING = numScale("Spacing"), RADIUS_S = numScale("Radius"), BORDER_S = numScale("Border");
+
+// every token colour keyed by RGBA, so alpha is part of the identity. Keying on RGB alone is what
+// let a bulk binding pass flatten every translucent scrim in a file.
+const COLKEY = new Set();
+for (const id in raw) {
+  const v = resolveAny(id);
+  if (v && v.r !== undefined)
+    COLKEY.add([v.r, v.g, v.b, v.a === undefined ? 1 : v.a].map(x => Math.round(x * 255)).join(","));
+}
+const paintRGBA = (f) => [f.color.r, f.color.g, f.color.b, f.opacity === undefined ? 1 : f.opacity]
+  .map(x => Math.round(x * 255)).join(",");
+
+// binding strokeWeight writes the four per-side keys and leaves strokeWeight itself undefined
+const SW_KEYS = ["strokeWeight", "strokeTopWeight", "strokeBottomWeight", "strokeLeftWeight", "strokeRightWeight"];
+const swBound = (n) => { const bv = n.boundVariables || {}; return SW_KEYS.some(k => bv[k]); };
+const RADII = ["topLeftRadius", "topRightRadius", "bottomRightRadius", "bottomLeftRadius"];
+const PADS  = ["paddingLeft", "paddingRight", "paddingTop", "paddingBottom"];
+const isIconArt = (n) => n.type === "VECTOR" || n.type === "BOOLEAN_OPERATION" || n.type === "LINE";
 
 const topSolid = (n) => {
   if (!Array.isArray(n.fills)) return null;
@@ -95,8 +149,12 @@ const hasLocalStyle = (n) => {
 
 const R = { overflow: [], ovals: [], clippedShadow: 0, clippedRail: 0, overlaps: [], tiny: 0,
   styleless: [], weightUnbound: 0, notCentred: 0, btnNotFill: [], deadEnds: [], hiMissing: [],
-  hiOnHug: [], banned: 0, placeholder: [], orphans: [], detached: 0, mixedFont: 0,
-  unboundHalfGrey: 0, contrast: {}, fonts: {}, weights: {}, screens: 0, links: 0, instances: [] };
+  banned: 0, placeholder: [], orphans: [], detached: 0, mixedFont: 0,
+  unboundHalfGrey: 0, contrast: {}, fonts: {}, weights: {}, screens: 0, links: 0, instances: [],
+  // 0.2.0: geometry token binding, translucency integrity, vertical alignment
+  radiusUnbound: [], paddingUnbound: [], strokeWeightUnbound: [], colourUnbound: [],
+  rawUnregistered: [], flattened: [], iconRowNotCentred: [], textRidingHigh: [],
+  unequalSiblings: [], chromeUnpinned: [], screenFrames: 0 };
 
 const instanceRefs = [];
 
@@ -159,6 +217,87 @@ for (const pg of figma.root.children) {
       if (half && !(f.boundVariables && f.boundVariables.color)) R.unboundHalfGrey++;
     }
 
+    // ---- geometry token binding (0.2.0) ------------------------------------
+    // COMPONENT_SET is the variant-set wrapper: its radius and padding are editor chrome, not design.
+    if (n.type !== "COMPONENT_SET" && n.type !== "SECTION") {
+      const bv = n.boundVariables || {};
+
+      for (const k of RADII) {
+        const v = n[k];
+        if (typeof v !== "number" || v <= 0 || bv[k]) continue;
+        if (RADIUS_S.has(v)) R.radiusUnbound.push(where + " " + k.replace("Radius", "") + "=" + v);
+        else if (RAW_EXEMPT.radius.indexOf(v) < 0) R.rawUnregistered.push(where + " radius " + v);
+      }
+
+      if (n.layoutMode && n.layoutMode !== "NONE") for (const k of PADS) {
+        const v = n[k];
+        if (typeof v !== "number" || v <= 0 || bv[k]) continue;
+        if (SPACING.has(v)) R.paddingUnbound.push(where + " " + k.replace("padding", "") + "=" + v);
+        else if (RAW_EXEMPT.padding.indexOf(v) < 0) R.rawUnregistered.push(where + " padding " + v);
+      }
+
+      // icon artwork carries SVG-import weights (1.17, 1.83, 2.08) that are internals, not borders
+      if (!isIconArt(n) && Array.isArray(n.strokes) && n.strokes.length
+          && typeof n.strokeWeight === "number" && n.strokeWeight > 0 && !swBound(n)) {
+        if (BORDER_S.has(n.strokeWeight)) R.strokeWeightUnbound.push(where + " w=" + n.strokeWeight);
+        else if (RAW_EXEMPT.stroke.indexOf(n.strokeWeight) < 0)
+          R.rawUnregistered.push(where + " strokeWeight " + n.strokeWeight);
+      }
+
+      for (const key of ["fills", "strokes"]) {
+        if (!Array.isArray(n[key])) continue;
+        for (const f of n[key]) {
+          if (f.type !== "SOLID" || f.visible === false) continue;
+          if (f.boundVariables && f.boundVariables.color) continue;
+          if (isIconArt(n)) continue;
+          if (COLKEY.has(paintRGBA(f))) R.colourUnbound.push(where + " " + key + " " + hex(f.color));
+          else if (RAW_EXEMPT.fill.indexOf(hex(f.color)) < 0)
+            R.rawUnregistered.push(where + " " + key + " " + hex(f.color));
+        }
+      }
+
+      // Flattened translucency: a bound paint that resolved to opaque while sitting over artwork.
+      // Two corroborations keep this precise — an overlay-ish name, or a child of the same colour,
+      // which proves the element is invisible rather than merely opaque.
+      if (Array.isArray(n.fills) && n.fills.length) {
+        const f = n.fills.find(x => x.type === "SOLID" && x.visible !== false);
+        const opaque = f && (f.opacity === undefined || f.opacity >= 0.999);
+        if (f && opaque && f.boundVariables && f.boundVariables.color && overArt(n)) {
+          let sameColourChild = false;
+          try {
+            sameColourChild = n.findAll(k => k.type === "VECTOR" || k.type === "TEXT").some(k => {
+              const kf = (k.fills || []).find(x => x.type === "SOLID" && x.visible !== false);
+              return kf && (kf.opacity === undefined || kf.opacity >= 0.999) && hex(pc(kf)) === hex(pc(f));
+            });
+          } catch (e) { /* stale node id during traversal; name check still applies */ }
+          if (sameColourChild || OVERLAY_RE.test(n.name || ""))
+            R.flattened.push(where + " " + hex(pc(f)) + (sameColourChild ? " (child same colour)" : ""));
+        }
+      }
+    }
+
+    // ---- vertical alignment (0.2.0) ---------------------------------------
+    if (n.type === "FRAME" && n.layoutMode === "HORIZONTAL" && n.counterAxisAlignItems !== "CENTER"
+        && (n.children || []).some(c => c.type === "VECTOR" || ICON_RE.test(c.name || "")))
+      R.iconRowNotCentred.push(where + " " + n.counterAxisAlignItems);
+
+    if (n.type === "TEXT" && n.textAutoResize === "NONE" && n.textAlignVertical === "TOP") {
+      const seg = n.getStyledTextSegments(["lineHeight"])[0];
+      const lh = seg && seg.lineHeight && seg.lineHeight.unit === "PIXELS" ? seg.lineHeight.value : null;
+      if (lh && Math.abs(n.height % lh) > 0.01)
+        R.textRidingHigh.push(where + " h=" + Math.round(n.height) + " lh=" + lh);
+    }
+
+    // a row of three or more peers should be one height, achieved with FILL not luck
+    if (n.type === "FRAME" && n.layoutMode === "HORIZONTAL") {
+      const kids = (n.children || []).filter(c => c.type === "FRAME" || c.type === "INSTANCE");
+      if (kids.length >= 3) {
+        const hs = [...new Set(kids.map(c => Math.round(c.height)))];
+        if (hs.length > 1 && kids.some(c => c.layoutSizingVertical !== "FILL"))
+          R.unequalSiblings.push(where + " " + hs.join("/"));
+      }
+    }
+
     if (n.type === "TEXT") {
       const chars = String(n.characters);
       if (BANNED_CHARS.some(ch => chars.indexOf(ch) >= 0)) R.banned++;
@@ -201,12 +340,27 @@ for (const pg of figma.root.children) {
     }
   }
 
+  /**
+   * Home indicator, 0.2.0: required on EVERY screen frame, hug included, and bottom-pinned.
+   *
+   * Two changes from 0.1.0. The hug exception is gone, because a missing element reads as an
+   * oversight rather than a decision. And a frame is a screen if EITHER dimension is the portrait
+   * width, so landscape and hug frames are both in the population — a filter keyed on 375x812
+   * silently excluded them and then reported full coverage.
+   */
   const frames = pg.children.flatMap(c => c.type === "SECTION" ? c.children : [c])
-    .filter(n => n.type === "FRAME" && Math.round(n.width) === 375);
+    .filter(n => n.type === "FRAME" && !/annotation|▸/i.test(n.name || "")
+      && (Math.round(n.width) === SCREEN_W || Math.round(n.height) === SCREEN_W)
+      && Math.max(n.width, n.height) >= 300);
+  R.screenFrames += frames.length;
   for (const f of frames) {
-    const hi = f.findOne(n => n.type === "INSTANCE" && n.name === "home-indicator");
-    if (Math.round(f.height) === VIEWPORT_H && !hi) R.hiMissing.push(f.name);
-    if (Math.round(f.height) !== VIEWPORT_H && hi) R.hiOnHug.push(f.name);
+    const hi = (f.children || []).find(c => /home-indicator/i.test(c.name || ""));
+    if (!hi) { R.hiMissing.push(f.name + " " + Math.round(f.width) + "x" + Math.round(f.height)); continue; }
+    const con = hi.constraints;
+    const gap = Math.round(f.height - (hi.y + hi.height));
+    if (!con || con.vertical !== "MAX" || Math.abs(gap) > 1)
+      R.chromeUnpinned.push(f.name + " " + (con ? con.horizontal + "/" + con.vertical : "no-constraints")
+        + " gap=" + gap);
   }
 
   if (pg.name.indexOf(PROTOTYPE_PAGE) === 0) {
@@ -253,7 +407,15 @@ return {
   stylelessScreenText: cap(R.styleless), weightUnbound: R.weightUnbound,
   buttonLabelsNotCentred: R.notCentred, sizeLNotFilling: cap(R.btnNotFill),
   prototypeDeadEnds: cap(R.deadEnds),
-  homeIndicatorMissing: cap(R.hiMissing), homeIndicatorOnHug: cap(R.hiOnHug),
+  screenFramesSeen: R.screenFrames,          // print the denominator, do not trust a percentage
+  homeIndicatorMissing: cap(R.hiMissing), chromeUnpinned: cap(R.chromeUnpinned),
+  // geometry token binding
+  radiusUnbound: cap(R.radiusUnbound), paddingUnbound: cap(R.paddingUnbound),
+  strokeWeightUnbound: cap(R.strokeWeightUnbound), colourUnbound: cap(R.colourUnbound),
+  rawUnregistered: cap(R.rawUnregistered, 10),
+  // translucency and alignment
+  flattenedTranslucency: cap(R.flattened), iconRowNotCentred: cap(R.iconRowNotCentred),
+  textRidingHigh: cap(R.textRidingHigh), unequalSiblingHeights: cap(R.unequalSiblings),
   bannedChars: R.banned, placeholderText: cap(R.placeholder),
   orphanNodes: cap(R.orphans), detachedInstances: R.detached,
   mixedFontNodes: R.mixedFont, unboundHalfGreyFills: R.unboundHalfGrey,

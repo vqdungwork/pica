@@ -12,7 +12,22 @@ Load this for step 4 (foundations) and step 6 (port). It pairs with
 ## Two layers, always
 
 **Layer 1, primitives.** The raw palette and scales: `Colors` (`primary/700`, `neutral/500`,
-`semantic/error-700`), `Spacing`, `Radius`, `Typography` (`font-size/*`, `line-height/*`).
+`semantic/error-700`), `Spacing`, `Radius`, `Border`, `Typography` (`font-size/*`, `line-height/*`).
+
+`Border` is the one people forget. Without a `STROKE_FLOAT`-scoped scale there is **nothing to bind a
+border width to**, so every stroke in the file stays a raw number and a client reviewing token coverage
+finds it immediately. Create it at foundations time alongside `Radius`:
+
+```js
+// Border, scopes ["STROKE_FLOAT"]
+hairline  1     // loading skeletons, hairline dividers
+default   1.5   // the standard component border
+emphasis  2     // focus rings, checked controls
+```
+
+Read the real stroke weights out of the design before choosing the values, and expect two or three, not
+eight. Icon artwork imported from SVG carries junk weights (1.17, 1.83, 2.08, 3.33) that are artwork
+internals, not borders: leave those raw.
 
 **Layer 2, semantic aliases.** A `Token` collection whose every value is a **VARIABLE_ALIAS** to a
 primitive: `text/primary` to `neutral/900`, `surface` to `neutral/100`, `divider` to `neutral/200`,
@@ -31,6 +46,95 @@ These alias into layer 2 or layer 1.
 The default is every scope, which pollutes every property picker in the file and is almost never
 what you want. Use `["FRAME_FILL", "SHAPE_FILL"]` for backgrounds, `["TEXT_FILL"]` for text colour,
 `["GAP"]` for spacing, and so on.
+
+## Bind geometry, not only type
+
+Type bindings get all the attention and geometry gets none, so geometry is where a client's token audit
+lands. Four families, each of which must be bound wherever a matching token exists:
+
+| Family | Properties | Scope |
+|---|---|---|
+| Corner radius | `topLeftRadius`, `topRightRadius`, `bottomRightRadius`, `bottomLeftRadius` | `CORNER_RADIUS` |
+| Padding | `paddingLeft`, `paddingRight`, `paddingTop`, `paddingBottom` | `GAP` |
+| Border width | `strokeWeight` | `STROKE_FLOAT` |
+| Colour | every SOLID `fills[]` and `strokes[]` entry | fill and stroke scopes |
+
+Three traps in that table:
+
+1. **All four corners, individually.** Binding "corner radius" in the UI can leave you with only
+   `topLeftRadius` bound. A file reviewed by a client had exactly that: one corner bound, three raw, on
+   every input field. Set each of the four explicitly and audit each of the four.
+2. **`strokeWeight` fans out.** Binding it writes `strokeTopWeight`, `strokeBottomWeight`,
+   `strokeLeftWeight` and `strokeRightWeight`, and leaves `boundVariables.strokeWeight` **undefined**. A
+   detector that only looks for `strokeWeight` reports every bound border as unbound. Check all five keys.
+3. **`GAP` covers padding as well as gap.** A spacing variable scoped `["GAP"]` binds to both, so there
+   is no excuse for raw padding when a spacing scale exists.
+
+Bind at the **component**, never the instance. Instances inherit bindings, so a component-level pass of
+900 bindings collapses to a few dozen edits. Where an instance still reports unbound after the component
+is fixed, it carries a genuine override, and those are worth looking at individually rather than
+bulk-binding.
+
+## Raw values need a register, or the rule is unauditable
+
+"Raw values only where no suitable token exists" is the right rule and it is meaningless without a list.
+Keep the exemptions in `.pica/state.json` under `rawValueExemptions`, with a reason each:
+
+```json
+{ "rawValueExemptions": [
+  { "prop": "padding", "value": 32, "why": "iOS status-bar inline inset, not a spacing step" },
+  { "prop": "strokeWeight", "value": 2.08, "why": "icon artwork from SVG import" },
+  { "prop": "fill", "value": "#1877f2", "why": "Facebook brand mark" }
+] }
+```
+
+The audit reads it and reports anything raw that is **not** on the list. Without the register, a reviewer
+cannot tell a deliberate one-off from an oversight, and neither can you a week later.
+
+Two categories that are always exempt: **third-party brand colours** (Google, Facebook, Apple marks) and
+**icon vector internals** from SVG import.
+
+## Alpha belongs in the token
+
+**Binding a paint's colour to a variable overwrites `paint.opacity` with the token's alpha.**
+
+Proven with a throwaway node: a paint at `opacity 0.30`, bound to an opaque token, comes back at
+**`1.0`**. Bound to a token carrying `a: 0.45`, it comes back at `0.45`. The variable's RGBA is
+authoritative; the paint's own opacity is discarded.
+
+Two consequences, and the first destroyed a file:
+
+**A colour matcher that hashes RGB only cannot see alpha.** A scrim at black 45 percent hashes
+identically to opaque black. A bulk "bind every fill to its matching token" pass therefore bound six
+full-screen scrims and two buffering overlays to `btn/primary/bg`, flattening them to solid black and
+hiding the content behind every bottom sheet. The content was never deleted and every node still read
+`visible: true`, so it looked like deletion and audited as success.
+
+It reached white too: an on-video progress track and its fill both ended at opaque white, making the
+progress bar invisible, and 56px control circles went opaque white with white icons inside them, so they
+rendered as blank discs.
+
+**Never carry alpha as a manual paint opacity on a bound paint.** It is an override, and it re-resolves
+away — reliably on nested instance children, which discard it and fall back to the token's alpha. Three
+separate attempts to hold `0.2` on a nested skip button reverted to `1.0` before the alpha was moved
+into the token.
+
+So: **every translucent surface gets its own token.**
+
+```js
+// Token collection, scopes ["ALL_FILLS", "STROKE_COLOR"]
+scrim            #000000 @ 0.45   // sheet and dialog scrims, dimming overlays
+overlay/pill     #000000 @ 0.68   // dark pill on media: duration, viewer count
+overlay/control  #ffffff @ 0.20   // on-video control backgrounds, spinner tracks
+overlay/track    #ffffff @ 0.30   // on-video progress track and hairline
+```
+
+When you match colours, key on **RGBA**, and never exclude alpha-bearing tokens from the candidate set —
+that exclusion is what guarantees the correct token can never win.
+
+**Audit fingerprint for past damage:** any node whose SOLID fill is bound, sits at `opacity 1`, and lies
+geometrically inside a node with an IMAGE fill. Cross-check against elements whose own icon or label is
+the same colour as their fill: that pair is invisible and proves the flattening.
 
 ## Font weight must be numeric
 
@@ -177,6 +281,74 @@ while a loadable font is active.
 **Plan around it:** batch all pending text work into one such window. Do not ask the human for
 repeated round-trips of installing, flipping, and flipping back. On the project this came from, that
 happened at least six times and every flip cost a re-review.
+
+## Read the font files before blaming Figma
+
+When a family swap collapses the weights, the cause is often in the font package, not in the file. Two
+failures that look identical in Figma and have different fixes:
+
+**1. The static desktop build registers one family per weight.** Several foundries ship OTFs using the
+legacy four-style naming: `nameID 1` (family) is `Chillax Semibold` and `nameID 2` (style) is `Regular`,
+with the real typographic family in `nameID 16/17`. Apps that read `nameID 1` — Figma among them — see
+**six separate families**:
+
+| File | Family it registers as | Style |
+|---|---|---|
+| `Chillax-Regular.otf` | `Chillax` | Regular |
+| `Chillax-Bold.otf` | `Chillax` | Bold |
+| `Chillax-Medium.otf` | **`Chillax Medium`** | Regular |
+| `Chillax-Semibold.otf` | **`Chillax Semibold`** | Regular |
+
+So `Font-family = "Chillax"` can only ever resolve **400 and 700**. The 500 and 600 weights are in
+different families and collapse. No amount of correct binding fixes it, because the token is pointing at
+a family that does not contain those weights.
+
+**2. The variable build is a third family name.** `Chillax-Variable.ttf` registers as `Chillax Variable`
+with an `fvar` `wght` axis 200–700 and six named instances (Extralight, Light, Regular, Medium, Semibold,
+Bold), all in **one** family. That is the build a token architecture needs. Install the variable font,
+remove the statics, and set the family variable to the variable font's name — which is neither the
+marketing name nor the CSS name. Expect three different strings for one typeface:
+
+| Context | String |
+|---|---|
+| Marketing / brand guide | `Chillax` |
+| Figma family variable | `Chillax Variable` |
+| Web CSS `font-family` | `Chillax-Variable` |
+
+Write all three into handoff or someone will trip on it.
+
+Dump the truth straight out of the files, no dependencies:
+
+```python
+import struct, glob
+def names(p):
+    d = open(p,'rb').read(); n = struct.unpack('>H', d[4:6])[0]
+    off = next(struct.unpack('>I', d[12+i*16+8:12+i*16+12])[0]
+               for i in range(n) if d[12+i*16:12+i*16+4] == b'name')
+    _, cnt, so = struct.unpack('>HHH', d[off:off+6]); out = {}
+    for i in range(cnt):
+        pid,_,_, nid, ln, o = struct.unpack('>HHHHHH', d[off+6+i*12:off+18+i*12])
+        s = d[off+so+o: off+so+o+ln]
+        try: out.setdefault(nid, s.decode('utf-16-be') if pid == 3 else s.decode('latin-1'))
+        except Exception: pass
+    return {k: out.get(k) for k in (1, 2, 16, 17)}   # family, style, typoFamily, typoStyle
+for f in sorted(glob.glob('*.otf')): print(f, names(f))
+```
+
+`OS/2 usWeightClass` at table offset +4 gives the numeric weight, which is what your `font-weight/*`
+tokens must match.
+
+## Figma caches the font list at launch
+
+A font installed while Figma is running stays invisible: `listAvailableFontsAsync()` will not list it and
+`loadFontAsync` fails. It needs a **full quit and relaunch**, not a file reload.
+
+The tell is a font count that does not move. Two calls minutes apart both returning exactly 8,927 fonts
+means the list was never rescanned, so "the font is not installed" is the wrong conclusion. Check the OS
+first — on macOS, `ls ~/Library/Fonts` — before asking anyone to reinstall anything.
+
+Locally installed fonts **are** reachable once Figma has rescanned. The hard limit is narrower than "local
+fonts are invisible": it is that you cannot pick up a font installed *during* the session.
 
 ---
 

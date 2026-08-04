@@ -157,6 +157,60 @@ When you must measure from a render, for example text over photography:
 A node screenshot renders that node alone. A status bar with white text over a photo comes back blank
 white, because the photo is a **sibling**, not an ancestor. Screenshot the parent frame.
 
+## A binding that changes appearance is a defect
+
+Every check in this file verifies a binding **exists**. None of them verifies the pixel did not move. That
+gap let a token-binding pass flatten 38 translucent surfaces while reporting "0 remaining unbound, all
+verified" on every page.
+
+So before any bulk mutation — binding, snapping, rounding — **capture a baseline**, and diff after:
+
+```js
+// per SOLID paint, resolved through the alias chain, alpha included
+{ id, prop, r, g, b, a }
+```
+
+A non-zero delta on any channel including alpha is a defect until you can name why. The pass is finished
+when the delta set is empty or every entry is a deliberate, recorded change.
+
+This matters because **appearance and structure fail independently.** A file can be 100 percent bound and
+completely wrong, and the audit that only counts bindings will call it done.
+
+`scripts/capture-baseline.js` writes the baseline; run it before the pass, not after you suspect a
+problem. Version history is the only other record of pre-change values and the Plugin API cannot read it,
+so a missed baseline means the original values are gone.
+
+## Audit integrity
+
+An audit is code, so it fails like code. Five rules, each of which has produced a false clean result:
+
+**1. A filter that narrows the population must report what it excluded.** A screen audit matched frames
+within 3px of 375x812, reported "68 of 68 screens covered", and had silently skipped every hug-height
+frame — which is exactly where the missing element was. Print the population and the exclusions, or the
+denominator is fiction.
+
+**2. Never write an empty `catch {}` in an audit or a fix script.** A swallowed error turns a failed write
+into a silent success. One pass reported 12 nodes fixed; two of them had not persisted and only surfaced
+two reviews later.
+
+**3. Never compare floats with `===`.** Figma stores `0.2` as `0.20000000298023224`, so an equality check
+reported a correct write as a failure and sent the whole investigation down the wrong path. Compare with a
+tolerance.
+
+**4. Assert the intended value, not "different from broken."** A check for `opacity < 1` passed nodes
+sitting at `0.45` that were supposed to be `0.68`. Write the expected value into the assertion.
+
+**5. Three failed detectors means stop.** If a detector produces mostly false positives, the next one
+usually will too. One investigation went name-based (missed the case entirely), then geometric (323 hits,
+almost all noise), then colour-clash (36 hits, mostly noise) before anyone went looking for ground truth.
+At the third miss, stop writing detectors and find a source of truth: a surviving correct example, the
+design's own convention, the human.
+
+**Corollary on false positives.** Structural detectors must exclude documentation. Frames inside an
+annotation or kit-coverage board carry component *names* as labels and read as detached instances; a white
+glyph on a coloured logo circle reads as a contrast clash because the coloured layer is a sibling, not an
+ancestor. Check for an intermediate layer before reporting.
+
 ## Trust the data over the render, and the render over your memory
 
 The plugin API is authoritative for structure and bindings. Renders are authoritative for what a human
@@ -201,12 +255,23 @@ Everything must return zero. `scripts/figma-audit.js` runs it as one call.
 | Page-level overlaps | pairwise AABB on `page.children` |
 | Style-less screen text | no `textStyleId` matching a local style, excluding instance children |
 | Unbound font weights | no `fontWeight` binding and no bound style |
+| Unbound corner radii | any of the **four** corner properties > 0, unbound, with a matching `CORNER_RADIUS` token and no register entry |
+| Unbound padding | any padding side > 0, unbound, with a matching `GAP` token and no register entry |
+| Unbound border width | strokes present and **none of the five** `strokeWeight` keys bound, with a matching `STROKE_FLOAT` token |
+| Unbound fills and strokes | SOLID paint with no `boundVariables.color` and a token matching its **RGBA** |
+| Unregistered raw values | anything raw with no matching token **and** no entry in `rawValueExemptions` |
+| Flattened translucency | bound SOLID paint at `opacity 1` sitting inside an IMAGE-filled node, or whose own icon or label shares its exact colour |
+| Baseline delta | any resolved RGBA change against the pre-pass baseline that is not a recorded decision |
+| Un-centred icons in controls | horizontal frame containing an icon child with `counterAxisAlignItems !== "CENTER"` |
+| Fixed-height text riding high | `textAutoResize === "NONE"`, `textAlignVertical === "TOP"`, `height % lineHeight !== 0` |
+| Unequal sibling heights | row of peers (nav tabs, segments, tiles) where any `layoutSizingVertical !== "FILL"` and heights differ |
+| Unpinned screen chrome | bottom chrome whose `constraints.vertical !== "MAX"`, or whose gap to the frame bottom is non-zero |
 | Un-centred button labels | `textAlignHorizontal !== "CENTER"` inside a button instance |
 | Wrong button sizing | full-width size in an auto-layout parent not set to FILL |
 | Detached instances | `getMainComponentAsync()` throws |
 | Orphaned nodes | `icon/*`, `Vector`, `Rectangle` directly on a page |
 | Prototype dead ends | frame with zero outgoing reactions |
-| Home indicators | present on every viewport frame, absent on every hug frame |
+| Home indicators | present and bottom-pinned on **every** screen frame, viewport and hug alike |
 | Placeholder text | `PASTE HERE`, `TODO`, `TBD`, `lorem ipsum` |
 | Banned characters | project-specific, declared at intake |
 | Conflicting weight spellings | one normalised weight with more than one spelling |
@@ -224,6 +289,10 @@ from a live count in the same script that writes them, so the parts always add t
 - [ ] Audit returns zero on every check
 - [ ] Geometry diff shows no position delta above roughly 3px that is not a documented decision
 - [ ] Every screen text node carries a text style; every style is variable-bound
+- [ ] Every geometry property is bound or listed in `rawValueExemptions`: four corner radii, four
+      padding sides, border width, fills and strokes
+- [ ] Baseline diff is empty, or every resolved RGBA delta is a recorded decision
+- [ ] Every screen frame carries a bottom-pinned home indicator, hug frames included
 - [ ] Zero detached instances; zero raw shapes in screens beyond images, scrims and indicators
 - [ ] Contrast computed and passing, with any exception measured from the render and written down
 - [ ] Prototype has no dead ends

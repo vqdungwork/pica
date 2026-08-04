@@ -113,8 +113,23 @@ Dead ends, links to the wrong target, missing back paths, states with no way in 
 ### 8. Hygiene
 
 Placeholder text (`PASTE HERE`, `TODO`, `TBD`, `lorem ipsum`), any banned characters declared at intake,
-home indicators present on viewport frames and absent on hug frames, and **every published number
-recounted from the file**. A cover claiming 45 screens was counting five annotation boards.
+home indicators present and **bottom-pinned on every screen frame including hug frames**, and **every
+published number recounted from the file**. A cover claiming 45 screens was counting five annotation
+boards.
+
+### 9. Geometry token binding
+
+All four corner radii individually, all four padding sides, border width, and every fill and stroke where
+a token matches its **RGBA**. Anything raw must appear in `rawValueExemptions` with a reason.
+
+Two detector traps: binding `strokeWeight` leaves `boundVariables.strokeWeight` undefined and writes four
+per-side keys instead, so check all five; and `COMPONENT_SET` geometry is variant-set chrome, not design.
+
+### 10. Appearance preserved
+
+Structural checks prove bindings exist, not that the pixel held. Diff `scripts/capture-baseline.js` output
+from before the pass. A bound paint takes its alpha from the token, so binding a translucent paint to an
+opaque token flattens it silently — and every existence check still passes.
 
 ---
 
