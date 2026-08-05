@@ -38,6 +38,18 @@ node ${CLAUDE_PLUGIN_ROOT}/skills/design-flow/scripts/capture-html-reference.mjs
   --dir html --out .audit --font "<the family Figma currently resolves>"
 ```
 
+**Then confirm the HTML side is still clean before porting anything.** `/pica-wp` measured it at
+approval, but the HTML may have moved since:
+
+```
+S=${CLAUDE_PLUGIN_ROOT}/skills/design-flow/scripts
+node $S/verify-html.mjs  .audit/html-reference.json .pica/state.json
+node $S/parity-check.mjs .audit/html-reference.json .pica/state.json
+```
+
+Both must return 0 findings. Porting from HTML with known defects reproduces them in Figma and costs a
+second pass to undo.
+
 Force the family Figma is resolving, so the diff isolates layout from typeface metrics. Run it natively
 too, once both sides share a family.
 
@@ -99,6 +111,25 @@ roughly 3px.
 
 Fix, then **re-audit in a separate call**. Same-call read-back is not proof. Repeat until every check
 returns zero.
+
+## The loop is per frame, and the render is not optional
+
+**Capture the frame → compare it against the HTML capture → measure → fix → re-capture.** Per frame,
+immediately after that frame is built, and again after every fix.
+
+Presenting a port as complete on the strength of a spot check is not a lesser version of this; it is a
+different and much weaker claim. On one project two frames were reported as matching on the strength of
+two numbers, and were in fact missing their last 300px of content — a field, a filter group and the
+primary CTA — because **a clipped node still reports its coordinates**, so the position diff called them
+merely "over tolerance".
+
+Re-diffing after *each* fix is what makes a wrong fix cheap. On the same project a fix based on one
+finding moved a heading from an exact match to 24px out; the next diff run caught it immediately instead
+of it shipping.
+
+And a diff finding is **not automatically a design defect**. Of four causes traced on that project, one
+was the Figma file, one was a wrong fix, one was a measurement artefact, and one was a corrupted HTML
+source. The diff says the two disagree. It does not say which is wrong.
 
 Print the **full font family and style distribution** and read it. Do not ask "is anything not the
 target family": that question is blind to nodes with no binding at all.

@@ -23,21 +23,46 @@ All of it looked fine in a screenshot. Eyeballing finds the wrong things and mis
 
 ## The flow
 
+Brief becomes a contract, HTML becomes the design, measurement decides whether it is right. Figma is a
+downstream rendering of an approved HTML design — never a parallel effort, never the place a decision
+first gets made.
+
+**Phase A — establish (one sitting).** Ends with a UI kit and tokens.
+
 | # | Step | Command | Rules |
 |---|---|---|---|
-| 1 | Intake, brief becomes a contract | `/pica` | [research.md](rules/research.md) |
+| 1 | Intake, brief becomes a contract. Declares `viewports` and `figmaInScope` | `/pica` | [research.md](rules/research.md) |
 | 2 | Research and tokens | inside `/pica` | [research.md](rules/research.md) |
-| 3 | UI kit in HTML | inside `/pica` | [html-prototype.md](rules/html-prototype.md) |
-| 4 | Foundations into Figma | inside `/pica` | [figma-elements.md](rules/figma-elements.md) |
-| 5 | Work package | `/pica-wp <name>` | [html-prototype.md](rules/html-prototype.md), [review-gates.md](rules/review-gates.md) |
-| 6 | Port to Figma | `/pica-port <wp>` | [figma-screens.md](rules/figma-screens.md), [figma-elements.md](rules/figma-elements.md) |
-| 7 | Review | `/pica-review [wp]` | [review-gates.md](rules/review-gates.md) |
-| 8 | Prototype | `/pica-prototype` | [figma-screens.md](rules/figma-screens.md), [review-gates.md](rules/review-gates.md) |
-| 9 | Closeout | `/pica-close` | [review-gates.md](rules/review-gates.md) |
+| 3 | UI kit in HTML — the design kit every screen consumes | inside `/pica` | [html-prototype.md](rules/html-prototype.md) |
+
+**Phase B — design and verify (repeats per work package, over days).** This phase is the deliverable.
+An HTML-only project ends here, having been fully verified.
+
+| # | Step | Command | Rules |
+|---|---|---|---|
+| 4 | Build the package at every declared viewport | `/pica-wp <name>` | [html-prototype.md](rules/html-prototype.md) |
+| 5 | **Measure it** — capture, `verify-html`, `parity-check`. All zero, or fix | inside `/pica-wp` | [review-gates.md](rules/review-gates.md) |
+| 6 | Render every frame and look at it, per viewport | inside `/pica-wp` | [review-gates.md](rules/review-gates.md) |
+| 7 | **GATE: human approves this package's HTML** | inside `/pica-wp` | [review-gates.md](rules/review-gates.md) |
+
+**Phase C — Figma (optional; skip entirely when `figmaInScope` is false).** Nothing here may begin for a
+package until step 7 passed for that package. The hook enforces it.
+
+| # | Step | Command | Rules |
+|---|---|---|---|
+| 8 | Foundations into Figma — variables, text styles, components | inside `/pica` or before first port | [figma-elements.md](rules/figma-elements.md) |
+| 9 | Port the approved package | `/pica-port <wp>` | [figma-screens.md](rules/figma-screens.md), [figma-elements.md](rules/figma-elements.md) |
+| 10 | Verify against the HTML — `geometry-diff`, per frame, re-diff after each fix | inside `/pica-port` | [review-gates.md](rules/review-gates.md) |
+| 11 | Review | `/pica-review [wp]` | [review-gates.md](rules/review-gates.md) |
+| 12 | Prototype | `/pica-prototype` | [figma-screens.md](rules/figma-screens.md), [review-gates.md](rules/review-gates.md) |
+| 13 | Closeout | `/pica-close` | [review-gates.md](rules/review-gates.md) |
 | — | Feedback arrives | `/pica-feedback` | [review-gates.md](rules/review-gates.md), [figma-mcp.md](rules/figma-mcp.md) |
 
-Steps 1 to 4 happen in one sitting. Steps 5 to 9 recur over days, which is why each has its own entry
-point: no session survives a multi-day project.
+Foundations sat at step 4 through 0.3.0, before any HTML was approved. That put Figma writes ahead of the
+gate that exists to prevent them and made the optional phase look mandatory. They belong in Phase C: the
+kit is settled in HTML at step 3, and pushing it to Figma is only worth doing if Figma is in scope.
+
+Each step from 4 on has its own entry point because no session survives a multi-day project.
 
 `/pica-feedback` is not a step. It runs whenever someone else's review lands, before or after delivery,
 and it exists because triaging a client's claims is a different job from auditing your own work: every
@@ -94,7 +119,32 @@ and the failure modes that skill does not cover.
 and `ported`, plus `activeReview` and `writeAuthorization`.
 
 **Read by the audit**, to make judgement calls checkable: `rawValueExemptions`, `exclusions`,
-`deviations`, `bannedChars`.
+`deviations`, `bannedChars`, `parityExemptions`, `reflowNotes`.
+
+**The viewport declaration**, which everything downstream reads:
+
+```json
+"viewports": [
+  { "name": "desktop", "w": 1440, "h": 900,
+    "idiom": "desktop web, no device chrome",
+    "pointer": true, "breakpoints": [1024],
+    "chrome": [ { "name": "top-nav", "required": true, "pinH": "STRETCH", "pinV": "MIN" } ],
+    "grid": { "columns": 12, "gutter": 24, "margin": 40, "maxContent": 1200 } }
+]
+```
+
+One entry behaves exactly as 0.2.0 did. Two or more activates sections per viewport, a prototype page
+per viewport, the parity check and the hug pair.
+
+Two registers exist only because multi-viewport work needs them, and each has something that reads it:
+
+- **`parityExemptions`** — a screen deliberately absent at a viewport. `{screen, presentAt[], why}`.
+  Without it the parity check reports every deliberate asymmetry forever; with it, a decision is
+  distinguishable from an omission.
+- **`reflowNotes`** — a component that legitimately differs across viewports. **`scope` is required**:
+  either a screen name or `"*"` for chrome that reflows everywhere. A flat global list is too blunt —
+  a class can reflow on one screen and be identical on another, and silencing it globally blinds the
+  check where it mattered.
 
 A hook is a shell script. It cannot know the human said yes out loud, so approvals have to be on disk.
 
@@ -114,12 +164,39 @@ script only, or the two will drift.
 
 ## Scripts
 
-- `scripts/capture-html-reference.mjs` renders every HTML frame and records true text-run rectangles via
-  range geometry, every element box with its classes, and computed font size and weight.
-- `scripts/figma-audit.js` runs the whole audit checklist as one `use_figma` call. Everything must
-  return zero. It proves **structure**.
-- `scripts/capture-baseline.js` records the resolved RGBA of every paint. Run it before and after any
-  bulk mutation and diff. It proves **appearance**, which the audit cannot.
+Every check named in a rule ships here and is runnable. A rule that names a check with no executable
+behind it is a rule nobody can follow — 0.3.0 shipped three such rules, documenting a parity check and a
+geometry diff that existed only in the project they were written from.
+
+**HTML side — runs in Phase B, before approval. The only verification an HTML-only project gets.**
+
+| Script | Proves | Passes when |
+|---|---|---|
+| `capture-html-reference.mjs` | measurement is possible | it writes an artefact; it refuses on 0 frames rather than emitting an empty one |
+| `verify-html.mjs` | the HTML is internally sound | 0 findings across viewport-tagged, overflow, tall-screen-pair, viewport-coverage |
+| `parity-check.mjs` | the viewports agree | 0 findings, nominal and structural. 2+ viewports only |
+
+The capture records true text-run rectangles via range geometry, every element box with its classes,
+depth and nearest classed ancestor, computed font size and weight, each run's owning element and
+text-align, and per frame the tagged viewport, hug flag, content height and horizontal overflow. Frames
+are located by `data-viewport` — the same attribute that names the viewport.
+
+**Figma side — Phase C only.**
+
+| Script | Proves | Passes when |
+|---|---|---|
+| `geometry-diff.mjs` | Figma matches the HTML | 0 findings above tolerance, **and** a nonzero number of runs compared |
+| `figma-audit.js` | **structure** — the whole audit checklist in one `use_figma` call | every count returns zero |
+| `capture-baseline.js` | **appearance**, which the audit cannot | resolved RGBA of every paint identical before and after a bulk mutation |
+
+**Every one of these fails closed.** A selector that matches nothing, a frame map with no entries, a
+comparison of zero nodes: each exits non-zero rather than reporting a clean run. A check that cannot
+tell you it did nothing is worse than no check, because its silence reads as a pass.
+
+**None of them can detect absence.** A node never created has no coordinates, so it cannot be over
+tolerance; a frame missing a third of its content still reports everything it does have as correct.
+Inventory and count checks cover that, and rendering every frame and looking at it covers what no
+script does.
 
 ## Rules
 

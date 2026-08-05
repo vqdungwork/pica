@@ -139,6 +139,36 @@ that exclusion is what guarantees the correct token can never win.
 geometrically inside a node with an IMAGE fill. Cross-check against elements whose own icon or label is
 the same colour as their fill: that pair is invisible and proves the flattening.
 
+## Bind behaviour at the component, never per instance
+
+Three cases from one project where the per-instance version would have been wrong within a day:
+
+- **Single-line truncation.** Four component variants propagated to all 16 instances with zero forced
+  overrides. Per instance it would have been sixteen edits, and any instance added later would have
+  reverted to wrapping.
+- **Control heights across viewports.** Bind them to tokens — `control/h-pointer` 40 / `control/h-touch`
+  44 — so a viewport difference is an auditable token swap on the instance rather than a stale fixed
+  height, which is what pica already warns about.
+- **Icon sizing.** Fixing the artwork size once at the component fixed every row it appeared in.
+
+## A storybook that simplifies a component stops documenting it
+
+Kit entries must show the component **as the screens use it**, including children hidden at that
+viewport. A desktop nav demo written without its burger button documented a component the screens do not
+have — and the storybook is what a developer builds from.
+
+Two traps that follow:
+
+- **Distinguish *absent* from *hidden*.** A check asking "is this hidden?" returns `null` for a missing
+  node, and `null` is not `false`. A check that conflates them passes on a wrong file.
+- **A demo frame must sit above the breakpoints of the viewport it claims to represent.** A frame sized
+  1000px for convenience rendered mobile chrome under a heading reading "desktop 1440". Comment the
+  width with why it cannot be reduced.
+
+- **A component demoed outside a frame has no container ancestor**, so `@container` never matches and it
+  renders its base variant only. Anything that reflows must be demoed inside an explicit container
+  context at each declared viewport.
+
 ## Font weight must be numeric
 
 **This is the single most valuable rule here.**

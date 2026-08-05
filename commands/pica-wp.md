@@ -64,22 +64,65 @@ Do this before drawing. It is the cheapest way to avoid finding a missing state 
 - **Real assets.** No emoji for icons, no unrelated stock imagery, real brand marks on social buttons.
   Label anything genuinely unavailable as a placeholder in the frame.
 - Screens taller than the viewport ship as a **pair**: interactive with real scrolling and pinned chrome,
-  and full-height with no home indicator. **Never a third mid-scroll version.**
+  and full-height (`· hug`) showing the whole content. Both carry the declared device chrome, the home
+  indicator included — a hug frame is the same screen at a taller viewport, not a documentation board.
+  **Never a third mid-scroll version.**
+- **Tag every frame** `data-viewport="<name>"` matching a viewport in `.pica/state.json`. The capture
+  script locates frames by that attribute and every downstream check reads the viewport from it.
 - Length-realistic copy for the shipping locale.
 - Hold one content-edge inset across every row. If the reference itself breaks its grid, fix the
   reference; faithful to broken is still broken.
 
 **3. Add the tab** to `html/review.html`.
 
-**4. Self-review, and say what you checked.** Against the state matrix, the grid, the kit, and the
-acceptance criteria for this package in `docs/contract.md`. State findings, including "none". Never
-report complete on work you have not verified.
+**4. Measure it. This is not optional and it is not the same as looking at it.**
+
+Never ask for approval of HTML you have not measured. For an HTML-only project this is the only
+verification the work will ever get; for a Figma project, finding these defects here costs minutes and
+finding them after the port costs a rebuild.
+
+```bash
+S=<plugin>/skills/design-flow/scripts
+node $S/capture-html-reference.mjs --dir html --out .audit
+node $S/verify-html.mjs   .audit/html-reference.json .pica/state.json
+node $S/parity-check.mjs  .audit/html-reference.json .pica/state.json   # 2+ viewports only
+```
+
+Pass criteria, all of them, no partial credit:
+
+| Check | Passes when |
+|---|---|
+| capture | writes an artefact at all — it refuses on 0 frames, which means a selector matched nothing |
+| `viewport-tagged` | 0 findings: every frame tagged with a declared viewport name |
+| `overflow` | 0 findings: nothing extends past a frame's right edge |
+| `tall-screen-pair` | 0 findings: every frame whose content exceeds its viewport by >24px has a `· hug` twin |
+| `viewport-coverage` | 0 findings: every declared viewport produced frames |
+| parity nominal | 0 findings: every screen exists at every viewport, or a `parityExemptions` entry says why not |
+| parity structural | 0 findings: per-class element counts match across viewports, or `reflowNotes` covers the difference |
+
+A non-zero count is a defect to fix, not a number to explain. The registers exist so that a real
+decision can be recorded and the check can still return zero — reaching for a register is legitimate,
+leaving a finding unregistered is not.
+
+**Measurement does not replace looking.** These checks find what the eye misses — 83px of clipped
+overflow behind a frame edge, one row silently absent from a column. They are blind to what only the eye
+catches: cramped type, a label that reads wrong, a card that is technically correct and ugly. **Render
+every frame and look at it, per viewport, before you present.** Both classes of defect shipped in the
+project this rule came from, in both directions.
+
+**5. Self-review, and say what you checked.** Against the state matrix, the grid, the kit, and the
+acceptance criteria for this package in `docs/contract.md`. Report the check output — the actual counts,
+not "checks pass". State findings, including "none". Never report complete on work you have not verified.
 
 ---
 
 ## GATE 5
 
-Present the package. Point at the review page and name the tabs.
+Present the package. Point at the review page and name the tabs, and give the measured results from
+step 4 alongside them.
+
+**Do not present an unmeasured package.** If any check is non-zero, fix it first. Presenting HTML with
+known findings asks the human to arbitrate something a script already decided.
 
 **Stop. Wait for explicit approval of this package's HTML.**
 

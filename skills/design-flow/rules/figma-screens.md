@@ -46,6 +46,20 @@ does not exist.
 
 Name them `home / default` and `home / default · hug`.
 
+## Lay the page out so a reviewer can read it
+
+Three things a reviewer notices before any of the design, and all three were review findings:
+
+- **Local components must not overlap the screen sections.** Left at the page origin they float over
+  the frames, and a reviewer cannot tell a component from a screen. Put them in their own band above
+  the sections and assert no overlap by comparing bounding boxes — a name check proves nothing.
+- **A section's background must differ from the frame's.** Sections default to near-white, which is
+  the same value as a typical page background, so the frame has no visible edge. Bind the section
+  fill to a distinct token — the same value the HTML review page uses on `body`, for the same reason.
+- **A tall-screen pair sits side by side, on one row.** Stacked vertically the two halves read as two
+  unrelated screens; beside each other they read as one decision, and the difference between them is
+  the information a reviewer is there to judge.
+
 ## Page structure that works
 
 ```
@@ -62,6 +76,67 @@ Cover               scope, criteria, how to review
 Zero-pad page numbers so the sidebar sorts. Prefix documentation frames with a marker so a frame
 search never returns notes, but keep that marker out of *body copy*, because most brand fonts have no
 glyph for it and it falls back visibly.
+
+## Plugin API calls that return success and produce a wrong result
+
+Each of these was hit on a real port. None throws. All return a plausible value.
+
+**`findAll` under-reports instance children in two situations, not one.** The documented case is a node
+whose page is not current. The second is a node **created in the current call** — a freshly cloned
+frame does not expose its nested instances until the next call. Consequences:
+
+- Clone in one call, wire the prototype in the next. Wiring in the same call silently missed 11 of 16
+  triggers — every one that lived inside an instance, none that lived on a plain frame.
+- **Never compare descendant counts across pages.** The non-current side always under-reports, so the
+  comparison can never pass. Split it into two reads, each taken while its own page is current, and
+  compare outside the plugin.
+
+**Node object identity is not stable across lookups.** Two lookups of the same node return different
+proxy wrappers, so `node.parent === someNode` silently matches nothing — and *inconsistently*, so the
+same code works in one place and fails in another. Compare `.id`, or avoid the comparison by walking
+`.children` directly.
+
+**`layoutGrow` is relative to the parent's primary axis.** Re-parenting a node from a horizontal to a
+vertical container reinterprets it: a card carrying `layoutGrow = 2` for its column width became
+vertically growing, flipped from HUG to FILL, and clipped 300px of content. After any re-parent, assert
+the child's sizing rather than assuming it survived.
+
+**Removing `layoutGrow` converts `FILL` to `FIXED`, not `HUG`.** The clip persists at exactly the same
+height, and a repair that tests for `FILL` stops matching. Set `HUG` unconditionally.
+
+**`vectorPaths` accepts `M`/`L`/`C`/`Z` only.** No arcs — `A` throws *"Invalid command at A"*. Draw
+circles as four cubic béziers with control offset `0.5523 × r`.
+
+**`vectorPaths` geometry is scaled to fit the node's box.** A path spanning 8 units in a node resized
+to 16 renders at 16px, not 8. Size the node to the artwork's **visible** size, not to the box size the
+CSS uses — otherwise every icon comes out one to two times too heavy.
+
+**`reactions` requires the plural `actions` array.** The singular `action` throws *"Please update the
+`actions` field … to prevent data loss"*.
+
+**`layoutGrow` rejects floats.** `1.6` throws *"Expected integer, received float"*.
+
+**Instances of a variant are not reliably named after their set.** Matching a prototype trigger by
+instance name misses them; match by label **text** and walk up to the nearest clickable ancestor. Keys
+and other plain frames need the same treatment, since they are not instances at all.
+
+**Variants created at the page origin stack on top of each other.** `combineAsVariants` preserves
+relative position, so nine buttons built at `(0,0)` produce a set where one is visible. Give every set
+wrapping auto-layout after combining.
+
+**Changing an instance's text does not change its variant.** A score pill whose label was overridden to
+`78%` still rendered the `high` colour band until `setProperties({band})` was called as well.
+
+## Re-sync prototype clones after every frame-level fix
+
+Component-level fixes propagate to clones. **Frame-level fixes do not** — content alignment, a wrapper
+frame, a sizing mode, an instance colour override, a divider. On one project the prototypes were a full
+day stale: a client clicking through would have seen the left-aligned, clipped versions of screens that
+had already been fixed.
+
+When the drift is structural, **delete the clones and re-clone** rather than patching. Then audit by
+**measuring a property that changed** — names and child counts match while geometry diverges, which is
+exactly why comparing names proves nothing.
 
 ## Prototype links cannot cross pages
 

@@ -45,17 +45,97 @@ because it is the tighter constraint.
 Whatever it is, **the HTML viewport matches the Figma frame exactly**, or the geometry diff in step 7
 compares two different things and every finding is noise.
 
+## Responsive is `@container`, never a width `@media`
+
+When more than one viewport is declared, **every viewport renders in the same browser window**. A
+width-based `@media` rule therefore fires for every column at once and renders the narrow column as
+the wide one — and that column is what gets ported. Verified: with a 1440 frame and a 375 frame side
+by side, every `@container` rule resolved against its own frame.
+
+Each frame declares `container-type: inline-size`. That contains the **inline axis only**, so frame
+height stays content-driven — which is what keeps the tall-screen hug pair working.
+
+Hover cannot use `@media (hover)` either: one window cannot distinguish the columns. Key it off the
+frame class.
+
+**`@container` carries no specificity.** A component base class declared *later* in the file wins at
+equal specificity, so the container rule silently loses:
+
+```css
+.top-nav__burger { display: inline-flex; }
+@container frame (min-width: 1024px) { .top-nav__burger { display: none; } }
+/* ... 200 lines later ... */
+.btn { display: inline-flex; }        /* equal specificity, declared later — wins */
+```
+
+The burger rendered on the desktop frame. Every `@container` block that overrides a property also set
+by a component base class must be declared **after** that class; keeping them in one trailing section
+makes the ordering a visible convention. This trap was hit **three times** in one stylesheet — the
+third time it made an icon button 32×40 instead of square and dragged every row it sat in 8px taller.
+
+## Prefer CSS Grid with named areas for anything that reflows
+
+A flex row cannot promote a nested child to full width. One mobile card ran to **550px** because its
+chip row was a grandchild inside a squeezed column; no amount of flex tuning could fix it, because the
+reflow was structurally impossible without changing the DOM.
+
+Grid changes order *and* span from CSS alone, so both viewports keep **identical markup** — which is
+what keeps a structural parity check meaningful. Reaching for flex first tends to force either a markup
+fork per viewport (which parity then reports forever) or a compromise layout. After the restructure:
+550px → 170px, wide viewport unchanged.
+
+## Check for overflow. The frame hides it.
+
+Frames carry `overflow: hidden`, so content that spills is **clipped, not visible**. Two mobile frames
+overflowed by 83px and 34px with nothing to see: no scrollbar, no cut glyph, just content rendered into
+a void.
+
+Cause both times: grid items default to `min-width: auto` and refuse to shrink below their min-content
+width, so one unbreakable string — a 38-character filename — pushed the column past the frame edge.
+`.grid > * { min-width: 0 }` fixes it; **the finding is that nothing would have caught it.** The capture
+script already walks every element box and knows each frame's rect, so the check is nearly free.
+
+## Single-line controls must truncate, not wrap
+
+An `<input>` is single-line by definition: the value scrolls and never lays out on a second line. A
+design-tool text node wraps as soon as the string exceeds the width — correct for a paragraph, wrong for
+a form control. Set `maxLines: 1` with ellipsis truncation **on the component**, so every instance
+inherits and any instance added later cannot revert.
+
+Note the ellipsis is a deliberate improvement on the reference, not a match: a browser clips input
+overflow with no ellipsis. A static frame cannot scroll, so without it a truncated value reads as the
+complete value and a developer builds the wrong field width. Record it as a deviation.
+
 ## The tall-screen pair
 
 A screen taller than the viewport ships as **two versions**, side by side:
 
 1. **Interactive.** The real viewport height with genuine `overflow-y: auto` inside it, scrollbar
    hidden, bottom nav pinned, home indicator present.
-2. **Full height.** The frame grows to the full content so a reviewer sees everything at once. No home
-   indicator, because it is a board rather than a viewport.
+2. **Full height.** The frame grows to the full content so a reviewer sees everything at once. It
+   **still carries the declared chrome**, bottom-pinned like every other frame.
+
+   *Corrected in 0.3.0.* This rule previously said a hug frame carries no home indicator "because it is
+   a board rather than a viewport" — which contradicted figma-screens.md, where 0.2.0 had already
+   reversed it. A missing element reads as an oversight rather than a decision, and it also removes a
+   per-frame judgement call from the audit.
 
 **Never a third "scrolled" version** showing a mid-scroll position. It reads as a state that does not
 exist, and it is the thing reviewers ask about every time.
+
+**This is not optional and it needs a check.** On one project it was specified in two rule files and
+implemented in neither: **8 of 25 screens overflowed** their viewport by 212px to 614px, and every one
+was a screen a reviewer could only ever see the top two-thirds of. Nothing in the audit caught it,
+because each frame was internally valid.
+
+Two implementation details that matter:
+
+- **Threshold the overflow at ~24px.** A twin generated for a 10px overflow is rounding noise and makes
+  the pair read as mechanical rather than considered.
+- **Generate the twin by cloning the interactive frame**, not by copying its markup. The two cannot then
+  drift — which is the exact failure the pair exists to expose.
+- A hug twin is **not a separate screen** for parity purposes. Its existence depends on content height at
+  that viewport, so it is legitimately asymmetric between viewports.
 
 This pair maps directly onto Figma's interactive and hug frames, which is why it exists in this form.
 

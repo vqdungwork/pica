@@ -36,7 +36,10 @@ rather than on the day it blocks.
 Write `docs/contract.md`:
 
 - one section per work package, with **acceptance criteria in the human's own terms**
-- the declared frame size (default 375 x 812)
+- the declared **viewports**, one entry each, and for every one its **idiom**: native app, mobile web
+  bare, or mobile web presented in a device frame. The idiom determines the chrome list, and it is a
+  human decision the flow may neither infer nor default. A width of 375 tells you nothing about whether
+  a home indicator belongs.
 - the declared banned characters or house conventions, if any
 
 Write `docs/exclusions.md`: everything the brief rules out, **quoted from the brief**. Then ask the
@@ -65,7 +68,12 @@ Write `.pica/state.json`:
 ```json
 {
   "figmaInScope": false,
-  "frameSize": { "w": 375, "h": 812 },
+  "viewports": [
+    { "name": "desktop", "w": 1440, "h": 900, "idiom": "desktop web, no device chrome",
+      "pointer": true,  "breakpoints": [1024], "chrome": [ ... ], "grid": { "columns": 12, "gutter": 24, "margin": 40, "maxContent": 1200 } },
+    { "name": "mobile",  "w": 375,  "h": 812,  "idiom": "mobile web in a device frame",
+      "pointer": false, "breakpoints": [],     "chrome": [ ... ], "grid": null }
+  ],
   "disclosurePolicy": "",
   "delivered": false,
   "workPackages": {},
@@ -94,6 +102,12 @@ aspirational. Two are filled now, two accumulate:
 - **`deviations`** — starts empty, grows when the human approves Figma differing from the HTML.
 
 A register with no entries is a valid state and means something: nothing has been excused yet.
+
+**Chrome is declared, never defaulted.** Each `chrome` entry carries a name, `required` (must be on
+every frame at that viewport) or optional (may appear; if it does, it must match), and `pinH`/`pinV` —
+two axes, because a sidebar pins horizontally and stretches vertically. Record **who** declared it: a
+rule that says "declare X" is violated just as much by the assistant quietly declaring X as by nobody
+declaring it.
 
 Open three artefacts that run for the life of the project, and say they exist:
 
@@ -159,9 +173,18 @@ Present the kit. **Stop. Wait for confirmation.**
 
 ---
 
-## Step 4: Foundations into Figma
+## Step 4: Foundations into Figma — Phase C, optional
 
-**Skip this step entirely if `figmaInScope` is false.** Say so and finish.
+**Skip this step entirely if `figmaInScope` is false.** Say so and finish: the project is HTML-only and
+the next thing to run is `/pica-wp <name>`. An HTML-only project is a complete pica project, not a
+truncated one — it is verified by the measured gate in `/pica-wp`, which is where the checks live.
+
+**This step is not required before the first work package, and running it early is usually wrong.** It
+belongs to the optional Figma phase. Building the kit in HTML (step 3) is what every screen consumes;
+pushing it into Figma is worth doing only once Figma is genuinely in scope, and it is easier to do after
+one package's HTML is approved, because the approved package tells you which components the screens
+actually needed. Through 0.3.0 this sat mid-flow, ahead of every HTML approval gate, which made the
+optional phase read as mandatory.
 
 Load `${CLAUDE_PLUGIN_ROOT}/skills/design-flow/rules/figma-elements.md`, then load the `figma-use`
 skill. Pass `skillNames: "figma-use"` on every `use_figma` call.

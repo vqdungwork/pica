@@ -283,11 +283,173 @@ Everything must return zero. `scripts/figma-audit.js` runs it as one call.
 | Conflicting weight spellings | one normalised weight with more than one spelling |
 | Stale published counts | claims parsed from the file's own text and recounted against live counts of screens, components, variables and links. Unrecognised nouns are ignored rather than guessed at |
 | Excluded work built anyway | any top-level frame name matching an entry in the `exclusions` register |
+| Clipped content | per vertical auto-layout node, `lastChild.y + height + paddingBottom` vs the node's own height; exclude declared scroll surfaces |
+| Missing content | per-frame text-run count against the HTML reference, tolerance calibrated `+1 per input` / `−2 per emphasis run` |
+| Missing hug twin | any screen whose content exceeds its viewport height by more than 24px must have a `· hug` twin |
+| Declared chrome | every entry in `viewports[].chrome` marked `required`, present and pinned on the declared axes; optional entries match their constraints where present |
+| Single-line controls | inputs and selects carry `maxLines: 1` with ellipsis truncation, set on the component |
 
 ## Recount every number you publish
 
 A cover claiming "45 designed screens" was counting five annotation boards. Derive published figures
 from a live count in the same script that writes them, so the parts always add to the total.
+
+
+## The measured HTML gate
+
+`scripts/verify-html.mjs <html-reference.json> <state.json>`. **Pass: 0 findings on all four checks.**
+
+Runs in `/pica-wp` before the human is asked to approve anything, and again at the start of a port. For a
+project with `figmaInScope: false` it is the **only** verification the work ever receives — which is why
+it cannot live in the Figma half of the flow, where it sat through 0.3.0.
+
+| Check | Detects | Pass |
+|---|---|---|
+| `viewport-tagged` | a frame with no `data-viewport`, or one naming an undeclared viewport | 0 |
+| `overflow` | content past the frame's right edge — the frame clips it, so no screenshot shows it | 0 |
+| `tall-screen-pair` | content exceeding its viewport by >24px with no `· hug` twin, so the remainder is unreviewable | 0 |
+| `viewport-coverage` | a declared viewport that produced no frames at all | 0 |
+
+The 24px threshold is calibrated, not chosen: on the project this came from, real overflows were 90px and
+up while sub-pixel scroll-region noise never exceeded 8px. A threshold in that gap separates them without
+tuning per screen.
+
+### A check must fail closed
+
+Every script here exits non-zero when it could not do its job, and none of them report a clean run for
+work they did not do:
+
+- a wrap or frame selector matching nothing → the capture **refuses to write** rather than emitting a
+  well-formed artefact containing zero frames
+- an empty `frameMap` → the geometry diff **refuses to start** rather than skipping every frame
+- zero text runs compared → the geometry diff **fails** rather than printing "0 over tolerance"
+- an untagged frame reaching parity or the diff → **fails**, pointing back at `verify-html`
+
+This is the difference between a check that returns zero and a check that *did nothing and said zero*.
+Both print the same reassuring number. Through 0.3.0 the capture script's frame selector defaulted to
+`.phone`, from the mobile-only era: any project whose frames were not called `.phone` captured nothing,
+logged "0 frames" as ordinary output, and passed every downstream check.
+
+**A green check is not evidence the check works.** Before trusting a new check, make it fail on purpose —
+break one frame, delete one row — and confirm it reports. A check never seen to fail has not been tested.
+
+### Every named check must ship
+
+If a rule names a check, the executable is in `scripts/` and the rule gives its command line and its pass
+criterion. 0.3.0 violated this: it documented the parity check and the geometry diff in prose, complete
+with tolerances and two-pass structure, while both existed only inside the project they were derived
+from. Anyone installing the plugin read a rule telling them to run something that was not there.
+
+A coverage audit that greps for concepts cannot catch this — the concept is present and well described.
+Audit for **executability**: for each named check, does the file exist, does it run, and does the rule
+state what passing means?
+
+## The viewport parity check
+
+`scripts/parity-check.mjs <html-reference.json> <state.json>`. **Pass: 0 findings.**
+
+Only with two or more declared viewports; with one it says so and exits 0. It answers one question: **do
+the viewports of a screen say the same thing, apart from the differences we declared?**
+
+**Compare per-class COUNTS, not sets — a set comparison misses count drift.** A set comparison reported zero findings on every screen of a
+project while missing real drift: delete one of five candidate rows from one column and the class *set*
+is unchanged — `.cand` is still present — so the check passes on a screen that lost content. Since
+hand-copied columns are where drift lives and a dropped row is the likeliest copy error, set comparison
+fails at exactly the job it was added for.
+
+Two passes, and they answer different questions:
+
+1. **Nominal** — is the screen present at every declared viewport? Cheap, catches a whole screen
+   missing. An absence is a finding unless `parityExemptions` records it as a decision. A tall-screen
+   **hug twin is not a separate screen** here; fold it into its base.
+2. **Structural** — per-class counts, **subtree-pruned**, plus text attributed to its owning element.
+
+Three things it needs to avoid firing forever on correct work:
+
+- **Prune the subtree of an excused component.** Excusing `cand__actions` must excuse the
+  `btn--secondary` inside it, or the descendant leaks a count gap the register does not cover. And the
+  parent link must be the nearest **classed** ancestor — an unclassed wrapper such as a `<td>` around a
+  pill silently breaks the chain and defeats the pruning.
+- **Attribute text to its owner.** Otherwise every legitimately reflowing component reports its own
+  labels as drift.
+- **Scope the register.** See `reflowNotes` in SKILL.md: `scope` is required.
+
+Correctly built, this returns **zero** on a correct two-viewport project. On the source project it went
+from 305 raw deltas to 0 findings once subtree pruning and owner attribution were in place — and the
+remaining text differences were the calibration artefacts below, not defects.
+
+## Measurement and review find different defects. Neither substitutes for the other.
+
+**"Eyeballing finds the wrong things and misses the real ones" is true and incomplete.** One project
+produced evidence for it and for its converse in the same afternoon:
+
+- An 83px horizontal overflow, invisible because the frame's `overflow: hidden` clipped it. Found by
+  measurement, impossible to see.
+- A checkbox with no tick, a control whose labels did not fit, and a card missing its last 300px of
+  content. Found by looking. **Four automated passes ran clean over exactly those frames** — verified
+  by re-introducing the defect and measuring 0px of clipping.
+
+Measurement finds clipping, overflow, misalignment and drift: defects with a numeric signature. It is
+blind to *"this control does not fit its copy"*, *"this component is missing its mark"*, and *"this
+card is missing three fields"*, which have none.
+
+**An audit returning zero means no defect with a numeric signature survives. It does not mean the
+design is good.** Never present it as if it does.
+
+## A position diff cannot detect absence
+
+**A clipped node still reports its coordinates.** Every text run clipped out of existence returns a
+plausible x and y, so a geometry diff reports the frame as merely "over tolerance" while a third of
+its content is missing.
+
+Two checks close that gap, and both are cheap:
+
+1. **Per-frame text-run counts.** Count visible runs in the design, count them in the HTML reference,
+   flag any delta beyond a calibrated tolerance. On one project this flagged 8 frames and **every flag
+   was real** — including an invisible stray text node on every instance of a component, where a
+   button label had been clipped by resizing rather than removed.
+2. **Content height vs container height.** For every vertical auto-layout node, compare
+   `lastChild.y + lastChild.height + paddingBottom` against the node's own height. Anything over is
+   clipped content. Exclude deliberate scroll surfaces only.
+
+## Calibrate the tolerance, or the check fires forever
+
+A count comparison needs a per-frame expected delta, not a flat number. Two structural differences
+between HTML and a design tool are permanent, not defects:
+
+- **The HTML capture cannot see `<input>` values.** A `value` or `placeholder` is not a DOM text node,
+  so range geometry finds nothing. Every input costs **+1 run** on the design side.
+- **Inline `<strong>` splits one visual line into three runs.** One design text node, three HTML runs.
+
+Same shape on the x axis: for **centred or FILL text**, the HTML capture records glyph *ink* and the
+design tool records the *layout box*. They coincide only for left-aligned hug text. Reporting raw `dx`
+on centred text guarantees an audit that can never return zero.
+
+## A structural check is only as good as its model of legitimate difference
+
+Three times on one project a check was arithmetically right and conceptually wrong, and each time the
+fix was to teach it a distinction the design already made — **never to loosen the tolerance**:
+
+| Check | What it got wrong |
+|---|---|
+| Reflow register | A flat global list silenced a component everywhere; it needed a per-screen scope |
+| Count comparison | A flat tolerance; it needed `+1 per input`, `−2 per emphasis run` |
+| Nominal parity | Counted each tall-screen hug twin as its own screen, producing 8 phantom findings |
+
+## A green check is not evidence the check works
+
+A clone-integrity check compared descendant counts between a frame and its clone and reported zero.
+It could not have failed meaningfully: it read one node on the current page and the other on a
+**different** page, and `findAll` under-reports instance children on any page that is not current. Run
+from the other side, every number reversed.
+
+**Assert a check against a known bad case before trusting a pass.** This is rule 4 above — *assert the
+intended value, not "different from broken"* — turned on the audit itself.
+
+And its corollary for any tool that returns a status object: a plausible success value is not evidence
+of a correct result. On one project a write API returned `{variantCount: 9}` with all nine variants
+stacked at the origin, and `{rows: 5}` with five rows built from the wrong component variant. **A
+structural read-back would have passed on both.** Render the node and look at it.
 
 ---
 
@@ -298,6 +460,13 @@ from a live count in the same script that writes them, so the parts always add t
 - [ ] Every screen text node carries a text style; every style is variable-bound
 - [ ] Every geometry property is bound or listed in `rawValueExemptions`: four corner radii, four
       padding sides, border width, fills and strokes
+- [ ] **Every frame rendered and looked at, per viewport.** Separate from "audit returns zero": the
+      audit answers a narrower question than it appears to
+- [ ] Content-height check returns zero, so nothing is clipped
+- [ ] Text-run counts match the HTML reference within the calibrated tolerance
+- [ ] Every screen taller than its viewport has its hug twin
+- [ ] Prototype clones re-synced after the last frame-level fix, audited by **measuring** a property
+      that changed — not by remembering the re-sync
 - [ ] Baseline diff is empty, or every resolved RGBA delta is a recorded decision
 - [ ] Every screen frame carries a bottom-pinned home indicator, hug frames included
 - [ ] Zero detached instances; zero raw shapes in screens beyond images, scrims and indicators

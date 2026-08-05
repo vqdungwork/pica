@@ -1,0 +1,17 @@
+# Practice and client projects live here but are never published.
+#
+# pica ships the METHOD - rules, commands, hooks, scripts. The projects it was
+# derived from are evidence for the author, not content for anyone installing it,
+# and they carry briefs, PRDs, real copy and client identifiers that must not be
+# redistributed. The findings those projects produced are in CHANGELOG.md, which is
+# the durable form: a rule and the failure that earned it, with no client data.
+#
+# The plugin surface itself is NEVER ignored - .claude-plugin/, commands/, skills/
+# (rules and scripts), hooks/, README.md, CHANGELOG.md, LICENSE all ship.
+spike/
+docs/superpowers/
+
+# Per-project pica state and captured artefacts, wherever a project is worked on.
+.pica/
+.audit/
+.cmp/

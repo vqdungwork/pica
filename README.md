@@ -422,6 +422,27 @@ Six modules, each written to be read on its own.
 This was extracted from **one** real client design pilot: a fixed-scope mobile app redesign delivered
 against a 24 hour cap. Every rule in it earns its place from a specific failure on that project.
 
+`0.4.0` is the release that made `0.3.0` true. `0.3.0` documented a viewport parity check and a geometry
+diff in full detail — passes, pruning, tolerances, pass criteria — and **shipped neither**. Both lived only
+in the project the rules came from, so a fresh install read instructions to run something absent. Worse,
+the HTML was never measured at all: verification began at the port, so an HTML-only project got none,
+while "HTML is the source of truth" stayed the first rule in the skill. `0.4.0` ships the checks, moves
+them ahead of the approval gate, and makes every one of them **fail closed** — a selector matching
+nothing, an empty frame map, a comparison of zero nodes each exit non-zero instead of printing a
+reassuring zero. The capture script's frame selector had defaulted to `.phone` since the mobile-only era,
+so a desktop project captured zero frames and passed every check downstream.
+
+The lesson is in the audit method. `0.3.0`'s coverage audit reported 39 concepts covered and 0 gaps, and
+was right: every concept *was* documented. **Audit for executability, not for mention** — does the file
+exist, does it run, does the rule say what passing means. A grep for concepts also cannot find a
+contradiction, since both sides of one are on-topic; one survived in a second file for a whole release.
+
+`0.3.0` adds a third project, and the first that is not mobile-only: a desktop-shaped recruitment web
+application from a real PRD, designed at two declared viewports and ported to Figma in full. It produced
+**35 findings**, four of which contradicted the multi-viewport design as originally reasoned. The most
+valuable were found by a human looking at a rendered frame *after* every automated check returned zero —
+which is why the definition of done now lists rendering and looking as a step separate from the audit.
+
 `0.2.0` adds a second round of evidence from the same file: the client's review of that pilot, and the
 repair pass afterwards. The client raised two items — incomplete variable bindings, and icons not centred
 in inputs — and **`0.1.0` would have caught neither.** It bound type thoroughly and geometry not at all,
@@ -433,13 +454,38 @@ surface it bound. Both facts are why `0.2.0` exists, and both are written into t
 That is its strength and its limit. Two rounds on one file is not evidence that this generalises, and you
 will hit cases it has never seen.
 
-The HTML half is still the better tested half. The Figma rules work, but they have been exercised against a
-single design system in a single file. Hence `0.2.0`, and not `1.0`.
+The HTML half is still the better tested half, and `0.4.0` widened the gap again by design: the HTML gate
+has three shipped checks, each negative-tested by being broken on purpose to confirm it reports, while the
+Figma side has one. `geometry-diff.mjs` is generalized from the version that reached zero findings during
+the `0.3.0` port, but **its clean run is reported history rather than something you can re-run** — the
+dumps it ran against were mid-port intermediates measured against a superseded reference, so they proved
+nothing and were not worth keeping.
+
+Hence `0.4.0`, and not `1.0`.
+
+### What this repo does and does not contain
+
+It ships the **method**: rules, commands, hooks and the six checks. It does **not** ship the projects the
+rules were derived from. Those carry briefs, PRDs, real copy and client identifiers, and none of that is
+yours to receive — so `spike/` is in `.gitignore` and stays on the author's disk.
+
+That means the findings arrive as claims you cannot re-run, and you should read them that way. The durable
+form of each one is in [CHANGELOG.md](CHANGELOG.md): a rule, and the specific failure that earned it. A
+rule whose failure is not written down next to it is the kind of rule that gets deleted by the next person
+who finds it inconvenient, which is why the changelog is long and why every entry names what broke.
+
+To generate your own evidence, run the flow on a project of your own. The checks are self-contained: point
+`capture-html-reference.mjs` at a directory of HTML, then run `verify-html.mjs` and `parity-check.mjs`
+against the artefact and your `.pica/state.json`. Each states its pass criterion, and each fails closed —
+if it cannot do its job it exits non-zero rather than reporting a clean run.
+
+Three projects is not proof that this generalises, and you will hit cases it has never seen.
 
 ## Not included
 
 Motion design and transition specs. Generating production code from designs. Exporting tokens into a
-codebase. Any Figma community plugin. Desktop or web variants, since this is mobile-shaped for now.
+codebase. Any Figma community plugin. Responsive breakpoints as a continuum — the flow guarantees the
+**declared** viewports and says nothing about the widths between them.
 
 ## Contributing
 

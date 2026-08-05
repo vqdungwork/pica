@@ -1,5 +1,156 @@
 # Changelog
 
+## 0.4.0
+
+**The checks 0.3.0 documented now exist, and they run before the human is asked to approve anything.**
+
+0.3.0 described a viewport parity check and a geometry diff in full — two passes, subtree pruning,
+tolerance calibration, pass criteria. Neither shipped. Both existed only inside the project the rules were
+derived from, so anyone installing the plugin read a rule instructing them to run something that was not
+there. The 0.3.0 coverage audit did not catch this because it graded whether concepts were *documented*.
+
+Six findings, all of the same shape: **a rule that names a check, with nothing behind it.**
+
+- **F37 — the parity check and geometry diff did not ship.** Now in `skills/design-flow/scripts/`,
+  generalized off the source project. `geometry-diff.mjs` takes its Figma-to-HTML frame mapping from
+  `frameMap` in state rather than a hardcoded table.
+- **F38 — the HTML was never measured.** `/pica-wp` ran no check at all; measurement began at
+  `/pica-port`. An HTML-only project (`figmaInScope: false`) therefore received *no* verification, while
+  "HTML is the source of truth" remained the first rule in the skill. New `verify-html.mjs` runs inside
+  `/pica-wp` before GATE 5, checking viewport tagging, horizontal overflow, the tall-screen pair and
+  viewport coverage. It is the gate an HTML-only project ends on.
+- **F39 — the capture script's frame selector defaulted to `.phone`.** A mobile-only holdover. Any
+  project whose frames were not called `.phone` captured **zero frames**, logged it as ordinary output,
+  wrote a well-formed empty artefact, and passed every downstream check. The default is now
+  `[data-viewport]`, so one attribute both locates the frame and names its viewport, and the capture
+  **refuses to write** an empty reference.
+- **F40 — the geometry diff reported success for work it had not done.** An unmapped frame was a `SKIP`,
+  not a finding, so a project with no frame map compared zero runs, printed "0 over tolerance" and exited
+  0. Unmapped is now a finding, an empty `frameMap` refuses to start, and zero comparisons is a failure.
+- **F41 — `viewport` was captured but inert.** The tag was implemented in 0.3.0 and never used: no HTML
+  carried it, every consumer fell back to matching frame width, and nothing complained. A fallback that
+  always fires makes the tag decorative. Untagged is now a finding.
+- **F42 — a contradiction survived in a second file.** `pica-wp.md` still said a full-height frame
+  carries "no home indicator", reversed by 0.2.0 and corrected in `html-prototype.md` for 0.3.0. Five
+  files said present, one said absent. A concept-grep audit cannot find a contradiction, because both
+  sides of it are on-topic.
+
+### Every check now fails closed
+
+A selector matching nothing, an empty frame map, a comparison of zero nodes — each exits non-zero rather
+than printing a reassuring number. All three paths are negative-tested: broken on purpose, confirmed to
+report. A check never seen to fail has not been tested.
+
+### The flow says what it always meant
+
+Restructured into three phases. **A — establish** (contract, tokens, HTML kit). **B — design and verify**
+(build, measure, look, approve) — this phase is the deliverable and an HTML-only project ends here, fully
+verified. **C — Figma, optional**, entirely downstream of an approved package. Foundations-into-Figma moved
+from step 4 into Phase C: it sat ahead of every HTML approval gate, which made the optional phase read as
+mandatory.
+
+### Also
+
+- `parity-check.mjs`: the "registered reflow" counter was never incremented and always printed 0 despite
+  49 active notes; it now reports boxes pruned. Text parity is documented as **advisory by design** rather
+  than pending implementation — owner attribution works, and what remains is copy that differs between
+  viewports, which nothing measurable can adjudicate.
+- `geometry-diff.mjs`: `text-align: start` and `end` are no longer flagged as needing tolerance review.
+  They are the computed values of left and right in an LTR document and carry no extra error; flagging
+  them made two thirds of a report look suspect. Only `center` and `justify` are annotated.
+- **Audit for executability, not for mention.** New rule: if a rule names a check, the executable ships
+  and the rule states its command line and pass criterion.
+
+## 0.3.0
+
+Third project of evidence, and the first that is **not mobile-only**: a desktop-shaped recruitment web
+application taken from a real PRD, designed in HTML at two declared viewports and ported to Figma in full
+— 33 frames, 108 variables, 12 text styles, 37 component variants, two wired prototypes.
+
+**35 findings.** Four contradicted the 0.3.0 design as originally reasoned. The most valuable ones were
+found by a human looking at a rendered frame after every automated check had returned zero.
+
+### Multi-viewport
+
+`frameSize` becomes **`viewports`**, an ordered list. One entry means byte-identical behaviour to 0.2.0;
+two or more activates sections per viewport, a prototype page per viewport, and the parity check.
+
+Each viewport declares its **`idiom`** — native app, mobile web bare, or mobile web in a device frame —
+and its own `chrome`, `pointer`, `breakpoints` and `grid`.
+
+**Chrome is declared, never defaulted.** 0.2.0's list was not "the mobile contract", it was *the
+native-iOS-app contract*. A width of 375 says nothing about whether a home indicator belongs. Entries
+carry `required` and **two** pin axes, because a sidebar pins horizontally and stretches vertically.
+
+The corollary that cost two rounds: **a rule saying "declare X" is violated just as much by an assistant
+quietly declaring X as by nobody declaring it.** The register records who declared it.
+
+### Responsive prototypes
+
+`@container`, never a width `@media` — every viewport renders in one browser window, so a width media
+query fires for all columns at once and the narrow column ports as the wide one. `container-type:
+inline-size` contains the inline axis only, so the tall-screen hug pair still works.
+
+`@container` carries **no specificity**: a component base class declared later wins. Hit three times in
+one stylesheet. Prefer **CSS Grid with named areas** for anything that reflows — a flex row cannot promote
+a nested child to full width, and grid keeps both viewports on identical markup.
+
+### The tall-screen pair, enforced
+
+Specified in two rule files since 0.1.0 and implemented in neither: **8 of 25 screens** overflowed their
+viewport by 212–614px. Now a checklist item, thresholded at 24px, generated by cloning so the pair cannot
+drift, and understood by the parity check as one screen rather than two.
+
+### Verification: two passes, not one
+
+**"Eyeballing finds the wrong things and misses the real ones" is true and incomplete.** This project
+produced evidence for it *and its converse* in one afternoon.
+
+- **A position diff cannot detect absence.** A clipped node still reports coordinates, so a 397-run
+  geometry diff called a frame "over tolerance" while a third of its content was missing.
+- Two cheap checks close the gap: per-frame **text-run counts** against the reference, and **content
+  height vs container height** on every vertical auto-layout node. The count check flagged 8 frames and
+  every flag was real — including an invisible stray text node on every instance of a component.
+- **Calibrate the tolerance.** The HTML capture cannot see `<input>` values, and inline `<strong>` splits
+  one line into three runs. Uncalibrated, the check fires forever on correct frames.
+- **A green check is not evidence the check works.** A clone-integrity check compared counts across pages,
+  where `findAll` under-reports — it could not fail meaningfully *or* pass meaningfully. Assert a check
+  against a known bad case first.
+- Definition of done now includes **every frame rendered and looked at, per viewport**, as a line separate
+  from "audit returns zero".
+
+### Plugin API traps that return success and a wrong result
+
+`findAll` under-reports instance children on a non-current page **and on a node created in the same call**
+— so clone in one call and wire in the next. Node identity is not stable across lookups, so `===` on nodes
+silently matches nothing. `layoutGrow` is primary-axis relative, so re-parenting reinterprets it, and
+removing it yields `FIXED` not `HUG`. `vectorPaths` takes no arcs and **scales geometry to the node box**,
+so icons sized to their CSS box come out twice too heavy. `reactions` needs the plural `actions`.
+
+### The capture script carries the data the checks need
+
+`capture-html-reference.mjs` now records, per frame: `viewport` and `hug` **tagged, never parsed** from
+the caption; `contentH` and `overflowX` so clipped content is measurable; each text run's **owning
+element and text-align**; and each box's **depth and nearest classed parent**.
+
+Those last two are not polish — without the owner, text inside a registered reflow reports as drift
+forever; without the parent chain, excusing a component cannot excuse its descendants. With them the
+parity check went from **305 raw deltas to 0 findings** on the source project. It also skips the
+storybook, which is a documentation board and yields no frames.
+
+One subtlety worth the comment it carries: the parent must be the nearest **classed** ancestor.
+Unclassed elements are not recorded, so an unclassed wrapper — a `<td>` around a score pill — silently
+breaks the chain and defeats the pruning.
+
+### Known limits
+
+- Three projects of evidence, one of them a spike rather than a delivered engagement.
+- The geometry diff's **x-axis** comparison is still uncalibrated for centred and FILL text. The
+  capture now records `text-align` so it *can* be, but the diff does not yet use it.
+- The Figma half remains less exercised than the HTML half, now across two design systems rather than
+  one.
+
+
 ## 0.2.0
 
 Second project of evidence: a client review of the 0.1.0 pilot output, then the repair pass. The client
