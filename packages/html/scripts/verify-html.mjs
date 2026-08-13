@@ -22,7 +22,7 @@
  *                        PASS: 0 viewports with no frames.
  *
  * Exit 0 only when every check passes. A check that could not run is a failure, not
- * a pass — see the "green check" rule in review-gates.md.
+ * a pass — see the "green check" rule in the core package's review-discipline.md.
  *
  * Usage: node verify-html.mjs <html-reference.json> <state.json>
  */

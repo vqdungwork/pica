@@ -2,7 +2,7 @@
 
 Step 9.
 
-Load `${CLAUDE_PLUGIN_ROOT}/skills/design-flow/rules/review-gates.md`.
+Load `${CLAUDE_PLUGIN_ROOT}/rules/review-discipline.md`.
 
 ---
 

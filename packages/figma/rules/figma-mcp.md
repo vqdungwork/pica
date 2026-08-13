@@ -138,4 +138,4 @@ return { changed: [...], skipped: [...], failed: [...] }
 
 `failed` must exist and must be populated from real `catch` blocks with the error text. An empty `catch {}`
 in a mutation script converts a failure into a silent success, and that has cost two reviews. See
-[review-gates.md](review-gates.md), audit integrity.
+[figma-gates.md](figma-gates.md), audit integrity.

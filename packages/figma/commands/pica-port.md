@@ -2,8 +2,8 @@
 
 Step 6. The package named in `$ARGUMENTS`.
 
-Load `${CLAUDE_PLUGIN_ROOT}/skills/design-flow/rules/figma-screens.md` and
-`${CLAUDE_PLUGIN_ROOT}/skills/design-flow/rules/figma-elements.md`, then load the `figma-use` skill.
+Load `${CLAUDE_PLUGIN_ROOT}/rules/figma-screens.md` and
+`${CLAUDE_PLUGIN_ROOT}/rules/figma-elements.md`, then load the `figma-use` skill.
 Pass `skillNames: "figma-use"` on every `use_figma` call.
 
 ---
@@ -34,7 +34,7 @@ to `null` when the command ends, including on failure.
 Before touching Figma:
 
 ```
-node ${CLAUDE_PLUGIN_ROOT}/skills/design-flow/scripts/capture-html-reference.mjs \
+node ${CLAUDE_PLUGIN_ROOT}/../html/scripts/capture-html-reference.mjs \
   --dir html --out .audit --font "<the family Figma currently resolves>"
 ```
 
@@ -42,7 +42,7 @@ node ${CLAUDE_PLUGIN_ROOT}/skills/design-flow/scripts/capture-html-reference.mjs
 approval, but the HTML may have moved since:
 
 ```
-S=${CLAUDE_PLUGIN_ROOT}/skills/design-flow/scripts
+S=${CLAUDE_PLUGIN_ROOT}/../html/scripts
 node $S/verify-html.mjs  .audit/html-reference.json .pica/state.json
 node $S/parity-check.mjs .audit/html-reference.json .pica/state.json
 ```
@@ -101,7 +101,7 @@ wait for `/pica-prototype`.
 ## 6. Audit to zero
 
 ```
-${CLAUDE_PLUGIN_ROOT}/skills/design-flow/scripts/figma-audit.js
+${CLAUDE_PLUGIN_ROOT}/scripts/figma-audit.js
 ```
 
 Run it as one `use_figma` call. Then diff geometry against the captured reference: **match by text

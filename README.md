@@ -4,7 +4,7 @@
 
 **A design workflow for Claude Code.**
 
-[![version](https://img.shields.io/badge/version-0.5.0-1f2328)](https://github.com/vqdungwork/pica/releases)
+[![version](https://img.shields.io/badge/version-0.6.0-1f2328)](https://github.com/vqdungwork/pica/releases)
 [![licence](https://img.shields.io/badge/licence-MIT-1f2328)](LICENSE)
 [![requires](https://img.shields.io/badge/requires-Claude%20Code-1f2328)](https://claude.com/claude-code)
 [![figma](https://img.shields.io/badge/Figma-optional-1f2328)](#requirements)
@@ -42,8 +42,24 @@ against itself.
 /plugin install pica@pica
 ```
 
+That installs the bundle — all four packages, so an existing install keeps working unchanged.
 Restart Claude Code. The workflow announces itself at the start of every session from then on,
 including after a context compaction. You never have to remember to load it.
+
+**Or install only what the project needs.** pica is four independently installable packages;
+`pica-html`, `pica-research` and `pica-figma` each declare `pica-core` as a dependency and pull it
+in automatically:
+
+```bash
+/plugin install pica-core@pica    # required by everything below
+/plugin install pica-research@pica  # the source audit and token provenance
+/plugin install pica-html@pica    # work packages in HTML, and the measured gate
+/plugin install pica-figma@pica   # the port, annotations, and the geometry diff — needs pica-html
+```
+
+A project that will never touch Figma installs `pica-core` and `pica-html` and never sees the
+Figma half. `pica-figma` depends on both `pica-core` and `pica-html`, so installing it pulls both
+in.
 
 ## The flow
 
@@ -405,21 +421,23 @@ through.
 **The Figma tier needs enough MCP calls to finish.** The rate limits are real and they do not degrade
 gracefully — they return a paywall message where you expected data, mid-task. A **View or Collab seat gets
 6 calls per month**, which is not enough to port anything; Dev and Full seats get 200 to 600 per day. Run
-`whoami`, which is exempt from the limits, and size the work to the budget before starting. See
-`rules/figma-mcp.md`.
+`whoami`, which is exempt from the limits, and size the work to the budget before starting. See the figma
+package's `figma-mcp.md`.
 
 ## The rules
 
-Six modules, each written to be read on its own.
+Eight modules, split across the four packages, each written to be read on its own.
 
-| Module | Covers |
-|:--|:--|
-| `research.md` | Research before designing, audit breadth, token extraction with provenance, mock-data provenance, the client's copy rules and data-ownership table |
-| `html-prototype.md` | Frame size, the single tabbed review page, option boards versus the interactive main flow, navigation state, the interactive and full-height pair, real assets, state matrices |
-| `figma-elements.md` | Token layers including `Border`, binding geometry as well as type, alpha living in the token, numeric font weights, font-package forensics, global versus local component tiers |
-| `figma-screens.md` | Frames, states, FILL versus HUG, vertical centring, screen-chrome pinning, the circle rule, alignment measured against HTML, and the Plugin API calls that fail silently |
-| `figma-mcp.md` | Rate limits and the call budget, `page.loadAsync` for whole-file reads in one call, write discipline |
-| `review-gates.md` | The self-review checklist, report versus fix, complexity criteria, panel lenses, writing checks that can fail, appearance baselines, audit integrity, and what "zero" means |
+| Module | Package | Covers |
+|:--|:--|:--|
+| `research.md` | research | Research before designing, audit breadth, token extraction with provenance, mock-data provenance, the client's copy rules and data-ownership table |
+| `html-prototype.md` | html | Frame size, the single tabbed review page, option boards versus the interactive main flow, navigation state, the interactive and full-height pair, real assets, state matrices |
+| `html-gates.md` | html | The measured HTML gate, the flow gate, viewport parity, HTML-only coverage, behaviour review for prototypes |
+| `figma-elements.md` | figma | Token layers including `Border`, binding geometry as well as type, alpha living in the token, numeric font weights, font-package forensics, global versus local component tiers |
+| `figma-screens.md` | figma | Frames, states, FILL versus HUG, vertical centring, screen-chrome pinning, the circle rule, alignment measured against HTML, and the Plugin API calls that fail silently |
+| `figma-mcp.md` | figma | Rate limits and the call budget, `page.loadAsync` for whole-file reads in one call, write discipline |
+| `figma-gates.md` | figma | The Figma audit checklist, appearance baselines, geometry-diff tolerances, the deviations register |
+| `review-discipline.md` | core | The self-review checklist, report versus fix, complexity criteria, panel lenses, writing checks that can fail, audit integrity, and what "zero" means |
 
 ## Where this came from
 

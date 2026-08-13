@@ -3,8 +3,8 @@
 Step 5. The package named in `$ARGUMENTS`. If empty, list the packages from `.pica/state.json` with their
 tiers and ask which one.
 
-Load `${CLAUDE_PLUGIN_ROOT}/skills/design-flow/rules/html-prototype.md` and
-`${CLAUDE_PLUGIN_ROOT}/skills/design-flow/rules/review-gates.md`.
+Load `${CLAUDE_PLUGIN_ROOT}/rules/html-prototype.md` and
+`${CLAUDE_PLUGIN_ROOT}/rules/html-gates.md`.
 
 This command **never writes to Figma.** Porting is `/pica-port`, and it is blocked until the gate below
 passes.
@@ -93,7 +93,7 @@ verification the work will ever get; for a Figma project, finding these defects 
 finding them after the port costs a rebuild.
 
 ```bash
-S=<plugin>/skills/design-flow/scripts
+S=${CLAUDE_PLUGIN_ROOT}/scripts
 node $S/capture-html-reference.mjs --dir html --out .audit
 node $S/verify-html.mjs   .audit/html-reference.json .pica/state.json
 node $S/parity-check.mjs  .audit/html-reference.json .pica/state.json   # 2+ viewports only

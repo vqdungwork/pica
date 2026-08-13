@@ -63,7 +63,7 @@ let nodes = 0;
 for (const pg of figma.root.children) {
   if (PAGES && !PAGES.some(p => pg.name.indexOf(p) === 0)) continue;
   // loadAsync, not setCurrentPageAsync: this is a shallow property read across every page, and one
-  // call is the point. See rules/figma-mcp.md.
+  // call is the point. See ../rules/figma-mcp.md.
   try { if (pg.loadAsync) await pg.loadAsync(); } catch (e) { out.push({ k: pg.name, err: "load" }); continue; }
 
   for (const n of pg.findAll(() => true)) {

@@ -3,7 +3,7 @@
 Runs steps 1 to 4: intake, research and tokens, the HTML UI kit, and if Figma is in scope, the
 foundations port. These happen in one sitting. Steps 5 onward have their own commands.
 
-Load `${CLAUDE_PLUGIN_ROOT}/skills/design-flow/rules/research.md` before anything else.
+Load the research package's `${CLAUDE_PLUGIN_ROOT}/../research/rules/research.md` before anything else.
 
 `$ARGUMENTS` may contain the brief or a path to it. If it is empty, ask for the intake packet.
 
@@ -43,7 +43,7 @@ Write `docs/contract.md`:
 - the declared banned characters or house conventions, if any
 - the **applications** the product presents as its own, since each one gets its own interactive prototype
 - a **data ownership** table: per entity, who owns it and what this surface may create, change or only
-  read. See [research.md](../skills/design-flow/rules/research.md); "read-only" applied as a blanket
+  read. See [research.md](../../research/rules/research.md); "read-only" applied as a blanket
   removes the flows the product exists for
 
 Write `docs/exclusions.md`: everything the brief rules out, **quoted from the brief**. Then ask the
@@ -183,7 +183,7 @@ a late change is expensive.
 
 ## Step 3: UI kit in HTML
 
-Load `${CLAUDE_PLUGIN_ROOT}/skills/design-flow/rules/html-prototype.md`.
+Load the html package's `${CLAUDE_PLUGIN_ROOT}/../html/rules/html-prototype.md`.
 
 1. `html/shared.css`, tokens plus the phone chrome, no build step
 2. `html/design-system.html`, a storybook: every token, every component, all variants and states
@@ -209,8 +209,8 @@ one package's HTML is approved, because the approved package tells you which com
 actually needed. Through 0.3.0 this sat mid-flow, ahead of every HTML approval gate, which made the
 optional phase read as mandatory.
 
-Load `${CLAUDE_PLUGIN_ROOT}/skills/design-flow/rules/figma-elements.md`, then load the `figma-use`
-skill. Pass `skillNames: "figma-use"` on every `use_figma` call.
+Load the figma package's `${CLAUDE_PLUGIN_ROOT}/../figma/rules/figma-elements.md`, then load the
+`figma-use` skill. Pass `skillNames: "figma-use"` on every `use_figma` call.
 
 Set `writeAuthorization` to `{"granted": true, "reason": "foundations"}` in `.pica/state.json` before the
 first write, and back to `null` when the step ends. The write gate reads it.

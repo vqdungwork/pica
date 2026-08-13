@@ -3,8 +3,8 @@
 Third-party feedback has arrived — client, reviewer, stakeholder. `$ARGUMENTS` is the feedback itself, or
 a path to it. Screenshots usually come with it.
 
-Load `${CLAUDE_PLUGIN_ROOT}/skills/design-flow/rules/review-gates.md` and
-`${CLAUDE_PLUGIN_ROOT}/skills/design-flow/rules/figma-mcp.md`. For Figma reads, load the `figma-use`
+Load `${CLAUDE_PLUGIN_ROOT}/rules/review-discipline.md` and the figma package's
+`${CLAUDE_PLUGIN_ROOT}/../figma/rules/figma-mcp.md`. For Figma reads, load the `figma-use`
 skill and pass `skillNames: "figma-use"`.
 
 This is not `/pica-review`. That one measures your own work against the HTML. This one takes someone
@@ -76,7 +76,8 @@ client costs credibility. Three real ones from one session:
 
 Corroborate before reporting: two independent signals, or one measurement you can state as a number. And
 if three detectors in a row come back mostly noise, stop writing detectors and find ground truth — a
-surviving correct example, the design's own convention, or the human. See review-gates, audit integrity.
+surviving correct example, the design's own convention, or the human. See `review-discipline.md`, Audit
+integrity.
 
 ## 5. Look for the convention already in the file
 
@@ -89,7 +90,7 @@ been skipped, and those three still carried the project's real convention: bound
 
 ## 6. Capture a baseline before fixing anything in bulk
 
-`scripts/capture-baseline.js`, before the fix pass, then again after. Feedback fixes are exactly the
+the figma package's `scripts/capture-baseline.js`, before the fix pass, then again after. Feedback fixes are exactly the
 situation this exists for: someone is watching, the file is already reviewed, and a regression introduced
 while fixing a cosmetic note is the worst outcome available.
 
