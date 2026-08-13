@@ -1,0 +1,12 @@
+{
+  "name": "pica-core",
+  "description": "pica core: intake, the contract, the state schema, and every approval gate.",
+  "version": "0.6.0",
+  "author": { "name": "Dung Vuong" },
+  "homepage": "https://github.com/vqdungwork/pica",
+  "repository": "https://github.com/vqdungwork/pica",
+  "license": "MIT",
+  "commands": ["./commands"],
+  "hooks": "./hooks/hooks.json",
+  "keywords": ["design", "workflow", "handoff"]
+}

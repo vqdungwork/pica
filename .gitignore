@@ -20,6 +20,7 @@
 !/.claude-plugin/
 !/commands/
 !/hooks/
+!/packages/
 !/skills/
 !/scripts/
 
