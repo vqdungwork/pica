@@ -9,7 +9,7 @@
   },
   "requires": { "state": [], "artifacts": [], "gates": [] },
   "produces": {
-    "state": ["contract", "exclusions", "viewports", "figmaInScope", "tier", "delivered", "gates"],
+    "state": ["figmaInScope", "viewports", "delivered", "workPackages", "exclusions", "flows", "intakeApproved"],
     "artifacts": ["docs/contract.md", "docs/exclusions.md", ".pica/state.json"]
   },
   "checks": [],

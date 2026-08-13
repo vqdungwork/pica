@@ -7,13 +7,25 @@
  */
 import fs from "fs";
 import path from "path";
+import { fileURLToPath } from "url";
 
 const WP_PLACEHOLDER = "<wp>";
 
 const statePath = process.argv[2] || ".pica/state.json";
-const PKG_DIR = path.join(process.cwd(), "packages");
 
-if (!fs.existsSync(PKG_DIR)) { console.error("no packages/ directory"); process.exit(2); }
+// packages/ is resolved from THIS SCRIPT's own location, not from the working
+// directory. This script ships inside packages/core/scripts/, so packages/ is
+// always two levels up from here, regardless of where the command is invoked from.
+// State and artifacts belong to the PROJECT, not to pica's own repo, and are
+// resolved against process.cwd() below (the default base for a relative path)
+// so that this works when run from inside a project directory.
+const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
+const PKG_DIR = path.resolve(SCRIPT_DIR, "..", "..");
+
+if (!fs.existsSync(PKG_DIR)) {
+  console.error(`no packages/ directory found at ${PKG_DIR}`);
+  process.exit(2);
+}
 
 let state = {};
 let stateError = null;
@@ -25,9 +37,15 @@ if (fs.existsSync(statePath)) {
     state = {};
   }
 }
-const gates = state.gates || {};
 
-const has = (g) => Boolean(gates[g]?.granted);
+// NOTHING writes state.gates. What the commands actually write is
+// state.workPackages.<wp>.<key> for a per-package gate (e.g. "htmlApproved") and a
+// top-level state.<key> boolean for a project-level gate (e.g. "intakeApproved") —
+// see packages/html/commands/pica-wp.md and packages/core/hooks/gate-figma-write.
+// state.gates is still honoured if present, for forward compatibility with any
+// command that adopts that vocabulary directly, but nothing here depends on it.
+const gates = state.gates || {};
+const workPackages = state.workPackages || {};
 
 // A bare key (no "=want") checks PRESENCE only, not truthiness — a manifest requiring a
 // bare boolean key would read as satisfied even when that key is explicitly set to
@@ -39,18 +57,30 @@ const stateHas = (expr) => {
   return String(val) === want;
 };
 
+// A bare gate (no work-package template): satisfied by the legacy state.gates
+// vocabulary if present, otherwise by a top-level boolean of that exact name.
+const gateGranted = (name) => Boolean(gates[name]?.granted) || Boolean(state[name]);
+
+// A per-work-package gate for one specific wp: satisfied by the legacy
+// state.gates vocabulary under its resolved name, otherwise by
+// workPackages.<wp>.<key>, where `key` is the template with "<wp>" and its
+// separator removed (e.g. "htmlApproved:<wp>" -> key "htmlApproved").
+const wpGateGranted = (resolvedName, key, wp) =>
+  Boolean(gates[resolvedName]?.granted) || Boolean(workPackages[wp]?.[key]);
+
 // A required gate name may be a template over work packages, e.g. "htmlApproved:<wp>".
 // Resolve it against the real work packages instead of looking it up literally — the
 // literal string "<wp>" never appears as a real gate key. Returns the list of missing
 // gate names: empty if the requirement is satisfied.
 const resolveGate = (template) => {
-  if (!template.includes(WP_PLACEHOLDER)) return has(template) ? [] : [template];
+  if (!template.includes(WP_PLACEHOLDER)) return gateGranted(template) ? [] : [template];
 
   const idx = template.indexOf(WP_PLACEHOLDER);
   const prefix = template.slice(0, idx);
   const suffix = template.slice(idx + WP_PLACEHOLDER.length);
+  const key = prefix.replace(/[:.]$/, ""); // "htmlApproved:" -> "htmlApproved"
 
-  let wps = Object.keys(state.workPackages || {});
+  let wps = Object.keys(workPackages);
   if (!wps.length) {
     wps = Object.keys(gates)
       .filter((k) => k.startsWith(prefix) && k.endsWith(suffix) && k.length > prefix.length + suffix.length)
@@ -60,7 +90,8 @@ const resolveGate = (template) => {
   if (!wps.length) return [template];
 
   const resolved = wps.map((wp) => `${prefix}${wp}${suffix}`);
-  return resolved.some((g) => has(g)) ? [] : resolved;
+  const satisfied = wps.some((wp) => wpGateGranted(`${prefix}${wp}${suffix}`, key, wp));
+  return satisfied ? [] : resolved;
 };
 
 const rows = [];

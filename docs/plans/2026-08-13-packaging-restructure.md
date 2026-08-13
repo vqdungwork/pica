@@ -682,11 +682,23 @@ console.log(`\n${rows.filter((r) => r.verdict === "READY").length} ready, `
 Run: `node scripts/validate-packages.mjs`
 Expected: `0 finding(s).` and exit 0. Confirm with `echo $?`.
 
-- [ ] **Step 3: Test the resolver against empty state**
+- [ ] **Step 3: Test the resolver from a project directory, not from the pica repo**
 
-Run: `node packages/core/scripts/pica-status.mjs /dev/null 2>/dev/null || node packages/core/scripts/pica-status.mjs .pica/state.json`
+Resolving `packages/` from `process.cwd()` means the resolver only works when the working directory
+happens to be the pica repo itself. Run from a **project** directory instead — where `.pica/state.json`
+and the built artifacts actually live, and where `packages/` does not exist — with an absent or empty
+`.pica/state.json`:
 
-With no state file, expected: `core` READY, and `research`, `html`, `figma` BLOCKED with their missing gates named. This proves `requires` actually blocks rather than decorating.
+```
+cd /path/to/some/project && node /path/to/pica/packages/core/scripts/pica-status.mjs
+```
+
+Expected: it still runs (exit 0), because `packages/` resolves from the script's own location
+(`import.meta.url`), not from the working directory. `research`, `html` and `figma` report BLOCKED with
+their missing gates, state and artifacts named, proving `requires` actually blocks rather than
+decorating — from the location this script is actually meant to be run from. If `packages/` is instead
+resolved from `process.cwd()`, this step exits 2, because a project directory has no `packages/` of its
+own.
 
 - [ ] **Step 4: Commit**
 
