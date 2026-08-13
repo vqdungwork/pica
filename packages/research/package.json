@@ -1,0 +1,15 @@
+{
+  "name": "research",
+  "status": "stable",
+  "description": "Audit the sources named in the contract and derive tokens with provenance recorded per token.",
+  "owns": { "commands": [], "rules": ["research.md"], "scripts": [] },
+  "requires": { "state": [], "artifacts": ["docs/contract.md"], "gates": ["intakeApproved"] },
+  "produces": { "state": ["packages.research.tokensDerived"], "artifacts": ["tokens/tokens.json", "tokens/tokens.css"] },
+  "checks": [],
+  "definitionOfDone": [
+    { "type": "artifact", "path": "tokens/tokens.json" },
+    { "type": "artifact", "path": "tokens/tokens.css" },
+    { "type": "human", "says": "every token records its source and whether it was taken or derived" },
+    { "type": "gate",  "grants": "tokensApproved" }
+  ]
+}
