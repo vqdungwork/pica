@@ -1,0 +1,14 @@
+{
+  "name": "impl-android",
+  "status": "coming-soon",
+  "description": "Implement the verified design as a native Android application. Contract only — content to be defined by the author.",
+  "owns": { "commands": [], "rules": [], "scripts": [] },
+  "requires": {
+    "state": [],
+    "artifacts": [],
+    "gates": ["figmaVerified:<wp>"]
+  },
+  "produces": { "state": ["packages.impl-android.built"], "artifacts": [] },
+  "checks": [],
+  "definitionOfDone": []
+}

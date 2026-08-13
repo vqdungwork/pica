@@ -1,0 +1,14 @@
+{
+  "name": "impl-ios",
+  "status": "coming-soon",
+  "description": "Implement the verified design as a native iOS application. Contract only — content to be defined by the author.",
+  "owns": { "commands": [], "rules": [], "scripts": [] },
+  "requires": {
+    "state": [],
+    "artifacts": [],
+    "gates": ["figmaVerified:<wp>"]
+  },
+  "produces": { "state": ["packages.impl-ios.built"], "artifacts": [] },
+  "checks": [],
+  "definitionOfDone": []
+}
