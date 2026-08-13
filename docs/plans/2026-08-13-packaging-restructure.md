@@ -885,9 +885,9 @@ and a `human` item cannot be satisfied by any script — the schema rejects one 
 a script, because ten green harnesses and four screenshot-obvious defects on the fourth
 source project is what that type exists to prevent.
 
-`review-gates.md` is retired. Its 685 lines are split three ways: 23 medium-independent
-sections into core's `review-discipline.md`, three HTML gates into `html-gates.md`, six
-Figma gates into `figma-gates.md`. Sections moved verbatim; no rule changed meaning.
+`review-gates.md` is retired. Its 685 lines are split three ways: 22 medium-independent
+sections into core's `review-discipline.md`, five HTML gates into `html-gates.md`, nine
+Figma gates into `figma-gates.md`, with `## Definition of done` split across both files. Sections moved verbatim; no rule changed meaning.
 
 New: `scripts/validate-packages.mjs` asserts every declared file exists and every shipped
 file is owned exactly once, and `packages/core/scripts/pica-status.mjs` reports what is
@@ -934,4 +934,4 @@ git commit -m "Document the package split; 0.6.0"
 
 **Type consistency.** `package.json` field names are identical across all six manifests: `name`, `status`, `description`, `owns.{commands,rules,scripts}`, `requires.{state,artifacts,gates}`, `produces.{state,artifacts}`, `checks[].{run,passes}`, `definitionOfDone[].{type,run,passes,says,grants,path}`. `validate-packages.mjs` (Task 1) checks exactly these names, and `pica-status.mjs` (Task 7) reads exactly `requires.{gates,state,artifacts}` and `status`. Gate names are consistent: core grants `intakeApproved`, research grants `tokensApproved`, html grants `htmlApproved:<wp>`, figma requires `htmlApproved:<wp>` and grants `figmaVerified:<wp>`, and `impl-*` requires `figmaVerified:<wp>`.
 
-**One risk the plan cannot remove.** Task 3 and Task 5 move prose by hand. The line-count and heading-diff checks in Task 3 Steps 2–3 catch loss and renaming, but they cannot catch a section moved into the *wrong* file. That judgement is recorded in the task text — 23 core, 3 html, 6 figma, with the two promoted `###` subsections named explicitly — and should be re-read against the file before Task 5 Step 3 deletes the original.
+**One risk the plan cannot remove.** Task 3 and Task 5 move prose by hand. The line-count and heading-diff checks in Task 3 Steps 2–3 catch loss and renaming, but they cannot catch a section moved into the *wrong* file. That judgement is recorded in the task text — 22 core, 5 html, 9 figma, with the two promoted `###` subsections named explicitly — and should be re-read against the file before Task 5 Step 3 deletes the original.
