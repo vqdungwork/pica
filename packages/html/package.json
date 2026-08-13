@@ -1,0 +1,32 @@
+{
+  "name": "html",
+  "status": "stable",
+  "description": "The UI kit and work packages in HTML at every declared viewport, and the measured gate before approval.",
+  "owns": {
+    "commands": ["pica-wp.md"],
+    "rules": ["html-prototype.md", "html-gates.md"],
+    "scripts": ["capture-html-reference.mjs", "verify-html.mjs", "parity-check.mjs", "flow-check.mjs"]
+  },
+  "requires": {
+    "state": ["viewports"],
+    "artifacts": ["tokens/tokens.css"],
+    "gates": ["intakeApproved"]
+  },
+  "produces": {
+    "state": ["packages.html.built"],
+    "artifacts": ["html/", ".audit/html-reference.json"]
+  },
+  "checks": [
+    { "run": "verify-html.mjs",  "passes": "0 findings across viewport-tagged, overflow, tall-screen-pair, viewport-coverage" },
+    { "run": "parity-check.mjs", "passes": "0 findings, nominal and structural" },
+    { "run": "flow-check.mjs",   "passes": "0 findings, or --allow-none for a boards-only package" }
+  ],
+  "definitionOfDone": [
+    { "type": "check", "run": "verify-html.mjs",  "passes": "0 findings" },
+    { "type": "check", "run": "parity-check.mjs", "passes": "0 findings" },
+    { "type": "check", "run": "flow-check.mjs",   "passes": "0 findings" },
+    { "type": "human", "says": "every frame rendered and looked at, per viewport, after the last change" },
+    { "type": "human", "says": "the main flow clicked end to end" },
+    { "type": "gate",  "grants": "htmlApproved:<wp>" }
+  ]
+}
