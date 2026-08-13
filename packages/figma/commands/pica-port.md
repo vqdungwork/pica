@@ -2,24 +2,26 @@
 
 Step 6. The package named in `$ARGUMENTS`.
 
-Load `${CLAUDE_PLUGIN_ROOT}/rules/figma-screens.md` and
-`${CLAUDE_PLUGIN_ROOT}/rules/figma-elements.md`, then load the `figma-use` skill.
+Load `${CLAUDE_PLUGIN_ROOT}/rules/figma-screens.md`,
+`${CLAUDE_PLUGIN_ROOT}/rules/figma-elements.md`, and the core package's `review-discipline.md`, then
+load the `figma-use` skill.
 Pass `skillNames: "figma-use"` on every `use_figma` call.
 
 ---
 
 ## Preconditions
 
-Check `.pica/state.json` and **stop** if any fail:
+Check `.pica/state.json` and the filesystem, and **stop** if any fail:
 
 - `figmaInScope` is true
 - `workPackages.<wp>.htmlApproved` is true
 - `delivered` is false
 - `activeReview` is not in report mode
+- `.audit/html-reference.json` exists
 
-The write gate enforces all of these anyway, so a failure here is a denied tool call rather than a
-wrong file. But check first and say which precondition failed, rather than letting the human read a
-hook denial.
+The write gate enforces the state-based checks anyway, so a failure there is a denied tool call rather
+than a wrong file. But check first and say which precondition failed, rather than letting the human read
+a hook denial.
 
 **If the HTML is not approved, do not port.** On the source project a package was ported before approval
 and the entire page had to be deleted. That is the failure this gate exists for.
@@ -29,32 +31,21 @@ to `null` when the command ends, including on failure.
 
 ---
 
-## 1. Capture the HTML reference first
+## 1. The HTML reference must already exist
 
-Before touching Figma:
+This command **consumes** the measured HTML reference; it never produces one. The html package captures
+`.audit/html-reference.json` during `/pica-wp`, and verifies the HTML against it before the human is
+asked to approve that package.
 
-```
-node ${CLAUDE_PLUGIN_ROOT}/../html/scripts/capture-html-reference.mjs \
-  --dir html --out .audit --font "<the family Figma currently resolves>"
-```
+**If `.audit/html-reference.json` is absent, the port cannot proceed. Stop and say so.** Tell the human
+to run `/pica-wp <wp>` first — building and measuring this package's HTML is a precondition of porting
+it, not a step this command can perform on its own. Do not synthesize the artifact and do not fall back
+to eyeballing; that is the failure mode this whole flow exists to prevent.
 
-**Then confirm the HTML side is still clean before porting anything.** `/pica-wp` measured it at
-approval, but the HTML may have moved since:
-
-```
-S=${CLAUDE_PLUGIN_ROOT}/../html/scripts
-node $S/verify-html.mjs  .audit/html-reference.json .pica/state.json
-node $S/parity-check.mjs .audit/html-reference.json .pica/state.json
-```
-
-Both must return 0 findings. Porting from HTML with known defects reproduces them in Figma and costs a
-second pass to undo.
-
-Force the family Figma is resolving, so the diff isolates layout from typeface metrics. Run it natively
-too, once both sides share a family.
-
-If playwright is unavailable, **say the measured diff cannot run** and stop. Do not fall back to
-eyeballing and call it a port; that is the failure mode this whole flow exists to prevent.
+If the artifact is present, treat it as the measured baseline for this package's HTML for the rest of
+this command. If you have reason to think the HTML changed since its approval — the human mentions an
+edit, or a diff below looks wrong in a way that points at drift rather than at the port — say so and ask
+whether to re-run `/pica-wp <wp>` before continuing, rather than porting against a stale reference.
 
 ## 2. Local components
 

@@ -4,7 +4,7 @@ Third-party feedback has arrived — client, reviewer, stakeholder. `$ARGUMENTS`
 a path to it. Screenshots usually come with it.
 
 Load `${CLAUDE_PLUGIN_ROOT}/rules/review-discipline.md` and the figma package's
-`${CLAUDE_PLUGIN_ROOT}/../figma/rules/figma-mcp.md`. For Figma reads, load the `figma-use`
+`figma-mcp.md`. For Figma reads, load the `figma-use`
 skill and pass `skillNames: "figma-use"`.
 
 This is not `/pica-review`. That one measures your own work against the HTML. This one takes someone

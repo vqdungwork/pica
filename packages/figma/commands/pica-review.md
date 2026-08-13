@@ -2,8 +2,8 @@
 
 Step 7. `$ARGUMENTS` may name a work package and may contain `--fix`. With no package, review everything.
 
-Load `${CLAUDE_PLUGIN_ROOT}/rules/figma-gates.md`. For Figma-side checks, load the
-`figma-use` skill and pass `skillNames: "figma-use"`.
+Load `${CLAUDE_PLUGIN_ROOT}/rules/figma-gates.md` and the core package's `review-discipline.md`. For
+Figma-side checks, load the `figma-use` skill and pass `skillNames: "figma-use"`.
 
 ---
 
