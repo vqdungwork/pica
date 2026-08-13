@@ -18,8 +18,8 @@ This is not bureaucracy. Three reasons, each earned:
 3. **The fix is often not the one you would pick.** A contrast failure can be fixed by darkening the
    scrim or by changing the text colour. That is a design decision, not a repair.
 
-While a report-mode review is active, the write gate denies every Figma mutation. That is enforced by
-hook, not by intention.
+Report mode forbids writing to the artefact under review, whatever the medium; where Figma is in scope,
+that is enforced by hook, not by intention.
 
 ## The self-review, which is different
 

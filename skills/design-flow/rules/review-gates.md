@@ -74,8 +74,8 @@ The plugin API is authoritative for structure and bindings. Renders are authorit
 sees. Your recollection of what you built two hours ago is authoritative for nothing. Re-read before
 asserting.
 
-When two sources disagree, say so and find out which is wrong. Two audit bugs above were found exactly
-that way.
+When two sources disagree, say so and find out which is wrong. Two audit bugs named in core's
+`review-discipline.md` (Audit integrity, rules 2 and 3) were found exactly that way.
 
 ## Always read the font family and style distribution
 
@@ -138,7 +138,7 @@ Everything must return zero. `scripts/figma-audit.js` runs it as one call.
 | Declared chrome | every entry in `viewports[].chrome` marked `required`, present and pinned on the declared axes; optional entries match their constraints where present |
 | Single-line controls | inputs and selects carry `maxLines: 1` with ellipsis truncation, set on the component |
 
-## When the checks are yours
+## HTML-only coverage
 
 An HTML-only project gets the four shipped HTML-side scripts and nothing else, so most of its
 verification is harnesses written for that project. The source project ended with ten of them, green three

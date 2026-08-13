@@ -342,7 +342,7 @@ for s in capture-html-reference.mjs verify-html.mjs parity-check.mjs flow-check.
 done
 ```
 
-- [ ] **Step 2: Create `packages/html/rules/html-gates.md`** with this header, then move 3 sections verbatim from `review-gates.md`
+- [ ] **Step 2: Create `packages/html/rules/html-gates.md`** with this header, then move 5 sections verbatim from `review-gates.md`
 
 ```markdown
 # HTML gates
@@ -351,7 +351,16 @@ The gates the html package owns. Medium-independent review discipline is in core
 `review-discipline.md`, which these assume.
 ```
 
-Move verbatim: `## The measured HTML gate`, `## The flow gate`, `## The viewport parity check`.
+Move verbatim: `## The measured HTML gate`, `## The flow gate`, `## The viewport parity check`,
+`## HTML-only coverage`, `## Behaviour review, for prototypes`.
+
+**Exception — `## Definition of done` is split, not moved whole.** `review-gates.md`'s single
+`## Definition of done` section contains an HTML-side checklist and a Figma-side checklist under one
+heading (Task 3 moved the whole block rather than split it — that was deliberate, splitting it was
+left for here and for Task 5). This task takes only the **HTML-side** checklist items into its own
+`## Definition of done` heading in `html-gates.md`. Do not take the Figma-side items — those belong to
+Task 5's `figma-gates.md`, under its own `## Definition of done` heading. Do not delete or edit the
+Figma-side items here; Task 5 is responsible for cutting them out of `review-gates.md` when it runs.
 
 - [ ] **Step 3: Write `packages/html/package.json`**
 
@@ -443,7 +452,7 @@ for r in figma-screens.md figma-elements.md figma-mcp.md; do git mv skills/desig
 for s in geometry-diff.mjs figma-audit.js capture-baseline.js; do git mv skills/design-flow/scripts/$s packages/figma/scripts/$s; done
 ```
 
-- [ ] **Step 2: Create `packages/figma/rules/figma-gates.md`** with this header, then move 6 sections verbatim
+- [ ] **Step 2: Create `packages/figma/rules/figma-gates.md`** with this header, then move 9 sections verbatim
 
 ```markdown
 # Figma gates
@@ -452,7 +461,21 @@ The gates the figma package owns. Medium-independent review discipline is in cor
 `review-discipline.md`, which these assume.
 ```
 
-Move verbatim: `## Match by text content, compare position only`, `## Capture element boxes too`, `## Force a common font while diffing layout`, `## A binding that changes appearance is a defect`, `## A position diff cannot detect absence`, `## Deviating from the HTML`.
+Move verbatim: `## Match by text content, compare position only`, `## Capture element boxes too`,
+`## Force a common font while diffing layout`, `## A binding that changes appearance is a defect`,
+`## A position diff cannot detect absence`, `## Deviating from the HTML`, `## Trust the data over the
+render, and the render over your memory`, `## Always read the font family and style distribution`,
+`## The audit checklist`.
+
+**Exception — `## Definition of done` is split, not moved whole.** As noted in Task 4: this section
+holds both an HTML-side checklist and a Figma-side checklist under one heading. This task takes only
+the **Figma-side** checklist items into their own `## Definition of done` heading in
+`figma-gates.md`. The HTML-side items were already taken by Task 4 (run first). Once both the
+HTML-side items (removed by Task 4) and the Figma-side items (removed by this step) are gone from
+`review-gates.md`, nothing of that section remains there — do not leave a `## Definition of done`
+heading behind in `review-gates.md` with no content, and do not leave any content behind with no
+heading either. This task's removal of the Figma-side half is what finally empties the section out of
+`review-gates.md` entirely.
 
 - [ ] **Step 3: Verify `review-gates.md` is now empty of sections and delete it**
 
@@ -461,7 +484,11 @@ grep -c '^## ' skills/design-flow/rules/review-gates.md   # expect 0
 git rm skills/design-flow/rules/review-gates.md
 ```
 
-Expected: 0 sections remain. If any remain, they were not classified — stop and classify them before deleting.
+Expected: 0 sections remain. `review-gates.md` held 15 sections after Task 3: Task 4 takes 5 whole
+plus the HTML-side half of `## Definition of done`; this task (5) takes 9 whole plus the Figma-side
+half of `## Definition of done`. 5 + 9 + 1 split = all 15 accounted for, and the file is deleted at
+the end of this step. If any section remains, it was not classified — stop and classify it before
+deleting.
 
 - [ ] **Step 4: Write `packages/figma/package.json`**
 
