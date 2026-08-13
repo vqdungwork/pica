@@ -71,7 +71,7 @@ import path from "path";
 
 const ROOT = process.cwd();
 const PKG_DIR = path.join(ROOT, "packages");
-const REQUIRED = ["name", "status", "owns", "requires", "produces", "checks", "definitionOfDone"];
+const REQUIRED = ["name", "status", "description", "owns", "requires", "produces", "checks", "definitionOfDone"];
 const VALID_STATUS = ["stable", "coming-soon"];
 const findings = [];
 
