@@ -36,10 +36,11 @@
 /assets/*
 !/assets/*.svg
 
-# ---- docs: the design specs only, never the working brainstorm output ----
+# ---- docs: design specs and implementation plans, never brainstorm scratch ----
 !/docs/
 /docs/*
 !/docs/specs/
+!/docs/plans/
 
 # ---- belt and braces ----
 # These are ignored at ANY depth, including inside an allowlisted directory, so a

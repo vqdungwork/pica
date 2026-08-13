@@ -267,6 +267,9 @@ things.
   stays large, packages stay coupled and the whole exercise is cosmetic.
 - **Six plugins is more surface to keep consistent** than one. Version skew between
   packages is a new failure mode that does not exist today.
-- **`status: "coming-soon"` can rot.** A contract declared and never built is a promise
-  in the graph. If a package sits unbuilt across two releases, delete it rather than let
-  the roadmap read as capability.
+- **A declared package must not read as a built one.** The mitigation is presentation,
+  never removal: `coming-soon` packages stay in the graph, in `/pica status` and in the
+  banner, drawn dashed and labelled `PLANNED`. They are work in progress, and deleting a
+  roadmap entry because it has not shipped yet would lose the agreed contract — which is
+  the whole reason for declaring it early. **Nothing is removed from the roadmap
+  automatically.** If a package should go, that is the author's explicit call.
