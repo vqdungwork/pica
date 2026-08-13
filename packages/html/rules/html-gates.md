@@ -82,7 +82,8 @@ Three things it needs to avoid firing forever on correct work:
 
 Correctly built, this returns **zero** on a correct two-viewport project. On the source project it went
 from 305 raw deltas to 0 findings once subtree pruning and owner attribution were in place — and the
-remaining text differences were the calibration artefacts below, not defects.
+remaining text differences were the calibration artefacts described in the figma package's
+`figma-gates.md` ("Calibrate the tolerance, or the check fires forever"), not defects.
 
 ## A structural check is only as good as its model of legitimate difference
 
@@ -95,7 +96,8 @@ fix was to teach it a distinction the design already made — **never to loosen 
 | Count comparison | A flat tolerance; it needed `+1 per input`, `−2 per emphasis run` |
 | Nominal parity | Counted each tall-screen hug twin as its own screen, producing 8 phantom findings |
 
-"Nominal parity" and register scoping are defined in full by the viewport parity check in `html-gates.md`; this table only names the lessons learned from getting them wrong.
+"Nominal parity" and register scoping are defined in full by the viewport parity check above, in this
+same file; this table only names the lessons learned from getting them wrong.
 
 ## HTML-only coverage
 
