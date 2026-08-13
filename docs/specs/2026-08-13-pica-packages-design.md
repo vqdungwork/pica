@@ -91,7 +91,8 @@ already agreed.
 
 ## The package contract
 
-Every package ships a `package.json` alongside its `plugin.json`:
+Every package ships a `package.json` at its root, alongside the plugin manifest, which lives at
+`.claude-plugin/plugin.json` — the location Claude Code actually reads:
 
 ```json
 {
