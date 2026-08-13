@@ -68,6 +68,37 @@ completely wrong, and the audit that only counts bindings will call it done.
 problem. Version history is the only other record of pre-change values and the Plugin API cannot read it,
 so a missed baseline means the original values are gone.
 
+## Trust the data over the render, and the render over your memory
+
+The plugin API is authoritative for structure and bindings. Renders are authoritative for what a human
+sees. Your recollection of what you built two hours ago is authoritative for nothing. Re-read before
+asserting.
+
+When two sources disagree, say so and find out which is wrong. Two audit bugs above were found exactly
+that way.
+
+## Always read the font family and style distribution
+
+Do not check "is anything not the expected family". Print the **full distribution** and read it. Two
+failure modes only show up there:
+
+1. **Whole frames stranded in the default font.** 41 nodes across two client-facing annotation frames
+   sat in the wrong font through twenty rounds of auditing, because they had **no `fontFamily` binding
+   at all**, so every family change simply passed them by. A spot check for "non-target family" that
+   runs while the target *is* the current value finds nothing wrong.
+2. **Impossible family and style pairs.** One family spells it `Semi Bold`, another spells it
+   `Semibold`. Bind the family without fixing the style and you get a face that does not exist, which
+   renders as a missing font. `listAvailableFontsAsync` cannot catch it, because locally installed
+   families are invisible to the runtime.
+
+Detect the second structurally: normalise each style name (lowercase, strip spaces and dashes) and flag
+any normalised weight with more than one spelling in the file. The minority spelling is the broken one.
+
+**The general lesson: a check that asks "does anything differ from the current value" is blind to
+anything unbound. Ask what the distribution *is*, then judge it.**
+
+## The audit checklist
+
 Everything must return zero. `scripts/figma-audit.js` runs it as one call.
 
 | Check | Detection |
@@ -106,6 +137,8 @@ Everything must return zero. `scripts/figma-audit.js` runs it as one call.
 | Missing hug twin | any screen whose content exceeds its viewport height by more than 24px must have a `· hug` twin |
 | Declared chrome | every entry in `viewports[].chrome` marked `required`, present and pinned on the declared axes; optional entries match their constraints where present |
 | Single-line controls | inputs and selects carry `maxLines: 1` with ellipsis truncation, set on the component |
+
+## When the checks are yours
 
 An HTML-only project gets the four shipped HTML-side scripts and nothing else, so most of its
 verification is harnesses written for that project. The source project ended with ten of them, green three
@@ -209,6 +242,8 @@ Two checks close that gap, and both are cheap:
    `lastChild.y + lastChild.height + paddingBottom` against the node's own height. Anything over is
    clipped content. Exclude deliberate scroll surfaces only.
 
+## Definition of done
+
 **HTML side, and the whole list for a project with `figmaInScope: false`:**
 
 - [ ] `verify-html` returns zero on all four checks
@@ -274,6 +309,8 @@ The two cases:
    HTML never received, Figma is authoritative. Mark it in both files so nobody re-aligns it.
 
 Never silently split the difference.
+
+## Behaviour review, for prototypes
 
 Links are not behaviour. Check:
 

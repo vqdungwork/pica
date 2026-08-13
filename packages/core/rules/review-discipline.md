@@ -34,6 +34,8 @@ flow.
 
 A self-review that finds nothing is a valid result. Say what you ran.
 
+## Complexity routing
+
 A work package is **complex** if any one of these holds:
 
 - no precedent for the feature exists in the product being redesigned
@@ -102,35 +104,6 @@ one of them** on a cover, an audit board or a handoff table.
 annotation or kit-coverage board carry component *names* as labels and read as detached instances; a white
 glyph on a coloured logo circle reads as a contrast clash because the coloured layer is a sibling, not an
 ancestor. Check for an intermediate layer before reporting.
-
-## Trust the data over the render, and the render over your memory
-
-The plugin API is authoritative for structure and bindings. Renders are authoritative for what a human
-sees. Your recollection of what you built two hours ago is authoritative for nothing. Re-read before
-asserting.
-
-When two sources disagree, say so and find out which is wrong. Two audit bugs above were found exactly
-that way.
-
-## Always read the font family and style distribution
-
-Do not check "is anything not the expected family". Print the **full distribution** and read it. Two
-failure modes only show up there:
-
-1. **Whole frames stranded in the default font.** 41 nodes across two client-facing annotation frames
-   sat in the wrong font through twenty rounds of auditing, because they had **no `fontFamily` binding
-   at all**, so every family change simply passed them by. A spot check for "non-target family" that
-   runs while the target *is* the current value finds nothing wrong.
-2. **Impossible family and style pairs.** One family spells it `Semi Bold`, another spells it
-   `Semibold`. Bind the family without fixing the style and you get a face that does not exist, which
-   renders as a missing font. `listAvailableFontsAsync` cannot catch it, because locally installed
-   families are invisible to the runtime.
-
-Detect the second structurally: normalise each style name (lowercase, strip spaces and dashes) and flag
-any normalised weight with more than one spelling in the file. The minority spelling is the broken one.
-
-**The general lesson: a check that asks "does anything differ from the current value" is blind to
-anything unbound. Ask what the distribution *is*, then judge it.**
 
 ## The blind spot has a shape: space that should not be there
 
@@ -356,6 +329,8 @@ fix was to teach it a distinction the design already made — **never to loosen 
 | Reflow register | A flat global list silenced a component everywhere; it needed a per-screen scope |
 | Count comparison | A flat tolerance; it needed `+1 per input`, `−2 per emphasis run` |
 | Nominal parity | Counted each tall-screen hug twin as its own screen, producing 8 phantom findings |
+
+"Nominal parity" and register scoping are defined in full by the viewport parity check in `html-gates.md`; this table only names the lessons learned from getting them wrong.
 
 ## A green check is not evidence the check works
 
