@@ -14,16 +14,75 @@ const WP_PLACEHOLDER = "<wp>";
 const statePath = process.argv[2] || ".pica/state.json";
 
 // packages/ is resolved from THIS SCRIPT's own location, not from the working
-// directory. This script ships inside packages/core/scripts/, so packages/ is
-// always two levels up from here, regardless of where the command is invoked from.
+// directory, by WALKING UP AND VALIDATING rather than by counting path segments.
 // State and artifacts belong to the PROJECT, not to pica's own repo, and are
 // resolved against process.cwd() below (the default base for a relative path)
 // so that this works when run from inside a project directory.
-const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
-const PKG_DIR = path.resolve(SCRIPT_DIR, "..", "..");
+//
+// Why validation, not arithmetic: this script ships inside packages/core/scripts/
+// in the REPO layout, where "two levels up" happens to land on packages/. But an
+// INSTALLED pica-core lives at cache/<marketplace>/pica-core/<version>/scripts/,
+// where "two levels up" lands on cache/<marketplace>/pica-core/ -- whose only
+// child is the version directory (e.g. "0.6.0"), which itself holds core's OWN
+// package.json. Fixed arithmetic can't tell that apart from a real packages/
+// directory: it printed "READY 0.6.0", a phantom package named after a version
+// string, with exit 0 -- worse than erroring, because it looked like an answer.
+// The earlier fix (0af543b) was verified ONLY against the repo layout, which is
+// the one layout where a "../.." offset can never be wrong, so this bug shipped
+// anyway and was never seen failing.
+//
+// So: walk upward from this script's own directory. At each level, consider the
+// level itself and any child named "packages" as a candidate. A candidate
+// QUALIFIES only if it contains at least two subdirectories that each hold a
+// package.json whose "name" field equals that subdirectory's own name --
+// e.g. packages/core/package.json's name is "core", matching directory "core".
+// That rejects the version-directory false positive: core's manifest name is
+// "core" but the directory holding it is "0.6.0", a mismatch that doesn't count,
+// and pica-core/ itself has only one child ("0.6.0"), not two qualifying ones.
+// A resolver that cannot find a qualifying candidate says so and exits 2; it
+// never prints a package list derived from a directory that did not qualify.
+function qualifies(dir) {
+  let entries;
+  try { entries = fs.readdirSync(dir, { withFileTypes: true }); } catch { return false; }
+  let matches = 0;
+  for (const e of entries) {
+    if (!e.isDirectory()) continue;
+    const mp = path.join(dir, e.name, "package.json");
+    if (!fs.existsSync(mp)) continue;
+    let m;
+    try { m = JSON.parse(fs.readFileSync(mp, "utf8")); } catch { continue; }
+    if (m && m.name === e.name) matches++;
+    if (matches >= 2) return true;
+  }
+  return false;
+}
 
-if (!fs.existsSync(PKG_DIR)) {
-  console.error(`no packages/ directory found at ${PKG_DIR}`);
+function findPackagesDir(startDir) {
+  const tried = [];
+  let dir = path.resolve(startDir);
+  for (;;) {
+    for (const c of [dir, path.join(dir, "packages")]) {
+      if (tried.includes(c)) continue;
+      tried.push(c);
+      if (fs.existsSync(c) && qualifies(c)) return { dir: c, tried };
+    }
+    const parent = path.dirname(dir);
+    if (parent === dir) break; // reached the filesystem root
+    dir = parent;
+  }
+  return { dir: null, tried };
+}
+
+const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
+const { dir: PKG_DIR, tried } = findPackagesDir(SCRIPT_DIR);
+
+if (!PKG_DIR) {
+  console.error("no packages/ directory found: no candidate qualified.");
+  console.error("A candidate must contain at least two subdirectories each holding a package.json");
+  console.error('whose "name" matches that subdirectory\'s own name. Walking up from:');
+  console.error(`  ${SCRIPT_DIR}`);
+  console.error("Checked:");
+  for (const t of tried) console.error(`  ${t}`);
   process.exit(2);
 }
 
