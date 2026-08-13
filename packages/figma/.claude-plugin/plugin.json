@@ -1,0 +1,12 @@
+{
+  "name": "pica-figma",
+  "description": "pica figma: port an approved package, annotate it, verify it against the HTML by measurement.",
+  "version": "0.6.0",
+  "author": { "name": "Dung Vuong" },
+  "homepage": "https://github.com/vqdungwork/pica",
+  "repository": "https://github.com/vqdungwork/pica",
+  "license": "MIT",
+  "commands": ["./commands"],
+  "dependencies": ["pica-core", "pica-html"],
+  "keywords": ["design", "figma", "handoff"]
+}

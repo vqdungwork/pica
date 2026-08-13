@@ -1,5 +1,36 @@
 # Changelog
 
+## 0.6.0
+
+pica becomes four packages — `core`, `research`, `html`, `figma` — plus a bundle that
+installs all of them, so an existing install keeps working unchanged.
+
+Each package declares what it requires, what it produces, which checks it owns and what
+done means for it. `requires` is what makes omitting a package safe: a package refuses to
+start when its inputs are missing and names which. `definitionOfDone` items are typed,
+and a `human` item cannot be satisfied by any script — the schema rejects one that names
+a script, because ten green harnesses and four screenshot-obvious defects on the fourth
+source project is what that type exists to prevent.
+
+`review-gates.md` is retired. Its 685 lines are split three ways: 22 medium-independent
+sections into core's `review-discipline.md`, five HTML gates into `html-gates.md`, nine
+Figma gates into `figma-gates.md`, with `## Definition of done` split across both files. Sections moved verbatim; no rule changed meaning.
+
+New: `scripts/validate-packages.mjs` asserts every declared file exists and every shipped
+file is owned exactly once, and `packages/core/scripts/pica-status.mjs` reports what is
+ready and what is blocked and why.
+
+The path past Figma is declared in `packages/_planned/` as contracts with no content.
+Those packages are planned, not built, and are shown as `PLANNED` everywhere they appear.
+
+### Known limits
+
+- No package has been exercised as a separate install on a real project yet. The split is
+  verified structurally — the validator returns zero, every script still fails closed —
+  not by having run a project through four separately installed plugins.
+- `annotation-check.mjs`, required by the spec's D2, is not built. The Figma package
+  declares no check for annotations, so a missing annotation is currently invisible.
+
 ## 0.5.0
 
 Fourth project of evidence, and the first **HTML-only** one: the mobile design of a live enterprise

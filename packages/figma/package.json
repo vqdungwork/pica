@@ -1,0 +1,29 @@
+{
+  "name": "figma",
+  "status": "stable",
+  "description": "Port an approved package to Figma, annotate it, and verify it against the HTML by measurement.",
+  "owns": {
+    "commands": ["pica-port.md", "pica-prototype.md", "pica-review.md"],
+    "rules": ["figma-screens.md", "figma-elements.md", "figma-mcp.md", "figma-gates.md"],
+    "scripts": ["geometry-diff.mjs", "figma-audit.js", "capture-baseline.js"]
+  },
+  "requires": {
+    "state": ["viewports", "figmaInScope=true"],
+    "artifacts": [".audit/html-reference.json", ".audit/html-reference-forced.json"],
+    "gates": ["htmlApproved:<wp>"]
+  },
+  "produces": {
+    "state": ["packages.figma.ported", "packages.figma.annotated"],
+    "artifacts": [".audit/figma-dump.json"]
+  },
+  "checks": [
+    { "run": "geometry-diff.mjs", "passes": "0 findings above tolerance AND more than 0 text runs compared" },
+    { "run": "figma-audit.js",    "passes": "every count returns 0" }
+  ],
+  "definitionOfDone": [
+    { "type": "check", "run": "geometry-diff.mjs", "passes": "0 findings" },
+    { "type": "check", "run": "figma-audit.js",    "passes": "0 findings" },
+    { "type": "human", "says": "every frame rendered and looked at, after the last change" },
+    { "type": "gate",  "grants": "figmaVerified:<wp>" }
+  ]
+}

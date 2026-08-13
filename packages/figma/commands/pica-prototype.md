@@ -2,9 +2,9 @@
 
 Step 8. Run after the screens are ported and reviewed.
 
-Load `${CLAUDE_PLUGIN_ROOT}/skills/design-flow/rules/figma-screens.md` and
-`${CLAUDE_PLUGIN_ROOT}/skills/design-flow/rules/review-gates.md`, then load `figma-use`. Pass
-`skillNames: "figma-use"`.
+Load `${CLAUDE_PLUGIN_ROOT}/rules/figma-screens.md`, the core package's `review-discipline.md`, and the
+html package's `html-gates.md` for the behaviour-review checklist below, then load
+`figma-use`. Pass `skillNames: "figma-use"`.
 
 Set `writeAuthorization` to `{"granted": true, "reason": "prototype"}` before the first write, and clear
 it when the command ends.

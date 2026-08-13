@@ -8,7 +8,7 @@ description: Use when doing any UI or UX design work that will be reviewed or ha
 A gated design workflow. Prototype in HTML, port to Figma on approval, verify by measurement.
 
 **The commands drive this.** Run `/pica` to start a project; the flow is deterministic from there. This
-file is the map, and the rules are in `rules/`.
+file is the map. The rules now live with the package that owns them, under `packages/*/rules/`.
 
 ## The one non-negotiable
 
@@ -31,32 +31,32 @@ first gets made.
 
 | # | Step | Command | Rules |
 |---|---|---|---|
-| 1 | Intake, brief becomes a contract. Declares `viewports` and `figmaInScope` | `/pica` | [research.md](rules/research.md) |
-| 2 | Research and tokens | inside `/pica` | [research.md](rules/research.md) |
-| 3 | UI kit in HTML — the design kit every screen consumes | inside `/pica` | [html-prototype.md](rules/html-prototype.md) |
+| 1 | Intake, brief becomes a contract. Declares `viewports` and `figmaInScope` | `/pica` | [research.md](../../packages/research/rules/research.md) |
+| 2 | Research and tokens | inside `/pica` | [research.md](../../packages/research/rules/research.md) |
+| 3 | UI kit in HTML — the design kit every screen consumes | inside `/pica` | [html-prototype.md](../../packages/html/rules/html-prototype.md) |
 
 **Phase B — design and verify (repeats per work package, over days).** This phase is the deliverable.
 An HTML-only project ends here, having been fully verified.
 
 | # | Step | Command | Rules |
 |---|---|---|---|
-| 4 | Build the package at every declared viewport: option boards **and** the interactive main flow | `/pica-wp <name>` | [html-prototype.md](rules/html-prototype.md) |
-| 5 | **Measure it** — capture, `verify-html`, `parity-check`, `flow-check`. All zero, or fix | inside `/pica-wp` | [review-gates.md](rules/review-gates.md) |
-| 6 | Render every frame and look at it, per viewport, and **click the main flow end to end** | inside `/pica-wp` | [review-gates.md](rules/review-gates.md) |
-| 7 | **GATE: human approves this package's HTML** | inside `/pica-wp` | [review-gates.md](rules/review-gates.md) |
+| 4 | Build the package at every declared viewport: option boards **and** the interactive main flow | `/pica-wp <name>` | [html-prototype.md](../../packages/html/rules/html-prototype.md) |
+| 5 | **Measure it** — capture, `verify-html`, `parity-check`, `flow-check`. All zero, or fix | inside `/pica-wp` | [html-gates.md](../../packages/html/rules/html-gates.md) |
+| 6 | Render every frame and look at it, per viewport, and **click the main flow end to end** | inside `/pica-wp` | [review-discipline.md](../../packages/core/rules/review-discipline.md) |
+| 7 | **GATE: human approves this package's HTML** | inside `/pica-wp` | [html-gates.md](../../packages/html/rules/html-gates.md) |
 
 **Phase C — Figma (optional; skip entirely when `figmaInScope` is false).** Nothing here may begin for a
 package until step 7 passed for that package. The hook enforces it.
 
 | # | Step | Command | Rules |
 |---|---|---|---|
-| 8 | Foundations into Figma — variables, text styles, components | inside `/pica` or before first port | [figma-elements.md](rules/figma-elements.md) |
-| 9 | Port the approved package | `/pica-port <wp>` | [figma-screens.md](rules/figma-screens.md), [figma-elements.md](rules/figma-elements.md) |
-| 10 | Verify against the HTML — `geometry-diff`, per frame, re-diff after each fix | inside `/pica-port` | [review-gates.md](rules/review-gates.md) |
-| 11 | Review | `/pica-review [wp]` | [review-gates.md](rules/review-gates.md) |
-| 12 | Prototype | `/pica-prototype` | [figma-screens.md](rules/figma-screens.md), [review-gates.md](rules/review-gates.md) |
-| 13 | Closeout | `/pica-close` | [review-gates.md](rules/review-gates.md) |
-| — | Feedback arrives | `/pica-feedback` | [review-gates.md](rules/review-gates.md), [figma-mcp.md](rules/figma-mcp.md) |
+| 8 | Foundations into Figma — variables, text styles, components | inside `/pica` or before first port | [figma-elements.md](../../packages/figma/rules/figma-elements.md) |
+| 9 | Port the approved package | `/pica-port <wp>` | [figma-screens.md](../../packages/figma/rules/figma-screens.md), [figma-elements.md](../../packages/figma/rules/figma-elements.md) |
+| 10 | Verify against the HTML — `geometry-diff`, per frame, re-diff after each fix | inside `/pica-port` | [figma-gates.md](../../packages/figma/rules/figma-gates.md) |
+| 11 | Review | `/pica-review [wp]` | [figma-gates.md](../../packages/figma/rules/figma-gates.md) |
+| 12 | Prototype | `/pica-prototype` | [figma-screens.md](../../packages/figma/rules/figma-screens.md), [html-gates.md](../../packages/html/rules/html-gates.md) |
+| 13 | Closeout | `/pica-close` | [review-discipline.md](../../packages/core/rules/review-discipline.md) |
+| — | Feedback arrives | `/pica-feedback` | [review-discipline.md](../../packages/core/rules/review-discipline.md), [figma-mcp.md](../../packages/figma/rules/figma-mcp.md) |
 
 Foundations sat at step 4 through 0.3.0, before any HTML was approved. That put Figma writes ahead of the
 gate that exists to prevent them and made the optional phase look mandatory. They belong in Phase C: the
@@ -67,6 +67,29 @@ Each step from 4 on has its own entry point because no session survives a multi-
 `/pica-feedback` is not a step. It runs whenever someone else's review lands, before or after delivery,
 and it exists because triaging a client's claims is a different job from auditing your own work: every
 item has to be **verified before it is accepted**, and the fix is often a decision rather than a repair.
+
+## Packages
+
+pica is four packages plus a bundle. Each declares what it requires, produces, checks and
+considers done, in its own `package.json`.
+
+| Package | Depends on | Owns |
+|---|---|---|
+| `pica-core` | — | intake, closeout, feedback, the state schema, every gate |
+| `pica-research` | core | the source audit and token provenance |
+| `pica-html` | core, research | work packages at every viewport, and the measured gate |
+| `pica-figma` | core, html | the port, annotations, and the geometry diff |
+
+`pica` installs all four. A project that will never touch Figma installs `pica-html`, which pulls
+in `pica-core` and `pica-research` — html needs `tokens/tokens.css`, which only research
+produces — and never sees the Figma half.
+
+**No package may grant a gate it benefits from.** `html` requests `htmlApproved`; core
+grants it on human approval; `figma` requires it and cannot grant it. Run
+`node packages/core/scripts/pica-status.mjs` to see what is ready and what is blocked.
+
+The path past Figma — implementation for web, iOS and Android, then end-to-end testing —
+is declared in `packages/_planned/` as contracts only. Those are not built.
 
 ## Build order within a project
 
@@ -94,7 +117,7 @@ The rest are yours to hold:
 - Self-review and **say what you checked** before handing anything back. Never report complete on work
   you have not verified.
 - Verify every mutation in a **separate call**. Same-call read-back returns the in-memory value.
-- **Capture an appearance baseline before any bulk mutation.** `scripts/capture-baseline.js`, then diff
+- **Capture an appearance baseline before any bulk mutation.** `packages/figma/scripts/capture-baseline.js`, then diff
   after. Existence checks cannot see a binding that changed what a node renders, and Figma version
   history is not readable from the Plugin API, so a missed baseline means the original values are gone.
 - **Say what your filter excluded.** A denominator you did not verify is fiction: one screen audit
@@ -108,8 +131,8 @@ The rest are yours to hold:
 |---|---|---|
 | nothing | steps 1, 2, 3, 5, 7 HTML-side, 9 | the core flow runs |
 | Figma MCP server, which provides `figma-use` | steps 4, 6, 7 Figma-side, 8 | say those steps are unavailable, run the rest |
-| Figma seat with enough MCP calls | any Figma-side step | size the work to the budget, see [figma-mcp.md](rules/figma-mcp.md) |
-| playwright | the capture harness in `scripts/` | say the measured diff is unavailable, and do not silently fall back to eyeballing |
+| Figma seat with enough MCP calls | any Figma-side step | size the work to the budget, see [figma-mcp.md](../../packages/figma/rules/figma-mcp.md) |
+| playwright | the capture harness in `packages/html/scripts/` | say the measured diff is unavailable, and do not silently fall back to eyeballing |
 | superpowers | stronger intake and planning, plus the panel | use `brainstorming`, `writing-plans`, `dispatching-parallel-agents` when present |
 
 Load `figma-use` **before** any `use_figma` call. It owns the API contract; this skill owns the workflow
@@ -141,8 +164,8 @@ exists for the same reason every other register does: without it a deliberate ca
 from an omission.
 
 `copyRules` and `dataOwnership` carry the client's own rules in a form something can read. See
-[research.md](rules/research.md): a copy rule stated in conversation lasts about a day, and "the user's data
-is read-only here" means nothing useful until it is written per entity.
+[research.md](../../packages/research/rules/research.md): a copy rule stated in conversation lasts about a
+day, and "the user's data is read-only here" means nothing useful until it is written per entity.
 
 **The viewport declaration**, which everything downstream reads:
 
@@ -228,9 +251,13 @@ project ten green harnesses coexisted with a home-screen row that opened another
 
 ## Rules
 
-- [research.md](rules/research.md) intake packet, contract, exclusions, audit breadth, token provenance, mock-data provenance, client copy rules, data ownership
-- [html-prototype.md](rules/html-prototype.md) layout, the tabbed review page, options versus the interactive flow, navigation state, the tall-screen pair, real assets, state matrices
-- [figma-elements.md](rules/figma-elements.md) token layers including Border, geometry binding, alpha in tokens, numeric font weights, font-package forensics, component tiers, instance constraints
-- [figma-screens.md](rules/figma-screens.md) frames, states, alignment and vertical centring, screen chrome pinning, CSS to auto-layout, the circle trap, API traps
-- [figma-mcp.md](rules/figma-mcp.md) rate limits and call budget, `page.loadAsync` for whole-file reads, write discipline
-- [review-gates.md](rules/review-gates.md) report versus fix, self-review, complexity routing, the panel, verification method, writing your own checks, appearance baselines, audit integrity, the audit checklist
+Each rule now lives with the package that owns it.
+
+- [research.md](../../packages/research/rules/research.md) — research package. Intake packet, contract, exclusions, audit breadth, token provenance, mock-data provenance, client copy rules, data ownership
+- [html-prototype.md](../../packages/html/rules/html-prototype.md) — html package. Layout, the tabbed review page, options versus the interactive flow, navigation state, the tall-screen pair, real assets, state matrices
+- [html-gates.md](../../packages/html/rules/html-gates.md) — html package. The measured HTML gate, the flow gate, viewport parity, HTML-only coverage, behaviour review for prototypes, definition of done
+- [figma-elements.md](../../packages/figma/rules/figma-elements.md) — figma package. Token layers including Border, geometry binding, alpha in tokens, numeric font weights, font-package forensics, component tiers, instance constraints
+- [figma-screens.md](../../packages/figma/rules/figma-screens.md) — figma package. Frames, states, alignment and vertical centring, screen chrome pinning, CSS to auto-layout, the circle trap, API traps
+- [figma-mcp.md](../../packages/figma/rules/figma-mcp.md) — figma package. Rate limits and call budget, `page.loadAsync` for whole-file reads, write discipline
+- [figma-gates.md](../../packages/figma/rules/figma-gates.md) — figma package. The Figma audit checklist, appearance baselines, geometry-diff tolerances, the deviations register, definition of done
+- [review-discipline.md](../../packages/core/rules/review-discipline.md) — core package. Medium-independent: report versus fix, self-review, complexity routing, the panel, verification method, writing your own checks, audit integrity

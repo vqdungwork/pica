@@ -1,0 +1,10 @@
+{
+  "name": "e2e",
+  "status": "coming-soon",
+  "description": "End-to-end tests against a built application, one per platform. Contract only — content to be defined by the author.",
+  "owns": { "commands": [], "rules": [], "scripts": [] },
+  "requires": { "state": [], "artifacts": [], "gates": [] },
+  "produces": { "state": ["packages.e2e.reported"], "artifacts": [] },
+  "checks": [],
+  "definitionOfDone": []
+}

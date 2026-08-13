@@ -1,20 +1,11 @@
 {
   "name": "pica",
-  "description": "A design workflow for Claude Code. Prototype in HTML at one or more declared viewports, port to Figma on approval, verify by measurement and by looking.",
-  "version": "0.5.0",
-  "author": {
-    "name": "Dung Vuong"
-  },
+  "description": "A design workflow for Claude Code. Installs the full set: intake, research, HTML, and Figma.",
+  "version": "0.6.0",
+  "author": { "name": "Dung Vuong" },
   "homepage": "https://github.com/vqdungwork/pica",
   "repository": "https://github.com/vqdungwork/pica",
   "license": "MIT",
-  "keywords": [
-    "design",
-    "figma",
-    "ui",
-    "ux",
-    "design-system",
-    "prototype",
-    "handoff"
-  ]
+  "dependencies": ["pica-core", "pica-research", "pica-html", "pica-figma"],
+  "keywords": ["design", "figma", "ui", "ux", "design-system", "prototype", "handoff"]
 }

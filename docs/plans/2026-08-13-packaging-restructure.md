@@ -71,7 +71,7 @@ import path from "path";
 
 const ROOT = process.cwd();
 const PKG_DIR = path.join(ROOT, "packages");
-const REQUIRED = ["name", "status", "owns", "requires", "produces", "checks", "definitionOfDone"];
+const REQUIRED = ["name", "status", "description", "owns", "requires", "produces", "checks", "definitionOfDone"];
 const VALID_STATUS = ["stable", "coming-soon"];
 const findings = [];
 
@@ -342,7 +342,7 @@ for s in capture-html-reference.mjs verify-html.mjs parity-check.mjs flow-check.
 done
 ```
 
-- [ ] **Step 2: Create `packages/html/rules/html-gates.md`** with this header, then move 3 sections verbatim from `review-gates.md`
+- [ ] **Step 2: Create `packages/html/rules/html-gates.md`** with this header, then move 5 sections verbatim from `review-gates.md`
 
 ```markdown
 # HTML gates
@@ -351,7 +351,16 @@ The gates the html package owns. Medium-independent review discipline is in core
 `review-discipline.md`, which these assume.
 ```
 
-Move verbatim: `## The measured HTML gate`, `## The flow gate`, `## The viewport parity check`.
+Move verbatim: `## The measured HTML gate`, `## The flow gate`, `## The viewport parity check`,
+`## HTML-only coverage`, `## Behaviour review, for prototypes`.
+
+**Exception — `## Definition of done` is split, not moved whole.** `review-gates.md`'s single
+`## Definition of done` section contains an HTML-side checklist and a Figma-side checklist under one
+heading (Task 3 moved the whole block rather than split it — that was deliberate, splitting it was
+left for here and for Task 5). This task takes only the **HTML-side** checklist items into its own
+`## Definition of done` heading in `html-gates.md`. Do not take the Figma-side items — those belong to
+Task 5's `figma-gates.md`, under its own `## Definition of done` heading. Do not delete or edit the
+Figma-side items here; Task 5 is responsible for cutting them out of `review-gates.md` when it runs.
 
 - [ ] **Step 3: Write `packages/html/package.json`**
 
@@ -443,7 +452,7 @@ for r in figma-screens.md figma-elements.md figma-mcp.md; do git mv skills/desig
 for s in geometry-diff.mjs figma-audit.js capture-baseline.js; do git mv skills/design-flow/scripts/$s packages/figma/scripts/$s; done
 ```
 
-- [ ] **Step 2: Create `packages/figma/rules/figma-gates.md`** with this header, then move 6 sections verbatim
+- [ ] **Step 2: Create `packages/figma/rules/figma-gates.md`** with this header, then move 9 sections verbatim
 
 ```markdown
 # Figma gates
@@ -452,7 +461,21 @@ The gates the figma package owns. Medium-independent review discipline is in cor
 `review-discipline.md`, which these assume.
 ```
 
-Move verbatim: `## Match by text content, compare position only`, `## Capture element boxes too`, `## Force a common font while diffing layout`, `## A binding that changes appearance is a defect`, `## A position diff cannot detect absence`, `## Deviating from the HTML`.
+Move verbatim: `## Match by text content, compare position only`, `## Capture element boxes too`,
+`## Force a common font while diffing layout`, `## A binding that changes appearance is a defect`,
+`## A position diff cannot detect absence`, `## Deviating from the HTML`, `## Trust the data over the
+render, and the render over your memory`, `## Always read the font family and style distribution`,
+`## The audit checklist`.
+
+**Exception — `## Definition of done` is split, not moved whole.** As noted in Task 4: this section
+holds both an HTML-side checklist and a Figma-side checklist under one heading. This task takes only
+the **Figma-side** checklist items into their own `## Definition of done` heading in
+`figma-gates.md`. The HTML-side items were already taken by Task 4 (run first). Once both the
+HTML-side items (removed by Task 4) and the Figma-side items (removed by this step) are gone from
+`review-gates.md`, nothing of that section remains there — do not leave a `## Definition of done`
+heading behind in `review-gates.md` with no content, and do not leave any content behind with no
+heading either. This task's removal of the Figma-side half is what finally empties the section out of
+`review-gates.md` entirely.
 
 - [ ] **Step 3: Verify `review-gates.md` is now empty of sections and delete it**
 
@@ -461,7 +484,11 @@ grep -c '^## ' skills/design-flow/rules/review-gates.md   # expect 0
 git rm skills/design-flow/rules/review-gates.md
 ```
 
-Expected: 0 sections remain. If any remain, they were not classified — stop and classify them before deleting.
+Expected: 0 sections remain. `review-gates.md` held 15 sections after Task 3: Task 4 takes 5 whole
+plus the HTML-side half of `## Definition of done`; this task (5) takes 9 whole plus the Figma-side
+half of `## Definition of done`. 5 + 9 + 1 split = all 15 accounted for, and the file is deleted at
+the end of this step. If any section remains, it was not classified — stop and classify it before
+deleting.
 
 - [ ] **Step 4: Write `packages/figma/package.json`**
 
@@ -655,11 +682,23 @@ console.log(`\n${rows.filter((r) => r.verdict === "READY").length} ready, `
 Run: `node scripts/validate-packages.mjs`
 Expected: `0 finding(s).` and exit 0. Confirm with `echo $?`.
 
-- [ ] **Step 3: Test the resolver against empty state**
+- [ ] **Step 3: Test the resolver from a project directory, not from the pica repo**
 
-Run: `node packages/core/scripts/pica-status.mjs /dev/null 2>/dev/null || node packages/core/scripts/pica-status.mjs .pica/state.json`
+Resolving `packages/` from `process.cwd()` means the resolver only works when the working directory
+happens to be the pica repo itself. Run from a **project** directory instead — where `.pica/state.json`
+and the built artifacts actually live, and where `packages/` does not exist — with an absent or empty
+`.pica/state.json`:
 
-With no state file, expected: `core` READY, and `research`, `html`, `figma` BLOCKED with their missing gates named. This proves `requires` actually blocks rather than decorating.
+```
+cd /path/to/some/project && node /path/to/pica/packages/core/scripts/pica-status.mjs
+```
+
+Expected: it still runs (exit 0), because `packages/` resolves from the script's own location
+(`import.meta.url`), not from the working directory. `research`, `html` and `figma` report BLOCKED with
+their missing gates, state and artifacts named, proving `requires` actually blocks rather than
+decorating — from the location this script is actually meant to be run from. If `packages/` is instead
+resolved from `process.cwd()`, this step exits 2, because a project directory has no `packages/` of its
+own.
 
 - [ ] **Step 4: Commit**
 
@@ -858,9 +897,9 @@ and a `human` item cannot be satisfied by any script — the schema rejects one 
 a script, because ten green harnesses and four screenshot-obvious defects on the fourth
 source project is what that type exists to prevent.
 
-`review-gates.md` is retired. Its 685 lines are split three ways: 23 medium-independent
-sections into core's `review-discipline.md`, three HTML gates into `html-gates.md`, six
-Figma gates into `figma-gates.md`. Sections moved verbatim; no rule changed meaning.
+`review-gates.md` is retired. Its 685 lines are split three ways: 22 medium-independent
+sections into core's `review-discipline.md`, five HTML gates into `html-gates.md`, nine
+Figma gates into `figma-gates.md`, with `## Definition of done` split across both files. Sections moved verbatim; no rule changed meaning.
 
 New: `scripts/validate-packages.mjs` asserts every declared file exists and every shipped
 file is owned exactly once, and `packages/core/scripts/pica-status.mjs` reports what is
@@ -907,4 +946,4 @@ git commit -m "Document the package split; 0.6.0"
 
 **Type consistency.** `package.json` field names are identical across all six manifests: `name`, `status`, `description`, `owns.{commands,rules,scripts}`, `requires.{state,artifacts,gates}`, `produces.{state,artifacts}`, `checks[].{run,passes}`, `definitionOfDone[].{type,run,passes,says,grants,path}`. `validate-packages.mjs` (Task 1) checks exactly these names, and `pica-status.mjs` (Task 7) reads exactly `requires.{gates,state,artifacts}` and `status`. Gate names are consistent: core grants `intakeApproved`, research grants `tokensApproved`, html grants `htmlApproved:<wp>`, figma requires `htmlApproved:<wp>` and grants `figmaVerified:<wp>`, and `impl-*` requires `figmaVerified:<wp>`.
 
-**One risk the plan cannot remove.** Task 3 and Task 5 move prose by hand. The line-count and heading-diff checks in Task 3 Steps 2–3 catch loss and renaming, but they cannot catch a section moved into the *wrong* file. That judgement is recorded in the task text — 23 core, 3 html, 6 figma, with the two promoted `###` subsections named explicitly — and should be re-read against the file before Task 5 Step 3 deletes the original.
+**One risk the plan cannot remove.** Task 3 and Task 5 move prose by hand. The line-count and heading-diff checks in Task 3 Steps 2–3 catch loss and renaming, but they cannot catch a section moved into the *wrong* file. That judgement is recorded in the task text — 22 core, 5 html, 9 figma, with the two promoted `###` subsections named explicitly — and should be re-read against the file before Task 5 Step 3 deletes the original.

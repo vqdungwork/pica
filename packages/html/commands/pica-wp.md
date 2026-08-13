@@ -3,8 +3,8 @@
 Step 5. The package named in `$ARGUMENTS`. If empty, list the packages from `.pica/state.json` with their
 tiers and ask which one.
 
-Load `${CLAUDE_PLUGIN_ROOT}/skills/design-flow/rules/html-prototype.md` and
-`${CLAUDE_PLUGIN_ROOT}/skills/design-flow/rules/review-gates.md`.
+Load `${CLAUDE_PLUGIN_ROOT}/rules/html-prototype.md`,
+`${CLAUDE_PLUGIN_ROOT}/rules/html-gates.md`, and the core package's `review-discipline.md`.
 
 This command **never writes to Figma.** Porting is `/pica-port`, and it is blocked until the gate below
 passes.
@@ -93,18 +93,33 @@ verification the work will ever get; for a Figma project, finding these defects 
 finding them after the port costs a rebuild.
 
 ```bash
-S=<plugin>/skills/design-flow/scripts
+S=${CLAUDE_PLUGIN_ROOT}/scripts
 node $S/capture-html-reference.mjs --dir html --out .audit
 node $S/verify-html.mjs   .audit/html-reference.json .pica/state.json
 node $S/parity-check.mjs  .audit/html-reference.json .pica/state.json   # 2+ viewports only
 node $S/flow-check.mjs    --dir html --state .pica/state.json
 ```
 
+**If `figmaInScope` is true in `.pica/state.json`, capture a second, forced-font reference**, to a
+distinct artefact so both exist side by side:
+
+```bash
+node $S/capture-html-reference.mjs --dir html --out .audit/.forced-font --font "<the family Figma resolves>"
+mv .audit/.forced-font/html-reference.json .audit/html-reference-forced.json
+rm -rf .audit/.forced-font
+```
+
+Forcing the family Figma resolves isolates layout differences from typeface metrics: metrics differ per
+font family, so a geometry diff run with each side in a different font attributes a font fallback to a
+layout defect. This pass belongs here rather than in `/pica-port` because html owns
+`capture-html-reference.mjs`; figma only consumes what it captures.
+
 Pass criteria, all of them, no partial credit:
 
 | Check | Passes when |
 |---|---|
 | capture | writes an artefact at all — it refuses on 0 frames, which means a selector matched nothing |
+| forced-font capture | (figma-in-scope packages only) writes `.audit/html-reference-forced.json` |
 | `viewport-tagged` | 0 findings: every frame tagged with a declared viewport name |
 | `overflow` | 0 findings: nothing extends past a frame's right edge |
 | `tall-screen-pair` | 0 findings: every frame whose content exceeds its viewport by >24px has a `· hug` twin |

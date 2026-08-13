@@ -2,13 +2,14 @@
  * Full Figma hygiene audit. Paste as the `code` argument of a single use_figma call.
  *
  * Everything should return zero. Configure the block below for the file, then read
- * rules/review-gates.md for how to interpret the known false-positive classes (text over sibling
- * artwork, alpha that never reaches opaque, and documentation frames that carry component names).
+ * the core package's rules/review-discipline.md for how to interpret the known false-positive classes
+ * (text over sibling artwork, alpha that never reaches opaque, and documentation frames that carry
+ * component names).
  *
  * Notes on why it is written this way:
  *   - setCurrentPageAsync before every traversal, or instance children are invisible. This is the one
  *     place worth spending a page switch per page: page.loadAsync() is cheaper and fine for shallow
- *     reads, but this audit needs deep instance traversal. See rules/figma-mcp.md.
+ *     reads, but this audit needs deep instance traversal. See ../rules/figma-mcp.md.
  *   - cornerRadius / fontName can be figma.mixed, so numeric reads are guarded
  *   - SECTION nodes have no layout properties; COMPONENT_SET geometry is editor chrome
  *   - variable-bound paints report a stale cached colour, so colours are resolved through aliases

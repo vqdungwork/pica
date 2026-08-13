@@ -20,7 +20,9 @@
 !/.claude-plugin/
 !/commands/
 !/hooks/
+!/packages/
 !/skills/
+!/scripts/
 
 # ---- repo furniture ----
 !/README.md

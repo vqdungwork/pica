@@ -1,0 +1,23 @@
+{
+  "name": "core",
+  "status": "stable",
+  "description": "Intake, the contract, the state schema and every gate. Required by every other package.",
+  "owns": {
+    "commands": ["pica.md", "pica-close.md", "pica-feedback.md"],
+    "rules": ["review-discipline.md"],
+    "scripts": ["pica-status.mjs"],
+    "hooks": ["dispatcher.md", "gate-figma-write", "hooks.json", "session-start"]
+  },
+  "requires": { "state": [], "artifacts": [], "gates": [] },
+  "produces": {
+    "state": ["figmaInScope", "viewports", "delivered", "workPackages", "exclusions", "flows", "intakeApproved"],
+    "artifacts": ["docs/contract.md", "docs/exclusions.md", ".pica/state.json"]
+  },
+  "checks": [],
+  "definitionOfDone": [
+    { "type": "artifact", "path": "docs/contract.md" },
+    { "type": "artifact", "path": "docs/exclusions.md" },
+    { "type": "human", "says": "the human approved the contract, exclusions, options and tiers" },
+    { "type": "gate", "grants": "intakeApproved" }
+  ]
+}

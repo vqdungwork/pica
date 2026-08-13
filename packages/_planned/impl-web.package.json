@@ -1,0 +1,14 @@
+{
+  "name": "impl-web",
+  "status": "coming-soon",
+  "description": "Implement the verified design as a web application. Contract only — content to be defined by the author.",
+  "owns": { "commands": [], "rules": [], "scripts": [] },
+  "requires": {
+    "state": [],
+    "artifacts": [],
+    "gates": ["figmaVerified:<wp>"]
+  },
+  "produces": { "state": ["packages.impl-web.built"], "artifacts": [] },
+  "checks": [],
+  "definitionOfDone": []
+}
