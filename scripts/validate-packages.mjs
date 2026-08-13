@@ -3,9 +3,13 @@
  *
  * Asserts six things, each of which was a real failure mode in earlier pica releases:
  *   1. every package.json parses and has the required fields, each with a real shape —
- *      a null or empty contract field passes an `in` check while asserting nothing
+ *      a null or empty contract field passes an `in` check while asserting nothing. This
+ *      includes "requires" and "produces": both must be objects, and "requires" must have
+ *      "state", "artifacts" and "gates" as arrays while "produces" must have "state" and
+ *      "artifacts" as arrays — these are the two fields pica-status.mjs reads, and
+ *      `"requires":null,"produces":null` used to pass this check while asserting nothing.
  *   2. every package has its plugin manifest at .claude-plugin/plugin.json, the
- *      location Claude Code actually reads
+ *      location Claude Code actually reads, and that manifest parses and has a "name"
  *   3. every file a package CLAIMS to own actually exists
  *   4. every shipped rule/script/command/hook is owned by exactly one package
  *   5. every declared check resolves to a script that exists
@@ -60,6 +64,30 @@ for (const name of dirs) {
   if (m.definitionOfDone !== undefined && !Array.isArray(m.definitionOfDone))
     findings.push(`${name}: "definitionOfDone" must be an array, got ${JSON.stringify(m.definitionOfDone)}`);
 
+  /* "requires" and "produces" are the two fields pica-status.mjs actually reads to decide
+     whether a package is READY or BLOCKED. A null (or otherwise shapeless) value passed the
+     `in` check above while asserting nothing — pica-status.mjs would then read `undefined`
+     off it and treat every requirement as vacuously satisfied. Each must be an object, and
+     each of its own array-valued sub-fields must actually be an array. */
+  if (m.requires !== undefined) {
+    if (typeof m.requires !== "object" || m.requires === null || Array.isArray(m.requires)) {
+      findings.push(`${name}: "requires" must be an object, got ${JSON.stringify(m.requires)}`);
+    } else {
+      for (const f of ["state", "artifacts", "gates"])
+        if (!Array.isArray(m.requires[f]))
+          findings.push(`${name}: "requires.${f}" must be an array, got ${JSON.stringify(m.requires[f])}`);
+    }
+  }
+  if (m.produces !== undefined) {
+    if (typeof m.produces !== "object" || m.produces === null || Array.isArray(m.produces)) {
+      findings.push(`${name}: "produces" must be an object, got ${JSON.stringify(m.produces)}`);
+    } else {
+      for (const f of ["state", "artifacts"])
+        if (!Array.isArray(m.produces[f]))
+          findings.push(`${name}: "produces.${f}" must be an array, got ${JSON.stringify(m.produces[f])}`);
+    }
+  }
+
   if (m.name !== name) findings.push(`${name}: manifest name is "${m.name}", directory is "${name}"`);
   if (!VALID_STATUS.includes(m.status)) findings.push(`${name}: status "${m.status}" is not one of ${VALID_STATUS.join(", ")}`);
 
@@ -67,7 +95,17 @@ for (const name of dirs) {
      plugin.json at the package root. A package.json passing every check above with no
      plugin.json in the right place is a package Claude Code cannot actually install. */
   const pluginManifest = path.join(PKG_DIR, name, ".claude-plugin", "plugin.json");
-  if (!fs.existsSync(pluginManifest)) findings.push(`${name}: no .claude-plugin/plugin.json — Claude Code will not find this package's manifest`);
+  if (!fs.existsSync(pluginManifest)) {
+    findings.push(`${name}: no .claude-plugin/plugin.json — Claude Code will not find this package's manifest`);
+  } else {
+    try {
+      const pm = JSON.parse(fs.readFileSync(pluginManifest, "utf8"));
+      if (!pm || typeof pm !== "object" || Array.isArray(pm) || !pm.name)
+        findings.push(`${name}: .claude-plugin/plugin.json has no "name" field`);
+    } catch (e) {
+      findings.push(`${name}: .claude-plugin/plugin.json does not parse — ${e.message}`);
+    }
+  }
 
   for (const kind of ["commands", "rules", "scripts", "hooks"]) {
     for (const file of (m.owns?.[kind] || [])) {
