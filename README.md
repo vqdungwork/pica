@@ -57,9 +57,10 @@ in automatically:
 /plugin install pica-figma@pica   # the port, annotations, and the geometry diff — needs pica-html
 ```
 
-A project that will never touch Figma installs `pica-core` and `pica-html` and never sees the
-Figma half. `pica-figma` depends on both `pica-core` and `pica-html`, so installing it pulls both
-in.
+A project that will never touch Figma installs `pica-core`, `pica-research` and `pica-html`, and
+never sees the Figma half. `pica-html` depends on both `pica-core` and `pica-research` — it needs
+`tokens/tokens.css`, which only research produces — so installing it pulls both in. `pica-figma`
+depends on `pica-core` and `pica-html`, so installing it pulls in the whole chain.
 
 ## The flow
 

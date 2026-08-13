@@ -77,11 +77,12 @@ considers done, in its own `package.json`.
 |---|---|---|
 | `pica-core` | — | intake, closeout, feedback, the state schema, every gate |
 | `pica-research` | core | the source audit and token provenance |
-| `pica-html` | core | work packages at every viewport, and the measured gate |
+| `pica-html` | core, research | work packages at every viewport, and the measured gate |
 | `pica-figma` | core, html | the port, annotations, and the geometry diff |
 
-`pica` installs all four. A project that will never touch Figma installs `pica-html` and
-never sees the Figma half.
+`pica` installs all four. A project that will never touch Figma installs `pica-html`, which pulls
+in `pica-core` and `pica-research` — html needs `tokens/tokens.css`, which only research
+produces — and never sees the Figma half.
 
 **No package may grant a gate it benefits from.** `html` requests `htmlApproved`; core
 grants it on human approval; `figma` requires it and cannot grant it. Run

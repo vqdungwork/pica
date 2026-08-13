@@ -7,6 +7,6 @@
   "repository": "https://github.com/vqdungwork/pica",
   "license": "MIT",
   "commands": ["./commands"],
-  "dependencies": ["pica-core"],
+  "dependencies": ["pica-core", "pica-research"],
   "keywords": ["design", "html", "prototype"]
 }
