@@ -28,6 +28,14 @@
 !/LICENSE
 !/.gitignore
 
+# ---- README artwork, authored here and containing no project content ----
+# SVG only, deliberately: it is text, so it diffs and reviews like source. Raster
+# formats stay ignored below precisely because a screenshot is the easiest way to
+# leak a client's screen into the repo without noticing.
+!/assets/
+/assets/*
+!/assets/*.svg
+
 # ---- docs: the design specs only, never the working brainstorm output ----
 !/docs/
 /docs/*

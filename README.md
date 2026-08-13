@@ -1,10 +1,11 @@
 <div align="center">
 
-# pica
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/banner-dark.svg">
+  <img alt="pica — prototype in HTML, port to Figma on approval, verify by measurement, never by eye" src="assets/banner-light.svg" width="100%">
+</picture>
 
 **A design workflow for Claude Code.**
-
-Prototype in HTML. Port to Figma on approval. Verify by measurement, never by eye.
 
 [![version](https://img.shields.io/badge/version-0.5.0-1f2328)](https://github.com/vqdungwork/pica/releases)
 [![licence](https://img.shields.io/badge/licence-MIT-1f2328)](LICENSE)
