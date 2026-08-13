@@ -1,9 +1,7 @@
-# Review gates
+# Figma gates
 
-How work is checked before a human sees it, how a review reports without changing anything, and how
-complexity is routed.
-
-Load this for steps 5, 7, 8 and 9.
+The gates the figma package owns. Medium-independent review discipline is in core's
+`review-discipline.md`, which these assume.
 
 ## Match by text content, compare position only
 
@@ -67,6 +65,55 @@ completely wrong, and the audit that only counts bindings will call it done.
 `scripts/capture-baseline.js` writes the baseline; run it before the pass, not after you suspect a
 problem. Version history is the only other record of pre-change values and the Plugin API cannot read it,
 so a missed baseline means the original values are gone.
+
+## A position diff cannot detect absence
+
+**A clipped node still reports its coordinates.** Every text run clipped out of existence returns a
+plausible x and y, so a geometry diff reports the frame as merely "over tolerance" while a third of
+its content is missing.
+
+Two checks close that gap, and both are cheap:
+
+1. **Per-frame text-run counts.** Count visible runs in the design, count them in the HTML reference,
+   flag any delta beyond a calibrated tolerance. On one project this flagged 8 frames and **every flag
+   was real** — including an invisible stray text node on every instance of a component, where a
+   button label had been clipped by resizing rather than removed.
+2. **Content height vs container height.** For every vertical auto-layout node, compare
+   `lastChild.y + lastChild.height + paddingBottom` against the node's own height. Anything over is
+   clipped content. Exclude deliberate scroll surfaces only.
+
+## Deviating from the HTML
+
+The HTML wins by default. Two cases where it does not, and both go in the **`deviations` register** in
+`.pica/state.json` — not into prose, because a deviation recorded only in a review document cannot be
+distinguished from a defect on the next run:
+
+```json
+{ "deviations": [
+  { "node": "29:119", "prop": "y", "html": 369, "figma": 389,
+    "why": "client approved moving the CTA below the checkbox on 12 Mar", "by": "client" },
+  { "node": "28:4", "prop": "cornerRadius", "html": 16, "figma": 14,
+    "why": "HTML was off-token; 14 is the agreed hero radius", "by": "html-fix-pending" }
+] }
+```
+
+The geometry diff reads it: a delta above tolerance that **is** registered is reported as a decision, and
+one that is not is reported as a finding. Without the register the definition of done below is
+unfalsifiable, because "recorded as a decision" has nowhere to be recorded.
+
+Two rules on entries. `why` names the **person or the reason**, never "intentional" — the point is that a
+stranger can audit it. And `by: "html-fix-pending"` is a promise: the HTML gets corrected, the entry gets
+deleted. A register that only grows is a backlog pretending to be documentation.
+
+The two cases:
+
+1. **The HTML is accidentally off-token.** A missing `line-height` falling back to `normal`, an inline
+   `height:160px` where every sibling uses 150. Fix the HTML; do not copy the mistake into the design
+   system.
+2. **Figma reflects a later approved change.** If the client or designer approved a restructure the
+   HTML never received, Figma is authoritative. Mark it in both files so nobody re-aligns it.
+
+Never silently split the difference.
 
 ## Trust the data over the render, and the render over your memory
 
@@ -138,22 +185,6 @@ Everything must return zero. `scripts/figma-audit.js` runs it as one call.
 | Declared chrome | every entry in `viewports[].chrome` marked `required`, present and pinned on the declared axes; optional entries match their constraints where present |
 | Single-line controls | inputs and selects carry `maxLines: 1` with ellipsis truncation, set on the component |
 
-## A position diff cannot detect absence
-
-**A clipped node still reports its coordinates.** Every text run clipped out of existence returns a
-plausible x and y, so a geometry diff reports the frame as merely "over tolerance" while a third of
-its content is missing.
-
-Two checks close that gap, and both are cheap:
-
-1. **Per-frame text-run counts.** Count visible runs in the design, count them in the HTML reference,
-   flag any delta beyond a calibrated tolerance. On one project this flagged 8 frames and **every flag
-   was real** — including an invisible stray text node on every instance of a component, where a
-   button label had been clipped by resizing rather than removed.
-2. **Content height vs container height.** For every vertical auto-layout node, compare
-   `lastChild.y + lastChild.height + paddingBottom` against the node's own height. Anything over is
-   clipped content. Exclude deliberate scroll surfaces only.
-
 ## Definition of done
 
 **Figma side:**
@@ -178,36 +209,3 @@ Two checks close that gap, and both are cheap:
 - [ ] Every deviation from the HTML is either fixed or listed in `deviations` with a reason and a name
 - [ ] Nothing in `exclusions` exists in the file
 - [ ] Every number published in the file recounts correctly from the file
-
-## Deviating from the HTML
-
-The HTML wins by default. Two cases where it does not, and both go in the **`deviations` register** in
-`.pica/state.json` — not into prose, because a deviation recorded only in a review document cannot be
-distinguished from a defect on the next run:
-
-```json
-{ "deviations": [
-  { "node": "29:119", "prop": "y", "html": 369, "figma": 389,
-    "why": "client approved moving the CTA below the checkbox on 12 Mar", "by": "client" },
-  { "node": "28:4", "prop": "cornerRadius", "html": 16, "figma": 14,
-    "why": "HTML was off-token; 14 is the agreed hero radius", "by": "html-fix-pending" }
-] }
-```
-
-The geometry diff reads it: a delta above tolerance that **is** registered is reported as a decision, and
-one that is not is reported as a finding. Without the register the definition of done below is
-unfalsifiable, because "recorded as a decision" has nowhere to be recorded.
-
-Two rules on entries. `why` names the **person or the reason**, never "intentional" — the point is that a
-stranger can audit it. And `by: "html-fix-pending"` is a promise: the HTML gets corrected, the entry gets
-deleted. A register that only grows is a backlog pretending to be documentation.
-
-The two cases:
-
-1. **The HTML is accidentally off-token.** A missing `line-height` falling back to `normal`, an inline
-   `height:160px` where every sibling uses 150. Fix the HTML; do not copy the mistake into the design
-   system.
-2. **Figma reflects a later approved change.** If the client or designer approved a restructure the
-   HTML never received, Figma is authoritative. Mark it in both files so nobody re-aligns it.
-
-Never silently split the difference.
