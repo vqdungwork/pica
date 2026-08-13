@@ -3,7 +3,8 @@
 Runs steps 1 to 4: intake, research and tokens, the HTML UI kit, and if Figma is in scope, the
 foundations port. These happen in one sitting. Steps 5 onward have their own commands.
 
-Load the research package's `research.md` before anything else.
+Load the research package's `research.md` before anything else. If the research package is not
+installed, stop and say so rather than proceeding without it.
 
 `$ARGUMENTS` may contain the brief or a path to it. If it is empty, ask for the intake packet.
 
@@ -44,7 +45,8 @@ Write `docs/contract.md`:
 - the **applications** the product presents as its own, since each one gets its own interactive prototype
 - a **data ownership** table: per entity, who owns it and what this surface may create, change or only
   read. See the research package's `research.md`; "read-only" applied as a blanket
-  removes the flows the product exists for
+  removes the flows the product exists for. If the research package is not installed, stop and say so
+  rather than proceeding without it
 
 Write `docs/exclusions.md`: everything the brief rules out, **quoted from the brief**. Then ask the
 human what else to add. This is the single highest-value artefact here.
@@ -183,7 +185,8 @@ a late change is expensive.
 
 ## Step 3: UI kit in HTML
 
-Load the html package's `html-prototype.md`.
+Load the html package's `html-prototype.md`. If the html package is not installed, stop and say so
+rather than proceeding without it.
 
 1. `html/shared.css`, tokens plus the phone chrome, no build step
 2. `html/design-system.html`, a storybook: every token, every component, all variants and states
@@ -210,7 +213,8 @@ actually needed. Through 0.3.0 this sat mid-flow, ahead of every HTML approval g
 optional phase read as mandatory.
 
 Load the figma package's `figma-elements.md`, then load the
-`figma-use` skill. Pass `skillNames: "figma-use"` on every `use_figma` call.
+`figma-use` skill. Pass `skillNames: "figma-use"` on every `use_figma` call. If the figma package is not
+installed, stop and say so rather than proceeding without it.
 
 Set `writeAuthorization` to `{"granted": true, "reason": "foundations"}` in `.pica/state.json` before the
 first write, and back to `null` when the step ends. The write gate reads it.
