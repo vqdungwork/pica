@@ -82,6 +82,19 @@ Two checks close that gap, and both are cheap:
    `lastChild.y + lastChild.height + paddingBottom` against the node's own height. Anything over is
    clipped content. Exclude deliberate scroll surfaces only.
 
+## Calibrate the tolerance, or the check fires forever
+
+A count comparison needs a per-frame expected delta, not a flat number. Two structural differences
+between HTML and a design tool are permanent, not defects:
+
+- **The HTML capture cannot see `<input>` values.** A `value` or `placeholder` is not a DOM text node,
+  so range geometry finds nothing. Every input costs **+1 run** on the design side.
+- **Inline `<strong>` splits one visual line into three runs.** One design text node, three HTML runs.
+
+Same shape on the x axis: for **centred or FILL text**, the HTML capture records glyph *ink* and the
+design tool records the *layout box*. They coincide only for left-aligned hug text. Reporting raw `dx`
+on centred text guarantees an audit that can never return zero.
+
 ## Deviating from the HTML
 
 The HTML wins by default. Two cases where it does not, and both go in the **`deviations` register** in

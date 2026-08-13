@@ -306,32 +306,6 @@ card is missing three fields"*, which have none.
 **An audit returning zero means no defect with a numeric signature survives. It does not mean the
 design is good.** Never present it as if it does.
 
-## Calibrate the tolerance, or the check fires forever
-
-A count comparison needs a per-frame expected delta, not a flat number. Two structural differences
-between HTML and a design tool are permanent, not defects:
-
-- **The HTML capture cannot see `<input>` values.** A `value` or `placeholder` is not a DOM text node,
-  so range geometry finds nothing. Every input costs **+1 run** on the design side.
-- **Inline `<strong>` splits one visual line into three runs.** One design text node, three HTML runs.
-
-Same shape on the x axis: for **centred or FILL text**, the HTML capture records glyph *ink* and the
-design tool records the *layout box*. They coincide only for left-aligned hug text. Reporting raw `dx`
-on centred text guarantees an audit that can never return zero.
-
-## A structural check is only as good as its model of legitimate difference
-
-Three times on one project a check was arithmetically right and conceptually wrong, and each time the
-fix was to teach it a distinction the design already made — **never to loosen the tolerance**:
-
-| Check | What it got wrong |
-|---|---|
-| Reflow register | A flat global list silenced a component everywhere; it needed a per-screen scope |
-| Count comparison | A flat tolerance; it needed `+1 per input`, `−2 per emphasis run` |
-| Nominal parity | Counted each tall-screen hug twin as its own screen, producing 8 phantom findings |
-
-"Nominal parity" and register scoping are defined in full by the viewport parity check in `html-gates.md`; this table only names the lessons learned from getting them wrong.
-
 ## A green check is not evidence the check works
 
 A clone-integrity check compared descendant counts between a frame and its clone and reported zero.

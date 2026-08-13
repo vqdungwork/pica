@@ -84,6 +84,19 @@ Correctly built, this returns **zero** on a correct two-viewport project. On the
 from 305 raw deltas to 0 findings once subtree pruning and owner attribution were in place — and the
 remaining text differences were the calibration artefacts below, not defects.
 
+## A structural check is only as good as its model of legitimate difference
+
+Three times on one project a check was arithmetically right and conceptually wrong, and each time the
+fix was to teach it a distinction the design already made — **never to loosen the tolerance**:
+
+| Check | What it got wrong |
+|---|---|
+| Reflow register | A flat global list silenced a component everywhere; it needed a per-screen scope |
+| Count comparison | A flat tolerance; it needed `+1 per input`, `−2 per emphasis run` |
+| Nominal parity | Counted each tall-screen hug twin as its own screen, producing 8 phantom findings |
+
+"Nominal parity" and register scoping are defined in full by the viewport parity check in `html-gates.md`; this table only names the lessons learned from getting them wrong.
+
 ## HTML-only coverage
 
 An HTML-only project gets the four shipped HTML-side scripts and nothing else, so most of its
