@@ -1,5 +1,97 @@
 # Changelog
 
+## 0.5.0
+
+Fourth project of evidence, and the first **HTML-only** one: the mobile design of a live enterprise
+product, several applications behind one launcher. 31 files, 4 interactive prototypes, 60 screens, no
+Figma anywhere in it. It ran to ten hand-written harnesses, all green three runs in a row, and the human
+still found four defects in a screenshot the same afternoon and a mis-routed link by clicking. Both facts
+drove this release.
+
+Seven findings.
+
+- **F43 — a package could ship option boards and no usable flow.** Nothing in the flow said a work package
+  produces an interactive prototype, so the deliverable drifted toward boards, which are the part every
+  check can see. Meanwhile **every defect the human found by using the prototype was a navigation defect**
+  with no geometric signature: a home row that opened another role's screen, an entry point that lit the
+  tab it came from, a shared screen whose back control left the application, a deep link that went via the
+  launcher. A package now ships **boards and the interactive main flow**, one prototype per application,
+  linked to each other for real. It is rule 7 in the session dispatcher.
+- **F44 — nothing checked the wiring.** New `flow-check.mjs`: dangling targets, dangling cross-application
+  links, the router's own root and tab set, unreachable screens, dead ends, a prototype the review shell
+  cannot open, and `flows` entries that do not resolve. All seven negative-tested by breaking the source
+  project on purpose. It fails closed on zero screens or zero links, and `--allow-none` is the explicit
+  escape hatch for a boards-only package.
+- **F45 — ten green harnesses, four screenshot-obvious defects.** Duplicated sheet rows, a 16px spacer
+  orphaned between two dividers, an open sheet leaving the sticky header undimmed, a collapsed header
+  leaving a 20px white strip on every screen. The pattern has a shape worth naming: **a harness is good at
+  properties of elements that exist and blind to space that should not be there.** The fixes are counting
+  assertions rather than property assertions, and "render every screen and look at it" is now qualified as
+  **after** the last change.
+- **F46 — six checks returned zero because their sample excluded the case.** A type sweep that measured
+  only the visible tab (122 headers unmeasured), a spacing check comparing direct siblings only, a font
+  check that only looked at the declared family, an icon check that printed without counting, a
+  floating-button sweep that forced an app bar onto the one screen that never has one, a contrast probe
+  sampling where the gradient ramps into white. 0.4.0 said report what your filter excluded; 0.5.0 adds
+  **report the state you measured in**, and: an advisory that prints without counting is not an assertion.
+- **F47 — a check has to be seen to fail on the defect it was written for.** Two were not: a group-header
+  check exempted the exact pair that was broken, and a mock-data check asserted roster *membership*, so it
+  passed on an identifier belonging to a different person in the roster. Both were fixed only after the
+  defect was put back and the check was watched failing. And grepping for your own failure string proves
+  nothing: a suite that crashed before reaching a check prints the same nothing as a check that passed.
+- **F48 — real-looking mock data is self-certifying.** A real name under someone else's title, one person's
+  real identifier invented onto another person's row, a feed older than the screen's own today, a
+  notification crediting the wrong author. New rule: mock data gets **provenance like tokens do**,
+  cross-referenced against the source data, asserting **ownership by nearest name** rather than membership,
+  with relationship fields stripped first. Identify a row by the name beside it, never by initials: 14
+  initial forms were ambiguous in a roster of 32.
+- **F49 — the client's own rules had nowhere to live.** A punctuation ban in product copy, a mixed-case
+  wordmark, and a read-only rule on one entity all arrived as asides. Two new registers: **`copyRules`**
+  with the check that enforces each, and **`dataOwnership`** per entity. The second one earned itself: a
+  blanket reading of "the user's data cannot be changed on mobile" disabled the request and approval flows
+  the product exists for, when what was meant was the person's own record. Per entity, the distinction is
+  designable.
+
+### Also
+
+- **`flows` in state**, one entry per application, plus `flowExemptions` for a screen the router opens
+  rather than any control. Declared at intake, because it is a fact about the product.
+- **The interactive flow leads the review tab bar and is the default tab.** Tab order reads as priority
+  order whatever you meant by it: on the source project the tabs sat in build order and the human's report
+  was that the review page still opened on the first application built rather than on the launcher.
+- **Never assert a proxy.** `overflow: hidden` does not change `scrollWidth`; a z-index assertion run with
+  the sheet closed produced 38 findings on a correct file; a scrim comparison must be a **ratio**, because
+  the same overlay took a dark header from luminance 33 to 20 and a white page from 252 to 151.
+- **Check the probe before believing it.** Two contrast probes were wrong in opposite directions, one
+  sampling where the background ramps to white and one hiding the rows it measured with
+  `visibility: hidden`, which hides their background too.
+- **Colour interpolation is a design decision.** `color-mix(in oklch)` walks hue along an arc, so a dark
+  navy toward a saturated red transits mauve and green. `in oklab` is Cartesian; plain sRGB stayed richest
+  for that ramp. Also: two separately painted boxes cannot continue one diagonal gradient, and white type
+  over a background with eight generated conditions is eight contrast questions, not one.
+- **Editing safety, now part of verification.** Prove an anchor unique before an index-based edit: one
+  restructure cut 8,047 characters out of a file, twice, on a substring that appeared twice. Never use
+  `git checkout` to undo, which destroyed uncommitted work twice in one session. When you replace a
+  component, assert the old one is gone.
+- **A trap documented beside the code is not a rule.** `box-sizing` excludes margin, so `width: 100%` plus
+  a horizontal margin overflows: written as a comment on one component and hit again twelve lines below the
+  comment within the hour. Remove the chance to hit it with a kit utility, or make it an assertion.
+- Emoji as **content** is a different question from emoji as icons: a reaction set has to be the real
+  animated asset, decoded frame-exact into a sprite sheet, not a still standing in for motion.
+- The audit-integrity section said "five rules" over six of them. Six.
+
+### Known limits
+
+- Four projects of evidence. The Figma half is unchanged and untouched by this release, and is now the
+  less exercised half by some distance.
+- `flow-check` reads markup, so a link built in JavaScript is invisible to it, and it cannot judge whether
+  a link goes somewhere *sensible*. Clicking remains a line in the definition of done.
+- The ten project harnesses behind F45 and F46 are not shipped. They are too project-shaped to
+  generalize honestly, so what ships is the rules they produced. A future release should extract the two
+  that are general: stacked separators, and every layer above a scrim measurably darker once it opens.
+- **No usability testing happened on the source project at any point.** Every finding here is from
+  measurement, from looking, or from the client using the prototype.
+
 ## 0.4.0
 
 **The checks 0.3.0 documented now exist, and they run before the human is asked to approve anything.**

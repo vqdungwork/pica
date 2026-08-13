@@ -40,9 +40,9 @@ An HTML-only project ends here, having been fully verified.
 
 | # | Step | Command | Rules |
 |---|---|---|---|
-| 4 | Build the package at every declared viewport | `/pica-wp <name>` | [html-prototype.md](rules/html-prototype.md) |
-| 5 | **Measure it** — capture, `verify-html`, `parity-check`. All zero, or fix | inside `/pica-wp` | [review-gates.md](rules/review-gates.md) |
-| 6 | Render every frame and look at it, per viewport | inside `/pica-wp` | [review-gates.md](rules/review-gates.md) |
+| 4 | Build the package at every declared viewport: option boards **and** the interactive main flow | `/pica-wp <name>` | [html-prototype.md](rules/html-prototype.md) |
+| 5 | **Measure it** — capture, `verify-html`, `parity-check`, `flow-check`. All zero, or fix | inside `/pica-wp` | [review-gates.md](rules/review-gates.md) |
+| 6 | Render every frame and look at it, per viewport, and **click the main flow end to end** | inside `/pica-wp` | [review-gates.md](rules/review-gates.md) |
 | 7 | **GATE: human approves this package's HTML** | inside `/pica-wp` | [review-gates.md](rules/review-gates.md) |
 
 **Phase C — Figma (optional; skip entirely when `figmaInScope` is false).** Nothing here may begin for a
@@ -87,6 +87,10 @@ Four are enforced by hook and cannot be talked around:
 The rest are yours to hold:
 
 - Present limitations before capability claims.
+- **A package ships option boards and an interactive prototype of its main flow.** The boards settle a
+  decision and then become provenance; the flow is what the human uses.
+- **Look after the last change, not before it,** and click the flow. Ten green checks on one project
+  coexisted with four defects visible in a screenshot.
 - Self-review and **say what you checked** before handing anything back. Never report complete on work
   you have not verified.
 - Verify every mutation in a **separate call**. Same-call read-back returns the in-memory value.
@@ -119,7 +123,26 @@ and the failure modes that skill does not cover.
 and `ported`, plus `activeReview` and `writeAuthorization`.
 
 **Read by the audit**, to make judgement calls checkable: `rawValueExemptions`, `exclusions`,
-`deviations`, `bannedChars`, `parityExemptions`, `reflowNotes`.
+`deviations`, `bannedChars`, `parityExemptions`, `reflowNotes`, `flowExemptions`, `copyRules`,
+`dataOwnership`.
+
+**The flow declaration**, one entry per application the product presents as its own:
+
+```json
+"flows": [
+  { "app": "launcher",  "entry": "app-launcher.html", "home": "sign-in", "owns": ["account"] },
+  { "app": "<product>", "entry": "app-<slug>.html",   "home": "<screen id>" }
+]
+```
+
+`flow-check` reads it, so "one interactive prototype per application" is checkable rather than a habit.
+`flowExemptions` records a screen the router opens rather than any control, `{file, screen, why}`, and
+exists for the same reason every other register does: without it a deliberate case is indistinguishable
+from an omission.
+
+`copyRules` and `dataOwnership` carry the client's own rules in a form something can read. See
+[research.md](rules/research.md): a copy rule stated in conversation lasts about a day, and "the user's data
+is read-only here" means nothing useful until it is written per entity.
 
 **The viewport declaration**, which everything downstream reads:
 
@@ -175,6 +198,7 @@ geometry diff that existed only in the project they were written from.
 | `capture-html-reference.mjs` | measurement is possible | it writes an artefact; it refuses on 0 frames rather than emitting an empty one |
 | `verify-html.mjs` | the HTML is internally sound | 0 findings across viewport-tagged, overflow, tall-screen-pair, viewport-coverage |
 | `parity-check.mjs` | the viewports agree | 0 findings, nominal and structural. 2+ viewports only |
+| `flow-check.mjs` | the prototype goes where it says it goes | 0 findings across dangling-target, dangling-href, nav-target, unreachable, dead-end, orphan-prototype, flow-declared, **and** a non-zero screen and link count |
 
 The capture records true text-run rectangles via range geometry, every element box with its classes,
 depth and nearest classed ancestor, computed font size and weight, each run's owning element and
@@ -198,11 +222,15 @@ tolerance; a frame missing a third of its content still reports everything it do
 Inventory and count checks cover that, and rendering every frame and looking at it covers what no
 script does.
 
+**And none of them can tell you a link is wrong, only that it is broken.** `flow-check` proves every
+destination exists; whether it is the *right* destination is answered by a human clicking. On the source
+project ten green harnesses coexisted with a home-screen row that opened another role's screen.
+
 ## Rules
 
-- [research.md](rules/research.md) intake packet, contract, exclusions, audit breadth, token provenance
-- [html-prototype.md](rules/html-prototype.md) layout, the tabbed review page, the tall-screen pair, real assets, state matrices
+- [research.md](rules/research.md) intake packet, contract, exclusions, audit breadth, token provenance, mock-data provenance, client copy rules, data ownership
+- [html-prototype.md](rules/html-prototype.md) layout, the tabbed review page, options versus the interactive flow, navigation state, the tall-screen pair, real assets, state matrices
 - [figma-elements.md](rules/figma-elements.md) token layers including Border, geometry binding, alpha in tokens, numeric font weights, font-package forensics, component tiers, instance constraints
 - [figma-screens.md](rules/figma-screens.md) frames, states, alignment and vertical centring, screen chrome pinning, CSS to auto-layout, the circle trap, API traps
 - [figma-mcp.md](rules/figma-mcp.md) rate limits and call budget, `page.loadAsync` for whole-file reads, write discipline
-- [review-gates.md](rules/review-gates.md) report versus fix, self-review, complexity routing, the panel, verification method, appearance baselines, audit integrity, the audit checklist
+- [review-gates.md](rules/review-gates.md) report versus fix, self-review, complexity routing, the panel, verification method, writing your own checks, appearance baselines, audit integrity, the audit checklist

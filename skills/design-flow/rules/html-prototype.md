@@ -37,6 +37,79 @@ reading from the same files a reviewer looks at.
 
 Reason: a reviewer with four files to open reviews three of them. It gets worse every package.
 
+**The interactive flow leads the tab bar, and it is the default tab.** Tab order reads as priority
+order, whatever you intended it to mean. On one project the tabs sat in build order, so the first thing
+a refresh showed was work package one of an application that was no longer the entry point, and the
+human's report was that it still opened on the first application built rather than on the launcher. The
+tabs were accurate, and the ordering made an argument about the deliverable that was wrong.
+
+## Options decide. The interactive flow is the deliverable.
+
+A work package ships **both**: option boards, which settle a decision, and **one interactive prototype
+of its main flow**, which is the thing the human uses. Boards alone are not a package.
+
+Boards are static, so every check in this flow can see them. A flow cannot be checked that way, and on
+the source project **every defect the human found by using the prototype was a navigation defect with no
+geometric signature**:
+
+- a row on one role's home screen that opened a screen belonging to another role
+- an entry point that navigated correctly and left the bottom nav highlighting the tab it came from
+- a screen the launcher owns, opened from inside an application, returning the user to the launcher
+  instead of to the application they were in
+- a deep link that bounced through the launcher's own home on the way to its destination
+- a sheet that opened above the page and left the sticky header undimmed behind it
+
+Screenshot every destination and they are all correct. The defect is in the wiring, so the wiring is what
+has to be read: `scripts/flow-check.mjs`, and a human clicking.
+
+**Fold the winning option back into the flow, and mark the board as provenance.** Otherwise the review
+page accumulates three variants of a header and no product, and the next reviewer cannot tell which one
+shipped. The board stays as a record of the decision; it stops being a deliverable the moment the
+decision is made.
+
+### One prototype per application, linked for real
+
+When the product is several applications behind one launcher, each gets its own interactive file, and the
+links between them are real links rather than an annotation saying "this would open X".
+
+Cross-application navigation is where the routing defects live, because it is the only place two
+independently correct files have to agree. The vocabulary that makes it checkable:
+
+| Attribute | Means |
+|---|---|
+| `data-scr="id"` on a `section` | a screen |
+| `data-sheetwrap="id"` | a sheet |
+| `data-go="id"` | push a screen inside this application |
+| `data-tab="id"` | switch to a root screen, resetting the stack |
+| `data-sheet="id"` | open a sheet |
+| `data-href="f.html[?scr=id]"` | open another application, optionally deep into it |
+| `data-popback` | return to where the user came from |
+| `data-flow` on the viewport | inside a task: the bottom nav is hidden |
+| `<script src="proto.js" data-nav='[…]' data-home="id">` | the router, the tab set and the root |
+
+`flow-check.mjs` reads exactly these, so a link built in JavaScript is invisible to it. Keep targets in
+markup. A target in markup is also greppable, which is how you answer "what opens this screen" without
+reading the router.
+
+### Navigation state is part of the design, and it gets checked
+
+Four rules, each of which was a reported defect first:
+
+1. **An entry point sets the owner.** Arriving at a screen from a utility tile, a notification or a
+   search result leaves the bottom nav pointing at that screen's own section, never at where the user
+   came from. Derive the owner from the route rather than from the control, or every new entry point is a
+   new chance to get it wrong.
+2. **A deep link opens its destination directly.** Not the launcher, then the destination. The reviewer
+   sees the intermediate screen and reports it, correctly, as a bug.
+3. **Back returns to the previous screen inside the application**, including when the screen is owned by
+   another application. A shared screen opened from application B goes back into B.
+4. **A screen inside a task hides the tabs.** Tabs during a multi-step task invite the user to abandon
+   it and then blame the prototype.
+
+`flow-check.mjs` covers dangling targets, dangling cross-application links, unreachable screens, dead
+ends, the router's own root and tab set, and any prototype the review shell cannot open. It cannot judge
+whether a link goes somewhere *sensible*: that is what clicking is for.
+
 ## The frame size is declared once
 
 Set it at intake and hold it for the whole project. The default is **375 x 812**, the iOS idiom,
@@ -154,6 +227,18 @@ This pair maps directly onto Figma's interactive and hug frames, which is why it
 Anything genuinely unavailable is labelled as a placeholder in the frame, not left to be mistaken for a
 decision.
 
+**Emoji as content is a different question from emoji as icons.** A reaction picker whose whole subject is
+emoji has to show the real set the product will ship, at the real fidelity: if the product uses an
+animated set, a still frame standing in for the animation is the same substitution the icon rule forbids,
+one level down. Decode the real asset frame by frame (`ImageDecoder` from WebCodecs gives frame-exact
+output) into a sprite sheet and step it in CSS, so the prototype has no runtime dependency and no build
+step and still shows the thing itself.
+
+**Photography that carries the mock data is content too.** Where a screen's subject is a photo, a real
+photo from a licensable source is worth the twenty minutes: a grey rectangle teaches a reviewer that the
+image area is undesigned, and they stop reading it. Keep it in the repository at the size the screen
+renders, not linked from a service that can go away.
+
 ## The state matrix comes before the screens
 
 Write the matrix first: every screen against every state. It is the cheapest possible way to avoid
@@ -183,6 +268,22 @@ finding, not a shortcut, because it will not receive the next token change and n
 
 When a pattern repeats within a screen family, promote it. When it repeats across families, it belongs
 in the kit.
+
+## A trap documented beside the code is not a rule
+
+`box-sizing` contains padding and border and **not margin**, so `width: 100%` plus a horizontal margin
+overflows its parent. On the source project that trap was written out as a comment on one component, and
+then hit again on a new component **twelve lines below the comment**, in the same stylesheet, by the same
+author, within the hour.
+
+A comment explains a decision to whoever is already reading that line. It does not prevent anything. When
+a trap is general, remove the chance to hit it: one kit utility that sets the inset arithmetic
+(`calc(100% - 2 * var(--row-inset))`), used by every full-bleed row, so the wrong form never has to be
+typed. If it cannot be removed, it becomes an assertion in the project harness, not a comment.
+
+The same applies to naming collisions. A generic component name (`countdown`, `card`, `panel`) will
+eventually be claimed by something else and the second one silently inherits the first one's rules.
+Name for the slot it fills, and when two candidates collide, rename before building on either.
 
 ## Check the reference against its own grid
 

@@ -182,7 +182,7 @@ so a missed baseline means the original values are gone.
 
 ## Audit integrity
 
-An audit is code, so it fails like code. Five rules, each of which has produced a false clean result:
+An audit is code, so it fails like code. Six rules, each of which has produced a false clean result:
 
 **1. A filter that narrows the population must report what it excluded.** A screen audit matched frames
 within 3px of 375x812, reported "68 of 68 screens covered", and had silently skipped every hug-height
@@ -248,6 +248,125 @@ anything unbound. Ask what the distribution *is*, then judge it.**
 
 ---
 
+# Part 3b: When the checks are yours
+
+An HTML-only project gets the four shipped HTML-side scripts and nothing else, so most of its
+verification is harnesses written for that project. The source project ended with ten of them, green three
+runs in a row, and four defects the human found in a screenshot the same afternoon. Everything in this
+part comes out of that gap.
+
+## The blind spot has a shape: space that should not be there
+
+A harness is good at properties of elements that exist. It is blind to what is absent, duplicated, or
+merely empty. All four survivors were of that class:
+
+| Defect | Why ten green checks missed it |
+|---|---|
+| three of a sheet's action rows rendered twice | every row was individually correct, and nothing counted them |
+| a 16px spacer orphaned between two dividers | a spacer has no content to be wrong about |
+| an open sheet leaving the sticky header undimmed | the scrim existed and was correct; the header was simply above it |
+| a collapsed header leaving a 20px white strip on every screen | the header's own box measured exactly as specified |
+
+Each got an assertion afterwards, and each new assertion **counts** rather than inspecting: no two stacked
+separators anywhere, no repeated row title inside one sheet, every layer above the scrim measurably darker
+once the sheet opens, no gap between a collapsed header and the content below it.
+
+Scope a duplicate check to where repetition is genuinely wrong. Screens legitimately show the same
+document under two headings, so "no repeated title" holds inside a sheet and not on a screen. A check that
+has to be true everywhere gets switched off in its first week.
+
+## Never assert a proxy
+
+An assertion on a class, a declaration or a property passes on broken work whenever something else
+overrides it. Assert the rendered outcome.
+
+- `overflow: hidden` **does not change `scrollWidth`** or the scroll extents. An assertion keyed on
+  `scrollWidth` therefore reports a decoration that is already clipped, forever, and says nothing about
+  what a reviewer can see. The real fix was to move the spread into the gradient, not to loosen the check.
+- A z-index assertion compared computed stacking values **with the sheet closed**, across stacking
+  contexts that do not compare, and produced 38 findings on a correct file. Replaced by sampling pixels
+  with the sheet open.
+- A scrim comparison must be a **ratio, not an absolute drop**, because a scrim multiplies. One overlay
+  took a dark header from luminance 33 to 20 and a white page from 252 to 151, so "at least 30 points
+  darker" passed the page and failed the header, both wrongly. `after <= before * 0.8` holds on both.
+- **A constant offset is a proxy for a measurement.** A toast positioned a fixed distance below the app bar
+  landed on top of the header on exactly the two screens that replace the app bar with their own hero,
+  which are the two screens people look at most. Measure whatever chrome the current screen actually has.
+
+## Measure the state the product can actually enter
+
+Six checks on the source project returned zero because their sample excluded the case:
+
+- a type-scale sweep measured only the visible tab, leaving 122 group headers unmeasured
+- a spacing check compared direct siblings only
+- a font check looked only at the declared family, so a node bound to nothing passed
+- an icon check **printed** mixed stroke widths and never counted them
+- a floating-button sweep forced an app bar onto the one screen that never has one, measuring a layout
+  the product cannot produce
+- a contrast probe sampled the strip where a gradient ramps into white, and read about 1:1 everywhere
+
+So print the population, print the exclusions, **and print the state you measured in**. A check that
+measures a configuration the product cannot enter is worse than no check, because it produces a number.
+
+And an **advisory that prints without counting is not an assertion.** If it cannot fail, nobody reads it
+after the first week.
+
+## Verify a new check by reintroducing the defect it was written for
+
+Not a defect. **The** defect. Put it back, watch the check fail, note the count it reports, then take it
+out again. Two checks on the source project did not fail on the first attempt:
+
+- the group-header check exempted the `row + heading` pair, which was the exact pair that was broken.
+  Restoring zero padding produced 19 failures only once the exemption was narrowed.
+- the mock-data check asserted roster **membership**, so it passed on an identifier that belonged to a
+  different person in the roster. It had to assert **ownership** by nearest name instead.
+
+Corollary, and it cost an hour: **grepping for your own failure string proves nothing about whether the
+check ran.** A suite that crashed before reaching a check prints the same nothing as a check that passed.
+Emit one line per check, pass or fail, and count the lines.
+
+## Check the probe before believing the result
+
+Two of the source project's contrast probes were wrong in opposite directions, and both were believed for
+a few minutes:
+
+- one sampled the region where the background ramps into white, so every reading was about 1:1
+- one hid the rows it was measuring with `visibility: hidden`, which also hides their background, so the
+  numbers came out identical with and without the change under test
+
+A surprising measurement is a claim about your instrument first. Re-derive it a second way before acting
+on it.
+
+## Colour needs measuring, and the interpolation space is part of the design
+
+`color-mix(in oklch)` interpolates hue along an **arc**, so a dark navy mixed toward a saturated red
+transits through mauve and green. It is visible, and it reads as a bug. `in oklab` is Cartesian and stays
+neutral; plain sRGB stayed richest for that dark-to-saturated brand ramp. Sample the midpoints rather than
+reasoning about them.
+
+Two more that only measurement settles. **Separately painted boxes cannot continue one diagonal
+gradient**, so two stacked surfaces will seam until one of them paints both. And white type over a
+generated background is not one contrast question but as many as there are variants: a background with
+eight generated conditions took four measured iterations before all eight cleared 4.5:1.
+
+## Editing safely is part of verification
+
+Three failure modes here destroyed more work on the source project than any design defect.
+
+**Prove an anchor unique before an index-based edit.** A restructure computed string offsets from a
+substring that appeared twice and cut 8,047 characters out of a file, twice, taking a tab bar, a bulk
+action bar and two sheets with it. The visible symptom was a null-reference error somewhere unrelated.
+`assert src.count(anchor) == 1` before any slice.
+
+**Never use `git checkout` to undo.** It destroyed uncommitted work twice in one session, including the
+edits that were about to be committed. Copy the file somewhere else first; the cost is nothing.
+
+**When you replace a component, assert the old one is gone.** A reverted control left a stray closing tag
+that browsers tolerated silently, and it mangled the next restructure of the same region. Removal is a
+check, not a step.
+
+---
+
 # Part 4: The audit checklist
 
 Everything must return zero. `scripts/figma-audit.js` runs it as one call.
@@ -309,6 +428,34 @@ it cannot live in the Figma half of the flow, where it sat through 0.3.0.
 | `overflow` | content past the frame's right edge — the frame clips it, so no screenshot shows it | 0 |
 | `tall-screen-pair` | content exceeding its viewport by >24px with no `· hug` twin, so the remainder is unreviewable | 0 |
 | `viewport-coverage` | a declared viewport that produced no frames at all | 0 |
+
+## The flow gate
+
+`scripts/flow-check.mjs --dir html [--state .pica/state.json]`. **Pass: 0 findings on all seven checks**,
+and a non-zero number of screens and links, because zero of either means a selector missed rather than a
+sound flow.
+
+It measures the one thing a geometry diff structurally cannot: whether the prototype goes where it says it
+goes. Every destination renders perfectly in a screenshot, which is why this class of defect reaches the
+human every time.
+
+| Check | Detects | Pass |
+|---|---|---|
+| `dangling-target` | `data-go`, `data-tab` or `data-sheet` naming something that does not exist | 0 |
+| `dangling-href` | a cross-application link to a missing file, or a deep link to a missing screen | 0 |
+| `nav-target` | a router root or tab id that resolves to no screen, or a tab set that will not parse | 0 |
+| `unreachable` | a screen no control opens, so a reviewer is told about it and never sees it | 0 |
+| `dead-end` | a screen with nothing outgoing and no back affordance, which traps the reviewer | 0 |
+| `orphan-prototype` | an interactive file with no tab in the review shell | 0 |
+| `flow-declared` | a `flows` entry whose entry file or home screen does not exist | 0 |
+
+Pass `--allow-none` for a package that genuinely ships boards only, and **say so at the gate**. Without
+the flag, no interactive prototype is a failure, because that is the normal way this deliverable goes
+missing.
+
+Two things it cannot do. It reads markup, so a link built in JavaScript is invisible to it: keep targets in
+attributes. And it cannot tell whether a link goes somewhere *sensible*, which is why "the human clicks the
+main flow end to end" is a separate line in the definition of done.
 
 The 24px threshold is calibrated, not chosen: on the project this came from, real overflows were 90px and
 up while sub-pixel scroll-region noise never exceeded 8px. A threshold in that gap separates them without
@@ -454,6 +601,18 @@ structural read-back would have passed on both.** Render the node and look at it
 ---
 
 # Part 5: Definition of done
+
+**HTML side, and the whole list for a project with `figmaInScope: false`:**
+
+- [ ] `verify-html` returns zero on all four checks
+- [ ] `parity-check` returns zero, nominal and structural, where two or more viewports are declared
+- [ ] `flow-check` returns zero on all seven checks, with a non-zero screen and link count
+- [ ] **The main flow of every application clicked end to end**, by a human, from its real entry point
+- [ ] Every screen rendered and looked at **after** the last change, not before it
+- [ ] Every check written for this project has been **seen to fail** on the defect it was written for
+- [ ] Every option board either folded into the flow or labelled as provenance
+
+**Figma side:**
 
 - [ ] Audit returns zero on every check
 - [ ] Geometry diff shows no position delta above roughly 3px that is not a documented decision

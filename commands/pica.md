@@ -41,6 +41,10 @@ Write `docs/contract.md`:
   human decision the flow may neither infer nor default. A width of 375 tells you nothing about whether
   a home indicator belongs.
 - the declared banned characters or house conventions, if any
+- the **applications** the product presents as its own, since each one gets its own interactive prototype
+- a **data ownership** table: per entity, who owns it and what this surface may create, change or only
+  read. See [research.md](../skills/design-flow/rules/research.md); "read-only" applied as a blanket
+  removes the flows the product exists for
 
 Write `docs/exclusions.md`: everything the brief rules out, **quoted from the brief**. Then ask the
 human what else to add. This is the single highest-value artefact here.
@@ -79,8 +83,13 @@ Write `.pica/state.json`:
   "workPackages": {},
   "activeReview": null,
   "writeAuthorization": null,
+  "flows": [
+    { "app": "<application>", "entry": "app-<slug>.html", "home": "<screen id>", "owns": [] }
+  ],
   "exclusions": [],
   "bannedChars": [],
+  "copyRules": [],
+  "dataOwnership": [],
   "rawValueExemptions": [],
   "deviations": []
 }
@@ -89,8 +98,13 @@ Write `.pica/state.json`:
 Populate `workPackages` with one entry per package: `{ "tier": "standard", "htmlApproved": false,
 "ported": false }`.
 
-The last four are **registers**, and they are what make later judgement calls checkable rather than
-aspirational. Two are filled now, two accumulate:
+**`flows`** is one entry per application the product presents as its own, and every package's main flow
+lands in one of them. Declared here because it is a fact about the product, not a build artefact:
+`flow-check` reads it, so "one interactive prototype per application, linked for real" is checkable rather
+than a habit. A single-application project declares one entry.
+
+The rest are **registers**, and they are what make later judgement calls checkable rather than
+aspirational. Four are filled now, two accumulate:
 
 - **`exclusions`** — a short matchable name for each thing the brief rules out, alongside the prose in
   `docs/exclusions.md`. `["settings", "profile", "onboarding video"]`. The audit compares frame names
@@ -98,6 +112,15 @@ aspirational. Two are filled now, two accumulate:
   two days later by a human re-reading the brief.
 - **`bannedChars`** — declared here rather than buried in the audit script's config, since it is a project
   fact established at intake.
+- **`copyRules`** — the client's house conventions on wording and punctuation, each with the check that
+  enforces it. On the source project a punctuation ban and a mixed-case wordmark both arrived as asides,
+  and both had to be enforced mechanically afterwards. Ask for them at intake; a copy rule that lives only
+  in conversation lasts about a day.
+- **`dataOwnership`** — per entity, who owns it and what this surface may do with it:
+  `{entity, ownedBy, thisSurface, why}`. Read-only is never a blanket. On the source project an instruction
+  that the user's data could not be changed on mobile was first applied to everything and disabled the
+  request and approval flows the product exists for. What was meant was the **person's own record**, while
+  everything a person *does* stays interactive. Per entity, that distinction is designable and checkable.
 - **`rawValueExemptions`** — starts empty, grows during the port when a value genuinely has no token.
 - **`deviations`** — starts empty, grows when the human approves Figma differing from the HTML.
 

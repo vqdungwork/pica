@@ -6,7 +6,7 @@
 
 Prototype in HTML. Port to Figma on approval. Verify by measurement, never by eye.
 
-[![version](https://img.shields.io/badge/version-0.2.0-1f2328)](https://github.com/vqdungwork/pica/releases)
+[![version](https://img.shields.io/badge/version-0.5.0-1f2328)](https://github.com/vqdungwork/pica/releases)
 [![licence](https://img.shields.io/badge/licence-MIT-1f2328)](LICENSE)
 [![requires](https://img.shields.io/badge/requires-Claude%20Code-1f2328)](https://claude.com/claude-code)
 [![figma](https://img.shields.io/badge/Figma-optional-1f2328)](#requirements)
@@ -247,8 +247,14 @@ standing in for icons. Screens taller than the viewport come as a **pair**, one 
 that really scrolls with pinned chrome, and one full-height version. Never a separate "scrolled"
 duplicate frame.
 
-Then a self-review, then your approval. Your approval is what unlocks step 6, and it is recorded to
-disk.
+**And the flow, interactively.** Options settle a decision and then become provenance; the deliverable is
+something you click, one prototype per application, linked to the others for real. `flow-check.mjs` proves
+every link resolves, every screen is reachable and nothing is a dead end. Whether a link goes somewhere
+*sensible* is what your click is for, and on the source project that is where every routing defect was
+found.
+
+Then the measured checks, then rendering every screen and looking at it, then a self-review, then your
+approval. Your approval is what unlocks step 6, and it is recorded to disk.
 
 </details>
 
@@ -410,17 +416,36 @@ Six modules, each written to be read on its own.
 
 | Module | Covers |
 |:--|:--|
-| `research.md` | Research before designing, audit breadth, token extraction with provenance |
-| `html-prototype.md` | Frame size, the single tabbed review page, the interactive and full-height pair, real assets, state matrices |
+| `research.md` | Research before designing, audit breadth, token extraction with provenance, mock-data provenance, the client's copy rules and data-ownership table |
+| `html-prototype.md` | Frame size, the single tabbed review page, option boards versus the interactive main flow, navigation state, the interactive and full-height pair, real assets, state matrices |
 | `figma-elements.md` | Token layers including `Border`, binding geometry as well as type, alpha living in the token, numeric font weights, font-package forensics, global versus local component tiers |
 | `figma-screens.md` | Frames, states, FILL versus HUG, vertical centring, screen-chrome pinning, the circle rule, alignment measured against HTML, and the Plugin API calls that fail silently |
 | `figma-mcp.md` | Rate limits and the call budget, `page.loadAsync` for whole-file reads in one call, write discipline |
-| `review-gates.md` | The self-review checklist, report versus fix, complexity criteria, panel lenses, appearance baselines, audit integrity, and what "zero" means |
+| `review-gates.md` | The self-review checklist, report versus fix, complexity criteria, panel lenses, writing checks that can fail, appearance baselines, audit integrity, and what "zero" means |
 
 ## Where this came from
 
 This was extracted from **one** real client design pilot: a fixed-scope mobile app redesign delivered
 against a 24 hour cap. Every rule in it earns its place from a specific failure on that project.
+
+`0.5.0` adds the first **HTML-only** project: the mobile design of a live enterprise product, several
+applications behind one launcher, 60 screens across four interactive prototypes, no Figma anywhere in it. Two things
+came out of it.
+
+The deliverable was wrong-shaped. A work package produced option boards, which every check can see, and
+the flow between them was left implicit. But **every defect the client found by using the prototype was a
+navigation defect with no geometric signature**: a home row that opened another role's screen, an entry
+point that lit the tab it came from, a shared screen whose back control left the application, a deep link
+that travelled via the launcher. So a package now ships boards **and** an interactive prototype of its main
+flow, one per application, and `flow-check.mjs` reads the wiring.
+
+And the checks were the wrong shape too. Ten hand-written harnesses ran green three times in a row while
+four defects sat visible in a screenshot: duplicated rows in a sheet, a spacer orphaned between two
+dividers, an open sheet leaving the header undimmed, a 20px white strip under a collapsed header. **A
+harness is good at properties of elements that exist and blind to space that should not be there.** Six
+other checks returned zero because their sample excluded the case, one of them measuring a screen
+configuration the product cannot produce. Two of the fixes only worked once the original defect was put
+back and the check was watched failing.
 
 `0.4.0` is the release that made `0.3.0` true. `0.3.0` documented a viewport parity check and a geometry
 diff in full detail — passes, pruning, tolerances, pass criteria — and **shipped neither**. Both lived only
@@ -454,18 +479,18 @@ surface it bound. Both facts are why `0.2.0` exists, and both are written into t
 That is its strength and its limit. Two rounds on one file is not evidence that this generalises, and you
 will hit cases it has never seen.
 
-The HTML half is still the better tested half, and `0.4.0` widened the gap again by design: the HTML gate
-has three shipped checks, each negative-tested by being broken on purpose to confirm it reports, while the
-Figma side has one. `geometry-diff.mjs` is generalized from the version that reached zero findings during
+The HTML half is still the better tested half, and `0.4.0` and `0.5.0` widened the gap again by design:
+the HTML gate now has four shipped scripts, every check in them negative-tested by being broken on purpose
+to confirm it reports, while the Figma side has one. `geometry-diff.mjs` is generalized from the version that reached zero findings during
 the `0.3.0` port, but **its clean run is reported history rather than something you can re-run** — the
 dumps it ran against were mid-port intermediates measured against a superseded reference, so they proved
 nothing and were not worth keeping.
 
-Hence `0.4.0`, and not `1.0`.
+Hence `0.5.0`, and not `1.0`.
 
 ### What this repo does and does not contain
 
-It ships the **method**: rules, commands, hooks and the six checks. It does **not** ship the projects the
+It ships the **method**: rules, commands, hooks and the seven checks. It does **not** ship the projects the
 rules were derived from. Those carry briefs, PRDs, real copy and client identifiers, and none of that is
 yours to receive — so `spike/` is in `.gitignore` and stays on the author's disk.
 
@@ -476,10 +501,10 @@ who finds it inconvenient, which is why the changelog is long and why every entr
 
 To generate your own evidence, run the flow on a project of your own. The checks are self-contained: point
 `capture-html-reference.mjs` at a directory of HTML, then run `verify-html.mjs` and `parity-check.mjs`
-against the artefact and your `.pica/state.json`. Each states its pass criterion, and each fails closed —
+against the artefact and your `.pica/state.json`, and `flow-check.mjs` against the HTML directory itself. Each states its pass criterion, and each fails closed —
 if it cannot do its job it exits non-zero rather than reporting a clean run.
 
-Three projects is not proof that this generalises, and you will hit cases it has never seen.
+Four projects is not proof that this generalises, and you will hit cases it has never seen.
 
 ## Not included
 

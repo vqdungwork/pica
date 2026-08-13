@@ -1,7 +1,7 @@
 {
   "name": "pica",
   "description": "A design workflow for Claude Code. Prototype in HTML at one or more declared viewports, port to Figma on approval, verify by measurement and by looking.",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "author": {
     "name": "Dung Vuong"
   },

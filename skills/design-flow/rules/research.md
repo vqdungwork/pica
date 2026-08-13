@@ -119,6 +119,76 @@ identity contradicts a reuse estimate.
 
 Output `tokens.json` and `tokens.css` from the same source, so the HTML and Figma sides cannot drift.
 
+## Mock data provenance, which matters as much as token provenance
+
+Real-looking data is self-certifying, and that is what makes it dangerous. Nobody checks a screen that
+looks right. On the source project, where the mock data came from the product's own seed, the defects were:
+
+- a real person's name under someone else's job title
+- an identifier that belongs to a **different** real person in the roster, invented to fill a row
+- a feed whose newest item predated the screen's own "today"
+- a notification crediting the wrong author for a real post
+- a post that no screen in the flow could produce
+
+Each one reads as authoritative. So:
+
+**Cross-reference against the source, and assert ownership rather than membership.** The first version of
+that check confirmed the value existed somewhere in the source data, which is exactly why it passed on an
+identifier belonging to somebody else. It has to bind each value to the **nearest name in the markup**, and it has to
+strip relationship fields (`Manager`, `Approver`, `Reviewer`) first, or a row resolves to the person it
+references instead of the person it is about.
+
+**Identify a row by the name beside it, never by initials.** In a 32-person roster, 14 initial forms were
+ambiguous, and a plausible face on the wrong row invites even less scrutiny than a plausible job title.
+
+**A nullable field is two states, and both are content.** 12 of 32 people in one roster had an account
+photo and only 9 of those were usable, so the prototype shows photographs and initials side by side,
+because that is what the product renders. Filling the gap with a generated face would have designed away a
+state the build has to handle.
+
+**Internal consistency is a check, not a proofread.** Dates monotonic against the screen's own today,
+counts equal to the rows they count, authors matching between an item and the notification about it, every
+referenced entity reachable from some screen.
+
+## Client rules become contract entries, and each one gets an executable
+
+A rule stated in conversation lasts about a day. On the source project three of them arrived as asides and
+all three had to be enforced mechanically afterwards:
+
+| Rule | Register | Enforced by |
+|---|---|---|
+| a banned punctuation mark in product copy | `copyRules` | a rewriter over text nodes and the spoken attributes, plus a count that must reach zero |
+| a mixed-case wordmark that must never be upper-cased | `copyRules` | exact-case grep across every file |
+| the person's own record is read-only on this surface | `dataOwnership` | no editable control inside the declared read-only regions |
+
+Two details the punctuation rule needed before it could run, and both were found by running it: script,
+style and comment text are not product copy and must be skipped, and a mark at the boundary **between two
+inline tags** is joining them, so deleting it welds two words together. Substitute by what follows the mark
+rather than deleting it blindly.
+
+## Declare who owns each piece of data
+
+When a surface is one of several clients of the same account, write down what it may change, per entity,
+before designing anything that looks editable.
+
+```json
+"dataOwnership": [
+  { "entity": "the person's own record", "ownedBy": "launcher", "thisSurface": "read", "why": "changed once, centrally" },
+  { "entity": "requests they raise",     "ownedBy": "this",     "thisSurface": "create, cancel" },
+  { "entity": "approvals they give",     "ownedBy": "this",     "thisSurface": "approve, reject" }
+]
+```
+
+Read-only is not a blanket. On the source project an instruction that the user's data could not be changed
+on mobile was taken too far on the first pass and disabled the request and approval flows, which are the
+reason the product exists. The correction was that **the person's record** is view-only while everything a
+person *does* stays interactive. A per-entity table makes that distinguishable; a sentence in a review
+document does not.
+
+The same table settles the launcher question: one application owns the account, every other application
+syncs from it and can never write to it. Design the others without an edit affordance at all, rather than
+with one that fails.
+
 ## Precedent research
 
 For anything the product does not already do, research how real products do it, and **cite what you
