@@ -1,9 +1,6 @@
 <div align="center">
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="assets/banner-dark.svg">
-  <img alt="pica — prototype in HTML, port to Figma on approval, verify by measurement, never by eye" src="assets/banner-light.svg" width="100%">
-</picture>
+<img alt="pica — from the brief to the shipped screen. Intake, research, HTML, Figma, then implementation and test. Every step verified by measurement, never by opinion." src="assets/banner.svg" width="100%">
 
 **A design workflow for Claude Code.**
 
