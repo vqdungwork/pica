@@ -34,10 +34,6 @@ flow.
 
 A self-review that finds nothing is a valid result. Say what you ran.
 
----
-
-# Part 2: Complexity routing
-
 A work package is **complex** if any one of these holds:
 
 - no precedent for the feature exists in the product being redesigned
@@ -69,10 +65,6 @@ The feasibility lens earns its place on its own: it found fifteen backend gaps a
 component reuse that were not true.
 
 Blindness matters. Four agents given each other's output converge, and convergence is not agreement.
-
----
-
-# Part 3: Verification method
 
 ## Audit integrity
 
@@ -139,15 +131,6 @@ any normalised weight with more than one spelling in the file. The minority spel
 
 **The general lesson: a check that asks "does anything differ from the current value" is blind to
 anything unbound. Ask what the distribution *is*, then judge it.**
-
----
-
-# Part 3b: When the checks are yours
-
-An HTML-only project gets the four shipped HTML-side scripts and nothing else, so most of its
-verification is harnesses written for that project. The source project ended with ten of them, green three
-runs in a row, and four defects the human found in a screenshot the same afternoon. Everything in this
-part comes out of that gap.
 
 ## The blind spot has a shape: space that should not be there
 
@@ -296,49 +279,6 @@ edits that were about to be committed. Copy the file somewhere else first; the c
 that browsers tolerated silently, and it mangled the next restructure of the same region. Removal is a
 check, not a step.
 
----
-
-# Part 4: The audit checklist
-
-Everything must return zero. `scripts/figma-audit.js` runs it as one call.
-
-| Check | Detection |
-|---|---|
-| Auto-layout overflow | flow children + gaps + padding versus box, on FIXED axes only; exclude ABSOLUTE children and WRAP frames |
-| Ovalised circles | ELLIPSE or radius-999, round-sounding name, w/h ratio outside 0.92 to 1.08 |
-| Clipped shadows | `clipsContent` with a child carrying a visible DROP_SHADOW |
-| Clipped rails | `clipsContent`, HORIZONTAL layout, more than 2 children, no `overflowDirection` |
-| Page-level overlaps | pairwise AABB on `page.children` |
-| Style-less screen text | no `textStyleId` matching a local style, excluding instance children |
-| Unbound font weights | no `fontWeight` binding and no bound style |
-| Unbound corner radii | any of the **four** corner properties > 0, unbound, with a matching `CORNER_RADIUS` token and no register entry |
-| Unbound padding | any padding side > 0, unbound, with a matching `GAP` token and no register entry |
-| Unbound border width | strokes present and **none of the five** `strokeWeight` keys bound, with a matching `STROKE_FLOAT` token |
-| Unbound fills and strokes | SOLID paint with no `boundVariables.color` and a token matching its **RGBA** |
-| Unregistered raw values | anything raw with no matching token **and** no entry in `rawValueExemptions` |
-| Flattened translucency | **advisory, not zero.** Bound SOLID paint at `opacity 1` over artwork, named as a true overlay or carrying a same-colour child. The gate is the baseline diff, because a name cannot tell you what was meant to be translucent |
-| Baseline delta | any resolved RGBA change against the pre-pass baseline that is not a recorded decision |
-| Un-centred icons in controls | horizontal frame with an icon child and `counterAxisAlignItems !== "CENTER"`, **unless a `*-slot` child is present**, which centres on the field deliberately |
-| Fixed-height text riding high | `textAutoResize === "NONE"`, `textAlignVertical === "TOP"`, `height % lineHeight !== 0` |
-| Unequal sibling heights | 3+ children **sharing a name stem** (`tab …`, `seg-…`) with differing heights and any `layoutSizingVertical !== "FILL"` |
-| Unpinned screen chrome | bottom chrome whose `constraints.vertical !== "MAX"`, or whose gap to the frame bottom is non-zero |
-| Un-centred button labels | `textAlignHorizontal !== "CENTER"` inside a button instance |
-| Wrong button sizing | full-width size in an auto-layout parent not set to FILL |
-| Detached instances | `getMainComponentAsync()` throws |
-| Orphaned nodes | `icon/*`, `Vector`, `Rectangle` directly on a page |
-| Prototype dead ends | frame with zero outgoing reactions |
-| Home indicators | present and bottom-pinned on **every** screen frame, viewport and hug alike |
-| Placeholder text | `PASTE HERE`, `TODO`, `TBD`, `lorem ipsum` |
-| Banned characters | project-specific, declared at intake |
-| Conflicting weight spellings | one normalised weight with more than one spelling |
-| Stale published counts | claims parsed from the file's own text and recounted against live counts of screens, components, variables and links. Unrecognised nouns are ignored rather than guessed at |
-| Excluded work built anyway | any top-level frame name matching an entry in the `exclusions` register |
-| Clipped content | per vertical auto-layout node, `lastChild.y + height + paddingBottom` vs the node's own height; exclude declared scroll surfaces |
-| Missing content | per-frame text-run count against the HTML reference, tolerance calibrated `+1 per input` / `−2 per emphasis run` |
-| Missing hug twin | any screen whose content exceeds its viewport height by more than 24px must have a `· hug` twin |
-| Declared chrome | every entry in `viewports[].chrome` marked `required`, present and pinned on the declared axes; optional entries match their constraints where present |
-| Single-line controls | inputs and selects carry `maxLines: 1` with ellipsis truncation, set on the component |
-
 ## Recount every number you publish
 
 A cover claiming "45 designed screens" was counting five annotation boards. Derive published figures
@@ -431,41 +371,4 @@ And its corollary for any tool that returns a status object: a plausible success
 of a correct result. On one project a write API returned `{variantCount: 9}` with all nine variants
 stacked at the origin, and `{rows: 5}` with five rows built from the wrong component variant. **A
 structural read-back would have passed on both.** Render the node and look at it.
-
----
-
-# Part 5: Definition of done
-
-**HTML side, and the whole list for a project with `figmaInScope: false`:**
-
-- [ ] `verify-html` returns zero on all four checks
-- [ ] `parity-check` returns zero, nominal and structural, where two or more viewports are declared
-- [ ] `flow-check` returns zero on all seven checks, with a non-zero screen and link count
-- [ ] **The main flow of every application clicked end to end**, by a human, from its real entry point
-- [ ] Every screen rendered and looked at **after** the last change, not before it
-- [ ] Every check written for this project has been **seen to fail** on the defect it was written for
-- [ ] Every option board either folded into the flow or labelled as provenance
-
-**Figma side:**
-
-- [ ] Audit returns zero on every check
-- [ ] Geometry diff shows no position delta above roughly 3px that is not a documented decision
-- [ ] Every screen text node carries a text style; every style is variable-bound
-- [ ] Every geometry property is bound or listed in `rawValueExemptions`: four corner radii, four
-      padding sides, border width, fills and strokes
-- [ ] **Every frame rendered and looked at, per viewport.** Separate from "audit returns zero": the
-      audit answers a narrower question than it appears to
-- [ ] Content-height check returns zero, so nothing is clipped
-- [ ] Text-run counts match the HTML reference within the calibrated tolerance
-- [ ] Every screen taller than its viewport has its hug twin
-- [ ] Prototype clones re-synced after the last frame-level fix, audited by **measuring** a property
-      that changed — not by remembering the re-sync
-- [ ] Baseline diff is empty, or every resolved RGBA delta is a recorded decision
-- [ ] Every screen frame carries a bottom-pinned home indicator, hug frames included
-- [ ] Zero detached instances; zero raw shapes in screens beyond images, scrims and indicators
-- [ ] Contrast computed and passing, with any exception measured from the render and written down
-- [ ] Prototype has no dead ends
-- [ ] Every deviation from the HTML is either fixed or listed in `deviations` with a reason and a name
-- [ ] Nothing in `exclusions` exists in the file
-- [ ] Every number published in the file recounts correctly from the file
 
