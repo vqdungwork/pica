@@ -14,7 +14,7 @@
   },
   "produces": {
     "state": ["packages.html.built"],
-    "artifacts": ["html/", ".audit/html-reference.json"]
+    "artifacts": ["html/", ".audit/html-reference.json", ".audit/html-reference-forced.json"]
   },
   "checks": [
     { "run": "verify-html.mjs",  "passes": "0 findings across viewport-tagged, overflow, tall-screen-pair, viewport-coverage" },

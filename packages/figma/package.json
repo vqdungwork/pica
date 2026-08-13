@@ -9,7 +9,7 @@
   },
   "requires": {
     "state": ["viewports", "figmaInScope=true"],
-    "artifacts": [".audit/html-reference.json"],
+    "artifacts": [".audit/html-reference.json", ".audit/html-reference-forced.json"],
     "gates": ["htmlApproved:<wp>"]
   },
   "produces": {

@@ -100,11 +100,26 @@ node $S/parity-check.mjs  .audit/html-reference.json .pica/state.json   # 2+ vie
 node $S/flow-check.mjs    --dir html --state .pica/state.json
 ```
 
+**If `figmaInScope` is true in `.pica/state.json`, capture a second, forced-font reference**, to a
+distinct artefact so both exist side by side:
+
+```bash
+node $S/capture-html-reference.mjs --dir html --out .audit/.forced-font --font "<the family Figma resolves>"
+mv .audit/.forced-font/html-reference.json .audit/html-reference-forced.json
+rm -rf .audit/.forced-font
+```
+
+Forcing the family Figma resolves isolates layout differences from typeface metrics: metrics differ per
+font family, so a geometry diff run with each side in a different font attributes a font fallback to a
+layout defect. This pass belongs here rather than in `/pica-port` because html owns
+`capture-html-reference.mjs`; figma only consumes what it captures.
+
 Pass criteria, all of them, no partial credit:
 
 | Check | Passes when |
 |---|---|
 | capture | writes an artefact at all — it refuses on 0 frames, which means a selector matched nothing |
+| forced-font capture | (figma-in-scope packages only) writes `.audit/html-reference-forced.json` |
 | `viewport-tagged` | 0 findings: every frame tagged with a declared viewport name |
 | `overflow` | 0 findings: nothing extends past a frame's right edge |
 | `tall-screen-pair` | 0 findings: every frame whose content exceeds its viewport by >24px has a `· hug` twin |

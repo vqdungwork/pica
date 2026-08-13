@@ -3,8 +3,8 @@
 Step 6. The package named in `$ARGUMENTS`.
 
 Load `${CLAUDE_PLUGIN_ROOT}/rules/figma-screens.md`,
-`${CLAUDE_PLUGIN_ROOT}/rules/figma-elements.md`, and the core package's `review-discipline.md`, then
-load the `figma-use` skill.
+`${CLAUDE_PLUGIN_ROOT}/rules/figma-elements.md`, `${CLAUDE_PLUGIN_ROOT}/rules/figma-gates.md`, and the
+core package's `review-discipline.md`, then load the `figma-use` skill.
 Pass `skillNames: "figma-use"` on every `use_figma` call.
 
 ---
@@ -18,6 +18,7 @@ Check `.pica/state.json` and the filesystem, and **stop** if any fail:
 - `delivered` is false
 - `activeReview` is not in report mode
 - `.audit/html-reference.json` exists
+- `.audit/html-reference-forced.json` exists
 
 The write gate enforces the state-based checks anyway, so a failure there is a denied tool call rather
 than a wrong file. But check first and say which precondition failed, rather than letting the human read
@@ -46,6 +47,11 @@ If the artifact is present, treat it as the measured baseline for this package's
 this command. If you have reason to think the HTML changed since its approval — the human mentions an
 edit, or a diff below looks wrong in a way that points at drift rather than at the port — say so and ask
 whether to re-run `/pica-wp <wp>` before continuing, rather than porting against a stale reference.
+
+The same applies to `.audit/html-reference-forced.json`, the forced-font capture `/pica-wp` produces
+alongside the native one. Use it, not the native reference, when running the font-forced pass in
+`figma-gates.md`'s "Force a common font while diffing layout" — that isolates layout differences from
+typeface metrics. If it is absent, stop for the same reason as above: do not synthesize it here.
 
 ## 2. Local components
 
