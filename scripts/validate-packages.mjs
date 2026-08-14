@@ -116,6 +116,16 @@ for (const name of dirs) {
     }
   }
 
+  /* A skill is a DIRECTORY containing SKILL.md, not a file — `owns.skills` names the
+     directory, and existence means packages/<pkg>/skills/<name>/SKILL.md is present. */
+  for (const skill of (m.owns?.skills || [])) {
+    const rel = path.join("packages", name, "skills", skill);
+    const skillFile = path.join(rel, "SKILL.md");
+    if (!fs.existsSync(path.join(ROOT, skillFile))) findings.push(`${name}: owns skills/${skill}, which has no SKILL.md`);
+    if (owned.has(rel)) findings.push(`${rel} is owned by both ${owned.get(rel)} and ${name}`);
+    owned.set(rel, name);
+  }
+
   for (const c of (m.checks || [])) {
     if (!c.run || !c.passes) { findings.push(`${name}: a check is missing "run" or "passes"`); continue; }
     const rel = path.join("packages", name, "scripts", c.run);
@@ -139,6 +149,17 @@ for (const name of dirs) {
     if (!fs.existsSync(dir)) continue;
     for (const f of fs.readdirSync(dir)) {
       const rel = path.join("packages", name, kind, f);
+      if (!owned.has(rel)) findings.push(`${rel} exists but no package.json claims it`);
+    }
+  }
+
+  /* skills/ holds directories, each a skill named by its own directory (containing
+     SKILL.md), not files — scanned the same way but by directory name. */
+  const skillsDir = path.join(PKG_DIR, name, "skills");
+  if (fs.existsSync(skillsDir)) {
+    for (const f of fs.readdirSync(skillsDir, { withFileTypes: true })) {
+      if (!f.isDirectory()) continue;
+      const rel = path.join("packages", name, "skills", f.name);
       if (!owned.has(rel)) findings.push(`${rel} exists but no package.json claims it`);
     }
   }

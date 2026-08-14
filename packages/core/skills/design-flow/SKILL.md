@@ -31,32 +31,32 @@ first gets made.
 
 | # | Step | Command | Rules |
 |---|---|---|---|
-| 1 | Intake, brief becomes a contract. Declares `viewports` and `figmaInScope` | `/pica` | [research.md](../../packages/research/rules/research.md) |
-| 2 | Research and tokens | inside `/pica` | [research.md](../../packages/research/rules/research.md) |
-| 3 | UI kit in HTML — the design kit every screen consumes | inside `/pica` | [html-prototype.md](../../packages/html/rules/html-prototype.md) |
+| 1 | Intake, brief becomes a contract. Declares `viewports` and `figmaInScope` | `/pica` | [research.md](../../../packages/research/rules/research.md) |
+| 2 | Research and tokens | inside `/pica` | [research.md](../../../packages/research/rules/research.md) |
+| 3 | UI kit in HTML — the design kit every screen consumes | inside `/pica` | [html-prototype.md](../../../packages/html/rules/html-prototype.md) |
 
 **Phase B — design and verify (repeats per work package, over days).** This phase is the deliverable.
 An HTML-only project ends here, having been fully verified.
 
 | # | Step | Command | Rules |
 |---|---|---|---|
-| 4 | Build the package at every declared viewport: option boards **and** the interactive main flow | `/pica-wp <name>` | [html-prototype.md](../../packages/html/rules/html-prototype.md) |
-| 5 | **Measure it** — capture, `verify-html`, `parity-check`, `flow-check`. All zero, or fix | inside `/pica-wp` | [html-gates.md](../../packages/html/rules/html-gates.md) |
-| 6 | Render every frame and look at it, per viewport, and **click the main flow end to end** | inside `/pica-wp` | [review-discipline.md](../../packages/core/rules/review-discipline.md) |
-| 7 | **GATE: human approves this package's HTML** | inside `/pica-wp` | [html-gates.md](../../packages/html/rules/html-gates.md) |
+| 4 | Build the package at every declared viewport: option boards **and** the interactive main flow | `/pica-wp <name>` | [html-prototype.md](../../../packages/html/rules/html-prototype.md) |
+| 5 | **Measure it** — capture, `verify-html`, `parity-check`, `flow-check`. All zero, or fix | inside `/pica-wp` | [html-gates.md](../../../packages/html/rules/html-gates.md) |
+| 6 | Render every frame and look at it, per viewport, and **click the main flow end to end** | inside `/pica-wp` | [review-discipline.md](../../../packages/core/rules/review-discipline.md) |
+| 7 | **GATE: human approves this package's HTML** | inside `/pica-wp` | [html-gates.md](../../../packages/html/rules/html-gates.md) |
 
 **Phase C — Figma (optional; skip entirely when `figmaInScope` is false).** Nothing here may begin for a
 package until step 7 passed for that package. The hook enforces it.
 
 | # | Step | Command | Rules |
 |---|---|---|---|
-| 8 | Foundations into Figma — variables, text styles, components | inside `/pica` or before first port | [figma-elements.md](../../packages/figma/rules/figma-elements.md) |
-| 9 | Port the approved package | `/pica-port <wp>` | [figma-screens.md](../../packages/figma/rules/figma-screens.md), [figma-elements.md](../../packages/figma/rules/figma-elements.md) |
-| 10 | Verify against the HTML — `geometry-diff`, per frame, re-diff after each fix | inside `/pica-port` | [figma-gates.md](../../packages/figma/rules/figma-gates.md) |
-| 11 | Review | `/pica-review [wp]` | [figma-gates.md](../../packages/figma/rules/figma-gates.md) |
-| 12 | Prototype | `/pica-prototype` | [figma-screens.md](../../packages/figma/rules/figma-screens.md), [html-gates.md](../../packages/html/rules/html-gates.md) |
-| 13 | Closeout | `/pica-close` | [review-discipline.md](../../packages/core/rules/review-discipline.md) |
-| — | Feedback arrives | `/pica-feedback` | [review-discipline.md](../../packages/core/rules/review-discipline.md), [figma-mcp.md](../../packages/figma/rules/figma-mcp.md) |
+| 8 | Foundations into Figma — variables, text styles, components | inside `/pica` or before first port | [figma-elements.md](../../../packages/figma/rules/figma-elements.md) |
+| 9 | Port the approved package | `/pica-port <wp>` | [figma-screens.md](../../../packages/figma/rules/figma-screens.md), [figma-elements.md](../../../packages/figma/rules/figma-elements.md) |
+| 10 | Verify against the HTML — `geometry-diff`, per frame, re-diff after each fix | inside `/pica-port` | [figma-gates.md](../../../packages/figma/rules/figma-gates.md) |
+| 11 | Review | `/pica-review [wp]` | [figma-gates.md](../../../packages/figma/rules/figma-gates.md) |
+| 12 | Prototype | `/pica-prototype` | [figma-screens.md](../../../packages/figma/rules/figma-screens.md), [html-gates.md](../../../packages/html/rules/html-gates.md) |
+| 13 | Closeout | `/pica-close` | [review-discipline.md](../../../packages/core/rules/review-discipline.md) |
+| — | Feedback arrives | `/pica-feedback` | [review-discipline.md](../../../packages/core/rules/review-discipline.md), [figma-mcp.md](../../../packages/figma/rules/figma-mcp.md) |
 
 Foundations sat at step 4 through 0.3.0, before any HTML was approved. That put Figma writes ahead of the
 gate that exists to prevent them and made the optional phase look mandatory. They belong in Phase C: the
@@ -131,7 +131,7 @@ The rest are yours to hold:
 |---|---|---|
 | nothing | steps 1, 2, 3, 5, 7 HTML-side, 9 | the core flow runs |
 | Figma MCP server, which provides `figma-use` | steps 4, 6, 7 Figma-side, 8 | say those steps are unavailable, run the rest |
-| Figma seat with enough MCP calls | any Figma-side step | size the work to the budget, see [figma-mcp.md](../../packages/figma/rules/figma-mcp.md) |
+| Figma seat with enough MCP calls | any Figma-side step | size the work to the budget, see [figma-mcp.md](../../../packages/figma/rules/figma-mcp.md) |
 | playwright | the capture harness in `packages/html/scripts/` | say the measured diff is unavailable, and do not silently fall back to eyeballing |
 | superpowers | stronger intake and planning, plus the panel | use `brainstorming`, `writing-plans`, `dispatching-parallel-agents` when present |
 
@@ -164,7 +164,7 @@ exists for the same reason every other register does: without it a deliberate ca
 from an omission.
 
 `copyRules` and `dataOwnership` carry the client's own rules in a form something can read. See
-[research.md](../../packages/research/rules/research.md): a copy rule stated in conversation lasts about a
+[research.md](../../../packages/research/rules/research.md): a copy rule stated in conversation lasts about a
 day, and "the user's data is read-only here" means nothing useful until it is written per entity.
 
 **The viewport declaration**, which everything downstream reads:
@@ -253,11 +253,11 @@ project ten green harnesses coexisted with a home-screen row that opened another
 
 Each rule now lives with the package that owns it.
 
-- [research.md](../../packages/research/rules/research.md) — research package. Intake packet, contract, exclusions, audit breadth, token provenance, mock-data provenance, client copy rules, data ownership
-- [html-prototype.md](../../packages/html/rules/html-prototype.md) — html package. Layout, the tabbed review page, options versus the interactive flow, navigation state, the tall-screen pair, real assets, state matrices
-- [html-gates.md](../../packages/html/rules/html-gates.md) — html package. The measured HTML gate, the flow gate, viewport parity, HTML-only coverage, behaviour review for prototypes, definition of done
-- [figma-elements.md](../../packages/figma/rules/figma-elements.md) — figma package. Token layers including Border, geometry binding, alpha in tokens, numeric font weights, font-package forensics, component tiers, instance constraints
-- [figma-screens.md](../../packages/figma/rules/figma-screens.md) — figma package. Frames, states, alignment and vertical centring, screen chrome pinning, CSS to auto-layout, the circle trap, API traps
-- [figma-mcp.md](../../packages/figma/rules/figma-mcp.md) — figma package. Rate limits and call budget, `page.loadAsync` for whole-file reads, write discipline
-- [figma-gates.md](../../packages/figma/rules/figma-gates.md) — figma package. The Figma audit checklist, appearance baselines, geometry-diff tolerances, the deviations register, definition of done
-- [review-discipline.md](../../packages/core/rules/review-discipline.md) — core package. Medium-independent: report versus fix, self-review, complexity routing, the panel, verification method, writing your own checks, audit integrity
+- [research.md](../../../packages/research/rules/research.md) — research package. Intake packet, contract, exclusions, audit breadth, token provenance, mock-data provenance, client copy rules, data ownership
+- [html-prototype.md](../../../packages/html/rules/html-prototype.md) — html package. Layout, the tabbed review page, options versus the interactive flow, navigation state, the tall-screen pair, real assets, state matrices
+- [html-gates.md](../../../packages/html/rules/html-gates.md) — html package. The measured HTML gate, the flow gate, viewport parity, HTML-only coverage, behaviour review for prototypes, definition of done
+- [figma-elements.md](../../../packages/figma/rules/figma-elements.md) — figma package. Token layers including Border, geometry binding, alpha in tokens, numeric font weights, font-package forensics, component tiers, instance constraints
+- [figma-screens.md](../../../packages/figma/rules/figma-screens.md) — figma package. Frames, states, alignment and vertical centring, screen chrome pinning, CSS to auto-layout, the circle trap, API traps
+- [figma-mcp.md](../../../packages/figma/rules/figma-mcp.md) — figma package. Rate limits and call budget, `page.loadAsync` for whole-file reads, write discipline
+- [figma-gates.md](../../../packages/figma/rules/figma-gates.md) — figma package. The Figma audit checklist, appearance baselines, geometry-diff tolerances, the deviations register, definition of done
+- [review-discipline.md](../../../packages/core/rules/review-discipline.md) — core package. Medium-independent: report versus fix, self-review, complexity routing, the panel, verification method, writing your own checks, audit integrity

@@ -6,7 +6,8 @@
     "commands": ["pica.md", "pica-close.md", "pica-feedback.md"],
     "rules": ["review-discipline.md"],
     "scripts": ["pica-status.mjs"],
-    "hooks": ["dispatcher.md", "gate-figma-write", "hooks.json", "session-start"]
+    "hooks": ["dispatcher.md", "gate-figma-write", "hooks.json", "session-start"],
+    "skills": ["design-flow"]
   },
   "requires": { "state": [], "artifacts": [], "gates": [] },
   "produces": {
