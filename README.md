@@ -24,7 +24,7 @@
 [Install](#install) · [The flow](#the-flow) · [In practice](#what-this-looks-like-in-practice) ·
 [The steps in detail](#the-steps-in-detail) · [What is enforced](#what-is-enforced-and-how) ·
 [Requirements](#requirements) · [The rules](#the-rules) · [Philosophy](#philosophy) ·
-[Troubleshooting](#troubleshooting) · [Community](#community)
+[Community](#community)
 
 ## The problem
 
@@ -606,70 +606,7 @@ codebase. Any Figma community plugin. Responsive breakpoints as a continuum — 
 - **Approval is a decision, not an inference** — silence, "looks ready" and moving on are not approval
 - **Every rule names the failure that earned it** — a rule without one gets deleted by the next person
 
-## Troubleshooting
-
-<details>
-<summary><b>The checks say playwright is unavailable</b></summary>
-
-<br>
-
-`capture-html-reference.mjs` needs playwright to render and measure. It searches upward from the
-working directory and then the usual global locations. If it cannot find it, **it says the measured diff
-cannot run and stops** — it does not fall back to eyeballing, because that is the failure mode the whole
-flow exists to prevent. Install playwright in the project, or run the capture from a directory that has it.
-
-</details>
-
-<details>
-<summary><b>The capture reports 0 frames</b></summary>
-
-<br>
-
-Your selectors match nothing. The defaults are `--sel ".frame-wrap"` for the wrapper and
-`--frame "[data-viewport]"` for the frame itself. Every frame needs `data-viewport="<name>"` matching a
-viewport declared in `.pica/state.json` — that one attribute both locates the frame and names its
-viewport. The capture refuses to write rather than produce an empty artefact that passes everything.
-
-</details>
-
-<details>
-<summary><b>A command says BLOCKED and will not run</b></summary>
-
-<br>
-
-Its inputs are missing, and the message names which — a gate that has not been granted, an artefact that
-does not exist, or a state key that is not set. Run `node packages/core/scripts/pica-status.mjs` from your
-project to see every package and what each is waiting on. This is deliberate: a package that runs without
-its inputs produces something nobody can verify.
-
-</details>
-
-<details>
-<summary><b>The Figma write gate is refusing my write</b></summary>
-
-<br>
-
-One of four conditions: the work package's HTML is not approved, a review is running in report mode, the
-project is delivered and frozen, or the `figma-use` skill was not loaded. The gate is a hook reading
-`.pica/state.json`, so it does not negotiate. Approve the package, finish the review, or load the skill.
-
-</details>
-
-<details>
-<summary><b>A check returns zero and I do not believe it</b></summary>
-
-<br>
-
-Good instinct — this is a documented rule rather than paranoia. Break the thing it is meant to catch and
-watch it fail. Delete a row, add an overflowing element, point a selector at nothing. A check never seen
-to fail has not been tested, and several in this repo's own history returned zero because their sample
-excluded the case.
-
-</details>
-
 ## Community
-
-Built by [Dung Vuong](https://github.com/vqdungwork).
 
 - **Issues and questions**: <https://github.com/vqdungwork/pica/issues>
 - **Changelog**: [CHANGELOG.md](CHANGELOG.md) — every rule beside the failure that earned it
