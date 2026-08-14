@@ -1,12 +1,39 @@
 {
   "name": "pica",
-  "description": "Design workflow for Claude Code: prototype in HTML, port to Figma on approval, verify by measurement",
-  "owner": { "name": "Dung Vuong" },
+  "description": "Design applications, websites and landing pages the way you ship code: prototype in HTML, verify by measurement, port to Figma on approval.",
+  "owner": {
+    "name": "Dung Vuong"
+  },
   "plugins": [
-    { "name": "pica",          "source": "./",                  "version": "0.6.0", "description": "Everything below, as one install. Depends on the four packages." },
-    { "name": "pica-core",     "source": "./packages/core",     "version": "0.6.0", "description": "Intake, the contract, the state schema and every gate." },
-    { "name": "pica-research", "source": "./packages/research", "version": "0.6.0", "description": "Audit the named sources and derive tokens with provenance." },
-    { "name": "pica-html",     "source": "./packages/html",     "version": "0.6.0", "description": "Work packages in HTML at every viewport, measured before approval." },
-    { "name": "pica-figma",    "source": "./packages/figma",    "version": "0.6.0", "description": "Port an approved package to Figma and verify it by measurement." }
+    {
+      "name": "pica",
+      "source": "./",
+      "version": "0.6.0",
+      "description": "From the brief to the shipped screen. Design an application, a website or a landing page in HTML at every viewport you declare, verify it by measurement rather than opinion, then port to Figma once you approve it. Seven checks that fail closed, four gates enforced by hook."
+    },
+    {
+      "name": "pica-core",
+      "source": "./packages/core",
+      "version": "0.6.0",
+      "description": "Intake, the contract, the state schema and every gate."
+    },
+    {
+      "name": "pica-research",
+      "source": "./packages/research",
+      "version": "0.6.0",
+      "description": "Audit the named sources and derive tokens with provenance."
+    },
+    {
+      "name": "pica-html",
+      "source": "./packages/html",
+      "version": "0.6.0",
+      "description": "Work packages in HTML at every viewport, measured before approval."
+    },
+    {
+      "name": "pica-figma",
+      "source": "./packages/figma",
+      "version": "0.6.0",
+      "description": "Port an approved package to Figma and verify it by measurement."
+    }
   ]
 }

@@ -35,6 +35,28 @@ against itself.
 
 `pica` fixes the order of operations and refuses to trust the eye.
 
+## What it is for
+
+**Interfaces someone is going to build.** An application, a website, a landing page, a dashboard, a set
+of screens, or the design system behind them. Say *"design the app"*, *"design this landing page"*,
+*"design these screens"*, *"build a design system"*, *"port the HTML to Figma"* — and the flow starts.
+
+| pica is for | pica is not for |
+|:--|:--|
+| Applications — web, mobile, desktop | Illustration, images, photography |
+| Websites and landing pages | Video, motion pieces, animation |
+| Dashboards, admin tools, internal products | Logos, brand marks, identity work |
+| Design systems and component libraries | Presentation decks and documents |
+| Screens that need a spec someone can implement | Diagrams, charts, CLI and terminal output |
+
+The line is simple: **pica designs things people navigate and someone has to build.** If nothing will be
+implemented from the output, this is the wrong tool and it will get in your way — every gate it enforces
+exists to protect an implementation that would otherwise be built from an unverified design.
+
+It also works on **any project, for anyone**. Nothing in it assumes a particular client, stack, brand or
+team. You declare the viewports, whether Figma is in scope, and what the brief actually says; the flow
+adapts to that and refuses to invent the rest.
+
 ## Install
 
 ```bash
@@ -85,15 +107,24 @@ flowchart TD
     L -->|yes| H
     L -->|no| M["pica-prototype: wire + verify"]
     M --> N["pica-close: handover, then freeze"]
+    N -.-> O["implement: web · iOS · Android"]
+    O -.-> P["test: e2e + usability"]
 
     style B fill:#fff4e5,stroke:#d97706,color:#1f2328
     style D fill:#fff4e5,stroke:#d97706,color:#1f2328
     style I fill:#fff4e5,stroke:#d97706,color:#1f2328
     style K fill:#e8f5e9,stroke:#2e7d32,color:#1f2328
     style N fill:#f3e5f5,stroke:#7b1fa2,color:#1f2328
+    style O fill:#f6f8fa,stroke:#8c959f,stroke-dasharray:5 4,color:#6e7781
+    style P fill:#f6f8fa,stroke:#8c959f,stroke-dasharray:5 4,color:#6e7781
 ```
 
 The amber diamonds are **your** gates. Nothing crosses one without you.
+
+The dashed boxes are **declared, not built** — `impl-web`, `impl-ios`, `impl-android` and `e2e` exist
+as contracts in `packages/_planned/`, so the interface is agreed before the work starts. They are drawn
+this way deliberately: a tool whose first rule is never to claim an unverified state cannot draw its
+roadmap as though it were finished.
 
 | # | Step | Command | Runs |
 |:--|:--|:--|:--|
@@ -107,7 +138,9 @@ The amber diamonds are **your** gates. Nothing crosses one without you.
 | 7 | Review | `/pica-review [wp]` | After every port |
 | 8 | Prototype | `/pica-prototype` | Once, after screens land |
 | 9 | Closeout | `/pica-close` | Once, at handover |
-| — | Feedback triage | `/pica-feedback` | Whenever someone else's review lands |
+| 10 | Implement — web, iOS, Android | *declared, not built* | Contract agreed in `packages/_planned/` |
+| 11 | Test — e2e and usability | *declared, not built* | Contract agreed in `packages/_planned/` |
+| — | Feedback triage | `/pica-feedback` | Any time someone else's review lands, before or after delivery |
 
 ---
 
@@ -440,14 +473,44 @@ Eight modules, split across the four packages, each written to be read on its ow
 | `figma-gates.md` | figma | The Figma audit checklist, appearance baselines, geometry-diff tolerances, the deviations register |
 | `review-discipline.md` | core | The self-review checklist, report versus fix, complexity criteria, panel lenses, writing checks that can fail, audit integrity, and what "zero" means |
 
-## Where this came from
+## Why this exists
 
-This was extracted from **one** real client design pilot: a fixed-scope mobile app redesign delivered
-against a 24 hour cap. Every rule in it earns its place from a specific failure on that project.
+**To take a product from a brief to a shipped screen without losing it on the way.**
 
-`0.5.0` adds the first **HTML-only** project: the mobile design of a live enterprise product, several
-applications behind one launcher, 60 screens across four interactive prototypes, no Figma anywhere in it. Two things
-came out of it.
+That is the whole ambition. Not to produce prettier mockups — to make the thing that gets built the same
+thing that was approved, and to be able to prove it at every step rather than hope. Design is the one
+stage of product work that still ships on opinion: a screen is declared finished because it looked right
+to whoever was in the room, and the cost of that surfaces weeks later in code review, in QA, or in front
+of a client. Every other stage of shipping software has a check that can fail. Design should too.
+
+So pica is built backwards from delivery. Each stage names what it requires before it starts, what it
+produces when it ends, and what "done" means in terms something can verify. Approval is a human decision
+at a gate, never an inference from silence. The expensive medium is never built before the cheap one is
+signed off. And the path runs the whole way — brief, research, HTML, Figma, then implementation and test
+as the declared next phases — because a design that is verified but never correctly built has still
+failed at the only thing that mattered.
+
+**Every rule earns its place from a specific failure.** None was invented because it sounded like good
+practice; each one exists because something broke, and the break is recorded next to the rule that now
+prevents it. That is why [CHANGELOG.md](CHANGELOG.md) is long, and it is the most useful file here — a
+rule whose failure is not written beside it is the kind of rule the next person deletes for being
+inconvenient.
+
+Here is what the work so far has taught, release by release.
+
+`0.6.0` splits pica into four installable packages, so a project takes only the parts it needs and a
+change to one cannot ripple through the rest. The lesson came from restructuring it: **four defects
+survived every check that passed, and two of them were in the design that specified the checks.**
+Cross-package references resolved only in the development repo and could never have worked once
+installed. Four plugin manifests sat in a directory the host does not read, silently disarming the
+dependency graph. The status resolver read a state key nothing wrote — and the first fix made it worse,
+reporting a package that did not exist as ready, with a success exit code. Splitting the rulebook quietly
+dropped review discipline from five of seven commands, including the audit command itself. Each was found
+by a reviewer looking at work it had not done, which is now the strongest argument in the repo for why
+finding and fixing must stay separate passes.
+
+`0.5.0` is the first release exercised on a project with **no Figma at all**, which is how the HTML-only
+path stopped being theoretical. Two things came out of it.
 
 The deliverable was wrong-shaped. A work package produced option boards, which every check can see, and
 the flow between them was left implicit. But **every defect the client found by using the prototype was a
@@ -503,7 +566,7 @@ the `0.3.0` port, but **its clean run is reported history rather than something 
 dumps it ran against were mid-port intermediates measured against a superseded reference, so they proved
 nothing and were not worth keeping.
 
-Hence `0.5.0`, and not `1.0`.
+Hence `0.6.0`, and not `1.0`.
 
 ### What this repo does and does not contain
 
@@ -521,7 +584,8 @@ To generate your own evidence, run the flow on a project of your own. The checks
 against the artefact and your `.pica/state.json`, and `flow-check.mjs` against the HTML directory itself. Each states its pass criterion, and each fails closed —
 if it cannot do its job it exits non-zero rather than reporting a clean run.
 
-Four projects is not proof that this generalises, and you will hit cases it has never seen.
+Four projects is not proof that this generalises, and you will hit cases it has never seen. If you run
+it on one it was not built for, the findings are the contribution worth having.
 
 ## Not included
 

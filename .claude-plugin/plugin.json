@@ -1,11 +1,31 @@
 {
   "name": "pica",
-  "description": "A design workflow for Claude Code. Installs the full set: intake, research, HTML, and Figma.",
+  "description": "From the brief to the shipped screen. Design an application, a website or a landing page in HTML at every viewport you declare, verify it by measurement rather than opinion, then port to Figma once you approve it. Seven checks that fail closed, four gates enforced by hook.",
   "version": "0.6.0",
-  "author": { "name": "Dung Vuong" },
+  "author": {
+    "name": "Dung Vuong"
+  },
   "homepage": "https://github.com/vqdungwork/pica",
   "repository": "https://github.com/vqdungwork/pica",
   "license": "MIT",
-  "dependencies": ["pica-core", "pica-research", "pica-html", "pica-figma"],
-  "keywords": ["design", "figma", "ui", "ux", "design-system", "prototype", "handoff"]
+  "dependencies": [
+    "pica-core",
+    "pica-research",
+    "pica-html",
+    "pica-figma"
+  ],
+  "keywords": [
+    "design",
+    "figma",
+    "ui",
+    "ux",
+    "design-system",
+    "prototype",
+    "handoff",
+    "website",
+    "landing-page",
+    "app-design",
+    "design-review",
+    "design-to-code"
+  ]
 }
