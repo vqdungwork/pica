@@ -31,27 +31,65 @@ const statePath = process.argv[2] || ".pica/state.json";
 // the one layout where a "../.." offset can never be wrong, so this bug shipped
 // anyway and was never seen failing.
 //
-// So: walk upward from this script's own directory. At each level, consider the
-// level itself and any child named "packages" as a candidate. A candidate
-// QUALIFIES only if it contains at least two subdirectories that each hold a
-// package.json whose "name" field equals that subdirectory's own name --
-// e.g. packages/core/package.json's name is "core", matching directory "core".
-// That rejects the version-directory false positive: core's manifest name is
-// "core" but the directory holding it is "0.6.0", a mismatch that doesn't count,
-// and pica-core/ itself has only one child ("0.6.0"), not two qualifying ones.
-// A resolver that cannot find a qualifying candidate says so and exits 2; it
-// never prints a package list derived from a directory that did not qualify.
+// The fix after that one required a child directory's package.json "name" field
+// to equal the child directory's own name -- true in the repo (packages/core/
+// name "core") and NEVER true once installed, because the installed directory
+// is "pica-core" while the manifest still says "core". That rule could never
+// qualify the very install shape packaging exists to support, so it always fell
+// through to exit 2 there. Fixed closed, but useless for its actual purpose.
+//
+// So the rule is structural, not name-based, and manifests may sit one level
+// deeper than the child itself: installed, the layout is
+// <cache>/<marketplace>/pica-core/0.6.0/package.json, not
+// <cache>/<marketplace>/pica-core/package.json. A child directory YIELDS A
+// MANIFEST if either <child>/package.json or <child>/<anything>/package.json
+// exists, parses, and has "name", "status", "owns", "requires" and "produces"
+// as fields. A candidate directory QUALIFIES if at least two of its child
+// directories each yield a manifest.
+//
+// That still rejects the phantom case naturally: pica-core/ has exactly one
+// child (the version directory), which yields exactly one manifest (core's
+// own) -- one match, not two, so it fails and the walk continues up to
+// <cache>/<marketplace>/, whose three-plus package children each yield a
+// manifest and which wins on its own structure. A resolver that cannot find a
+// qualifying candidate says so and exits 2; it never prints a package list
+// derived from a directory that did not qualify.
+const CHILD_MANIFEST_FIELDS = ["name", "status", "owns", "requires", "produces"];
+
+// Existence only: the FIRST of <child>/package.json or <child>/<anything>/package.json
+// that exists on disk, regardless of whether it parses or has the fields above.
+function locateManifestPath(childDir) {
+  const direct = path.join(childDir, "package.json");
+  if (fs.existsSync(direct)) return direct;
+  let entries;
+  try { entries = fs.readdirSync(childDir, { withFileTypes: true }); } catch { return null; }
+  for (const e of entries) {
+    if (!e.isDirectory()) continue;
+    const nested = path.join(childDir, e.name, "package.json");
+    if (fs.existsSync(nested)) return nested;
+  }
+  return null;
+}
+
+// A child "yields a manifest" only when the located file also parses and carries every
+// field pica-status.mjs and the qualifying rule depend on.
+function readChildManifest(childDir) {
+  const mp = locateManifestPath(childDir);
+  if (!mp) return null;
+  let m;
+  try { m = JSON.parse(fs.readFileSync(mp, "utf8")); } catch { return null; }
+  if (!m || typeof m !== "object" || Array.isArray(m)) return null;
+  return { path: mp, data: m };
+}
+
 function qualifies(dir) {
   let entries;
   try { entries = fs.readdirSync(dir, { withFileTypes: true }); } catch { return false; }
   let matches = 0;
   for (const e of entries) {
     if (!e.isDirectory()) continue;
-    const mp = path.join(dir, e.name, "package.json");
-    if (!fs.existsSync(mp)) continue;
-    let m;
-    try { m = JSON.parse(fs.readFileSync(mp, "utf8")); } catch { continue; }
-    if (m && m.name === e.name) matches++;
+    const found = readChildManifest(path.join(dir, e.name));
+    if (found && CHILD_MANIFEST_FIELDS.every((f) => f in found.data)) matches++;
     if (matches >= 2) return true;
   }
   return false;
@@ -78,8 +116,9 @@ const { dir: PKG_DIR, tried } = findPackagesDir(SCRIPT_DIR);
 
 if (!PKG_DIR) {
   console.error("no packages/ directory found: no candidate qualified.");
-  console.error("A candidate must contain at least two subdirectories each holding a package.json");
-  console.error('whose "name" matches that subdirectory\'s own name. Walking up from:');
+  console.error("A candidate must contain at least two subdirectories that each yield a package.json");
+  console.error('(at <child>/package.json or <child>/<anything>/package.json) parsing with "name",');
+  console.error('"status", "owns", "requires" and "produces" as fields. Walking up from:');
   console.error(`  ${SCRIPT_DIR}`);
   console.error("Checked:");
   for (const t of tried) console.error(`  ${t}`);
@@ -162,17 +201,24 @@ if (stateError) {
   });
 }
 
-for (const name of fs.readdirSync(PKG_DIR).filter((d) => !d.startsWith("_"))) {
-  const mp = path.join(PKG_DIR, name, "package.json");
-  if (!fs.existsSync(mp)) continue;
+// Reported by MANIFEST name ("core", "html"), not directory name ("pica-core"), so
+// output is identical whether this runs against the repo layout or an installed one.
+for (const dirName of fs.readdirSync(PKG_DIR, { withFileTypes: true })
+    .filter((d) => d.isDirectory() && !d.name.startsWith("_"))
+    .map((d) => d.name)) {
+  const childDir = path.join(PKG_DIR, dirName);
+  const mp = locateManifestPath(childDir);
+  if (!mp) continue;
 
   let m;
   try {
     m = JSON.parse(fs.readFileSync(mp, "utf8"));
   } catch (e) {
-    rows.push({ name, verdict: "UNREADABLE", missing: [`could not parse package.json: ${e.message}`] });
+    rows.push({ name: dirName, verdict: "UNREADABLE", missing: [`could not parse package.json: ${e.message}`] });
     continue;
   }
+
+  const name = m.name || dirName;
 
   if (m.status === "coming-soon") { rows.push({ name, verdict: "PLANNED", missing: [] }); continue; }
 
