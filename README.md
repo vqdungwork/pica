@@ -18,6 +18,14 @@
 
 ---
 
+## Contents
+
+[The problem](#the-problem) · [What it is for](#what-it-is-for) · [How it works](#how-it-works) ·
+[Install](#install) · [The flow](#the-flow) · [In practice](#what-this-looks-like-in-practice) ·
+[The steps in detail](#the-steps-in-detail) · [What is enforced](#what-is-enforced-and-how) ·
+[Requirements](#requirements) · [The rules](#the-rules) · [Philosophy](#philosophy) ·
+[Troubleshooting](#troubleshooting) · [Community](#community)
+
 ## The problem
 
 Your design looks right. It is not right.
@@ -56,6 +64,50 @@ exists to protect an implementation that would otherwise be built from an unveri
 It also works on **any project, for anyone**. Nothing in it assumes a particular client, stack, brand or
 team. You declare the viewports, whether Figma is in scope, and what the brief actually says; the flow
 adapts to that and refuses to invent the rest.
+
+### Just ask for it
+
+The skill activates on its own. Talk normally:
+
+```
+Design the onboarding screens for our mobile app
+
+Build a landing page for the new pricing tier
+
+Design this dashboard for desktop and mobile
+
+Port the approved HTML to Figma
+
+Review the Figma file against the HTML
+```
+
+## How it works
+
+It starts the moment you ask for design work. Instead of opening a file and drawing, it asks what
+you are actually building — and it refuses to start until it has the brief in your words, your sources
+labelled as ones to use or ignore, the commercial constraint, and one decision: **is Figma a deliverable
+here, or not.**
+
+What comes back first is a contract, not a mockup. One section per work package with acceptance
+criteria, an exclusions list quoting everything the brief rules out, two or three costed options, and a
+complexity tier for each package. Nothing proceeds until you approve it.
+
+Then it designs — **in HTML, at every viewport you declared**, because HTML is cheap to change, cheap to
+measure, and it is real: it reflows, it scrolls, you can click it. The screens consume a UI kit built
+first, so a one-off control invented mid-screen is a review finding rather than a shortcut.
+
+Before it shows you anything, it measures. Overflow behind a frame edge. Screens taller than their
+viewport with no full-height twin. Drift between viewports, compared by counting elements rather than
+listing them. Dead links and unreachable screens in the prototype. **Every check has to return zero, or
+it fixes and runs them again** — and then it renders every frame and looks at them, because measurement
+and eyes catch different defects.
+
+Only then does it ask you to approve. And only after you approve does anything reach Figma — enforced by
+a hook, not by good intentions. The port is verified back against the HTML by measurement, frame by
+frame, and where the two disagree the HTML wins.
+
+If Figma is not in scope, you stop after approval with a fully verified HTML design. That is a complete
+pica project, not a truncated one.
 
 ## Install
 
@@ -141,6 +193,52 @@ roadmap as though it were finished.
 | 10 | Implement — web, iOS, Android | *declared, not built* | Contract agreed in `packages/_planned/` |
 | 11 | Test — e2e and usability | *declared, not built* | Contract agreed in `packages/_planned/` |
 | — | Feedback triage | `/pica-feedback` | Any time someone else's review lands, before or after delivery |
+
+## What this looks like in practice
+
+Before you are asked to approve anything, the HTML is measured. This is the gate:
+
+```
+$ node verify-html.mjs .audit/html-reference.json .pica/state.json
+
+frames captured:     33 across 2 package(s)
+viewports declared:  desktop 1440x900, mobile 375x812
+frames per viewport: desktop=12, mobile=21
+
+pass  viewport-tagged      0 finding(s)   (33 frames checked)
+pass  overflow             0 finding(s)   (33 frames checked)
+pass  tall-screen-pair     0 finding(s)   (8 frames exceed their viewport by >24px)
+pass  viewport-coverage    0 finding(s)   (2 viewports declared)
+
+0 finding(s). HTML passes the measured gate.
+```
+
+**A package cannot start before its inputs exist.** Ask to port to Figma too early and you get told
+exactly what is missing, rather than a half-built file:
+
+```
+$ /pica-port search
+
+BLOCKED  figma
+         missing gate      htmlApproved:search
+         missing artifact  .audit/html-reference.json
+
+Run /pica-wp search and get HTML approval first.
+```
+
+**And every check fails closed.** Point one at a directory that matches nothing and it refuses to write
+an artefact rather than reporting a clean run over zero files:
+
+```
+FAIL  captured 0 frames from 3 file(s).
+      wrap selector  --sel   ".frame-wrap"
+      frame selector --frame "[data-viewport]"
+      One of these matches nothing. Nothing was written: an empty
+      reference would pass every downstream check while measuring nothing.
+```
+
+That last one is the whole argument in six lines. A check that reports success for work it did not do is
+worse than no check, because its silence reads as a pass.
 
 ---
 
@@ -497,6 +595,86 @@ it on one it was not built for, the findings are the contribution worth having.
 Motion design and transition specs. Generating production code from designs. Exporting tokens into a
 codebase. Any Figma community plugin. Responsive breakpoints as a continuum — the flow guarantees the
 **declared** viewports and says nothing about the widths between them.
+
+## Philosophy
+
+- **Measure, do not eyeball** — every serious defect on the projects behind this passed visual review
+- **The cheap medium first** — nothing expensive gets built before the cheap one is approved
+- **Report before you fix** — finding and fixing are separate passes; an audit that writes is not an audit
+- **A check must fail closed** — if it cannot do its job it exits non-zero, never a clean run over nothing
+- **A green check is not evidence the check works** — make it fail on purpose before you trust it
+- **Approval is a decision, not an inference** — silence, "looks ready" and moving on are not approval
+- **Every rule names the failure that earned it** — a rule without one gets deleted by the next person
+
+## Troubleshooting
+
+<details>
+<summary><b>The checks say playwright is unavailable</b></summary>
+
+<br>
+
+`capture-html-reference.mjs` needs playwright to render and measure. It searches upward from the
+working directory and then the usual global locations. If it cannot find it, **it says the measured diff
+cannot run and stops** — it does not fall back to eyeballing, because that is the failure mode the whole
+flow exists to prevent. Install playwright in the project, or run the capture from a directory that has it.
+
+</details>
+
+<details>
+<summary><b>The capture reports 0 frames</b></summary>
+
+<br>
+
+Your selectors match nothing. The defaults are `--sel ".frame-wrap"` for the wrapper and
+`--frame "[data-viewport]"` for the frame itself. Every frame needs `data-viewport="<name>"` matching a
+viewport declared in `.pica/state.json` — that one attribute both locates the frame and names its
+viewport. The capture refuses to write rather than produce an empty artefact that passes everything.
+
+</details>
+
+<details>
+<summary><b>A command says BLOCKED and will not run</b></summary>
+
+<br>
+
+Its inputs are missing, and the message names which — a gate that has not been granted, an artefact that
+does not exist, or a state key that is not set. Run `node packages/core/scripts/pica-status.mjs` from your
+project to see every package and what each is waiting on. This is deliberate: a package that runs without
+its inputs produces something nobody can verify.
+
+</details>
+
+<details>
+<summary><b>The Figma write gate is refusing my write</b></summary>
+
+<br>
+
+One of four conditions: the work package's HTML is not approved, a review is running in report mode, the
+project is delivered and frozen, or the `figma-use` skill was not loaded. The gate is a hook reading
+`.pica/state.json`, so it does not negotiate. Approve the package, finish the review, or load the skill.
+
+</details>
+
+<details>
+<summary><b>A check returns zero and I do not believe it</b></summary>
+
+<br>
+
+Good instinct — this is a documented rule rather than paranoia. Break the thing it is meant to catch and
+watch it fail. Delete a row, add an overflowing element, point a selector at nothing. A check never seen
+to fail has not been tested, and several in this repo's own history returned zero because their sample
+excluded the case.
+
+</details>
+
+## Community
+
+Built by [Dung Vuong](https://github.com/vqdungwork).
+
+- **Issues and questions**: <https://github.com/vqdungwork/pica/issues>
+- **Changelog**: [CHANGELOG.md](CHANGELOG.md) — every rule beside the failure that earned it
+- **Design notes**: [`docs/specs/`](docs/specs) and [`docs/plans/`](docs/plans) — the reasoning behind
+  the current structure, including what was decided against
 
 ## Contributing
 
