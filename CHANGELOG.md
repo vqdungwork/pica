@@ -43,7 +43,12 @@ Ten findings.
   publish the pair; new `lensBaselines` register. A criterion targeting 0 where the source scores 247 is
   one nobody can close.
 
-- **F56 — component granularity had no rule.** A component is a thing, not an arrangement of things.
+- **F56 — component granularity had no rule, and the two "make it reusable" instincts pull opposite
+  ways.** Componentising is a bet and the default must be *no*: a library reached 147 components of
+  which 36 were arrangements and 9 were duplicates, 30% wrong, every one created by reflex rather than
+  decision. Tokenising has no default and no threshold — every colour, gap, radius, stroke and type
+  value is bound on first appearance, and the only escape is a signed register entry. Part 3 now opens
+  with that asymmetry. A component is a thing, not an arrangement of things.
   Two conditions dissolve a wrapper (no own content, separators excluded; no variant axis), plus a
   single-use clause — 36 components on this project. The heuristic then caught a component the client
   had named as correct, so `granularityExemptions` joins the registers. Reconciled with "never detach":
