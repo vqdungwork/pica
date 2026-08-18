@@ -7,6 +7,15 @@ a design-system-quality one — 92 components, 389 variables, 163 screens — wi
 nothing to approve, because the design already existed. The flow had no name for that job, so half of
 this release is the job and half is what it exposed about the checks.
 
+Most of what it exposed is **not specific to rebuilding**, and the release says so. Six criteria
+discovered in a Figma rebuild are medium-independent and now live in a new core rule,
+`reference-discipline.md`, governing the port flow and the HTML side equally: the reference is read-only
+and that is checkable, names are not identity so pick a channel you control, content parity is a
+criterion of its own, a reference has three kinds of defect decided three ways, fix at the definition
+rather than the occurrence, and promote slowly while binding always. `figma-rebuild.md`,
+`figma-elements.md`, `html-prototype.md` and `html-gates.md` each carry the applied form and point at
+core rather than restating it.
+
 Ten findings.
 
 - **F50 — pica had no flow for rebuilding an existing Figma file.** Every rule assumed Figma is
@@ -14,13 +23,15 @@ Ten findings.
   the client's untouched pages, there is no approval gate because the design is already approved by
   existing, and `geometry-diff.mjs` is replaced by a new `source-parity.js`.
 
-- **F51 — structure at zero says nothing about content.** A file passed seventeen structural criteria at
+- **F51 — structure at zero says nothing about content.** *(now core: content parity is a criterion of
+  its own, and the HTML gates say a text-run count is not a content diff)* A file passed seventeen structural criteria at
   zero while showing six filter rows with the wrong labels, an entirely wrong product on one screen, a
   stepper reading the master's placeholder, four cards in the wrong language, and a keypad missing its
   delete key. Every node was present, bound, on-grid, inside its parent and sensibly named. **Content
   parity is a separate criterion and only the source can score it.**
 
-- **F52 — the coordinate system is a tool.** Keeping rebuilt screens at the source's canvas coordinates
+- **F52 — the coordinate system is a tool.** *(now core: names are not identity — declare a channel per
+  medium, `data-viewport` for HTML, the frame map for a port, canvas position for a rebuild)* Keeping rebuilt screens at the source's canvas coordinates
   makes pairing a dictionary lookup, which survives duplicate screen names and renames. It also lets any
   node be paired by position: a distance of 0 with different strings is *right place, wrong words*, which
   is what three of the five defects above turned out to be. Now a rule, and the basis of `source-parity.js`.
@@ -48,7 +59,8 @@ Ten findings.
   which 36 were arrangements and 9 were duplicates, 30% wrong, every one created by reflex rather than
   decision. Tokenising has no default and no threshold — every colour, gap, radius, stroke and type
   value is bound on first appearance, and the only escape is a signed register entry. Part 3 now opens
-  with that asymmetry. A component is a thing, not an arrangement of things.
+  with that asymmetry, pointing at core, and `html-prototype.md` carries the CSS form of it: a shared
+  class is a promotion, a custom property is not. A component is a thing, not an arrangement of things.
   Two conditions dissolve a wrapper (no own content, separators excluded; no variant axis), plus a
   single-use clause — 36 components on this project. The heuristic then caught a component the client
   had named as correct, so `granularityExemptions` joins the registers. Reconciled with "never detach":

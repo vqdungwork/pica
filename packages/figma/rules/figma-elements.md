@@ -518,42 +518,20 @@ prior question: **should this be a component at all, and what is it called?**
 
 ## Componentising is a judgement call. Tokenising is not.
 
-These two look like the same instinct — "make it reusable" — and they run in opposite directions.
+The flow-wide statement is *promote slowly, bind always*, in
+[reference-discipline.md](../../core/rules/reference-discipline.md). In Figma it reads:
 
-**Default to not making a component.** A component is a bet that the thing recurs and that its
-recurrences are the same thing. A wrong bet is not neutral: it puts a name in the library that reads as
-the current plan, it forces every future variation through a variant axis, and it hides a screen's
-structure behind an instance nobody can edit. Building it on the screen and promoting it when the second
-real occurrence appears costs one refactor; componentising by default costs a library nobody trusts.
+**Default to not making a component.** Build it on the screen; promote when a second occurrence appears
+that is the same *thing*, not the same shape. What earns one: the brief names it, two or more real
+occurrences, or it carries a state someone switches. What does not: it appears twice, it is a section,
+it is large, it would tidy the layer list. The cost of the reflex is measured — one library reached 147
+components of which 36 were arrangements and 9 were duplicates.
 
-The evidence: a library reached 147 components of which **36 were arrangements rather than things** and
-another **9 were duplicates of each other** — 30% wrong, and every one of them created by the reflex to
-componentise rather than by a decision to. Every one had to be dissolved or merged later, at far higher
-cost than never making it.
+**Every value is bound on first appearance**, with no threshold: colour, gap, padding, corner radius,
+stroke width, and all four typographic axes (Part 1). The only escape is `rawValueExemptions`.
 
-What earns a component:
-
-- the brief or the client **names it** as a control, a state carrier or a pattern
-- **two or more occurrences that are the same thing** — not the same shape. Two rows that happen to be
-  328×64 are not one component; two rows that are both "a picked item" are
-- it holds **a state someone will switch** — active, selected, error, checked
-
-What does not earn one:
-
-- it appears twice (see above: same shape is not same thing)
-- it is a section, a group, or a nice-looking box
-- it is large, or took a while to build
-- it would "keep the layer list tidy"
-
-**Tokens are the opposite: there is no judgement call.** Every colour, every gap and padding, every
-radius, every stroke width, every type value is bound to a variable — the first time, on every node,
-with no threshold and no "this one is a one-off". A raw value has no second occurrence to justify it; it
-is wrong on its first appearance, because the entire point is that a developer can resolve it to a name.
-
-The only escape is a register entry (`rawValueExemptions`, see Part 1), which is a decision someone
-signed, not a discretion you exercise while building.
-
-So the two rules read: **be slow to promote something to a component, and never slow to bind a value.**
+The asymmetry matters because the two decisions arrive in the same moment and feel like the same
+instinct. Be slow to promote, and never slow to bind.
 
 ## A component is a thing, not an arrangement of things
 

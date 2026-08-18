@@ -21,6 +21,14 @@ no font at all on the one page the client was scoring.
 
 All of it looked fine in a screenshot. Eyeballing finds the wrong things and misses the real ones.
 
+**The general form is: measure against a reference, and the reference is read-only.** HTML is that
+reference for a port; a client's own file is that reference for a rebuild; the sources named in the brief
+are that reference for tokens and copy. How to treat one — never edit it, pair to it by an identity
+channel you control, diff its *content* as a criterion of its own, and sort its own defects into the
+three kinds — is medium-independent and lives in
+[reference-discipline.md](../../packages/core/rules/reference-discipline.md). Read it once; it applies to
+every phase.
+
 ## The flow
 
 Brief becomes a contract, HTML becomes the design, measurement decides whether it is right. Figma is a
@@ -86,6 +94,12 @@ already exists. What replaces it:
 
 Three things carry over unchanged: the audit (`figma-audit.js`), the appearance baseline
 (`capture-baseline.js`), and every rule in `figma-elements.md` and `figma-screens.md`.
+
+What is **not** specific to a rebuild, despite being discovered in one, is everything about handling the
+reference itself — read-only, identity channel, content parity, the three kinds of source defect, fixing
+at the definition, promote slowly and bind always. Those are in
+[reference-discipline.md](../../packages/core/rules/reference-discipline.md) and they govern the port
+flow just as much.
 
 Read [figma-rebuild.md](../../packages/figma/rules/figma-rebuild.md) before starting one. The short
 version: never write to the originals, keep the rebuilt screens at the source's canvas coordinates so
@@ -295,4 +309,5 @@ Each rule now lives with the package that owns it.
 - [figma-mcp.md](../../packages/figma/rules/figma-mcp.md) — figma package. Rate limits and call budget, `page.loadAsync` for whole-file reads, write discipline
 - [figma-gates.md](../../packages/figma/rules/figma-gates.md) — figma package. The Figma audit checklist, appearance baselines, geometry-diff tolerances, the deviations register, definition of done
 - [figma-rebuild.md](../../packages/figma/rules/figma-rebuild.md) — figma package. Rebuilding a client's existing Figma file: the source as arbiter, the shared coordinate system, positional parity, baselining every lens against the source, deciding the source's own defects
+- [reference-discipline.md](../../packages/core/rules/reference-discipline.md) — core package. Medium-independent: the reference is read-only and it is checkable, names are not identity, content parity as its own criterion, the three kinds of reference defect, fix at the definition, promote slowly and bind always
 - [review-discipline.md](../../packages/core/rules/review-discipline.md) — core package. Medium-independent: report versus fix, self-review, complexity routing, the panel, verification method, writing your own checks, audit integrity, reading a property instead of deducing it, baselining a number, guards that must fail rather than skip

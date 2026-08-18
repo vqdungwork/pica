@@ -269,6 +269,23 @@ finding, not a shortcut, because it will not receive the next token change and n
 When a pattern repeats within a screen family, promote it. When it repeats across families, it belongs
 in the kit.
 
+## Promote slowly, bind always
+
+The flow-wide statement is in
+[reference-discipline.md](../../core/rules/reference-discipline.md). In HTML it reads:
+
+**A shared class is a promotion, and the default is no.** Write the markup on the screen; lift it into
+the kit when a second occurrence appears that is the same *thing*, not the same shape. Two blocks that
+happen to be 328px wide are not one component. A kit class created on a guess is worse than none: it
+reads as the current plan, and every later variation arrives as a modifier nobody asked for.
+
+**Every value is a custom property on first use.** Colour, spacing, radius, border width, font size,
+line height, weight. No threshold, no "this one is a one-off" — a literal in a rule has no second
+occurrence to justify it, and it is exactly what will fail to port. The only escape is a
+`rawValueExemptions` entry.
+
+The two decisions arrive in the same moment and feel like the same instinct. They are opposite.
+
 ## A trap documented beside the code is not a rule
 
 `box-sizing` contains padding and border and **not margin**, so `width: 100%` plus a horizontal margin

@@ -120,6 +120,31 @@ Links are not behaviour. Check:
 
 Repeat until the pass returns nothing.
 
+## The approved HTML is a reference, and references are read-only
+
+Once a package passes its gate, its HTML is frozen. See
+[reference-discipline.md](../../core/rules/reference-discipline.md) — the rule that matters here is the
+one that costs a keystroke to break: when `geometry-diff` fails on the Figma side, the cheapest way to
+make it pass is to edit the HTML, and doing so destroys the only thing that could have settled the
+disagreement.
+
+A failing diff is a Figma finding or a registered deviation. If the HTML is genuinely wrong, it goes back
+through the gate — re-measured, re-rendered, re-approved — and the deviation register records why.
+
+## Content parity is not a text-run count
+
+`verify-html`, `parity-check` and `flow-check` prove structure, symmetry and navigation. None of them
+proves the screen **says the right thing**, and neither does a per-frame count on the Figma side: a wrong
+string counts exactly as much as the right one.
+
+Where the package has a reference for its copy — the client's own file, a source app, a supplied copy
+deck — diff the strings, not the totals: which are missing, which are extra, per screen. Then, for each
+mismatch, find the nearest counterpart by position; **distance 0 with different text is right place,
+wrong words**, and it is invisible to every other check here.
+
+Diff visible text only, and say so. `copyRules` and `dataOwnership` in state are what make this
+checkable rather than a habit.
+
 ## Definition of done
 
 **HTML side, and the whole list for a project with `figmaInScope: false`:**
