@@ -1,7 +1,7 @@
 {
   "name": "pica",
-  "description": "From the brief to the shipped screen. Design an application, a website or a landing page in HTML at every viewport you declare, verify it by measurement rather than opinion, then port to Figma once you approve it. Seven checks that fail closed, four gates enforced by hook.",
-  "version": "0.6.0",
+  "description": "From the brief to the shipped screen. Design an application, a website or a landing page in HTML at every viewport you declare, verify it by measurement rather than opinion, then port to Figma once you approve it. Eight checks that fail closed, four gates enforced by hook.",
+  "version": "0.7.0",
   "author": {
     "name": "Dung Vuong"
   },

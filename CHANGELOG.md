@@ -1,5 +1,89 @@
 # Changelog
 
+## 0.7.0
+
+Fifth project of evidence, and the first that was **not a port**: a client's own Figma file rebuilt into
+a design-system-quality one — 92 components, 389 variables, 163 screens — with no brief, no HTML and
+nothing to approve, because the design already existed. The flow had no name for that job, so half of
+this release is the job and half is what it exposed about the checks.
+
+Ten findings.
+
+- **F50 — pica had no flow for rebuilding an existing Figma file.** Every rule assumed Figma is
+  downstream of approved HTML. New `figma-rebuild.md`, and a variant table in the skill: the arbiter is
+  the client's untouched pages, there is no approval gate because the design is already approved by
+  existing, and `geometry-diff.mjs` is replaced by a new `source-parity.js`.
+
+- **F51 — structure at zero says nothing about content.** A file passed seventeen structural criteria at
+  zero while showing six filter rows with the wrong labels, an entirely wrong product on one screen, a
+  stepper reading the master's placeholder, four cards in the wrong language, and a keypad missing its
+  delete key. Every node was present, bound, on-grid, inside its parent and sensibly named. **Content
+  parity is a separate criterion and only the source can score it.**
+
+- **F52 — the coordinate system is a tool.** Keeping rebuilt screens at the source's canvas coordinates
+  makes pairing a dictionary lookup, which survives duplicate screen names and renames. It also lets any
+  node be paired by position: a distance of 0 with different strings is *right place, wrong words*, which
+  is what three of the five defects above turned out to be. Now a rule, and the basis of `source-parity.js`.
+
+- **F53 — three lenses inferred a property instead of reading it.** A paint's binding lives on the paint,
+  not on `node.boundVariables.fills`. Absence from `getLocalVariablesAsync()` is not evidence of
+  foreignness — 129 false findings. A text's backdrop is the last node in paint order that contains it,
+  not the nearest ancestor with a fill; correcting that surfaced an entire keypad rendering white on
+  white. New section in `review-discipline.md`: *ask the object, not the index*.
+
+- **F54 — a clip-aware overflow metric does not subsume the auto-layout one.** The audit has carried
+  `Auto-layout overflow` since 0.3.0. Writing a second, clip-aware metric for nodes escaping their parent
+  looks like a superset and is not: it excludes clipped subtrees, which is correct, and a fixed-width bar
+  whose children need 380px more than it has is entirely inside a clipping parent. Eight screens clipped a
+  tab through every round of *that* check at zero. Both metrics are needed, and the rule now says so
+  rather than leaving the next person to discover it by writing the wrong one.
+
+- **F55 — a number with no baseline is unreadable.** A new lens returned 356 on the rebuild and 268 on
+  the untouched source, most of both being scroll regions. Run every lens against the reference and
+  publish the pair; new `lensBaselines` register. A criterion targeting 0 where the source scores 247 is
+  one nobody can close.
+
+- **F56 — component granularity had no rule.** A component is a thing, not an arrangement of things.
+  Two conditions dissolve a wrapper (no own content, separators excluded; no variant axis), plus a
+  single-use clause — 36 components on this project. The heuristic then caught a component the client
+  had named as correct, so `granularityExemptions` joins the registers. Reconciled with "never detach":
+  never detach so an instance can differ, do detach to delete a component that should not exist.
+
+- **F57 — moving a component out of its set wipes every instance override.** Not just the swapped ones.
+  Twenty-nine chips silently reverted to the master's string, nothing threw, and the audit stayed at
+  zero. Caught only by comparing a tally to the source. New rules: capture-mutate-restore inside one
+  script, write masters before instances, and `swapComponent` keeps overrides only where the layer path
+  matches.
+
+- **F58 — a guard that skips is worse than a guard that fails.** `if (count !== expected) skip` left
+  eight cards holding placeholder content and reported a diff instead of an error. Fix the precondition
+  or throw; never continue past it with the work undone.
+
+- **F59 — 0.6.0 shipped every rule link in the skill broken.** Moving design-flow into `pica-core`
+  changed its depth; the 26 links out of the map were left at `../../../packages/`, which resolves in
+  neither the repo nor the installed layout. The package validator could not see it — every file was
+  present and correctly owned. `validate-packages.mjs` now has a seventh assertion that resolves every
+  relative markdown link in a rule or a skill, from the place that file is actually read from: a skill
+  under `packages/core/skills/<s>` ships at `<root>/skills/<s>`, so its links resolve against the repo
+  root, not against its position in the source tree. Verified by reintroducing the defect: 29 findings
+  with the old paths, 0 with the new. Found while adding this release's own rule to the map.
+
+Also: naming by role rather than measurement, including inside variant axes — 58 components, 95 variant
+values and 13 effect styles renamed on this project, and the observation that when a size scale cannot
+name an axis's members uniquely, it is not a size axis. Four new Plugin API traps in `figma-screens.md`
+(`return` inside a traversal exits the script; property references cannot be set on an instance sublayer;
+`figma.mixed` is not only `cornerRadius`; never filter a delete list by a key you transformed).
+
+### Known limits
+
+- `source-parity.js` compares text and position. It does not compare images, and an image swapped for
+  another of the same dimensions passes. `capture-baseline.js` covers paint, not image hashes.
+- The rebuild variant has one project behind it, and that project had a shared coordinate system by
+  luck rather than by policy. The rule now says to keep it; nothing enforces it.
+- The granularity rule is a heuristic with a register, not a measurement. It cannot distinguish a
+  one-off container from a list's repeated unit without a human.
+
+
 ## 0.6.0
 
 pica becomes four packages — `core`, `research`, `html`, `figma` — plus a bundle that

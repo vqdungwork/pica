@@ -4,7 +4,7 @@
 
 **A design workflow for Claude Code.**
 
-[![version](https://img.shields.io/badge/version-0.6.0-1f2328)](https://github.com/vqdungwork/pica/releases)
+[![version](https://img.shields.io/badge/version-0.7.0-1f2328)](https://github.com/vqdungwork/pica/releases)
 [![licence](https://img.shields.io/badge/licence-MIT-1f2328)](LICENSE)
 [![requires](https://img.shields.io/badge/requires-Claude%20Code-1f2328)](https://claude.com/claude-code)
 [![figma](https://img.shields.io/badge/Figma-optional-1f2328)](#requirements)
@@ -569,6 +569,7 @@ Eight modules, split across the four packages, each written to be read on its ow
 | `figma-screens.md` | figma | Frames, states, FILL versus HUG, vertical centring, screen-chrome pinning, the circle rule, alignment measured against HTML, and the Plugin API calls that fail silently |
 | `figma-mcp.md` | figma | Rate limits and the call budget, `page.loadAsync` for whole-file reads in one call, write discipline |
 | `figma-gates.md` | figma | The Figma audit checklist, appearance baselines, geometry-diff tolerances, the deviations register |
+| `figma-rebuild.md` | figma | Rebuilding a client's existing Figma file: the source as arbiter, the shared coordinate system, positional content parity, baselining every lens against the source |
 | `review-discipline.md` | core | The self-review checklist, report versus fix, complexity criteria, panel lenses, writing checks that can fail, audit integrity, and what "zero" means |
 
 ## What this repo contains

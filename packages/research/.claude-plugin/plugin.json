@@ -1,7 +1,7 @@
 {
   "name": "pica-research",
   "description": "pica research: audit the named sources and derive tokens with provenance.",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "author": { "name": "Dung Vuong" },
   "homepage": "https://github.com/vqdungwork/pica",
   "repository": "https://github.com/vqdungwork/pica",

@@ -510,3 +510,149 @@ When a nested instance child has a wrong pinned value, three options in order of
 Unknown style names and undefined variables do not throw. They resolve to nothing, and the file still
 looks plausible. After creating variables, styles or components, read back the real names in a
 **separate call** and compare against what you intended.
+
+# Part 3: Component modelling
+
+Part 2 covers what a component may contain and what you may do to an instance. This part covers the
+prior question: **should this be a component at all, and what is it called?**
+
+## A component is a thing, not an arrangement of things
+
+The test that fails is "it only contains instances". A row built from a product card and a status pair
+contains nothing but instances and is a real component; a list built from three of those rows contains
+nothing but instances and is a layout. Both look identical to that test.
+
+What separates them is **what the wrapper decides**. Dissolve to a plain auto-layout frame when both
+conditions hold:
+
+1. **The master contributes no content of its own** — no text, no shape, no fill, stroke or effect.
+   **Separators do not count as content.** A block that is three `stat` instances with two dividers
+   between them is an arrangement; the dividers are part of the arranging. Excluding them is what
+   collapses a family of four components that were the same idea at two, three, three and four stats.
+2. **It has no variant axis.** An axis means the wrapper encodes a state combination, which is a real
+   decision: a tab bar says which tab is active, a status pair says which side is in trouble. Those
+   survive.
+
+Plus one clause from the other direction: **a container used exactly once is dissolved regardless of
+variants.** An atomic element used once is kept — the harm is in one-off containers, not one-off atoms.
+
+Applied to one library this dissolved 36 components: lists, sections, stat rows, and wrappers whose
+entire job was a gap.
+
+### This does not license detaching
+
+Part 2 says never detach, and that stands. The two rules answer different questions. **Never detach an
+instance so it can differ** — that is what a variant is for. **Do detach when the component should not
+exist**, because detaching a wrapper is how you delete it without losing what it held: the children stay
+instances, and `detachInstance()` is appearance-preserving by construction, so the operation cannot move
+a pixel.
+
+Dissolve to a fixed point. Dissolving an outer wrapper exposes the inner one that was hiding inside it;
+loop until a pass finds nothing (this took three passes, 98 then 2 then 0).
+
+### The heuristic will catch something it should not
+
+Remove a variant axis at the client's request and the component that kept it now trips the rule. On this
+project `wh/check-row` — no own paint, no axis, only instance children — is the repeated row of the order
+list, used 35 times, and the client had named that exact node as the correct shape.
+
+A pure container is an arrangement when it appears once or twice on one screen and a component when it is
+the unit a list repeats. Rather than bolt a usage threshold onto the lens and guess where it sits, record
+the exception: **`granularityExemptions` with the component, the reason, and who approved it.** A rule
+with no register is a preference; an exemption with no reason is an oversight.
+
+## An axis whose members render identically is not an axis
+
+Check what actually differs between variants before believing the axis name.
+
+One set shipped `lang = en | sk`. Both variants read `QR kód`. Instances of *both* carried Slovak and
+English labels. What the axis actually tracked was colour — one variant `green/500`, the other
+`green/600` — and the client's file has **one** colour for all thirty-four of those chips. The split was
+manufactured twice: once by a palette normalisation landing one source colour on two ramp steps, then by
+someone reading two greens as two languages.
+
+The same fault in a milder form: one `tone` value meaning green-on-pale-green at one scale and
+white-on-dark at another, in a set that already had the right value available for the second case.
+
+Two smells, both cheap to test:
+- **identical rendered content across an axis's members** — collapse it
+- **one value meaning different things at different points on another axis** — rename it to the value
+  that already exists
+
+## Name by role, never by measurement
+
+Every number in a component name is a measurement taken the day it was cut, and every one of them is
+already wrong or shortly will be.
+
+| Measurement | Role |
+|---|---|
+| `wh/icon-pair-h156-4` | `wh/check-row` |
+| `wh/value-28` | `wh/trend-value` |
+| `wh/state-layer` | `wh/checkbox` |
+| `wh/number-of-items-per-day-path-475x192` | `wh/chart-items-per-day` |
+| `order-summary-9` / `-10` | `wh/order-detail-card` / `wh/order-list-card` |
+
+It matters more inside a variant axis, because a variant value is a word a developer reads in a props
+table. `size = 56 | 64 | 72 | 120 | 140` tells them the pixel heights of five buttons across two apps at
+two screen widths. `sm | md | lg | xl | 2xl` tells them the scale, which is what they pick from.
+
+**When a size scale cannot name the members uniquely, the axis is not a size axis.** One `title-block`
+carried font-size pairs — `41-30`, `32-24`, `16-12`, `12-8`, `12-7` — nine of them, with two pairs
+sharing a leading size. Naming by role produced nine distinct names where naming by size produced a
+collision: `page`, `screen`, `section`, `card`, `list`, `map`, `map-compact`, `row`, `row-compact`.
+
+Keep the number only where the number **is** the meaning. A tab bar's `active = 1..5` is a position and
+the labels change per instance, so position is the only stable thing to name. Its sibling switcher has
+three fixed segments, so `active = today | week | month` says what the numbers stood for.
+
+**A rename is finished when the structures the old names justified are gone too.** Once every icon became
+`icon/*`, the section called "Warehouse — icons" was named for a distinction that had just been deleted.
+
+## Merging components: capture, mutate, restore, in one script
+
+Never split a merge across calls. Capture the per-instance state, swap, and restore **inside the same
+script**, holding the baseline in a JavaScript variable. Split it and the baseline lives only in a tool
+result you then have to re-key by hand.
+
+Capture, at minimum: every visible text in document order, every nested instance's variant properties,
+every image fill's `imageHash` **and** `scaleMode`, and each slot's visibility. Restore by position, then
+diff the result against the capture in the same script and return only the differences.
+
+Done that way, a 35-instance conversion came back 35/35 identical, images included.
+
+### Moving a component out of its set wipes every instance override
+
+Collapsing a two-variant set to a single component means swapping the doomed variant's instances onto the
+survivor, deleting the doomed variant, and reparenting the survivor out of the set.
+
+That last step **resets the text overrides on every instance of it** — including the ones you never
+touched. Twenty-nine chips silently reverted to the master's string. Nothing threw. The structural audit
+stayed at zero on all seventeen criteria, because every node was still present, bound, on-grid and inside
+its parent; it just said the wrong word.
+
+What caught it was comparing a tally to the source: 12 / 12 / 5 / 5 against a rebuild reporting 29 of one
+string. **A verification that only checks the thing you changed cannot see the thing you changed by
+accident.**
+
+Two smaller facts from the same operation:
+
+- **An empty `COMPONENT_SET` deletes itself** when its last variant leaves. Calling `remove()` on it
+  afterwards throws `The node with id ... does not exist`, and because scripts are atomic that discards
+  the entire run.
+- **`swapComponent` preserves overrides only where the layer path matches.** Same-named subtrees survive;
+  renamed ones do not. It also drops the variant properties of *nested* instances, which is invisible
+  unless you captured them.
+
+### Write masters before instances, never after
+
+A repair script fixed eight instances and then set the master's default. That second write silently
+re-broke the two instances which had been correct by inheritance. Order the writes: master first, then
+instances, then verify.
+
+### Restoring geometry has two regimes
+
+`resize()` restores a node's size inside an absolutely-positioned parent. Inside auto-layout it does not,
+because the height comes from `layoutSizingVertical`. A merge that restored height only for
+non-auto-layout parents collapsed twenty-two dividers from 60/63/72px to 24 and reported success.
+
+Handle both, or assert the restored value and fail when it does not stick.

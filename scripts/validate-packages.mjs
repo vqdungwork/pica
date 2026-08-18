@@ -14,6 +14,12 @@
  *   4. every shipped rule/script/command/hook is owned by exactly one package
  *   5. every declared check resolves to a script that exists
  *   6. every definitionOfDone entry has a valid type, and a "human" entry names no script
+ *   7. every relative markdown link in a rule or a skill resolves to a file that exists.
+ *      0.6.0 shipped 26 broken links out of the design-flow skill — every rule reference in
+ *      the map — because moving the skill into pica-core changed its depth and nothing
+ *      checked. Ownership validation cannot see this: the files were all present and all
+ *      owned. Links out of a skill are resolved against the SHIPPED layout, where
+ *      packages/core/skills/<s> is installed at <root>/skills/<s>, not against the repo.
  *
  * Fails closed: zero packages found is an error, not a pass.
  */
@@ -165,7 +171,43 @@ for (const name of dirs) {
   }
 }
 
+/* 7. relative markdown links resolve.
+
+   Rules sit where they sit, so their links resolve against the repo. The design-flow skill
+   does not: packages/core/skills/design-flow ships as <root>/skills/design-flow, so a link
+   written ../../packages/x resolves to <root>/packages/x. Resolve each file from the place
+   it will actually be read from, or this check enforces the wrong layout. */
+const mdLink = /\]\((\.[^)#\s]+)/g;
+const mdFiles = [];
+for (const name of dirs) {
+  const rulesDir = path.join(PKG_DIR, name, "rules");
+  if (fs.existsSync(rulesDir))
+    for (const f of fs.readdirSync(rulesDir))
+      if (f.endsWith(".md")) mdFiles.push({ file: path.join(rulesDir, f), base: rulesDir });
+  const skillsDir = path.join(PKG_DIR, name, "skills");
+  if (fs.existsSync(skillsDir))
+    for (const d of fs.readdirSync(skillsDir, { withFileTypes: true })) {
+      if (!d.isDirectory()) continue;
+      const f = path.join(skillsDir, d.name, "SKILL.md");
+      if (fs.existsSync(f))
+        mdFiles.push({ file: f, base: path.join(ROOT, "skills", d.name) });  // shipped location
+    }
+}
+if (!mdFiles.length) findings.push("no rule or skill markdown found — the link check validated nothing");
+let linksChecked = 0;
+for (const { file, base } of mdFiles) {
+  const text = fs.readFileSync(file, "utf8");
+  let m;
+  while ((m = mdLink.exec(text)) !== null) {
+    linksChecked++;
+    if (!fs.existsSync(path.resolve(base, m[1])))
+      findings.push(`${path.relative(ROOT, file)} links to ${m[1]}, which does not resolve`);
+  }
+}
+if (!linksChecked) findings.push("0 markdown links checked — the link check did nothing");
+
 console.log(`packages: ${dirs.join(", ")}`);
+console.log(`markdown links checked: ${linksChecked}`);
 console.log(`files owned: ${owned.size}`);
 for (const f of findings) console.log(`FINDING  ${f}`);
 console.log(`\n${findings.length} finding(s).`);

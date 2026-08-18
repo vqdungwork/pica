@@ -321,3 +321,69 @@ of a correct result. On one project a write API returned `{variantCount: 9}` wit
 stacked at the origin, and `{rows: 5}` with five rows built from the wrong component variant. **A
 structural read-back would have passed on both.** Render the node and look at it.
 
+
+## Ask the object, not the index
+
+Three separate lenses on one project failed the same way: each inferred a property from a convenient
+listing instead of reading it off the thing itself. All three returned confident, wrong numbers, and two
+of them were believed long enough to act on.
+
+- **A paint's variable binding lives on the paint.** `setBoundVariableForPaint` writes
+  `paint.boundVariables.color`; it does **not** extend `node.boundVariables.fills`. A check reading only
+  the node-level array reports a correctly bound paint as unbound forever, and — worse — reports an
+  unbound paint as bound whenever the array indices happen to line up. Eight fixes were re-reported as
+  failures before the lens was corrected.
+- **Absence from a convenience listing is not evidence.** A binding was flagged foreign because its id
+  was missing from `getLocalVariablesAsync()`. Resolved directly, it is `radius/xl`, `remote === false`,
+  in a local collection — and the collections' `variableIds` sum to exactly the count that function
+  reports. 129 findings, all false. Resolve the id and read `remote`.
+- **A text's backdrop is not its ancestor's fill.** Walking up for the first solid fill finds nothing for
+  white text over a badge, a map pin or an avatar, because the backing is a **sibling** drawn just before
+  it. Flatten the subtree into paint order and take the last node before the text that fully contains its
+  box. That correction cut 64 candidates to 30 and surfaced an entire numeric keypad rendering white on
+  white.
+
+The pattern is one question: *am I reading this property, or deducing it from something adjacent?* If it
+is a deduction, the check is measuring the deduction.
+
+## A clip-aware check cannot see a frame overflowing itself
+
+Excluding clipped subtrees from an overflow metric is correct — content deliberately scrolled out of view
+is not a defect — and it has a blind spot shaped exactly like a fixed-width bar. The bar is 984 wide, its
+children need 1,363, nothing sticks out of any *parent*, and the parent clips, so the whole subtree is
+dropped before it is measured. A tab bar clipped its last tab on eight screens through every audit round
+at zero findings.
+
+The lens that sees it asks a different question: for a container with a fixed main axis, does
+`sum(children) + gaps + padding` exceed the container on that axis? That is the `Auto-layout overflow`
+row the Figma audit has always carried — the point is that the clip-aware metric **looks like a superset
+of it and is not**. Keep both, and do not widen the clip-aware one, whose exclusion is right.
+
+## A number without a baseline is unreadable
+
+Any new lens run for the first time on mature work will return a large number, and you will not know
+whether it found a problem or a normal property of the medium. Run it against the reference too —
+the client's original, the previous release, the untouched control — and **publish the pair**.
+
+One lens returned 356 on the rebuild. The same lens on the untouched source returned 268, with the same
+top offenders. Most of both numbers is scroll regions and horizontally scrollable strips: not defects in
+either. The useful signal was not 356; it was the 32 sub-5px cases the rebuild had and the source did
+not, thirty of which traced to one registered deviation.
+
+Corollary: **a criterion whose target is zero, on a dimension where the reference scores 247, is a
+criterion nobody can ever close.** Register the pair.
+
+## A guard that skips is worse than a guard that fails
+
+Defensive guards around a mutation are right. Guards that respond to a mismatch by *quietly doing
+nothing* are how a mutation half-lands.
+
+A restore step checked `if (textCount !== captured) skip this instance`. The counts differed — 11 against
+12, because the source hid a slot and the target did not — so every one of eight cards took the skip
+branch, kept the master's placeholder content, and reported a diff instead of an error. The count
+mismatch was the thing to **normalise** (hide the slot first, then restore), not a reason to abandon the
+restore.
+
+If a precondition fails, either fix the precondition or throw. Never continue past it with the work
+undone, because the file is then in exactly the state the guard existed to prevent, and the only trace is
+a line in a log nobody re-reads.

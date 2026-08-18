@@ -576,3 +576,40 @@ architecture that avoids it, in [figma-elements.md](figma-elements.md).
 Large scripts fail in ways that are hard to attribute, and a 20KB result gets truncated mid-JSON.
 Return compact shapes: arrays rather than objects, short strings, rounded numbers. Split wide reads
 across calls. Build, then verify, as separate steps.
+
+## 13. `return` inside a traversal exits the whole script
+
+`use_figma` wraps your code in an async function, so a `return` written as "skip this node" returns from
+the **script**. The tool reports `Code executed with no return value` and you have a read that silently
+did a third of its work. Inside a `while`/`for` traversal the keyword you want is `continue`; inside
+`forEach` it is `return` and that is fine, which is exactly why the two get mixed up.
+
+## 14. Component property references cannot be set on an instance sublayer
+
+Exposing a nested element as a property of the outer component only works if the element belongs to that
+component. If it lives inside a nested **instance**, `componentPropertyReferences` throws
+`Cannot set component property references on instance sublayer`.
+
+The chain has to be built inward-out: the inner component defines the property, then the outer maps to
+it. Before building any of that, check whether the inner component already exposes what you need — on
+one merge the nested card already carried the boolean, so the outer needed no property at all.
+
+## 15. `figma.mixed` is not only `cornerRadius`
+
+Trap 5 names `cornerRadius`. The same symbol comes back from `strokeWeight`, `fontName`, `fontSize`,
+`lineHeight`, `letterSpacing`, `textDecoration` and `fills` on any node with mixed values, and
+concatenating it into a string throws `TypeError: cannot convert symbol to string` — which, because
+scripts are atomic, discards a whole read. Coerce once at the top of every dump helper:
+
+```js
+const num = v => (typeof v === 'number') ? v : null;
+```
+
+## 16. Never filter a delete list by a key you transformed
+
+A cleanup pass removed the rows it had just built, because the "keep" list held
+`name + ' :: ' + description` while the filter compared against `node.name`. Nothing matched, so
+everything was deleted, and the script reported success.
+
+Collect the **node ids** you created and delete by identity, never by a reconstructed name. Anything you
+concatenate for logging is a different value from the thing you are matching on.
