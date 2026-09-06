@@ -1,18 +1,17 @@
 # ALLOWLIST. Everything is ignored unless named below.
 #
-# This is deliberately inverted. A denylist protects only the paths you thought of:
-# the first version of this file ignored `spike/` and would have published the next
-# practice project the moment it was called anything else, along with any brief or PRD
-# dropped in the repo root.
+# This is deliberately inverted. A denylist protects only the paths you thought of, and
+# would publish the next working directory the moment it was called something new, along
+# with any brief or requirements document left in the repo root.
 #
-# pica ships the METHOD - rules, commands, hooks, scripts. The projects it was derived
-# from are evidence for the author, not content for anyone installing it, and they carry
-# briefs, PRDs, real copy and client identifiers that are not redistributable. The
-# findings those projects produced live in CHANGELOG.md, which is the durable form: a
-# rule stated next to the failure that earned it, with no client data.
+# pica ships the METHOD: rules, commands, hooks, scripts, the sector base, the checks.
+# Working material is not content for anyone installing it, and it carries briefs, real
+# copy and identifiers that are not redistributable. What survives it belongs in
+# CHANGELOG.md, which is the durable form: a rule stated next to the failure that earned
+# it, and nothing that identifies where the failure happened.
 #
 # To publish something new, add it here on purpose. If you find yourself adding a
-# project directory, that is the signal to stop.
+# directory of work rather than a directory of method, that is the signal to stop.
 
 /*
 
