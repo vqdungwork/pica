@@ -42,7 +42,7 @@ Each item lands in one of four buckets. Say which, for every item:
 | **True, different cause** | the symptom is real, the stated cause is not |
 | **Not reproducible** | cannot be measured; say what you checked |
 
-"True, different cause" is the most valuable bucket and the easiest to skip. On the source project the
+"True, different cause" is the most valuable bucket and the easiest to skip. The
 client reported an off-centre icon in a password field. The icon was not mis-aligned inside the input at
 all: it was an 18x18 frame positioned absolutely **on the screen**, so it was 4px low on four screens and
 16px high on the fifth, where the error state pushed the field down 20px. Re-centring the five copies

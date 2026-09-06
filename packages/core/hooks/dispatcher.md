@@ -5,7 +5,7 @@ If this session involves design work, run `/pica` and follow the flow. Do not de
 These seven rules hold for the whole session. They are not suggestions and they do not expire.
 
 1. **HTML is the source of truth.** Where HTML and Figma disagree, Figma is wrong. Measure, do not
-   eyeball. Every serious defect in the project this came from was invisible to visual review.
+   eyeball. Every serious defect was invisible to visual review.
 
    And measurement is not the whole job: **render every screen and look at it, and click the main flow.**
    On one project four screenshot-obvious defects survived ten green checks.

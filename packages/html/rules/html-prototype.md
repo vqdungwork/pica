@@ -80,7 +80,7 @@ A work package ships **both**: option boards, which settle a decision, and **one
 of its main flow**, which is the thing the human uses. Boards alone are not a package.
 
 Boards are static, so every check in this flow can see them. A flow cannot be checked that way, and on
-the source project **every defect the human found by using the prototype was a navigation defect with no
+**every defect a human finds by using a prototype rather than looking at it is a navigation defect with no
 geometric signature**:
 
 - a row on one role's home screen that opened a screen belonging to another role
@@ -264,7 +264,7 @@ This pair maps directly onto Figma's interactive and hug frames, which is why it
 
 ## Real assets, or none
 
-- **No emoji standing in for icons.** Use a real icon set. On the source project fifteen emoji and glyph
+- **No emoji standing in for icons.** Use a real icon set. Fifteen emoji and glyph
   placeholders had reached the component library before anyone noticed, and every one had to be
   retrofitted across the whole file.
 - **No generic stock imagery unrelated to the content.** An image that does not match what the screen
@@ -339,7 +339,7 @@ The two decisions arrive in the same moment and feel like the same instinct. The
 ## A trap documented beside the code is not a rule
 
 `box-sizing` contains padding and border and **not margin**, so `width: 100%` plus a horizontal margin
-overflows its parent. On the source project that trap was written out as a comment on one component, and
+overflows its parent. That trap was written out as a comment on one component, and
 then hit again on a new component **twelve lines below the comment**, in the same stylesheet, by the same
 author, within the hour.
 
@@ -356,7 +356,7 @@ Name for the slot it fills, and when two candidates collide, rename before build
 
 Pick one content-edge inset and hold every row to it.
 
-The HTML is authoritative, but **faithful to a broken reference is still broken**. On the source project
+The HTML is authoritative, but **faithful to a broken reference is still broken**.
 a row used `justify-content: center`, putting its buttons at 43px while every other element sat at 16px.
 Figma reproduced it exactly and correctly, and both were wrong. Fix the HTML rather than porting the
 mistake.

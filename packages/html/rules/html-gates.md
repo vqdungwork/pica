@@ -121,7 +121,7 @@ Two things it cannot do. It reads markup, so a link built in JavaScript is invis
 attributes. And it cannot tell whether a link goes somewhere *sensible*, which is why "the human clicks the
 main flow end to end" is a separate line in the definition of done.
 
-The 24px threshold is calibrated, not chosen: on the project this came from, real overflows were 90px and
+The 24px threshold is calibrated, not chosen: real overflows were 90px and
 up while sub-pixel scroll-region noise never exceeded 8px. A threshold in that gap separates them without
 tuning per screen.
 
@@ -155,7 +155,7 @@ Three things it needs to avoid firing forever on correct work:
   labels as drift.
 - **Scope the register.** See `reflowNotes` in SKILL.md: `scope` is required.
 
-Correctly built, this returns **zero** on a correct two-viewport project. On the source project it went
+Correctly built, this returns **zero** on a correct two-viewport project. One implementation went
 from 305 raw deltas to 0 findings once subtree pruning and owner attribution were in place — and the
 remaining text differences were the calibration artefacts described in the figma package's
 `figma-gates.md` ("Calibrate the tolerance, or the check fires forever"), not defects.
@@ -177,7 +177,7 @@ same file; this table only names the lessons learned from getting them wrong.
 ## HTML-only coverage
 
 An HTML-only project gets the four shipped HTML-side scripts and nothing else, so most of its
-verification is harnesses written for that project. The source project ended with ten of them, green three
+verification is harnesses written for that project. One such set ended with ten of them, green three
 runs in a row, and four defects the human found in a screenshot the same afternoon. Everything in this
 part comes out of that gap.
 

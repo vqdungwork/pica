@@ -31,7 +31,7 @@ Clear `activeReview` when the command ends, including on failure. In report mode
 every Figma mutation, so a forgotten flag blocks the next command.
 
 Why the default is report: an audit that writes cannot be judged for severity, destroys the record of
-what was wrong, and on the source project deleted a node from a delivered file that could not be
+what was wrong, and deleted a node from a delivered file that could not be
 restored. Also, the right fix is frequently a design decision. A contrast failure can be solved by
 darkening the scrim or by changing the text colour, and that is not yours to pick.
 
@@ -179,5 +179,5 @@ Then `/pica-prototype` once every package in scope is ported and reviewed.
 
 Run this after **every** port, per package. Never accumulate it to the end of the project.
 
-Deferred once on the source project, it became 64 findings across 12 rounds, because two days of
+Deferred once, it becomes 64 findings across 12 rounds, because two days of
 divergence had piled up and every fix risked disturbing another.

@@ -153,16 +153,16 @@ aspirational. Four are filled now, two accumulate:
 
 - **`exclusions`** — a short matchable name for each thing the brief rules out, alongside the prose in
   `docs/exclusions.md`. `["settings", "profile", "onboarding video"]`. The audit compares frame names
-  against these, because on the source project a ruled-out screen got designed anyway and was only caught
+  against these, because a ruled-out screen got designed anyway and was only caught
   two days later by a human re-reading the brief.
 - **`bannedChars`** — declared here rather than buried in the audit script's config, since it is a project
   fact established at intake.
 - **`copyRules`** — the client's house conventions on wording and punctuation, each with the check that
-  enforces it. On the source project a punctuation ban and a mixed-case wordmark both arrived as asides,
+  enforces it. A punctuation ban and a mixed-case wordmark both arrived as asides,
   and both had to be enforced mechanically afterwards. Ask for them at intake; a copy rule that lives only
   in conversation lasts about a day.
 - **`dataOwnership`** — per entity, who owns it and what this surface may do with it:
-  `{entity, ownedBy, thisSurface, why}`. Read-only is never a blanket. On the source project an instruction
+  `{entity, ownedBy, thisSurface, why}`. Read-only is never a blanket. An instruction
   that the user's data could not be changed on mobile was first applied to everything and disabled the
   request and approval flows the product exists for. What was meant was the **person's own record**, while
   everything a person *does* stays interactive. Per entity, that distinction is designable and checkable.

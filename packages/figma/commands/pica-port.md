@@ -29,7 +29,7 @@ The write gate enforces the state-based checks anyway, so a failure there is a d
 than a wrong file. But check first and say which precondition failed, rather than letting the human read
 a hook denial.
 
-**If the HTML is not approved, do not port.** On the source project a package was ported before approval
+**If the HTML is not approved, do not port.** A package was ported before approval
 and the entire page had to be deleted. That is the failure this gate exists for.
 
 Set `writeAuthorization` to `{"granted": true, "reason": "port <wp>"}` before the first write, and back

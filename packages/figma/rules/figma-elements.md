@@ -318,8 +318,8 @@ list them. That flip has to happen in the Figma UI, by the human, and any text e
 while a loadable font is active.
 
 **Plan around it:** batch all pending text work into one such window. Do not ask the human for
-repeated round-trips of installing, flipping, and flipping back. On the project this came from, that
-happened at least six times and every flip cost a re-review.
+repeated round-trips of installing, flipping, and flipping back. Six
+round-trips is not unusual, and every flip costs a re-review.
 
 ## Read the font files before blaming Figma
 

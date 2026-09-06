@@ -14,7 +14,7 @@ file is the map. The rules now live with the package that owns them, under `pack
 
 **HTML is the source of truth. Measure, do not eyeball.**
 
-Every serious defect on the project this came from was invisible to visual review and obvious to
+Every serious defect was invisible to visual review and obvious to
 measurement: a hero 47px low across three screens, a CTA hugging its label instead of filling, a card
 43px too tall, inputs at a stale fixed height clipping their own error messages, 41 text nodes bound to
 no font at all on the one page the client was scoring.

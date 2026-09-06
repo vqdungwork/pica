@@ -13,7 +13,7 @@ This is not bureaucracy. Three reasons, each earned:
 
 1. **You cannot audit a moving file.** If findings are silently fixed as they are found, the human
    cannot judge severity, cannot see the pattern, and has no record of what was wrong.
-2. **An audit that writes can damage a delivered file.** On the project this came from, an audit ran as
+2. **An audit that writes can damage a delivered file.** An audit ran as
    a write against a handed-off file and deleted a node that could not be restored.
 3. **The fix is often not the one you would pick.** A contrast failure can be fixed by darkening the
    scrim or by changing the text colour. That is a design decision, not a repair.
@@ -26,7 +26,7 @@ that is enforced by hook, not by intention.
 Before handing **any** built work back, review it yourself and **state what you checked and what you
 found**. Not "done", not "complete".
 
-The failure this prevents: on the source project, four separate reports declared work complete when it
+The failure this prevents: four separate reports declared work complete when it
 was visibly broken, including one that said a screen set was "fully updated" while a home screen bore
 no resemblance to its HTML. Each time, the human found it by opening both and comparing. That converts
 their review from verification into discovery, which is the most expensive failure mode in the whole
@@ -145,7 +145,7 @@ overrides it. Assert the rendered outcome.
 
 ## Measure the state the product can actually enter
 
-Six checks on the source project returned zero because their sample excluded the case:
+Six checks returned zero because their sample excluded the case:
 
 - a type-scale sweep measured only the visible tab, leaving 122 group headers unmeasured
 - a spacing check compared direct siblings only
@@ -164,7 +164,7 @@ after the first week.
 ## Verify a new check by reintroducing the defect it was written for
 
 Not a defect. **The** defect. Put it back, watch the check fail, note the count it reports, then take it
-out again. Two checks on the source project did not fail on the first attempt:
+out again. Two checks did not fail on the first attempt:
 
 - the group-header check exempted the `row + heading` pair, which was the exact pair that was broken.
   Restoring zero padding produced 19 failures only once the exemption was narrowed.
@@ -177,7 +177,7 @@ Emit one line per check, pass or fail, and count the lines.
 
 ## Check the probe before believing the result
 
-Two of the source project's contrast probes were wrong in opposite directions, and both were believed for
+Two contrast probes were once wrong in opposite directions, and both were believed for
 a few minutes:
 
 - one sampled the region where the background ramps into white, so every reading was about 1:1
@@ -275,7 +275,7 @@ eight generated conditions took four measured iterations before all eight cleare
 
 ## Editing safely is part of verification
 
-Three failure modes here destroyed more work on the source project than any design defect.
+Three failure modes here destroyed more work than any design defect.
 
 **Prove an anchor unique before an index-based edit.** A restructure computed string offsets from a
 substring that appeared twice and cut 8,047 characters out of a file, twice, taking a tab bar, a bulk

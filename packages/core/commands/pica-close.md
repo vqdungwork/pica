@@ -19,7 +19,7 @@ that key is missing or the file is gone, **say so and stop**: this step cannot r
 the brief from the contract is exactly the substitution it exists to prevent. Report it as a failed
 closeout check rather than quietly reading the contract instead.
 
-Both the contract and the plan are copies, and copies drift. On the source project this step recovered a
+Both the contract and the plan are copies, and copies drift. This step recovered a
 scored deliverable that had been missed entirely: the brief asked for design reasoning, and nothing in
 the plan carried it.
 
@@ -105,7 +105,7 @@ Set in `.pica/state.json`:
 From here the write gate denies every Figma mutation.
 
 **After this point, audits report and do not repair.** If something is found wrong post-delivery, say what
-it is and let the human decide. On the source project a post-delivery audit ran as a write and deleted a
+it is and let the human decide. A post-delivery audit ran as a write and deleted a
 node that could not be restored. It was one empty text node, and it was still the only permanent damage in
 the entire project.
 

@@ -54,9 +54,9 @@ An error message that says "Something went wrong" tells the user nothing and tel
 **Realistic-looking data is self-certifying, and that is what makes it dangerous. Nobody checks a
 screen that reads correctly.**
 
-On the source project this produced: a real person's name under someone else's job title, an identifier
-belonging to a different real person in the same roster, a feed whose newest item predated the screen's
-own "today", and a post no screen in the flow could have produced.
+Four defect shapes recur, and every one of them renders as a plausible screen: a name paired with
+somebody else's job title, an identifier that belongs to a different record in the same set, a feed whose
+newest item predates the screen's own "today", and an item no screen in the flow could have produced.
 
 So:
 

@@ -14,8 +14,8 @@ on assumptions.
 Not a summary, not your restatement. The original text.
 
 Paraphrasing at intake loses the exact wording, and the exact wording is what settles disputes later.
-On the source project the phrase "we do not mean the subscription plan picker" was the only thing that
-proved a screen should never have been designed.
+A phrase as specific as "we do not mean the subscription plan picker" is the kind of thing that
+settles, months later, whether a screen should ever have been designed.
 
 **Write it to `docs/brief.md` verbatim as soon as it arrives, and record the path in `briefPath`.** The
 brief is a reference and read-only from that moment — see `packages/core/rules/reference-discipline.md`.
@@ -42,7 +42,7 @@ Write the labels down. They are part of the contract.
 Hours or days available. Whether it is fixed-scope or time-and-materials. Any existing estimate the
 work has to stay consistent with. And explicitly: **anything the client must not be told.**
 
-That last item is real. On the source project the delivery came in well under the estimate it was
+That last item is real. The delivery came in well under the estimate it was
 carved from, and revealing that would have invited a discount on a quote that was correctly priced for
 the full job. The disclosure policy was set at intake and recorded, so no later document leaked it.
 
@@ -53,7 +53,7 @@ the full job. The disclosure policy was set at intake and recorded, so no later 
 - **What only the human can do**
 
 That third one prevents the most tedious failure mode. Locally installed fonts are invisible to a
-plugin runtime, so only the human can install or switch them. On the source project this was
+plugin runtime, so only the human can install or switch them. This was
 discovered mid-build and cost at least six install-and-flip round-trips, each one invalidating a
 review.
 
@@ -97,7 +97,7 @@ That register exists because this artefact is weakest where it matters most. A t
 out, so the quoted half is empty — and a thin brief is precisely the project whose scope will grow. The
 ask is the whole defence, and an unrecorded ask is indistinguishable from one that never happened.
 
-> This is the highest-value artefact in the whole flow. On the source project a screen the brief
+> This is the highest-value artefact in the whole flow. A screen the brief
 > explicitly excluded got designed anyway, and it was caught two days later only because a human
 > re-read the brief. The exclusions list turns that from luck into a check.
 
@@ -115,7 +115,7 @@ Audit every source labelled `use`. Then audit **the sources the brief implies bu
 
 If the brief says reuse an existing design system, the audit covers **where that system actually
 lives**, not only the artefact being redesigned. A mobile app redesign that claims to reuse a desktop
-design system has to look at the desktop product. On the source project the desktop site went
+design system has to look at the desktop product. The desktop site went
 unexamined until the human asked "can you audit the website too", and that audit produced the entire
 token foundation.
 
@@ -242,13 +242,14 @@ Output `tokens.json` and `tokens.css` from the same source, so the HTML and Figm
 ## Mock data provenance, which matters as much as token provenance
 
 Real-looking data is self-certifying, and that is what makes it dangerous. Nobody checks a screen that
-looks right. On the source project, where the mock data came from the product's own seed, the defects were:
+looks right. When mock data is drawn from a real seed, five defect shapes recur and every one renders as
+a plausible screen:
 
-- a real person's name under someone else's job title
-- an identifier that belongs to a **different** real person in the roster, invented to fill a row
-- a feed whose newest item predated the screen's own "today"
-- a notification crediting the wrong author for a real post
-- a post that no screen in the flow could produce
+- a name paired with somebody else's job title
+- an identifier that belongs to a **different** record in the same set, invented to fill a row
+- a feed whose newest item predates the screen's own "today"
+- a notification crediting the wrong author
+- an item no screen in the flow could produce
 
 Each one reads as authoritative. So:
 
@@ -272,7 +273,7 @@ referenced entity reachable from some screen.
 
 ## Client rules become contract entries, and each one gets an executable
 
-A rule stated in conversation lasts about a day. On the source project three of them arrived as asides and
+A rule stated in conversation lasts about a day. Three of them arrived as asides and
 all three had to be enforced mechanically afterwards:
 
 | Rule | Register | Enforced by |
@@ -300,7 +301,7 @@ before designing anything that looks editable.
 ]
 ```
 
-Read-only is not a blanket. On the source project an instruction that the user's data could not be changed
+Read-only is not a blanket. An instruction that the user's data could not be changed
 on mobile was taken too far on the first pass and disabled the request and approval flows, which are the
 reason the product exists. The correction was that **the person's record** is view-only while everything a
 person *does* stays interactive. A per-entity table makes that distinguishable; a sentence in a review
