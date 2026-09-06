@@ -38,7 +38,10 @@ const DOC_PAGES = ["📕", "🔍 01", "📋 09"];
 // Populated from .pica/state.json before pasting. State is authoritative; this block is a copy the
 // Figma sandbox can see, because it has no filesystem access.
 const EXCLUSIONS = [];                      // short names the brief ruled out, e.g. ["settings", "profile"]
-const DEVIATIONS = [];                      // [{ node, prop, html, figma, why, by }]
+// DEVIATIONS lived here and nothing read it: a config block anyone could fill in with no
+// effect, which is worse than an absent one because it reads as a working control. The
+// register belongs to geometry-diff, which is the check a deviation suppresses, and it
+// lives in .pica/state.json where the reasons are. See figma-gates.md.
 
 // Deliberate raw values, copied from .pica/state.json rawValueExemptions where the reasons live.
 // State is authoritative; never edit this block alone or the two drift and the reasons are lost.

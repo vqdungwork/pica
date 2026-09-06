@@ -1,3 +1,8 @@
+---
+description: Review the Figma against the approved HTML by measurement, reporting before fixing
+argument-hint: "[work package] [--fix]"
+---
+
 # pica-review: review by measurement
 
 Step 7. `$ARGUMENTS` may name a work package and may contain `--fix`. With no package, review everything.
@@ -149,6 +154,24 @@ In report mode, present the report and **stop**. Do not offer to fix in the same
 decide what matters.
 
 In fix mode, fix, **re-audit in a separate call**, and report before and after.
+
+---
+
+## GATE 7
+
+Present the report. Clear `activeReview`, and `writeAuthorization` if fix mode set it. **Stop.**
+
+This gate is not shaped like the others. Every gate before it asks the human to approve work that is
+finished; this one hands over a list and asks **which of it is worth doing**. Zero findings still passes
+through here — the human is told what ran and what it proved, because a review that reports nothing and a
+review that never ran look identical in a transcript.
+
+**Report mode ends here. It does not slide into fix mode.** The step exists because the right fix is
+frequently a design decision rather than a repair — a contrast failure is solved by darkening the scrim
+or by changing the text colour, and that choice is not the flow's to make. `--fix` is a second
+invocation, entered only after the human has said which findings to act on.
+
+Then `/pica-prototype` once every package in scope is ported and reviewed.
 
 ---
 

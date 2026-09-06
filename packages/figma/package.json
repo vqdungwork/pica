@@ -9,16 +9,17 @@
       "pica-review.md"
     ],
     "rules": [
-      "figma-screens.md",
       "figma-elements.md",
-      "figma-mcp.md",
       "figma-gates.md",
-      "figma-rebuild.md"
+      "figma-mcp.md",
+      "figma-rebuild.md",
+      "figma-screens.md"
     ],
     "scripts": [
-      "geometry-diff.mjs",
-      "figma-audit.js",
       "capture-baseline.js",
+      "figma-audit.js",
+      "geometry-diff.mjs",
+      "mock-figma.mjs",
       "source-parity.js"
     ]
   },
@@ -37,8 +38,7 @@
   },
   "produces": {
     "state": [
-      "packages.figma.ported",
-      "packages.figma.annotated"
+      "packages.figma.ported"
     ],
     "artifacts": [
       ".audit/figma-dump.json"

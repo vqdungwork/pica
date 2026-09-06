@@ -2,6 +2,10 @@
 
 Frames, states, alignment, and the Plugin API calls that fail silently.
 
+> **The definition of done for everything here is in `packages/figma/rules/figma-gates.md`.** This file
+> is technique; that one is the gate.
+
+
 Load this for step 6 (port) and step 8 (prototype). It pairs with
 [figma-elements.md](figma-elements.md), which covers what the screens are built from.
 

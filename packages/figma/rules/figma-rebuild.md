@@ -9,7 +9,7 @@ every hard call in the work is some version of "the source does this; is it a de
 
 The criteria for working against a reference — it is read-only, names are not identity, content parity
 is its own criterion, a reference has three kinds of defect, fix at the definition — are flow-wide and
-live in [reference-discipline.md](../../core/rules/reference-discipline.md). Read that first. This file
+live in `packages/core/rules/reference-discipline.md`. Read that first. This file
 is the Figma application of it, plus what is specific to a rebuild.
 
 Everything in `figma-elements.md` and `figma-screens.md` still applies.
@@ -129,3 +129,18 @@ The keypad is also core's *fix at the definition* case: twenty-two digits, no ov
   deviation. Name the deviation next to the number.
 - Every lens reported as a pair against the source.
 - Every frame rendered and looked at, after the last change.
+
+---
+
+## Definition of done
+
+The port's gates are in `packages/figma/rules/figma-gates.md`; a rebuild replaces several of them and
+those replacements had no checklist of their own.
+
+- [ ] The client's pages were never written to, and the rebuild lives on its own pages
+- [ ] The rebuild sits at the source's canvas coordinates, so pairing is exact
+- [ ] `source-parity.js` returns zero missing and zero extra strings per screen, with a non-zero screen count
+- [ ] Contamination zero: nothing from the source was moved, renamed or restyled in place
+- [ ] Every lens reports a **pair**: the rebuild's number beside the untouched source's, in `lensBaselines`
+- [ ] Every source defect was decided, not silently inherited or silently fixed
+- [ ] Every component the granularity rule would dissolve and a human kept is in `granularityExemptions`

@@ -1,3 +1,8 @@
+---
+description: Port an approved work package to Figma and verify it against the HTML by measurement
+argument-hint: "<work package name>"
+---
+
 # pica-port: port an approved work package to Figma
 
 Step 6. The package named in `$ARGUMENTS`.
@@ -105,6 +110,33 @@ Run it as one `use_figma` call. Then diff geometry against the captured referenc
 content, compare position only.** Never compare width or height; the HTML glyph box and the Figma line
 box measure different things, and comparing them produces phantom findings by the hundred. Tolerance
 roughly 3px.
+
+**`geometry-diff.mjs` is that diff, and it ships.** For three releases this section described the
+comparison in prose and named no script, so every port reconstructed it by hand. Dump the ported frames
+from Figma, save the array, and run:
+
+```bash
+node ${CLAUDE_PLUGIN_ROOT}/scripts/geometry-diff.mjs \
+  .audit/html-reference-forced.json .audit/figma-dump.json .pica/state.json
+```
+
+The dump is an **array**, one entry per frame:
+
+```json
+[ { "pkg": "auth", "frame": "Sign in", "vp": "mobile", "font": "Inter",
+    "texts": [["Sign in", 24, 40, 120, "left"], ["Email", 24, 96, 60, "left"]] } ]
+```
+
+Three things it refuses to start without, each because skipping them once produced a clean report on an
+unverified file:
+
+- **`frameMap` in state**, as `{"<pkg>|<figma frame>": "<html screen>"}`. The html screen name is the
+  caption **without** its viewport suffix, because the viewport is matched separately
+- **A `font` per frame that matches the family the capture resolved.** Metrics differ per typeface, so a
+  diff across two families measures the typeface rather than the layout. This is what
+  `.audit/html-reference-forced.json` exists for
+- **A non-zero number of runs compared.** Zero comparisons reporting "0 findings" is the failure mode this
+  whole file is written against
 
 Fix, then **re-audit in a separate call**. Same-call read-back is not proof. Repeat until every check
 returns zero.
