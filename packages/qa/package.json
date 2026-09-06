@@ -1,0 +1,58 @@
+{
+  "name": "qa",
+  "status": "stable",
+  "description": "Test the running product: suite shape, use-case coverage, exploratory sessions, regression per defect, and the release gate.",
+  "owns": {
+    "commands": [
+      "pica-test.md"
+    ],
+    "rules": [
+      "testing.md"
+    ],
+    "scripts": [
+      "qa-check.mjs"
+    ],
+    "agents": [
+      "pica-tester.md"
+    ]
+  },
+  "requires": {
+    "state": [
+      "useCases",
+      "businessRules"
+    ],
+    "artifacts": [],
+    "gates": []
+  },
+  "produces": {
+    "state": [
+      "testStrategy",
+      "defects",
+      "exploratory",
+      "testData",
+      "rollbackExecuted"
+    ],
+    "artifacts": []
+  },
+  "checks": [
+    {
+      "run": "qa-check.mjs",
+      "passes": "0 findings"
+    }
+  ],
+  "definitionOfDone": [
+    {
+      "type": "check",
+      "run": "qa-check.mjs",
+      "passes": "0 findings"
+    },
+    {
+      "type": "human",
+      "says": "an exploratory session ran with a charter, and the rollback was executed rather than planned"
+    },
+    {
+      "type": "gate",
+      "grants": "tested"
+    }
+  ]
+}

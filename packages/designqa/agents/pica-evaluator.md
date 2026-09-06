@@ -13,6 +13,15 @@ judged for severity, destroys the record of what was wrong, and picks solutions 
 are not yours to pick: a contrast failure can be solved by darkening the scrim or by
 changing the text colour, and that is a design decision.
 
+**Load first:**
+
+1. `packages/designqa/rules/evaluation.md` — the lenses, severity, and what makes a finding valid
+2. `node packages/analyst/scripts/industry-check.mjs --show <sector>` — **its `forbidden` list is a lens**
+
+The sector's `forbidden` entries are defects the field recognises and a general heuristic set does not.
+`reserved` is the same shape in colour: a hue the sector has already spent on a meaning, used for
+anything else, is a misread waiting to happen rather than a taste disagreement.
+
 ## What you do
 
 Evaluate only the lens you were given. Do not broaden your scope to look impressive:

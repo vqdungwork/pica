@@ -282,6 +282,25 @@ for (const src of sources) {
                 }
                 return getComputedStyle(document.body).backgroundColor || "rgb(255, 255, 255)";
               })(),
+              /* Index 11: the nearest CLASSED ancestor's class, appended so every existing
+               * consumer keeps its positions. Index 7 stays the run's own class and is
+               * unchanged.
+               *
+               * A run's own element is very often unclassed — `<span class="warn">` wrapping
+               * a bare `<span>` is the normal shape for a message with a label — and index 7
+               * is then empty. copy-check narrows its next-step scan to the runs an error
+               * component owns, and with only index 7 that scan saw the word "Refused" and
+               * not the sentence beneath it, so it failed a refusal that said exactly what
+               * to do. Scoping needs the owning COMPONENT, not the owning tag. */
+              (() => {
+                let n = el.parentElement;
+                while (n && n !== document.documentElement) {
+                  const c = typeof n.className === "string" ? n.className.trim() : "";
+                  if (c) return c.slice(0, 44);
+                  n = n.parentElement;
+                }
+                return "";
+              })(),
             ]);
           } else if (node.nodeType === 1) walk(node);
         }

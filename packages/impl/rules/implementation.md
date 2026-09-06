@@ -4,15 +4,15 @@ Load this for phases 6 and 7, after the contract.
 
 ## What this package is, and what it is not
 
-**It does not ship a coding agent.** Writing code is the most mature thing in this ecosystem, and
-rebuilding it here would mean competing with the tool this runs on top of, with a worse version, on a
-moving target.
+**This package owns the repository, not the code inside it.** The pipeline, the branches, the three
+environments, where secrets live, and whether the tests trace to anything.
 
-**It ships the Definition of Done and the checks.** That is what this project has always contributed:
-it never wrote a browser, it wrote the checks. It never wrote Figma, it wrote the gates. Here it does
-not write React, it writes what "finished" means and something that returns non-zero when it is not.
+`pica-developer` writes the code and `pica-qa` tests it. Those are separate packages because they are
+separate jobs: how a component is built is a craft question, and whether a branch is allowed to reach
+production is a repository question. Merging them produced the failure this split fixed — a build with
+good components, no pipeline, and secrets in the source.
 
-A coding agent executes. This decides whether what came out is done.
+Read together, they cover phase 7. Neither covers it alone.
 
 ---
 

@@ -122,7 +122,7 @@ the wrong product** — content parity is a separate criterion and only the sour
 
 ## Packages
 
-pica is ten packages plus a bundle. Each declares what it requires, produces, checks and considers
+pica is twelve packages plus a bundle. Each declares what it requires, produces, checks and considers
 done, in its own manifest, and each installs on its own with only what it needs.
 
 | Package | Depends on | Owns |
@@ -135,10 +135,12 @@ done, in its own manifest, and each installs on its own with only what it needs.
 | `pica-designqa` | core, html | independent evaluators, cognitive walkthrough, build versus design |
 | `pica-architect` | core | feasibility before anything is promised, C4, ADRs, NFRs |
 | `pica-estimate` | core | three-point effort by role, the work order, the effort record |
-| `pica-impl` | core, html, designqa | the definition of done for building, reviewing, testing and releasing |
+| `pica-developer` | core, html, analyst | **the code**: the API contract as a seam, where state lives, failure shapes, accessibility |
+| `pica-qa` | core, analyst | **the tests**: the shape of the suite, who owns each layer, the release gate |
+| `pica-impl` | core, html, designqa | the repository: pipeline, branches, environments, secrets, and what release means |
 | `pica-figma` | core, html | the port, annotations, and the geometry diff |
 
-`pica` installs all ten. A project that will never touch Figma installs `pica-html`, which pulls in
+`pica` installs all twelve. A project that will never touch Figma installs `pica-html`, which pulls in
 `pica-core` and `pica-research` and never sees the Figma half. A team that only wants the business
 analysis installs `pica-analyst`, which pulls in `pica-core` and nothing else.
 
@@ -150,17 +152,43 @@ packages divide by artefact domain and the agents divide by who reasons about wh
 grants it on human approval; `figma` requires it and cannot grant it. Run
 `node packages/core/scripts/pica-status.mjs` to see what is ready and what is blocked.
 
-**pica ships the definition of done for implementation, not a coding agent.** `pica-impl` is built and
-stable: it checks that tests trace to use cases, that a pipeline runs lint, types and tests, that
-branches are short-lived, that three environments deploy from main, that no credential is tracked, that
-every NFR names how it is measured, and that the repository is the stack that was agreed.
+### Phase 7 is three packages, and the split is the point
 
-What it does not do is write the code. Writing code is the most mature thing in this ecosystem, and a
-worse version of it here would help nobody. A coding agent executes; this decides whether what came out
-is finished.
+`pica-developer` writes the code. `pica-qa` decides whether the suite is a suite or a number.
+`pica-impl` owns the repository around both.
+
+They are separate because they are separate jobs, and merging them produced the failure this split
+fixed: a build with good components, no pipeline, and secrets in the source. How a component is built is
+a craft question; whether a branch may reach production is a repository question; whether the tests
+prove anything is neither.
+
+**Nobody grades their own build.** Step 7.10 runs `pica-evaluate --build` against the approved design,
+and it is not run by whoever wrote the code: someone who knows why a value was chosen will find the
+reason it is acceptable.
 
 `packages/_planned/` keeps per-platform contracts for `impl-web`, `impl-ios`, `impl-android` and `e2e`.
 Those are interfaces worth agreeing before the work starts, and they have no content.
+
+## The role agents
+
+Nine, one per step. Each loads its own craft rules **and reads the sector entry before it starts**,
+which is what keeps a clinician's screen and a warehouse handheld from coming out of the same template.
+
+| Agent | Package | Step |
+|---|---|---|
+| `pica-researcher` | research | 1.6–1.7, fanned out, none seeing another's findings |
+| `pica-analyst` | analyst | 2 |
+| `pica-architect` | architect | 1.8 feasibility, then 6 |
+| `pica-designer` | html | 3 |
+| `pica-writer` | content | 3.5 |
+| `pica-evaluator` | designqa | 3.8 and 7.10, fanned out, **no write access** |
+| `pica-estimator` | estimate | 5 |
+| `pica-developer` | developer | 7.1–7.7 |
+| `pica-tester` | qa | 7.8 |
+
+**Fan out measurement. Never fan out judgement.** Research and evaluation are the two places, both
+spawned in one message, same return schema, and a unit with no provenance is rejected rather than
+merged.
 
 ## Build order within a project
 

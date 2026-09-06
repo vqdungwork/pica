@@ -19,6 +19,9 @@
       "flow-check.mjs",
       "parity-check.mjs",
       "verify-html.mjs"
+    ],
+    "agents": [
+      "pica-designer.md"
     ]
   },
   "requires": {

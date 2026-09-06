@@ -11,7 +11,7 @@
  *   2. every package has its plugin manifest at .claude-plugin/plugin.json, the
  *      location Claude Code actually reads, and that manifest parses and has a "name"
  *   3. every file a package CLAIMS to own actually exists
- *   4. every shipped rule/script/command/hook is owned by exactly one package
+ *   4. every shipped rule/script/command/hook/agent is owned by exactly one package
  *   5. every declared check resolves to a script that exists
  *   6. every definitionOfDone entry has a valid type, and a "human" entry names no script
  *   7. every relative markdown link in a rule or a skill resolves to a file that exists.
@@ -113,7 +113,7 @@ for (const name of dirs) {
     }
   }
 
-  for (const kind of ["commands", "rules", "scripts", "hooks"]) {
+  for (const kind of ["commands", "rules", "scripts", "hooks", "agents"]) {
     for (const file of (m.owns?.[kind] || [])) {
       const rel = path.join("packages", name, kind, file);
       if (!fs.existsSync(path.join(ROOT, rel))) findings.push(`${name}: owns ${kind}/${file}, which does not exist`);
@@ -148,9 +148,14 @@ for (const name of dirs) {
 
 /* Every shipped file must be owned. An orphan means a rule nobody is responsible for.
    hooks/ is included alongside commands/rules/scripts — core's hook files went
-   unvalidated and unowned until this scan reached them too. */
+   unvalidated and unowned until this scan reached them too.
+
+   agents/ joined them for the same reason and one worse: nine agent files shipped with
+   no package claiming them AND no plugin.json declaring them, so none of them loaded.
+   A directory this validator does not know about is a directory that can be wrong
+   forever, which is the whole failure mode it was written to end. */
 for (const name of dirs) {
-  for (const kind of ["commands", "rules", "scripts", "hooks"]) {
+  for (const kind of ["commands", "rules", "scripts", "hooks", "agents"]) {
     const dir = path.join(PKG_DIR, name, kind);
     if (!fs.existsSync(dir)) continue;
     for (const f of fs.readdirSync(dir)) {

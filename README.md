@@ -5,7 +5,7 @@
 **From a brief to a released product, checked by measurement at every step. For Claude Code.**
 
 [![version](https://img.shields.io/badge/version-0.8.0-1f2328)](https://github.com/vqdungwork/pica/releases)
-[![checks](https://img.shields.io/badge/checks-86%20fail--closed-1f2328)](#the-checks)
+[![checks](https://img.shields.io/badge/checks-100%20fail--closed-1f2328)](#the-checks)
 [![sectors](https://img.shields.io/badge/sectors-28-1f2328)](#it-knows-the-field)
 [![licence](https://img.shields.io/badge/licence-MIT-1f2328)](LICENSE)
 [![requires](https://img.shields.io/badge/requires-Claude%20Code-1f2328)](#requirements)
@@ -79,19 +79,27 @@ is worse than no check, because its silence reads as a pass.**
 | **Understands the work** | The problem, the AS-IS and the TO-BE, business rules, use cases, a domain model, and a PRD a non-technical client can read |
 | **Knows the field** | 28 sectors: who decides, which hues are already spent, the tradition each settled on, what each treats as a defect regardless of the brief |
 | **Designs in HTML first** | Every viewport you declare, every state, consuming a kit built before any screen. Cheap to change, cheap to measure, and it clicks |
-| **Measures before you see it** | Geometry, contrast, coverage, viewport parity, the words, the wiring. 86 checks |
+| **Measures before you see it** | Geometry, contrast, coverage, viewport parity, the words, the wiring. 100 checks |
 | **Has it reviewed** | Three to five independent evaluators with different lenses, none seeing another's findings, plus a walkthrough per use case |
 | **Prices it honestly** | Three-point effort per role, but only once scope and deadline are frozen |
-| **Holds the build to it** | Tests traced to use cases, a real pipeline, three environments, and the built product measured back against the approved design |
+| **Builds it** | The API contract as a seam with its errors, four places state is allowed to live, every failure shaped so the copy reaches it, accessibility written in rather than retrofitted |
+| **Tests it** | A pyramid with an owner per layer, one end-to-end test per use case, every business rule asserted, a regression test that failed before it passed |
+| **Holds the build to it** | A real pipeline, three environments, and the built product measured back against the approved design by someone who did not build it |
 | **Ports to Figma, optionally** | Verified frame by frame against the HTML. Where the two disagree, Figma is wrong |
 
-**It does not write your code.** Writing code is the most mature thing in this ecosystem and a worse
-version of it here would help nobody. pica never wrote a browser, it wrote the checks. It never wrote
-Figma, it wrote the gates. **A coding agent executes; this decides whether what came out is finished.**
+**It writes the code too, and holds it to the same standard as everything else.** `pica-developer`
+builds the approved design — the API contract as a seam with its errors, four places state is allowed to
+live, every failure shaped so the copy reaches it — and `pica-qa` decides whether the suite is a suite
+or a number. Then the built product is measured back against the approved design, by someone who did not
+build it.
+
+pica never wrote a browser, it wrote the checks. It never wrote Figma, it wrote the gates. **What it
+adds to writing code is the part that is usually missing: what "finished" means, and something that
+returns non-zero when it is not.**
 
 ## The flow
 
-Nine phases. One stops and waits for a person, and it is the one that matters.
+Nine phases and three places a person has to decide. Everything between them is deterministic.
 
 | | Phase | What happens | Command |
 |:--:|:--|:--|:--|
@@ -102,16 +110,28 @@ Nine phases. One stops and waits for a person, and it is the one that matters.
 | ⏸ **4** | **Client approves** | The business flow **and** the design. Scope and deadline frozen. **Nothing downstream runs until they are** | you |
 | **5** | Estimate | Three points per role, a work order derived from the deadline, arithmetic shown | `/pica-estimate` |
 | **6** | Architecture | C4, decision records carrying their downside, NFRs as numbers with a way to measure each | `/pica-architect` |
-| **7** | Build | Tests traced to use cases, pipeline, environments, then **the built product against the approved design** | `/pica-build` |
+| **7** | Build | The API contract as a seam with its errors, state in one of four places, every failure shaped so the copy reaches it | `/pica-develop` |
+| **7.8** | Test | A pyramid with an owner per layer, one end-to-end test per use case, every rule asserted, then the pipeline and the environments | `/pica-test` · `/pica-build` |
+| **7.10** | Compare | **The built product measured back against the approved design**, by someone who did not build it | `/pica-evaluate --build` |
 | **7f** | Figma | Only if it is a deliverable. Port, verify by measurement, wire the prototype | `/pica-port` · `/pica-review` |
 | **8** | Closeout | Proved against the original brief, handed over, then the real hours logged back | `/pica-close` |
 
-**Or hand it the brief and let it run.** `/picaflow` goes from phase 0 to a clickable `review.html`
-without stopping to ask, turning every gap into a labelled assumption carrying a confidence and a blast
-radius.
+**Or hand it the brief and let it run.** `/picaflow` runs the chain and stops only at those three
+decisions, turning every gap in between into a labelled assumption carrying a confidence and a blast
+radius. Each step runs as the agent that owns it, and each agent reads the sector before it starts.
 
-That is the argument, not a shortcut. Reacting to a built thing is far cheaper than specifying one from
-nothing: ask a client what their business flow is and you get hesitation; show them a wrong one that
+`--to` says where to finish, and **every one of them is a complete project rather than a truncated one**:
+
+| `--to design` | a measured, clickable `review.html`, the PRD, and the assumptions register |
+|:--|:--|
+| `--to figma` | that, plus the Figma file verified frame by frame against the HTML |
+| `--to product` | that, plus working front end and back end, tested, released |
+
+Figma is off the critical path. `--to product` goes straight from the approved HTML to production code
+without touching it, and it is a supported route rather than a corner cut.
+
+Running without stopping is the argument, not a shortcut. Reacting to a built thing is far cheaper than
+specifying one from nothing: ask a client what their business flow is and you get hesitation; show them a wrong one that
 clicks and you get the correction in three seconds. **The demo is the question. It is only packaged as an
 answer.** What makes it safe is the assumptions register and nothing else.
 
@@ -142,9 +162,11 @@ the state schema and the gates.
 |:--|:--:|:--|
 | `pica-analyst` · `pica-architect` · `pica-estimate` · `pica-research` | 2 | they need the state schema and nothing else |
 | `pica-html` | 3 | it consumes `tokens/tokens.css`, which research produces |
+| `pica-qa` | 3 | a test asserts a business rule, and the rules live in the analyst's state |
 | `pica-content` · `pica-designqa` · `pica-figma` | 4 | all three read the capture artefact html produces |
+| `pica-developer` | 5 | it builds an approved HTML design against the analyst's contract |
 | `pica-impl` | 5 | the build-versus-design comparison belongs to Design QA, not the builder |
-| `pica` | 11 | the bundle |
+| `pica` | 13 | the bundle |
 
 ### Where the line is
 
@@ -155,7 +177,7 @@ the state schema and the gates.
 | Dashboards, admin tools, internal products | Logos, brand marks, identity work |
 | Design systems and component libraries | Presentation decks and documents |
 | The PRD, use cases and domain model behind them | Diagrams, charts, terminal output |
-| Deciding whether a build matches its design | Writing the implementation code |
+| The code, the tests, and whether the build still matches the design | Bespoke infrastructure and cloud operations |
 
 **pica designs things people navigate and someone has to build.** If nothing will be implemented from
 the output, it will get in your way: every gate exists to protect an implementation that would otherwise
@@ -168,13 +190,13 @@ in scope, and what the brief says. It adapts to that and refuses to invent the r
 
 | | |
 |:--|:--|
-| **11 plugins** | 10 packages plus a bundle, each declaring what it requires, produces, checks and considers done |
-| **14 commands** | Deterministic once typed |
-| **20 rule modules** | Loaded per step, never all at once. 173 definition-of-done items across them |
-| **15 check scripts** | Plus the capture harness, the status tool, and a harness that runs the in-Figma scripts outside Figma |
-| **86 checks** | Every one fails closed |
+| **13 plugins** | 12 packages plus a bundle, each declaring what it requires, produces, checks and considers done |
+| **16 commands** | Deterministic once typed |
+| **22 rule modules** | Loaded per step, never all at once. 173 definition-of-done items across them |
+| **18 check scripts** | Plus the capture harness, the status tool, and a harness that runs the in-Figma scripts outside Figma |
+| **100 checks** | Every one fails closed |
 | **28 sectors** | 264 names resolving to them, 4 deliberately refused as ambiguous |
-| **1 subagent** | An evaluator with **no write access**, because a reviewer that can fix cannot be trusted to report |
+| **9 role agents** | One per step, each loading its own craft rules and the sector entry before it starts. The evaluator has **no write access**, because a reviewer that can fix cannot be trusted to report |
 | **2 hooks** | One loads the rules every session; one refuses a Figma write that has not earned it |
 
 ## The checks
@@ -197,9 +219,11 @@ Listed so the number can be recounted rather than trusted.
 | `estimate-check` | 6 | preconditions, three points, tier spread, risk reflected, headcount, effort log |
 | `impl-check` | 8 | test trace, CI pipeline, branch protection, branch age, environments, secrets, NFR measured, stack declared |
 | `code-tokens-check` | 4 | raw colour, raw spacing, raw radius, linear easing |
+| `dev-check` | 7 | API contract, error branch, state strategy, accessibility in code, performance budget, server guard, retry safety |
+| `qa-check` | 7 | pyramid shape, use case covered end to end, rule asserted, regression traced, severity defined, test data, release gate |
 | `build-diff` | 5 | frame paired, control height, radius, hue budget, text position |
 | `geometry-diff` | 1 | Figma position against the HTML reference |
-| | **86** | |
+| | **100** | |
 
 **Every one has been seen to fail on the defect it was written for.** That is the only reason to trust a
 number, and it is why each is recorded next to the failure that earned it in

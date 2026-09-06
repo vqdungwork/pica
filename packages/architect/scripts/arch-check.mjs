@@ -228,11 +228,18 @@ if (!FEAS_ONLY) {
 /* ---- 6. every technology has an ADR -------------------------------------- */
 let unexplained = 0;
 if (!FEAS_ONLY) {
-  const adrText = JSON.stringify(adrs).toLowerCase();
+  /* Punctuation and spacing are normalised on both sides. A stack declares
+   * "github-actions" and the ADR that decides it is titled "GitHub Actions", which is the
+   * same decision written the way a person writes it — and comparing the raw strings
+   * reported the ADR as absent while it sat two lines above in the same file. A false
+   * positive that survives writing the exact artefact it asked for is the kind people
+   * route around. */
+  const flat = (x) => String(x).toLowerCase().replace(/[^a-z0-9]+/g, "");
+  const adrText = flat(JSON.stringify(adrs));
   for (const [role, name] of Object.entries(state.stack || {})) {
     const n = String(name).toLowerCase().trim();
     if (!n) continue;
-    if (!adrText.includes(n)) {
+    if (!adrText.includes(flat(n))) {
       unexplained++;
       fail("tech-has-adr", `${role}: ${name}`,
         `is declared in the stack and no ADR names it. "We used ${name}" is a fact, not a decision`);
