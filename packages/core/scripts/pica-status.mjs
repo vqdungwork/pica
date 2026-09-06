@@ -227,13 +227,78 @@ for (const dirName of fs.readdirSync(PKG_DIR, { withFileTypes: true })
   for (const s of (m.requires?.state || [])) if (!stateHas(s)) missing.push(`state ${s}`);
   for (const a of (m.requires?.artifacts || [])) if (!fs.existsSync(a)) missing.push(`artifact ${a}`);
 
-  rows.push({ name, verdict: missing.length ? "BLOCKED" : "READY", missing });
+  rows.push({ name, verdict: missing.length ? "BLOCKED" : "READY", missing, dir: childDir, manifest: m });
 }
 
 for (const r of rows) {
   console.log(`${r.verdict.padEnd(8)} ${r.name}`);
   for (const m of r.missing) console.log(r.verdict === "UNREADABLE" ? `         ${m}` : `         missing ${m}`);
 }
+/* A manifest drifts. All four that existed before 0.8.0 had an `owns` that disagreed with
+ * the directory beside it, and one of them claimed no scripts while shipping a check the
+ * flow depends on. Nothing noticed, because nothing compared them.
+ *
+ * The comparison is free: the directory is right there. Reported rather than fatal, since
+ * this script explains state and does not enforce it, but reported LOUDLY, because a
+ * manifest nobody trusts is a manifest nobody reads. */
+const drift = [];
+for (const r of rows) {
+  const dir = r.dir;
+  if (!dir) continue;
+  const declared = r.manifest?.owns || {};
+  for (const [kind, glob] of [["commands", ".md"], ["rules", ".md"], ["scripts", ""], ["agents", ".md"]]) {
+    let onDisk = [];
+    try {
+      onDisk = fs.readdirSync(path.join(dir, kind))
+        .filter((f) => !f.startsWith(".") && (!glob || f.endsWith(glob))).sort();
+    } catch { onDisk = []; }
+    const said = [...(declared[kind] || [])].sort();
+    const missing = onDisk.filter((f) => !said.includes(f));
+    const phantom = said.filter((f) => !onDisk.includes(f));
+    if (missing.length) drift.push(`${r.name}: ${kind} on disk and not in the manifest: ${missing.join(", ")}`);
+    if (phantom.length) drift.push(`${r.name}: ${kind} in the manifest and not on disk: ${phantom.join(", ")}`);
+  }
+}
+/* The flow states two rules about gates and nothing checked either:
+ *   "No package may grant a gate it benefits from."
+ *   Implicit in that: a gate somebody requires has to be granted by somebody.
+ *
+ * Writing six new manifests broke both at once. `clientApproved` was invented in two of
+ * them and granted nowhere, which leaves those packages permanently BLOCKED with no way
+ * to unblock them — the deadlock shape this repository has already found twice. And
+ * `html` granted the gate the flow says core grants.
+ *
+ * Neither is expensive to check, and neither was checked. */
+const gate = (g) => String(g || "").split(":")[0];
+const grantsBy = new Map();
+const wantsBy = new Map();
+for (const r of rows) {
+  if (!r.manifest) continue;
+  grantsBy.set(r.name, (r.manifest.definitionOfDone || [])
+    .filter((d) => d && d.type === "gate").map((d) => d.grants));
+  wantsBy.set(r.name, r.manifest.requires?.gates || []);
+}
+const granted = new Set([...grantsBy.values()].flat().map(gate));
+const arch = [];
+for (const [name, wants] of wantsBy) {
+  for (const w of wants) {
+    if (!granted.has(gate(w))) arch.push(`${name} requires gate "${w}" and no package grants it, so it can never become READY`);
+    if ((grantsBy.get(name) || []).some((g) => gate(g) === gate(w)))
+      arch.push(`${name} both grants and requires "${w}". No package may grant a gate it benefits from`);
+  }
+}
+if (arch.length) {
+  console.log("\nGATE ARCHITECTURE");
+  for (const a2 of arch) console.log(`  ${a2}`);
+  console.log("  A gate nobody grants is a package nobody can unblock.");
+}
+
+if (drift.length) {
+  console.log("\nMANIFEST DRIFT");
+  for (const d of drift) console.log(`  ${d}`);
+  console.log("  A manifest that disagrees with its own directory is a manifest nobody can rely on.");
+}
+
 console.log(`\n${rows.filter((r) => r.verdict === "READY").length} ready, `
           + `${rows.filter((r) => r.verdict === "BLOCKED").length} blocked, `
           + `${rows.filter((r) => r.verdict === "PLANNED").length} planned.`);

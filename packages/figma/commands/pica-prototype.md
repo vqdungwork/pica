@@ -1,3 +1,7 @@
+---
+description: Wire the flows in Figma and verify the behaviour end to end
+---
+
 # pica-prototype: wire the flows and verify the behaviour
 
 Step 8. Run after the screens are ported and reviewed.

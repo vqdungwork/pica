@@ -23,7 +23,7 @@ Applied:
   finding or a registered deviation — never an HTML edit. If the HTML is genuinely wrong, it goes back
   through the gate.
 - **Rebuilding an existing design.** The client's pages are copied, never worked in. See
-  [figma-rebuild.md](../../figma/rules/figma-rebuild.md).
+  `packages/figma/rules/figma-rebuild.md`.
 - **Feedback.** A claim about the design is checked against the reference before it is accepted, not
   after the fix.
 
@@ -132,3 +132,19 @@ that someone can resolve it to a name. The only escape is a register entry, whic
 signed, not a discretion exercised while building.
 
 **Be slow to promote, and never slow to bind.**
+
+---
+
+## Definition of done
+
+Every other governing rule in this repository ends with one of these and these two did not, which meant
+the discipline they carry could be agreed to and never checked against. Nothing here is new: each line
+restates a rule stated above, in the form a person can tick.
+
+- [ ] The reference was never written to. Not corrected, not tidied, not re-saved
+- [ ] Pairing runs on an identity channel we control, never on a name
+- [ ] Content parity scored separately from structure, and by the source alone
+- [ ] Every source defect sorted into one of the three kinds, and the kind recorded
+- [ ] Every fix applied at the definition, and the occurrences re-checked afterwards
+- [ ] Every promotion verified in a separate call, and every binding confirmed rather than assumed
+- [ ] Where a criterion could not be scored against the reference, that is reported as unscored, not as clean

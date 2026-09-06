@@ -26,7 +26,7 @@ reference for a port; a client's own file is that reference for a rebuild; the s
 are that reference for tokens and copy. How to treat one — never edit it, pair to it by an identity
 channel you control, diff its *content* as a criterion of its own, and sort its own defects into the
 three kinds — is medium-independent and lives in
-[reference-discipline.md](../../packages/core/rules/reference-discipline.md). Read it once; it applies to
+[reference-discipline.md](../../rules/reference-discipline.md). Read it once; it applies to
 every phase.
 
 ## The flow
@@ -35,46 +35,60 @@ Brief becomes a contract, HTML becomes the design, measurement decides whether i
 downstream rendering of an approved HTML design — never a parallel effort, never the place a decision
 first gets made.
 
-**Phase A — establish (one sitting).** Ends with a UI kit and tokens.
+**`/picaflow <brief>` runs phases 0 to 3 in one go**, without stopping to ask. Everything it cannot
+derive becomes a labelled assumption the client corrects at review. The steps below are what it runs,
+and each has its own entry point because no session survives a multi-day project.
+
+**Phase 0 to 2 — understand and define.** Ends with a PRD a non-technical reader follows.
 
 | # | Step | Command | Rules |
 |---|---|---|---|
-| 1 | Intake, brief becomes a contract. Declares `viewports` and `figmaInScope` | `/pica` | [research.md](../../packages/research/rules/research.md) |
-| 2 | Research and tokens | inside `/pica` | [research.md](../../packages/research/rules/research.md) |
-| 3 | UI kit in HTML — the design kit every screen consumes | inside `/pica` | [html-prototype.md](../../packages/html/rules/html-prototype.md) |
+| 0 | Intake: brief verbatim, sources labelled, **analytics and support logs requested** | `/pica` | `packages/research/rules/research.md` |
+| 1 | Research: analytics, support logs, journey map, **measure 3 to 5 shipped products** | inside `/pica` | `packages/research/rules/design-vocabulary.md` |
+| 1.8 | Feasibility, **before anything is promised** | `/pica-architect --feasibility` | `packages/architect/rules/architecture.md` |
+| 2 | Domain knowledge, glossary, AS-IS, TO-BE, **the delta**, business rules, use cases, domain model, PRD | `/pica-analyse` | `packages/analyst/rules/business-analysis.md`, `packages/analyst/rules/domain-knowledge.md`, `packages/analyst/rules/industry-knowledge.md` |
 
-**Phase B — design and verify (repeats per work package, over days).** This phase is the deliverable.
-An HTML-only project ends here, having been fully verified.
-
-| # | Step | Command | Rules |
-|---|---|---|---|
-| 4 | Build the package at every declared viewport: option boards **and** the interactive main flow | `/pica-wp <name>` | [html-prototype.md](../../packages/html/rules/html-prototype.md) |
-| 5 | **Measure it** — capture, `verify-html`, `parity-check`, `flow-check`. All zero, or fix | inside `/pica-wp` | [html-gates.md](../../packages/html/rules/html-gates.md) |
-| 6 | Render every frame and look at it, per viewport, and **click the main flow end to end** | inside `/pica-wp` | [review-discipline.md](../../packages/core/rules/review-discipline.md) |
-| 7 | **GATE: human approves this package's HTML** | inside `/pica-wp` | [html-gates.md](../../packages/html/rules/html-gates.md) |
-
-**Phase C — Figma (optional; skip entirely when `figmaInScope` is false).** Nothing here may begin for a
-package until step 7 passed for that package. The hook enforces it.
+**Phase 3 — design and verify.** This phase is the deliverable. An HTML-only project ends here, fully
+verified.
 
 | # | Step | Command | Rules |
 |---|---|---|---|
-| 8 | Foundations into Figma — variables, text styles, components | inside `/pica` or before first port | [figma-elements.md](../../packages/figma/rules/figma-elements.md) |
-| 9 | Port the approved package | `/pica-port <wp>` | [figma-screens.md](../../packages/figma/rules/figma-screens.md), [figma-elements.md](../../packages/figma/rules/figma-elements.md) |
-| 10 | Verify against the HTML — `geometry-diff`, per frame, re-diff after each fix | inside `/pica-port` | [figma-gates.md](../../packages/figma/rules/figma-gates.md) |
-| 11 | Review | `/pica-review [wp]` | [figma-gates.md](../../packages/figma/rules/figma-gates.md) |
-| 12 | Prototype | `/pica-prototype` | [figma-screens.md](../../packages/figma/rules/figma-screens.md), [html-gates.md](../../packages/html/rules/html-gates.md) |
-| 13 | Closeout | `/pica-close` | [review-discipline.md](../../packages/core/rules/review-discipline.md) |
-| — | Feedback arrives | `/pica-feedback` | [review-discipline.md](../../packages/core/rules/review-discipline.md), [figma-mcp.md](../../packages/figma/rules/figma-mcp.md) |
+| 3.0 | IA, screen inventory traced to use cases, state matrix | inside `/pica-wp` | `packages/html/rules/html-prototype.md` |
+| 3.1 | **Design direction**, named against a tradition, asserted as numbers | inside `/pica` | `packages/research/rules/design-vocabulary.md` |
+| 3.2 | Tokens in **three tiers**: primitive, semantic, component | inside `/pica` | `packages/research/rules/research.md` |
+| 3.3 | UI kit in HTML, before any screen consumes it | inside `/pica` | `packages/html/rules/html-prototype.md` |
+| 3.4 | Build the package at every viewport, **every state**, plus the interactive flow | `/pica-wp <name>` | `packages/html/rules/html-prototype.md` |
+| 3.5 | **The words**, every state, bound to the glossary | `/pica-copy` | `packages/content/rules/content.md` |
+| 3.7 | **Measure**: verify-html, coverage-check, parity-check, flow-check, copy-check. All zero, or fix | inside `/pica-wp` | `packages/html/rules/html-gates.md` |
+| 3.8 | **3 to 5 independent evaluators**, then a walkthrough per use case | `/pica-evaluate` | `packages/designqa/rules/evaluation.md` |
+| 3.10 | Render every frame and **look at it**, then click the main flow end to end | inside `/pica-wp` | [review-discipline.md](../../rules/review-discipline.md) |
+| 3.11 | **GATE: the client approves this package** | inside `/pica-wp` | `packages/html/rules/html-gates.md` |
 
-Foundations sat at step 4 through 0.3.0, before any HTML was approved. That put Figma writes ahead of the
-gate that exists to prevent them and made the optional phase look mandatory. They belong in Phase C: the
-kit is settled in HTML at step 3, and pushing it to Figma is only worth doing if Figma is in scope.
+**Phase 4 to 5 — commercial.** Nothing here may run before the client froze scope and gave a date.
 
-Each step from 4 on has its own entry point because no session survives a multi-day project.
+| # | Step | Command | Rules |
+|---|---|---|---|
+| 4 | Client confirms the business flow **and** the design. Account writes `scopeFrozen` and `deadline` | human | — |
+| 5 | **Three-point effort by role**, work order derived from the deadline | `/pica-estimate` | `packages/estimate/rules/estimation.md` |
+
+**Phase 6 to 8 — build and release.** After the contract.
+
+| # | Step | Command | Rules |
+|---|---|---|---|
+| 6 | C4 diagrams, **ADRs**, NFRs stated as numbers | `/pica-architect` | `packages/architect/rules/architecture.md` |
+| 7 | Build, test, release, and **compare the build against the approved design** | `/pica-build` | `packages/impl/rules/implementation.md`, `packages/html/rules/native-mobile.md` |
+| 7f | Port to Figma for the developers, verify, wire the prototype | `/pica-port`, `/pica-review`, `/pica-prototype` | `packages/figma/rules/figma-screens.md` |
+| 8 | Closeout, then **log the real hours back** so the next estimate is better | `/pica-close`, `/pica-estimate --closeout` | [review-discipline.md](../../rules/review-discipline.md) |
+| — | Feedback arrives | `/pica-feedback` | [review-discipline.md](../../rules/review-discipline.md) |
+
+**One design, three viewports; targets choose what they consume.** A responsive website takes desktop,
+tablet and mobile. A native app takes tablet and mobile and never desktop. `coverage-check` fails a
+target that names a viewport the design never produced, so "we cannot build iOS, nobody drew tablet" is
+found in Phase 3 rather than in Phase 7.
 
 `/pica-feedback` is not a step. It runs whenever someone else's review lands, before or after delivery,
-and it exists because triaging a client's claims is a different job from auditing your own work: every
-item has to be **verified before it is accepted**, and the fix is often a decision rather than a repair.
+because triaging a client's claims is a different job from auditing your own work: every item has to be
+**verified before it is accepted**, and the fix is often a decision rather than a repair.
 
 ## The other job: rebuilding an existing Figma file
 
@@ -98,36 +112,55 @@ Three things carry over unchanged: the audit (`figma-audit.js`), the appearance 
 What is **not** specific to a rebuild, despite being discovered in one, is everything about handling the
 reference itself — read-only, identity channel, content parity, the three kinds of source defect, fixing
 at the definition, promote slowly and bind always. Those are in
-[reference-discipline.md](../../packages/core/rules/reference-discipline.md) and they govern the port
+[reference-discipline.md](../../rules/reference-discipline.md) and they govern the port
 flow just as much.
 
-Read [figma-rebuild.md](../../packages/figma/rules/figma-rebuild.md) before starting one. The short
+Read `packages/figma/rules/figma-rebuild.md` before starting one. The short
 version: never write to the originals, keep the rebuilt screens at the source's canvas coordinates so
 pairing is exact, and remember that **a file can pass every structural criterion at zero and still show
 the wrong product** — content parity is a separate criterion and only the source can score it.
 
 ## Packages
 
-pica is four packages plus a bundle. Each declares what it requires, produces, checks and
-considers done, in its own `package.json`.
+pica is ten packages plus a bundle. Each declares what it requires, produces, checks and considers
+done, in its own manifest, and each installs on its own with only what it needs.
 
 | Package | Depends on | Owns |
 |---|---|---|
-| `pica-core` | — | intake, closeout, feedback, the state schema, every gate |
-| `pica-research` | core | the source audit and token provenance |
+| `pica-core` | — | intake, closeout, feedback, the state schema, every gate, and `/picaflow` |
+| `pica-analyst` | core | elicitation, domain knowledge, AS-IS and TO-BE, business rules, the domain model, the PRD |
+| `pica-research` | core | the source audit, the nine foundations, design vocabulary, token provenance |
 | `pica-html` | core, research | work packages at every viewport, and the measured gate |
+| `pica-content` | core, html | the words: every state written, bound to the glossary |
+| `pica-designqa` | core, html | independent evaluators, cognitive walkthrough, build versus design |
+| `pica-architect` | core | feasibility before anything is promised, C4, ADRs, NFRs |
+| `pica-estimate` | core | three-point effort by role, the work order, the effort record |
+| `pica-impl` | core, html, designqa | the definition of done for building, reviewing, testing and releasing |
 | `pica-figma` | core, html | the port, annotations, and the geometry diff |
 
-`pica` installs all four. A project that will never touch Figma installs `pica-html`, which pulls
-in `pica-core` and `pica-research` — html needs `tokens/tokens.css`, which only research
-produces — and never sees the Figma half.
+`pica` installs all ten. A project that will never touch Figma installs `pica-html`, which pulls in
+`pica-core` and `pica-research` and never sees the Figma half. A team that only wants the business
+analysis installs `pica-analyst`, which pulls in `pica-core` and nothing else.
+
+**Package is a distribution unit; agent is an execution unit. They are different axes.** A rule file is
+a document, and which agent loads it is a runtime decision, not a packaging one. That is why the
+packages divide by artefact domain and the agents divide by who reasons about what.
 
 **No package may grant a gate it benefits from.** `html` requests `htmlApproved`; core
 grants it on human approval; `figma` requires it and cannot grant it. Run
 `node packages/core/scripts/pica-status.mjs` to see what is ready and what is blocked.
 
-The path past Figma — implementation for web, iOS and Android, then end-to-end testing —
-is declared in `packages/_planned/` as contracts only. Those are not built.
+**pica ships the definition of done for implementation, not a coding agent.** `pica-impl` is built and
+stable: it checks that tests trace to use cases, that a pipeline runs lint, types and tests, that
+branches are short-lived, that three environments deploy from main, that no credential is tracked, that
+every NFR names how it is measured, and that the repository is the stack that was agreed.
+
+What it does not do is write the code. Writing code is the most mature thing in this ecosystem, and a
+worse version of it here would help nobody. A coding agent executes; this decides whether what came out
+is finished.
+
+`packages/_planned/` keeps per-platform contracts for `impl-web`, `impl-ios`, `impl-android` and `e2e`.
+Those are interfaces worth agreeing before the work starts, and they have no content.
 
 ## Build order within a project
 
@@ -167,9 +200,9 @@ The rest are yours to hold:
 
 | Need | For | If missing |
 |---|---|---|
-| nothing | steps 1, 2, 3, 5, 7 HTML-side, 9 | the core flow runs |
-| Figma MCP server, which provides `figma-use` | steps 4, 6, 7 Figma-side, 8 | say those steps are unavailable, run the rest |
-| Figma seat with enough MCP calls | any Figma-side step | size the work to the budget, see [figma-mcp.md](../../packages/figma/rules/figma-mcp.md) |
+| nothing | intake, research, analysis, design, the measured gate, evaluation, the client gate, estimate, architecture | the whole flow to an approved design runs |
+| Figma MCP server, which provides `figma-use` | phase 7f only: the port, the geometry diff, annotations, the wired prototype | say the Figma phase is unavailable, run everything else |
+| Figma seat with enough MCP calls | any part of 7f | size the work to the budget, see `packages/figma/rules/figma-mcp.md` |
 | playwright | the capture harness in `packages/html/scripts/` | say the measured diff is unavailable, and do not silently fall back to eyeballing |
 | superpowers | stronger intake and planning, plus the panel | use `brainstorming`, `writing-plans`, `dispatching-parallel-agents` when present |
 
@@ -183,18 +216,42 @@ and the failure modes that skill does not cover.
 **Read by the hooks**, to gate writes: `figmaInScope`, `delivered`, per-package `tier`, `htmlApproved`
 and `ported`, plus `activeReview` and `writeAuthorization`.
 
+**Read by the analysis gate** (`trace-check`, `domain-check`, `industry-check`): `glossary`, `businessRules`,
+`useCases`, `domainModel`, `domainConstraints`, `asIs`, `toBe`, `delta`, `assumptions`, `stakeholders`,
+`field`, `industry` (`key`, `conventions`, `forbiddenPrevented`, `departures`, `stakeholdersNotApplicable`,
+`constraintsNotApplicable`, `evidenceNote`).
+
+The two `NotApplicable` registers each need a reason **and a name**. They exist for the same purpose as
+every other register here: so that a deliberate exception is distinguishable from an oversight, including
+by the person who wrote it a week later.
+
+**Read by the measured gate** (`verify-html`, `coverage-check`, `parity-check`, `copy-check`):
+`viewports`, `targets`, `direction`, `useCases`, `glossary`, `copyRules`, `parityExemptions`,
+`reflowNotes`, `flowExemptions`, `flows`.
+
+**Read by the commercial gate** (`estimate-check`): `scopeFrozen`, `deadline`, `durationWeeks`,
+`hoursPerWeek`, `estimate`, `risks`, `workPackages`, `effortLog`.
+
+**Read by the build gate** (`impl-check`, `code-tokens-check`, `build-diff`): `stack`, `nfr`,
+`useCases`, `businessRules`, `rawValueExemptions`.
+
 **Read by the audit**, to make judgement calls checkable: `rawValueExemptions`, `exclusions`,
-`deviations`, `bannedChars`, `parityExemptions`, `reflowNotes`, `flowExemptions`, `copyRules`,
-`dataOwnership`, `granularityExemptions`, `lensBaselines`.
+`deviations`, `bannedChars`, `copyRules`, `dataOwnership`, `granularityExemptions`, `lensBaselines`,
+`geometryTolerance`, `frameMap`, `fontMatch`, `gates`.
 
-Two of those exist only for a rebuild, and both for the same reason as every other register — so a
-deliberate call is distinguishable from an oversight:
+**Read by closeout**, so the last step can run at all: `briefPath` and `exclusionsConfirmed`.
 
-- **`granularityExemptions`** — a component the granularity rule would dissolve and the human kept.
-  `{component, why, by}`. Without it the rule re-reports the same approved component every round.
-- **`lensBaselines`** — for each lens, the number the untouched source scores. `{lens, rebuild, source,
-  why}`. A criterion whose target is 0 on a dimension where the client's own file scores 247 is a
-  criterion nobody can ever close; recording the pair is what makes the number readable.
+Three of these decide whether a whole phase can begin, and all three are written by a **human**
+recording that another human agreed. No command writes them, deliberately:
+
+| Key | Written when | Blocks |
+|---|---|---|
+| `exclusionsConfirmed` | The client was asked what **not** to build | GATE 1 |
+| `htmlApproved:<wp>` | The client approved that package's HTML | every Figma write |
+| `scopeFrozen` + `deadline` | The client confirmed scope and gave a date | the estimate |
+
+Refusing to run without them is the point, not an obstacle: each is the one hard stop between a thing
+a client liked and a thing they will be held to.
 
 **The flow declaration**, one entry per application the product presents as its own:
 
@@ -211,7 +268,7 @@ exists for the same reason every other register does: without it a deliberate ca
 from an omission.
 
 `copyRules` and `dataOwnership` carry the client's own rules in a form something can read. See
-[research.md](../../packages/research/rules/research.md): a copy rule stated in conversation lasts about a
+`packages/research/rules/research.md`: a copy rule stated in conversation lasts about a
 day, and "the user's data is read-only here" means nothing useful until it is written per entity.
 
 **The viewport declaration**, which everything downstream reads:
@@ -222,9 +279,21 @@ day, and "the user's data is read-only here" means nothing useful until it is wr
     "idiom": "desktop web, no device chrome",
     "pointer": true, "breakpoints": [1024],
     "chrome": [ { "name": "top-nav", "required": true, "pinH": "STRETCH", "pinV": "MIN" } ],
-    "grid": { "columns": 12, "gutter": 24, "margin": 40, "maxContent": 1200 } }
+    "grid": { "columns": 12, "gutter": 24, "margin": 40, "maxContent": 1200 } },
+  { "name": "tablet", "w": 768, "h": 1024,
+    "idiom": "tablet web in a device frame",
+    "pointer": false, "breakpoints": [768],
+    "chrome": [ { "name": "side-rail", "required": true, "pinH": "MIN", "pinV": "STRETCH" } ],
+    "grid": { "columns": 8, "gutter": 16, "margin": 24, "maxContent": 1200 } }
 ]
 ```
+
+**Tablet.** 768 x 1024 is the canonical entry: it is the breakpoint minimum, so the tightest case is
+covered, and it is a real device rather than a midpoint nobody ships. Pick the 8 column grid above and
+the column width lands within a pixel of the 4 column mobile grid at 375, which is the point. A card
+that spans two columns is the same width at both sizes, so tablet fits more of them per row instead of
+stretching each one. That is what makes a tablet pass cheap: components reflow, they are not redrawn.
+Reaching for 834 or 810 because a specific iPad uses it buys nothing and loses the grid relationship.
 
 One entry behaves exactly as 0.2.0 did. Two or more activates sections per viewport, a prototype page
 per viewport, the parity check and the hug pair.
@@ -266,14 +335,37 @@ geometry diff that existed only in the project they were written from.
 | Script | Proves | Passes when |
 |---|---|---|
 | `capture-html-reference.mjs` | measurement is possible | it writes an artefact; it refuses on 0 frames rather than emitting an empty one |
-| `verify-html.mjs` | the HTML is internally sound | 0 findings across viewport-tagged, overflow, tall-screen-pair, viewport-coverage |
+| `verify-html.mjs` | the HTML is internally sound | 0 findings across viewport-tagged, overflow, tall-screen-pair, viewport-coverage, direction |
+| `coverage-check.mjs` | **the design is what was agreed** | 0 across uc-covered, screen-traced, uc-exists, flow-reachable, target-buildable |
+| `copy-check.mjs` | the words are written | 0 across placeholder, glossary terms, copy rules, error next step, length realism |
 | `parity-check.mjs` | the viewports agree | 0 findings, nominal and structural. 2+ viewports only |
 | `flow-check.mjs` | the prototype goes where it says it goes | 0 findings across dangling-target, dangling-href, nav-target, unreachable, dead-end, orphan-prototype, flow-declared, **and** a non-zero screen and link count |
 
 The capture records true text-run rectangles via range geometry, every element box with its classes,
 depth and nearest classed ancestor, computed font size and weight, each run's owning element and
-text-align, and per frame the tagged viewport, hug flag, content height and horizontal overflow. Frames
-are located by `data-viewport` — the same attribute that names the viewport.
+text-align, and per frame the tagged viewport, the use case it serves, the hug flag, content height, horizontal
+overflow, and a **census** of radii, control heights, hues and numerals. Frames are located by
+`data-viewport` — the same attribute that names the viewport.
+
+`--url` captures a **running build** instead of prototype files, which is what makes step 7.10 possible.
+
+**Analysis side — runs before any design exists.**
+
+| Script | Proves | Passes when |
+|---|---|---|
+| `trace-check.mjs` | the requirements hold together | 0 across glossary closure, rule enforcement, use case trace, entity terms, AS-IS present, assumption radius |
+| `domain-check.mjs` | the domain was asked about | 0 across all-categories, sourced, verified, agent claims surfaced, affects |
+| `industry-check.mjs` | **the design belongs to its sector** | 0 across industry-known, stakeholders, constraints, conventions, forbidden, style-excluded, evidence. **Fails closed on a sector the base does not cover** |
+| `schema-check.mjs` | the field was measured, not admired | 0 across sample size, nine foundations, type roles, provenance, shipped-not-concept, tradition named |
+
+**Commercial and build side.**
+
+| Script | Proves | Passes when |
+|---|---|---|
+| `estimate-check.mjs` | the price is defensible | 0 across preconditions, three points, tier spread, risk reflected, headcount, effort log |
+| `code-tokens-check.mjs` | the code consumes the tokens | 0 raw colour, spacing, radius, and no linear easing |
+| `impl-check.mjs` | the repository is releasable | 0 across test trace, CI, branch protection, branch age, environments, secrets, NFR measured, stack declared |
+| `build-diff.mjs` | **the build is the design that was approved** | 0 across frame paired, control height, radius, hue budget, text position |
 
 **Figma side — Phase C only.**
 
@@ -301,13 +393,13 @@ project ten green harnesses coexisted with a home-screen row that opened another
 
 Each rule now lives with the package that owns it.
 
-- [research.md](../../packages/research/rules/research.md) — research package. Intake packet, contract, exclusions, audit breadth, token provenance, mock-data provenance, client copy rules, data ownership
-- [html-prototype.md](../../packages/html/rules/html-prototype.md) — html package. Layout, the tabbed review page, options versus the interactive flow, navigation state, the tall-screen pair, real assets, state matrices
-- [html-gates.md](../../packages/html/rules/html-gates.md) — html package. The measured HTML gate, the flow gate, viewport parity, HTML-only coverage, behaviour review for prototypes, definition of done
-- [figma-elements.md](../../packages/figma/rules/figma-elements.md) — figma package. Token layers including Border, geometry binding, alpha in tokens, numeric font weights, font-package forensics, component tiers, instance constraints, component granularity, fake variant axes, naming by role, merge mechanics
-- [figma-screens.md](../../packages/figma/rules/figma-screens.md) — figma package. Frames, states, alignment and vertical centring, screen chrome pinning, CSS to auto-layout, the circle trap, API traps
-- [figma-mcp.md](../../packages/figma/rules/figma-mcp.md) — figma package. Rate limits and call budget, `page.loadAsync` for whole-file reads, write discipline
-- [figma-gates.md](../../packages/figma/rules/figma-gates.md) — figma package. The Figma audit checklist, appearance baselines, geometry-diff tolerances, the deviations register, definition of done
-- [figma-rebuild.md](../../packages/figma/rules/figma-rebuild.md) — figma package. Rebuilding a client's existing Figma file: the source as arbiter, the shared coordinate system, positional parity, baselining every lens against the source, deciding the source's own defects
-- [reference-discipline.md](../../packages/core/rules/reference-discipline.md) — core package. Medium-independent: the reference is read-only and it is checkable, names are not identity, content parity as its own criterion, the three kinds of reference defect, fix at the definition, promote slowly and bind always
-- [review-discipline.md](../../packages/core/rules/review-discipline.md) — core package. Medium-independent: report versus fix, self-review, complexity routing, the panel, verification method, writing your own checks, audit integrity, reading a property instead of deducing it, baselining a number, guards that must fail rather than skip
+- `packages/research/rules/research.md` — research package. Intake packet, contract, exclusions, audit breadth, token provenance, mock-data provenance, client copy rules, data ownership
+- `packages/html/rules/html-prototype.md` — html package. Layout, the tabbed review page, options versus the interactive flow, navigation state, the tall-screen pair, real assets, state matrices
+- `packages/html/rules/html-gates.md` — html package. The measured HTML gate, the flow gate, viewport parity, HTML-only coverage, behaviour review for prototypes, definition of done
+- `packages/figma/rules/figma-elements.md` — figma package. Token layers including Border, geometry binding, alpha in tokens, numeric font weights, font-package forensics, component tiers, instance constraints, component granularity, fake variant axes, naming by role, merge mechanics
+- `packages/figma/rules/figma-screens.md` — figma package. Frames, states, alignment and vertical centring, screen chrome pinning, CSS to auto-layout, the circle trap, API traps
+- `packages/figma/rules/figma-mcp.md` — figma package. Rate limits and call budget, `page.loadAsync` for whole-file reads, write discipline
+- `packages/figma/rules/figma-gates.md` — figma package. The Figma audit checklist, appearance baselines, geometry-diff tolerances, the deviations register, definition of done
+- `packages/figma/rules/figma-rebuild.md` — figma package. Rebuilding a client's existing Figma file: the source as arbiter, the shared coordinate system, positional parity, baselining every lens against the source, deciding the source's own defects
+- [reference-discipline.md](../../rules/reference-discipline.md) — core package. Medium-independent: the reference is read-only and it is checkable, names are not identity, content parity as its own criterion, the three kinds of reference defect, fix at the definition, promote slowly and bind always
+- [review-discipline.md](../../rules/review-discipline.md) — core package. Medium-independent: report versus fix, self-review, complexity routing, the panel, verification method, writing your own checks, audit integrity, reading a property instead of deducing it, baselining a number, guards that must fail rather than skip

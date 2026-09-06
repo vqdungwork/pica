@@ -29,5 +29,21 @@ These seven rules hold for the whole session. They are not suggestions and they 
    decision; the flow is what the human uses, and it is where the defects nothing can measure live. One
    prototype per application, linked to each other for real.
 
-Commands: `/pica` intake, `/pica-wp` work package, `/pica-port` port to Figma, `/pica-review` review,
-`/pica-prototype` wire and verify, `/pica-close` handover.
+**`/picaflow <brief>` runs the whole chain** from a thin brief to a reviewable, measured, clickable
+`review.html`, without stopping to ask. Everything it cannot derive becomes a labelled assumption the
+client corrects, because reacting to a built thing is far cheaper than specifying one.
+
+Or run the steps yourself:
+
+| | |
+|---|---|
+| `/pica` | intake, the contract, exclusions |
+| `/pica-analyse` | glossary, AS-IS, TO-BE, business rules, domain model, PRD |
+| `/pica-architect` | feasibility before anything is promised, then C4 and ADRs |
+| `/pica-wp <name>` | one work package in HTML at every viewport, measured |
+| `/pica-copy` | the words, every state, bound to the glossary |
+| `/pica-evaluate` | 3 to 5 independent evaluators, walkthrough, build vs design |
+| `/pica-estimate` | three-point effort by role, work order, effort logged back |
+| `/pica-build` | the definition of done for building and releasing |
+| `/pica-port` · `/pica-review` · `/pica-prototype` | the Figma half, optional |
+| `/pica-close` · `/pica-feedback` | handover, and triaging someone else's review |

@@ -1,3 +1,8 @@
+---
+description: Build one work package in HTML at every declared viewport, then measure it before approval
+argument-hint: "[work package name]"
+---
+
 # pica-wp: build one work package in HTML
 
 Step 5. The package named in `$ARGUMENTS`. If empty, list the packages from `.pica/state.json` with their
@@ -95,9 +100,11 @@ finding them after the port costs a rebuild.
 ```bash
 S=${CLAUDE_PLUGIN_ROOT}/scripts
 node $S/capture-html-reference.mjs --dir html --out .audit
+node $S/contrast-check.mjs .audit/html-reference.json .pica/state.json
 node $S/verify-html.mjs   .audit/html-reference.json .pica/state.json
 node $S/parity-check.mjs  .audit/html-reference.json .pica/state.json   # 2+ viewports only
 node $S/flow-check.mjs    --dir html --state .pica/state.json
+node $S/coverage-check.mjs .audit/html-reference.json .pica/state.json
 ```
 
 **If `figmaInScope` is true in `.pica/state.json`, capture a second, forced-font reference**, to a

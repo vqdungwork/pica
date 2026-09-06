@@ -4,9 +4,10 @@
   "description": "Intake, the contract, the state schema and every gate. Required by every other package.",
   "owns": {
     "commands": [
-      "pica.md",
       "pica-close.md",
-      "pica-feedback.md"
+      "pica-feedback.md",
+      "pica.md",
+      "picaflow.md"
     ],
     "rules": [
       "reference-discipline.md",
@@ -63,6 +64,10 @@
     {
       "type": "gate",
       "grants": "intakeApproved"
+    },
+    {
+      "type": "gate",
+      "grants": "htmlApproved:<wp>"
     }
   ]
 }

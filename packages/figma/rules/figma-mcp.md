@@ -3,6 +3,10 @@
 The server this workflow runs on: what it costs, how to spend it, and the two calls that change how an
 audit is shaped.
 
+> **This file has no definition of done and should not.** It is operational: what the server costs and
+> how to spend a call budget. Nothing here is a criterion a package passes or fails.
+
+
 Load this before step 4 and any step that reads or writes Figma. It sits under
 [figma-elements.md](figma-elements.md) and [figma-screens.md](figma-screens.md), which cover *what* to
 build; this covers *how the tooling behaves*.

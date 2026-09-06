@@ -116,25 +116,46 @@ pica project, not a truncated one.
 /plugin install pica@pica
 ```
 
-That installs the bundle — all four packages, so an existing install keeps working unchanged.
+That installs the bundle: all ten packages. Each also installs on its own with only what it needs, so
+a team that only wants the business analysis takes `pica-analyst` and gets `pica-core` with it, and a
+project that will never touch Figma takes `pica-html` and never sees the Figma half.
 Restart Claude Code. The workflow announces itself at the start of every session from then on,
 including after a context compaction. You never have to remember to load it.
 
-**Or install only what the project needs.** pica is four independently installable packages;
-`pica-html`, `pica-research` and `pica-figma` each declare `pica-core` as a dependency and pull it
-in automatically:
+**Or install only what the project needs.** pica is ten independently installable packages. Every one
+declares `pica-core` as a dependency and pulls it in automatically, so any single install brings the
+state schema and the gates with it:
 
 ```bash
-/plugin install pica-core@pica    # required by everything below
-/plugin install pica-research@pica  # the source audit and token provenance
-/plugin install pica-html@pica    # work packages in HTML, and the measured gate
-/plugin install pica-figma@pica   # the port, annotations, and the geometry diff — needs pica-html
+/plugin install pica-core@pica       # required by everything below: intake, state, every gate
+/plugin install pica-analyst@pica    # elicitation, domain and industry knowledge, use cases, the PRD
+/plugin install pica-research@pica   # the source audit, the nine foundations, token provenance
+/plugin install pica-html@pica       # work packages in HTML, and the measured gate
+/plugin install pica-content@pica    # the words, in every state, bound to the glossary
+/plugin install pica-designqa@pica   # independent evaluators, and the build against the design
+/plugin install pica-architect@pica  # feasibility, C4, ADRs, NFRs as numbers
+/plugin install pica-estimate@pica   # three-point effort, the work order, the effort record
+/plugin install pica-impl@pica       # the definition of done for building and releasing
+/plugin install pica-figma@pica      # the port, annotations, and the geometry diff
 ```
 
-A project that will never touch Figma installs `pica-core`, `pica-research` and `pica-html`, and
-never sees the Figma half. `pica-html` depends on both `pica-core` and `pica-research` — it needs
-`tokens/tokens.css`, which only research produces — so installing it pulls both in. `pica-figma`
-depends on `pica-core` and `pica-html`, so installing it pulls in the whole chain.
+The dependency chain, which the installer resolves for you:
+
+| Install this | You end up with | Because |
+|:--|:--|:--|
+| `pica-analyst` | 2 plugins | analysis needs the state schema and nothing else |
+| `pica-architect`, `pica-estimate`, `pica-research` | 2 plugins each | the same |
+| `pica-html` | 3 plugins | it needs `tokens/tokens.css`, which only research produces |
+| `pica-content`, `pica-designqa`, `pica-figma` | 4 plugins each | all three read the capture artefact html produces |
+| `pica-impl` | 5 plugins | 7.10 is Design QA's comparison, not the builder's, so impl pulls designqa too |
+| `pica` | 11 plugins | the bundle |
+
+Those counts are measured, not derived: each was installed on its own into a clean configuration and the
+resolved set counted.
+
+A project that will never touch Figma installs anything except `pica-figma` and never sees that half.
+Run `node packages/core/scripts/pica-status.mjs` in a project to see which packages are ready and what
+each blocked one is waiting for.
 
 ## The flow
 
@@ -173,26 +194,47 @@ flowchart TD
 
 The amber diamonds are **your** gates. Nothing crosses one without you.
 
-The dashed boxes are **declared, not built** — `impl-web`, `impl-ios`, `impl-android` and `e2e` exist
-as contracts in `packages/_planned/`, so the interface is agreed before the work starts. They are drawn
-this way deliberately: a tool whose first rule is never to claim an unverified state cannot draw its
-roadmap as though it were finished.
+The dashed boxes have since **half landed**, and the half that has not is deliberate.
+
+`pica-impl` now ships the **definition of done** for building, reviewing, testing and releasing, plus
+`impl-check` (test trace, CI, branch protection, branch age, environments, secrets, NFR measured, stack
+declared) and `build-diff`, which compares the built product against the approved design. That last one
+is the check the industry reliably leaves undone: the designer assumes QA covers it and QA assumes the
+designer does.
+
+**What it does not ship is a coding agent, and it should not.** Writing code is the most mature thing
+in this ecosystem; rebuilding it here would mean a worse version of the tool this runs on top of. pica
+never wrote a browser, it wrote the checks. It never wrote Figma, it wrote the gates. It does not write
+React either. **A coding agent executes; this decides whether what came out is finished.**
+
+The contracts in `packages/_planned/` stay, because the interface is still worth agreeing before the
+work starts.
 
 | # | Step | Command | Runs |
 |:--|:--|:--|:--|
-| 0 | Workflow loads itself | none | Every session, automatically |
-| 1 | Intake | `/pica` | Once per project |
-| 2 | Research and tokens | inside step 1 | Once per project |
-| 3 | UI kit in HTML | inside step 1 | Once per project |
-| 4 | Foundations into Figma | inside step 1 | Only if Figma is in scope |
-| 5 | Work package | `/pica-wp <name>` | Once per package |
-| 6 | Port to Figma | `/pica-port <wp>` | Per package, **after approval** |
-| 7 | Review | `/pica-review [wp]` | After every port |
-| 8 | Prototype | `/pica-prototype` | Once, after screens land |
-| 9 | Closeout | `/pica-close` | Once, at handover |
-| 10 | Implement — web, iOS, Android | *declared, not built* | Contract agreed in `packages/_planned/` |
-| 11 | Test — e2e and usability | *declared, not built* | Contract agreed in `packages/_planned/` |
+| — | Workflow loads itself | none | Every session, automatically |
+| — | **The whole chain, unattended** | `/picaflow <brief>` | Brief in, `review.html` out |
+| 0 | Intake: brief verbatim, sources labelled, **data requested** | `/pica` | Once per project |
+| 1 | Research: analytics, support logs, journey map, **3 to 5 shipped products measured** | inside `/pica` | Once per project |
+| 1.8 | **Feasibility, before anything is promised** | `/pica-architect --feasibility` | Once, early |
+| 2 | Domain knowledge, **industry knowledge**, glossary, AS-IS, TO-BE, the delta, use cases, **PRD** | `/pica-analyse` | Once per project |
+| 3.1–3.3 | Design direction, tokens in three tiers, UI kit | inside `/pica` | Once per project |
+| 3.4 | Work package: every viewport, every state, the interactive flow | `/pica-wp <name>` | Once per package |
+| 3.5 | **The words**, every state, bound to the glossary | `/pica-copy` | Per package |
+| 3.7 | **Measure.** All checks zero, or fix and re-run | inside `/pica-wp` | Per package |
+| 3.8–3.9 | **3 to 5 independent evaluators**, then a walkthrough per use case | `/pica-evaluate` | Per package |
+| 3.10 | Render every frame and **look at it**, then click the main flow | inside `/pica-wp` | Per package |
+| 4 | **Client approves.** Account freezes scope and deadline | human | The gate that matters |
+| 5 | **Three-point effort by role**, work order from the deadline | `/pica-estimate` | After the client says yes |
+| 6 | C4 diagrams, ADRs, NFRs as numbers | `/pica-architect` | After the contract |
+| 7 | Build, test, release, **compare the build against the approved design** at 7.10 | `/pica-build` | After the contract |
+| 7f | Port to Figma for the developers, verify, wire the prototype | `/pica-port`, `/pica-review`, `/pica-prototype` | Only if Figma is a deliverable |
+| 8 | Closeout, then **log the real hours back** | `/pica-close`, `/pica-estimate --closeout` | Once, at handover |
 | — | Feedback triage | `/pica-feedback` | Any time someone else's review lands, before or after delivery |
+
+**These are the ids the rules and scripts use.** A rule that says "step 7.10" and a table that called the
+same work "step 12" is a flow nobody can follow across two documents, and this table carried its own
+sequence through three releases before anyone tried to trace one to the other.
 
 ## What this looks like in practice
 
@@ -209,6 +251,7 @@ pass  viewport-tagged      0 finding(s)   (33 frames checked)
 pass  overflow             0 finding(s)   (33 frames checked)
 pass  tall-screen-pair     0 finding(s)   (8 frames exceed their viewport by >24px)
 pass  viewport-coverage    0 finding(s)   (2 viewports declared)
+pass  direction            0 finding(s)   (direction "Instrument", 4 assertion(s))
 
 0 finding(s). HTML passes the measured gate.
 ```
@@ -298,7 +341,7 @@ Nothing proceeds until you approve all four.
 </details>
 
 <details>
-<summary><b>Step 2. Research and tokens</b>: evidence before invention</summary>
+<summary><b>Step 2. Research, direction and tokens</b>: evidence before invention</summary>
 
 <br>
 
@@ -311,6 +354,25 @@ taken directly or derived.
 
 If the brief claims an existing design system and no accessible source for it exists, you get told
 that plainly, rather than getting an invention presented to you as reuse.
+
+Between the audit and the tokens sits the **design direction**: the house style the product's field
+already expects, which a brief almost never states. You name the field narrowly at intake — "retail
+banking dashboard", not "fintech" — and pica proposes two or three named directions derived from three
+to five real products in that field **that it measured**: radius, control height, how many hues the
+interface actually spends, whether figures are tabular. You pick one, the same way you pick a costed
+option at step 1.
+
+pica ships **no table** of what a field looks like. A canned "banking means small radii" is a preference
+with a confident tone; it cannot be defended in a client review and it is wrong the moment a field
+moves. What ships is the method. A precedent with no measurement is not a precedent.
+
+Where a brand already exists the direction is *your own system*, scored against what its field does, and
+the gaps come back as questions rather than corrections. Your brand still wins; each gap you accept is
+recorded with its reason.
+
+The direction is written as **numbers**, not prose, and `verify-html` holds every package to them — so
+the direction chosen in week one is still in force at package eleven, which is the only part of this
+that is hard.
 
 Output: `tokens.json` and `tokens.css`, one source feeding both the HTML and the Figma sides.
 
@@ -400,7 +462,7 @@ every link resolves, every screen is reachable and nothing is a dead end. Whethe
 found.
 
 Then the measured checks, then rendering every screen and looking at it, then a self-review, then your
-approval. Your approval is what unlocks step 6, and it is recorded to disk.
+approval. Your approval is what unlocks the next package, and it is recorded to disk.
 
 </details>
 
@@ -541,9 +603,9 @@ said yes out loud.
 
 | Tier | Needs | Gives you |
 |:--|:--|:--|
-| **Core** | `bash` and `python3`, for the hooks | Steps 1, 2, 3, 5, 7 (HTML side), 9 |
-| **Figma** | the Figma MCP server, plus a Dev or Full seat | Steps 4, 6, 7 (Figma side), 8 |
-| **Measured diff** | playwright | The HTML capture harness that step 6 diffs against |
+| **Core** | `bash` and `python3`, for the hooks | Everything up to an approved design, and everything after it except Figma |
+| **Figma** | the Figma MCP server, plus a Dev or Full seat | Phase 7f only: the port, the geometry diff, the wired prototype |
+| **Measured diff** | playwright | The capture harness every measured check reads, at 3.7 and 7.10 |
 | **Enhanced** | [superpowers](https://github.com/obra/superpowers) | Stronger intake and planning, plus the agent panel |
 
 **The core tier works with nothing else installed.** If you never touch Figma, the whole HTML flow
@@ -558,11 +620,23 @@ package's `figma-mcp.md`.
 
 ## The rules
 
-Eight modules, split across the four packages, each written to be read on its own.
+Twenty modules across ten packages, each written to be read on its own and loaded only when a step
+names it. That is why a repository of this size costs about 370 tokens per session: rules do not
+auto-load, and a project without Figma never pays for the five Figma modules.
 
 | Module | Package | Covers |
 |:--|:--|:--|
 | `research.md` | research | Research before designing, audit breadth, token extraction with provenance, mock-data provenance, the client's copy rules and data-ownership table |
+| `design-vocabulary.md` | research | The nine foundations, typography as roles, named styles with measurable signatures, where to look and why Mobbin is not Dribbble |
+| `business-analysis.md` | analyst | BABOK's four beats, AS-IS and TO-BE as two models, the glossary, numbered business rules, traceability |
+| `industry-knowledge.md` | analyst | How to use the sector base at `packages/analyst/data/industries.json`, and `--audit` to check it against itself: 28 sectors with stakeholders, colour conventions **and the reason each reserved hue is reserved**, the tradition each sector settled on and the ones that misread in it, density per audience, typography, tone, and what the sector treats as a defect regardless of the brief. Read it with `industry-check.mjs --list` and `--show <sector>`. **Fails closed on a sector it does not cover**, because passing an unknown sector would give the least-supported projects the quietest gate |
+| `domain-knowledge.md` | analyst | Where to find domain constraints in order of authority, Event Storming without a workshop, the eight questions every project answers |
+| `content.md` | content | Terms from the glossary, length-realistic copy, every state written, mock data that is not quietly wrong |
+| `evaluation.md` | designqa | Three to five independent evaluators, heuristic versus cognitive walkthrough, computed contrast, report before fix as a tool restriction |
+| `architecture.md` | architect | Feasibility before promises, C4, ADRs with consequences, NFRs as numbers |
+| `estimation.md` | estimate | Three-point PERT by role, the deadline as a control not information, the effort loop nobody closes |
+| `implementation.md` | impl | One design and three viewports with targets choosing, trunk-based branching, pull requests, environments, the definition of done |
+| `native-mobile.md` | html | Two guideline sets, safe areas as chrome, and the release asymmetry: Android can stage a rollout and iOS cannot |
 | `html-prototype.md` | html | Frame size, the single tabbed review page, option boards versus the interactive main flow, navigation state, the interactive and full-height pair, real assets, state matrices |
 | `html-gates.md` | html | The measured HTML gate, the flow gate, viewport parity, HTML-only coverage, behaviour review for prototypes |
 | `figma-elements.md` | figma | Token layers including `Border`, binding geometry as well as type, alpha living in the token, numeric font weights, font-package forensics, global versus local component tiers |
@@ -570,11 +644,12 @@ Eight modules, split across the four packages, each written to be read on its ow
 | `figma-mcp.md` | figma | Rate limits and the call budget, `page.loadAsync` for whole-file reads in one call, write discipline |
 | `figma-gates.md` | figma | The Figma audit checklist, appearance baselines, geometry-diff tolerances, the deviations register |
 | `figma-rebuild.md` | figma | Rebuilding a client's existing Figma file: the source as arbiter, the shared coordinate system, positional content parity, baselining every lens against the source |
+| `reference-discipline.md` | core | Medium-independent: the reference is read-only and checkable, names are not identity, content parity as its own criterion, fix at the definition |
 | `review-discipline.md` | core | The self-review checklist, report versus fix, complexity criteria, panel lenses, writing checks that can fail, audit integrity, and what "zero" means |
 
 ## What this repo contains
 
-It ships the **method**: rules, commands, hooks and the seven checks. It does **not** ship the projects the
+It ships the **method**: rules, commands, hooks and the eighty-six checks. It does **not** ship the projects the
 rules were derived from. Those carry briefs, PRDs, real copy and client identifiers, and none of that is
 yours to receive — so `spike/` is in `.gitignore` and stays on the author's disk.
 
@@ -582,6 +657,39 @@ That means the findings arrive as claims you cannot re-run, and you should read 
 form of each one is in [CHANGELOG.md](CHANGELOG.md): a rule, and the specific failure that earned it. A
 rule whose failure is not written down next to it is the kind of rule that gets deleted by the next person
 who finds it inconvenient, which is why the changelog is long and why every entry names what broke.
+
+**The eighty-six, so the number can be recounted rather than trusted:**
+
+| Script | Checks | Runs |
+|:--|--:|:--|
+| `contrast-check.mjs` | 4 | body contrast, large-text contrast, unresolved background, exemption still needed |
+| `verify-html.mjs` | 7 | viewport tagged, overflow, tall-screen pair, viewport coverage, direction (all eight assertions, the declared style against its signature, and any assertion nothing can evaluate), data ownership, width media |
+| `parity-check.mjs` | 2 | nominal, structural — two or more viewports only |
+| `flow-check.mjs` | 7 | dead end, dangling href, dangling target, unreachable, orphan prototype, nav target, flow declared |
+| `coverage-check.mjs` | 5 | use case covered, screen traced, use case exists, flow reachable, target buildable |
+| `geometry-diff.mjs` | 1 | Figma position against the HTML reference — Figma projects only |
+| `scripts/validate-packages.mjs` | — | Not a check on a project, a check on **this repository**: every declared file exists, every shipped file is owned, every manifest matches the schema, and no markdown link crosses a package boundary. It lives at the repo root, outside `packages/`, which is how it stayed unrun through an entire audit |
+| `mock-figma.mjs` | — | Not a check. Runs the three in-Figma scripts outside Figma, and self-tests them with `node mock-figma.mjs`. Without it those 800 lines could only be verified by pasting them into a paid Figma session against a real file |
+| `trace-check.mjs` | 7 | glossary closure, rule enforcement, use case trace, entity terms, AS-IS present, assumption radius, exclusions asked |
+| `schema-check.mjs` | 6 | sample size, nine foundations, type roles, provenance, shipped not concept, tradition named |
+| `estimate-check.mjs` | 6 | preconditions, three points, tier spread, risk reflected, headcount, effort log |
+| `copy-check.mjs` | 5 | no placeholder, glossary terms, copy rules, error next step, length realism |
+| `code-tokens-check.mjs` | 4 | raw colour, raw spacing, raw radius, linear easing |
+| `domain-check.mjs` | 5 | all categories, sourced, verified, agent claims surfaced, affects |
+| `arch-check.mjs` | 7 | feasibility verdict, risk priced, NFR complete, constraint becomes NFR, ADR complete, technology has an ADR, mobile signing custody |
+| `industry-check.mjs` | 7 | industry known, stakeholders, constraints, conventions, forbidden, style excluded, evidence |
+| `impl-check.mjs` | 8 | test trace, CI pipeline, branch protection, branch age, environments, secrets, NFR measured, stack declared |
+| `build-diff.mjs` | 5 | frame paired, control height, radius, hue budget, text position |
+| | **86** | |
+
+A check here is a **named criterion that fails closed**: it has a stated pass condition, it returns
+non-zero when it is not met, and no step continues past it. The captures (`capture-html-reference.mjs`,
+`capture-baseline.js`) are not checks — they produce the artefact the checks read. The Figma-side audit
+scripts (`figma-audit.js`, `source-parity.js`) run inside the Plugin API and report through the review,
+not through an exit code.
+
+The count rose from 15 to 86 in one session, and every one of the seventy-one new criteria has been seen to fail on the defect it was written for. Counting scripts instead of criteria is what let this number drift: it read "seven" from 0.5.0 and
+"eight" from 0.7.0 in two places that disagreed for three releases, because nobody could recount it.
 
 To generate your own evidence, run the flow on a project of your own. The checks are self-contained: point
 `capture-html-reference.mjs` at a directory of HTML, then run `verify-html.mjs` and `parity-check.mjs`

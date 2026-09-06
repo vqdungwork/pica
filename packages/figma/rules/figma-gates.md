@@ -1,5 +1,11 @@
 # Figma gates
 
+> **The three scripts that run inside Figma can be run outside it.** `mock-figma.mjs` implements the
+> small part of the Plugin API they call, and `node packages/figma/scripts/mock-figma.mjs` asserts that
+> each still reports the defect it exists for. Run it after editing any of them. For three releases the
+> only way to find out whether `figma-audit.js` still worked was to paste 542 lines into a paid session,
+> which is why nobody edited it.
+
 The gates the figma package owns. Medium-independent review discipline is in core's
 `review-discipline.md`, which these assume.
 
@@ -42,6 +48,36 @@ await page.addStyleTag({ content: ':root{--font-family:"<resolved family>",sans-
 Then run it **again natively** once both sides share the family, because some differences only resolve
 then. A chip row that appeared to wrap differently turned out to be identical: the mismatch was
 entirely a forced-font artifact.
+
+## Both sides must name their font, and it must be the same one
+
+Forcing a common family is not enough on its own, because nothing checks that it happened. Text
+position depends on the family — a swap moved hug-width nodes **2 to 5 percent** on one project, several
+times the tolerance — so a capture in one family diffed against a dump in another reports typeface as
+layout, and the report reads like a broken design.
+
+The dangerous case is not disagreement, it is **silence**. Through 0.7.0 the dump recorded no font at
+all, so a dump taken in the handover font was indistinguishable from one taken in the working font. A
+team that flips between the two — designing in one, handing over in another — hits this every other run
+and has no way to tell.
+
+So:
+
+- the **capture** records the family the browser actually resolved, forced or not, in `meta.font`
+- the **dump** carries `font` on **every frame** — a partly labelled dump is not a labelled dump, and
+  accepting one lets the unlabelled frames through unchecked, which is the failure the guard exists to
+  prevent, reintroduced by the guard's own leniency
+- `geometry-diff` refuses to run when either is missing or they differ. Unknown is not a pass.
+
+**Pick one diff font and stay in it.** The handover font is a different question, answered by the checks
+that do not depend on position: overflow, truncation, whether a hug label still fits its fixed parent,
+contrast. Those hold across families, so flipping the font costs nothing and needs no re-dump — the dump
+is only retaken when the *design* changes.
+
+And wire it end to end. On the project this comes from, the harness captured with a forced font, wrote
+the artefact, and **then diffed the native one** — the two sides shared a family only by luck. The same
+harness read geometry-diff's stdout and ignored its **exit code and stderr**, so a script that refused
+to run looked exactly like one that passed. **A wrapper that cannot see its tool fail is not a check.**
 
 ## A binding that changes appearance is a defect
 
@@ -91,9 +127,39 @@ between HTML and a design tool are permanent, not defects:
   so range geometry finds nothing. Every input costs **+1 run** on the design side.
 - **Inline `<strong>` splits one visual line into three runs.** One design text node, three HTML runs.
 
-Same shape on the x axis: for **centred or FILL text**, the HTML capture records glyph *ink* and the
-design tool records the *layout box*. They coincide only for left-aligned hug text. Reporting raw `dx`
-on centred text guarantees an audit that can never return zero.
+## Compare the edge the alignment makes meaningful
+
+The HTML capture records the run's glyph **ink** rect. The design tool records the text node's
+**layout box**. For left-aligned text those share a left edge, so comparing `x` to `x` is sound.
+For anything else it is not, and the failure is not noise — it is a comparison of two unrelated
+numbers:
+
+- **right-aligned FILL text** — the box starts at the container's left while the ink ends at the
+  container's right, so `dx` is the container's width minus the string. That number is neither a
+  defect nor a pass.
+- **centred text** — the box spans the container, the ink sits in the middle, and the error scales
+  with the string, so a long label fails while being perfectly placed.
+
+Through 0.7.0 the answer here was to tolerate it: annotate centred findings, and ask the project to
+write a `deviations` entry per run. On the project that produced this rule that meant **eleven
+hand-written exemptions**, and one of them hid a real **258px** error for days — because the exemption
+removed the very run that would have caught it. **An exemption that exists to paper over a measurement
+bug is a place for defects to live.**
+
+So compare the edge that carries the meaning: **left for left, right for right, centre for centred.**
+A right-aligned label is then checked against the margin it must sit on, which is what the design
+actually promises. `geometry-diff.mjs` does this from 0.7.1.
+
+It needs the design side to carry width and alignment. **The dump contract is now**
+
+```
+{ pkg, frame, vp, hug?, texts: [[string, x, y, w, align], ...] }
+```
+
+`w` is the node's width and `align` its `textAlignHorizontal`, lowercased. Both are optional: a
+three-field dump still runs, falls back to left-edge comparison, and **says so in the output** rather
+than degrading silently. A dump that omits them cannot check a right-aligned or centred run at all,
+so the note is the difference between a gate that passes and a gate that has an opinion.
 
 ## Deviating from the HTML
 
@@ -103,12 +169,18 @@ distinguished from a defect on the next run:
 
 ```json
 { "deviations": [
-  { "node": "29:119", "prop": "y", "html": 369, "figma": 389,
+  { "screen": "Sign in", "text": "Create an account", "html": 369, "figma": 389,
     "why": "client approved moving the CTA below the checkbox on 12 Mar", "by": "client" },
-  { "node": "28:4", "prop": "cornerRadius", "html": 16, "figma": 14,
+  { "screen": "Hero", "text": "Get started", "html": 16, "figma": 14,
     "why": "HTML was off-token; 14 is the agreed hero radius", "by": "html-fix-pending" }
 ] }
 ```
+
+**`screen` and `text` are the matching pair, and they have to be.** The diff pairs runs by text content
+and the dump carries no Figma node ids, so a node id matches nothing whatever it names. This example
+said `{"node": "29:119", "prop": "y"}` for three releases: an entry written exactly as documented could
+never suppress anything, in the register this same file calls the reason the definition of done is
+falsifiable at all. The older spelling is still accepted so an existing register keeps working.
 
 The geometry diff reads it: a delta above tolerance that **is** registered is reported as a decision, and
 one that is not is reported as a finding. Without the register the definition of done below is
@@ -128,6 +200,30 @@ The two cases:
 
 Never silently split the difference.
 
+### An exemption is a claim, and claims age
+
+Every entry asserts something about the file at the moment it was written. Nothing re-reads it, and the
+diff *drops the exempted run* rather than comparing it — so a stale entry does not merely go out of
+date, it **blinds the check at exactly the point it was pointed**.
+
+On the project this rule comes from, an entry written on 28/08 said the node was `FILL`, box `48..359`.
+By 04/09 forty-six such nodes had become `layoutGrow 0`, `FIXED`, `w=231`. Figma sat at `x=72`, the HTML
+at `x=330.4` — **258px apart** — and the diff reported zero findings, because the run it would have
+caught was the run the exemption removed. A human opened the frame and saw it.
+
+Two habits follow.
+
+**Write the exemption on the invariant, not on a sample.** For a right-aligned label the invariant is
+the right edge — `375-16` and `768-24` — which holds whatever the lead slot contains. The left edge
+legitimately varies, so an entry that asserts it is wrong the first time the layout changes.
+
+**Give every exemption whose premise is measurable a lens that re-measures it.** If the entry says "all
+of these are FILL and right-aligned", something must assert that on every run, and fail closed when it
+examines fewer nodes than the register claims. An exemption with no such lens is a promise nobody keeps.
+
+And the first question to ask of any exemption: **is this excusing a decision, or excusing a bug in the
+measurement?** The eleven that motivated the alignment fix above were the second kind. Those should be
+deleted and the check corrected, not carried.
 ## Trust the data over the render, and the render over your memory
 
 The plugin API is authoritative for structure and bindings. Renders are authoritative for what a human
@@ -156,6 +252,29 @@ any normalised weight with more than one spelling in the file. The minority spel
 
 **The general lesson: a check that asks "does anything differ from the current value" is blind to
 anything unbound. Ask what the distribution *is*, then judge it.**
+
+## Reachability is a walk, not a count
+
+A prototype check that counts links, or proves both viewports are wired identically, or reports no
+dangling destination, can pass while whole arms of the flow float off the graph. All three were true of
+a file where `Notifications Intro` and `Notification Settings` pointed only at each other: nothing
+outside reached either, and **17 of 25 screens per lane** could not be opened by clicking. One missing
+reaction did it — a primary CTA with no link — and every gate was green.
+
+**Walk it breadth-first from the entry frame, once per lane**, where a lane is one viewport in one
+theme. Report an unreached screen only when it is in no register, so deliberate cases stay quiet and
+omissions do not.
+
+Two things the walk sees that a count cannot:
+
+- **Cross-twin links.** In a file where every screen has three twins, a link to the wrong one looks
+  perfectly valid to any existence check. A dark screen pointing at its light counterpart throws the
+  viewer into the other theme mid-flow. Assert that every edge lands in the same viewport and the same
+  theme as its source.
+- **Orphan cycles.** Two screens pointing at each other satisfy "has an inbound link" for both.
+
+And the limit that does not go away: `flow-check` and its Figma equivalent prove a destination
+**exists**, never that it is the **right** one. Only a human clicking answers that.
 
 ## The audit checklist
 

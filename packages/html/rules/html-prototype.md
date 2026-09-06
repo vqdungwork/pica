@@ -2,6 +2,10 @@
 
 The cheap medium, and the one that stays authoritative. Load this for steps 3 and 5.
 
+> **The definition of done for everything here is in `packages/html/rules/html-gates.md`.** This file is
+> how to build the prototype; that one is what has to be true before a human is asked to approve it.
+
+
 ---
 
 ## Why HTML first
@@ -26,6 +30,33 @@ tokens/        tokens.json, tokens.css
 .audit/        captured references and diffs
 .pica/         state.json
 ```
+
+## The builder is the source of the file it builds
+
+If a `<wp>.html` is generated, **every change goes in the generator.** Editing the output is not a
+shortcut, it is a mine: the file looks right, the gates pass, and the work is destroyed the next time
+anyone runs the script — which may be weeks later, by someone who did not make the edit.
+
+This is not hypothetical. On one afternoon a single project lost three things this way:
+
+- a card rebuilt in CSS and in Figma, while the builder still emitted the pre-rebuild markup, so
+  regenerating restored a placeholder icon at full width
+- two screens that had only ever existed in the output, deleted without a trace
+- a review page holding a stale copy of a screen nobody had rebuilt
+
+The second one is the instructive case, because the gate caught it and the eye did not: `geometry-diff`
+failed closed with *"no HTML frame for &lt;screen&gt;"* rather than quietly comparing 42 frames where it
+had compared 46. **A frame count that drops silently is worse than a red build.**
+
+Two habits. **After running any generator, diff its output against what was there** — file size and
+frame count are enough to notice a screen vanishing. And when a screen is added by hand under time
+pressure, that is a debt with a due date: put it in the builder before the day ends, or it will be
+collected at the worst moment.
+
+The same rule applies to anything that greps generated markup. A prototype router that matched
+`class="scr <viewport>"` silently stopped finding a screen once that screen gained a second class. It
+reported `MISSING` and carried on. **A matcher over generated HTML is coupled to the generator; change
+one, re-run the other.**
 
 ## One tabbed review page, always
 
@@ -110,6 +141,20 @@ Four rules, each of which was a reported defect first:
 ends, the router's own root and tab set, and any prototype the review shell cannot open. It cannot judge
 whether a link goes somewhere *sensible*: that is what clicking is for.
 
+## Three tags identify a frame
+
+```html
+<div data-viewport="mobile" data-uc="UC-03" data-state="empty">
+```
+
+Tagged, never inferred, for the reason `data-viewport` already gives: a caption cannot be parsed
+reliably and a fallback that always fires makes the tag inert. A build's captions come from its own
+markup and will never match the prototype's, so the tags are the only identity channel both sides
+control deliberately.
+
+`data-state` defaults to `default`. Omit it and nothing breaks; omit it on a project that has an empty
+state and the build comparison silently pairs the wrong frames.
+
 ## The frame size is declared once
 
 Set it at intake and hold it for the whole project. The default is **375 x 812**, the iOS idiom,
@@ -119,6 +164,11 @@ Whatever it is, **the HTML viewport matches the Figma frame exactly**, or the ge
 compares two different things and every finding is noise.
 
 ## Responsive is `@container`, never a width `@media`
+
+**Enforced by `verify-html`'s `width-media` check**, which reads the stylesheets from disk. It was a
+rule with nothing behind it until 0.8.0, and the cost of that was invisible: a prototype using a width
+`@media` renders correctly in a browser and is measured against the wrong layout by `verify-html`,
+`parity-check` and `build-diff` alike, all three reporting clean.
 
 When more than one viewport is declared, **every viewport renders in the same browser window**. A
 width-based `@media` rule therefore fires for every column at once and renders the narrow column as
@@ -272,7 +322,7 @@ in the kit.
 ## Promote slowly, bind always
 
 The flow-wide statement is in
-[reference-discipline.md](../../core/rules/reference-discipline.md). In HTML it reads:
+`packages/core/rules/reference-discipline.md`. In HTML it reads:
 
 **A shared class is a promotion, and the default is no.** Write the markup on the screen; lift it into
 the kit when a second occurrence appears that is the same *thing*, not the same shape. Two blocks that

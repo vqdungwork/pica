@@ -163,4 +163,23 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    # Fail closed on ANY unexpected error, and this is not defensive decoration.
+    #
+    # A PreToolUse hook blocks on exit code 2. Every other non-zero exit is reported as a
+    # hook error and THE TOOL CALL PROCEEDS. So an unhandled exception here does not stop
+    # a Figma write, it permits one, silently, and the four gates this file exists to hold
+    # are the only ones in pica enforced by anything other than a person remembering.
+    #
+    # Found by feeding it a state file where writeAuthorization was a string instead of
+    # {"granted": true}: AttributeError, exit 1, write allowed. A malformed field in a file
+    # anyone can edit was enough to open the only machine-enforced gate in the system.
+    try:
+        main()
+    except Exception as exc:  # noqa: BLE001 - deliberately broad, see above
+        deny(
+            "pica: this gate could not evaluate .pica/state.json and is refusing the write "
+            f"rather than allowing one it did not check ({type(exc).__name__}: {exc}). "
+            "Check the shape of writeAuthorization and activeReview: both are objects, "
+            'writeAuthorization as {"granted": true, "reason": "..."} and activeReview as '
+            '{"mode": "report"}, not bare strings.'
+        )

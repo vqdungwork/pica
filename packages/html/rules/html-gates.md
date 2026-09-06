@@ -5,7 +5,7 @@ The gates the html package owns. Medium-independent review discipline is in core
 
 ## The measured HTML gate
 
-`scripts/verify-html.mjs <html-reference.json> <state.json>`. **Pass: 0 findings on all four checks.**
+`scripts/verify-html.mjs <html-reference.json> <state.json>`. **Pass: 0 findings on all five checks.**
 
 Runs in `/pica-wp` before the human is asked to approve anything, and again at the start of a port. For a
 project with `figmaInScope: false` it is the **only** verification the work ever receives — which is why
@@ -17,6 +17,81 @@ it cannot live in the Figma half of the flow, where it sat through 0.3.0.
 | `overflow` | content past the frame's right edge — the frame clips it, so no screenshot shows it | 0 |
 | `tall-screen-pair` | content exceeding its viewport by >24px with no `· hug` twin, so the remainder is unreviewable | 0 |
 | `viewport-coverage` | a declared viewport that produced no frames at all | 0 |
+| `direction` | a screen that breaches the design direction chosen at step 2c — radius, control height, hue budget, tabular figures | 0 |
+
+### The direction check measures a different kind of wrong
+
+The first four checks ask whether the screen is built correctly. `direction` asks whether it is built to
+the design system that was chosen, and nothing else here can see that: a screen can be tagged, in bounds,
+paired and covered, and still spend eight hues on a product whose direction budgeted three.
+
+It is only checkable because step 2c wrote the direction down **as numbers**. A direction recorded as
+prose — "clean, trustworthy, modern" — is not a constraint and the check says so rather than passing it.
+
+Two data rules, both of which cost something to learn elsewhere:
+
+- **Hues are counted across the whole capture, never per frame.** A three-hue budget spent one hue per
+  screen is still three. Scoring frames alone calls that a pass and lets a palette sprawl one screen at a
+  time.
+- **Findings are one per violating value, not one per frame.** A single wrong token appears on every
+  screen that uses it, and forty identical lines bury the one value anybody has to change.
+
+Both bounds on control height exist because the directions that care about density want opposite things:
+a field tool needs a floor under its touch targets, a dense console needs a ceiling on its rows.
+
+**A declared direction with a pre-0.8.0 capture is a FAIL, not a skip.** The capture carries the census
+the check reads; without it nothing can be measured, and that is the `geometry-diff` lesson from 0.7.1 —
+a gate that silently cannot check is worse than one that admits it. Re-capture. A project that declares
+no direction at all is a different case and reports as not applicable.
+
+## The coverage gate
+
+`scripts/coverage-check.mjs <html-reference.json> <state.json>`. **Pass: 0 findings on all five checks.**
+
+This one was added after testing the flow on a real project, because the boundary between analysis and
+design turned out to be the only boundary nothing verified. The Analyst produces use cases, the Designer
+produces screens, and every other artefact here is checked against the one before it. These two were
+checked against nothing.
+
+| Check | Detects | Pass |
+|---|---|---|
+| `uc-covered` | a use case with no screen serving it: agreed, then not built | 0 |
+| `screen-traced` | a screen with no `data-uc`: either unsold scope, or a use case nobody recorded | 0 |
+| `uc-exists` | a screen claiming a use case id that does not exist | 0 |
+| `flow-reachable` | a use case served at one viewport and not another, so that user cannot complete it | 0 |
+| `target-buildable` | an implementation target consuming a viewport the design never produced. A native app needing tablet when nobody drew tablet cannot be built, and this finds it in Phase 3 rather than in Phase 7 | 0 |
+
+**One design, three viewports; targets choose.** The design is produced once at desktop, tablet and
+mobile. Implementation targets then declare which viewports they consume: a responsive website takes
+all three, a native app takes tablet and mobile and never desktop. The surface is a property of the
+target, not of the viewport, which keeps parity a single-design question.
+
+**A screen's identity is three tags, not one.**
+
+```html
+<div data-viewport="mobile" data-uc="UC-03" data-state="empty">
+```
+
+`data-uc` and `data-viewport` are not enough on their own: a screen and its empty state serve the same
+use case at the same size. Running the build comparison on a real project with that shape broke it
+three ways at once — the empty state paired against the populated one and produced four false findings,
+and a screen deliberately deleted from the build was never reported, because its sibling absorbed the
+pairing. **The check said "0 findings" on the exact defect it was written to catch.**
+
+`data-state` defaults to `default`, so a project with no state variants needs nothing. States come from
+the matrix at 3.0c: `empty`, `loading`, `error`, `long`, `unauthorised`.
+
+**Screens declare what they serve with `data-uc="UC-02"`**, comma-separated where one screen serves
+several. Tagged, never inferred, for the same reason `data-viewport` is.
+
+> **Why this is not covered by the other checks.** On the test project, `verify-html` returned
+> *"0 findings, HTML passes the measured gate"* on a capture where one agreed requirement had no screen
+> at all and one screen served no requirement. Every frame was tagged, in bounds, paired and covered.
+> The geometry was perfect and the product was both incomplete and over-scoped.
+
+Contract when the data is thin, following `geometry-diff`: **no use cases in state means not
+applicable**, and it says so. **Use cases declared with no frame tagged is a FAIL**, because the link
+cannot be checked and a check that cannot run is not a pass.
 
 ## The flow gate
 
@@ -123,7 +198,7 @@ Repeat until the pass returns nothing.
 ## The approved HTML is a reference, and references are read-only
 
 Once a package passes its gate, its HTML is frozen. See
-[reference-discipline.md](../../core/rules/reference-discipline.md) — the rule that matters here is the
+`packages/core/rules/reference-discipline.md` — the rule that matters here is the
 one that costs a keystroke to break: when `geometry-diff` fails on the Figma side, the cheapest way to
 make it pass is to edit the HTML, and doing so destroys the only thing that could have settled the
 disagreement.
@@ -149,7 +224,10 @@ checkable rather than a habit.
 
 **HTML side, and the whole list for a project with `figmaInScope: false`:**
 
-- [ ] `verify-html` returns zero on all four checks
+- [ ] `verify-html` returns zero on all seven checks
+- [ ] `contrast-check` returns zero, at the level `contrastLevel` declares. AA unless the project says otherwise, and a public-sector service has no choice about that
+- [ ] `coverage-check` returns zero on all five checks
+- [ ] `copy-check` returns zero, or the words are not written
 - [ ] `parity-check` returns zero, nominal and structural, where two or more viewports are declared
 - [ ] `flow-check` returns zero on all seven checks, with a non-zero screen and link count
 - [ ] **The main flow of every application clicked end to end**, by a human, from its real entry point

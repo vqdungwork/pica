@@ -1,5 +1,10 @@
 # pica Packaging Restructure Implementation Plan
 
+**Status: completed in 0.6.0.** Kept as the record of how the split was done. The unticked checkboxes
+below are the plan as written, not work outstanding: `packages/`, the ten manifests and
+`scripts/validate-packages.mjs` all exist and pass. A plan with no status is a plan nobody can tell is
+finished, which is why this line is here.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Split pica from one plugin into four installable packages — `core`, `research`, `html`, `figma` — each declaring what it requires, produces, checks and considers done, without changing any rule's meaning or breaking existing installs.

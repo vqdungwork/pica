@@ -1,0 +1,53 @@
+{
+  "name": "architect",
+  "status": "stable",
+  "description": "Feasibility before any promise, then C4 diagrams, ADRs and NFRs stated as numbers with a way to measure them.",
+  "owns": {
+    "commands": [
+      "pica-architect.md"
+    ],
+    "rules": [
+      "architecture.md"
+    ],
+    "scripts": [
+      "arch-check.mjs"
+    ]
+  },
+  "requires": {
+    "state": [
+      "useCases"
+    ],
+    "artifacts": [],
+    "gates": []
+  },
+  "produces": {
+    "state": [
+      "risks",
+      "nfr",
+      "stack",
+      "adr"
+    ],
+    "artifacts": []
+  },
+  "checks": [
+    {
+      "run": "arch-check.mjs",
+      "passes": "0 findings"
+    }
+  ],
+  "definitionOfDone": [
+    {
+      "type": "check",
+      "run": "arch-check.mjs",
+      "passes": "0 findings"
+    },
+    {
+      "type": "human",
+      "says": "every not-possible reads plainly to a non-technical reader, the C4 diagrams say something, and each ADR's consequences are honest"
+    },
+    {
+      "type": "gate",
+      "grants": "architectureApproved"
+    }
+  ]
+}

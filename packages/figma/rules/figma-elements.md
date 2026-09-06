@@ -2,6 +2,12 @@
 
 Variables, styles and components. What the system is made of, before any screen uses it.
 
+> **The definition of done for everything here is in `packages/figma/rules/figma-gates.md`.** This file
+> is technique: what the system is made of and how to build it. That one is the gate: what has to be true
+> before it is handed over. Splitting them keeps a 675-line reference from ending in a checklist nobody
+> scrolls to.
+
+
 Load this for step 4 (foundations) and step 6 (port). It pairs with
 [figma-screens.md](figma-screens.md), which covers the screens themselves.
 
@@ -519,7 +525,7 @@ prior question: **should this be a component at all, and what is it called?**
 ## Componentising is a judgement call. Tokenising is not.
 
 The flow-wide statement is *promote slowly, bind always*, in
-[reference-discipline.md](../../core/rules/reference-discipline.md). In Figma it reads:
+`packages/core/rules/reference-discipline.md`. In Figma it reads:
 
 **Default to not making a component.** Build it on the screen; promote when a second occurrence appears
 that is the same *thing*, not the same shape. What earns one: the brief names it, two or more real

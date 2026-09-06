@@ -1,0 +1,3164 @@
+{
+ "industries": {
+  "finance": {
+   "label": "Retail banking, payments and lending",
+   "aka": [
+    "banking",
+    "bank",
+    "payments",
+    "fintech",
+    "lending",
+    "wallet",
+    "neobank",
+    "retail banking",
+    "investment",
+    "treasury",
+    "credit union"
+   ],
+   "stakeholders": [
+    {
+     "role": "account holder",
+     "wants": "to see the true balance and move money without doubt",
+     "fears": "a transfer that silently failed, or a fee they did not see",
+     "decides": false,
+     "designImplication": "the balance is the single most-read number in the product. It never animates, never abbreviates, never rounds"
+    },
+    {
+     "role": "relationship manager",
+     "wants": "the customer's whole position on one screen",
+     "fears": "advising against a fact they could not see",
+     "decides": false,
+     "designImplication": "internal screens are dense and tabular by requirement, not by preference"
+    },
+    {
+     "role": "compliance officer",
+     "wants": "to prove afterwards who did what",
+     "fears": "an action with no attributable actor",
+     "decides": true,
+     "designImplication": "every state-changing screen needs a recorded actor and timestamp, and this is a screen, not a log file"
+    },
+    {
+     "role": "fraud analyst",
+     "wants": "to stop a payment mid-flight",
+     "fears": "a queue with no age on it",
+     "decides": true,
+     "designImplication": "a pending state must show how long it has been pending"
+    },
+    {
+     "role": "regulator",
+     "wants": "evidence of fair treatment and disclosure",
+     "fears": "a cost the customer was not shown before consenting",
+     "decides": true,
+     "designImplication": "fees and rates appear on the confirmation screen, never only in terms"
+    }
+   ],
+   "standards": [
+    "ISO 20022 for payment messaging",
+    "ISO 8583 for card authorisation",
+    "PCI DSS where card data is touched",
+    "Open Banking / PSD2 strong customer authentication in applicable markets"
+   ],
+   "regulator": "central bank plus the market conduct authority",
+   "requiredConstraints": [
+    "identity",
+    "retention",
+    "audit trail",
+    "restricted claims",
+    "data protection"
+   ],
+   "colour": {
+    "leads": "deep blue or navy, with a restrained secondary",
+    "why": "blue is the sector's inherited signal for solvency and permanence. Deviating from it is a positioning decision, not a taste one, and it must be argued",
+    "avoid": [
+     {
+      "what": "red as a brand or accent colour",
+      "why": "red is load-bearing here: it means negative, declined, or overdrawn. Spending it on a button destroys the one signal that must never be ambiguous"
+     },
+     {
+      "what": "neon and high-chroma playful palettes",
+      "why": "they read as a promotion, and a custody product cannot afford to read as a promotion"
+     },
+     {
+      "what": "green for anything other than settled or in credit",
+      "why": "same reason as red, in the other direction"
+     }
+    ],
+    "reserved": [
+     {
+      "hue": "red",
+      "for": "negative, declined or overdrawn"
+     },
+     {
+      "hue": "green",
+      "for": "settled or in credit"
+     }
+    ]
+   },
+   "style": {
+    "tradition": "international / Swiss typographic style, executed flat with restrained elevation",
+    "why": "the product is a table of numbers and a set of irreversible actions. Grid discipline and typographic hierarchy do the work; ornament competes with the figures",
+    "notThis": [
+     {
+      "what": "glassmorphism, because translucency reduces the contrast of the one number that must be unambiguous",
+      "names": [
+       "glassmorphism",
+       "glassmorphic",
+       "translucen",
+       "backdrop-filter",
+       "frosted"
+      ]
+     },
+     {
+      "what": "neubrutalism, because its deliberate crudeness reads as unfinished on a product holding money",
+      "names": [
+       "neubrutalism",
+       "neobrutalism",
+       "neobrutalist",
+       "brutalis"
+      ]
+     },
+     {
+      "what": "skeuomorphism, because the physical metaphors it borrows are the ones the sector left behind",
+      "names": [
+       "skeuomorphism",
+       "skeuomorphic",
+       "skeuomorph"
+      ]
+     }
+    ]
+   },
+   "density": "high on desktop internal screens, comfortable on customer mobile. Two densities in one product, declared separately",
+   "typography": "tabular numerals are mandatory wherever an amount appears, so columns of money align on the decimal. Currency symbol and sign never rendered smaller than the figure",
+   "tone": "precise and unhurried. Never jocular about a failure. 'Your transfer was not sent' beats 'Oops, something went wrong', because the second one does not say whether the money moved",
+   "forbidden": [
+    "animating a balance so it cannot be read immediately",
+    "hiding a fee behind a disclosure the user has to open",
+    "an irreversible transfer with no confirmation step naming the recipient in full"
+   ],
+   "evidence": [
+    "Monzo",
+    "Revolut",
+    "Wise",
+    "Chase UK",
+    "Nubank"
+   ]
+  },
+  "insurance": {
+   "label": "Insurance: policy, quote and claims",
+   "aka": [
+    "insurer",
+    "policy",
+    "claims",
+    "underwriting",
+    "assurance"
+   ],
+   "stakeholders": [
+    {
+     "role": "policyholder",
+     "wants": "to know whether this thing is covered",
+     "fears": "discovering an exclusion at the moment of the claim",
+     "decides": false,
+     "designImplication": "exclusions are never rendered smaller or later than benefits. That asymmetry is the sector's characteristic design failure"
+    },
+    {
+     "role": "broker or agent",
+     "wants": "to compare and place quickly",
+     "fears": "quoting a price that will not hold",
+     "decides": false,
+     "designImplication": "a quote carries its own expiry, visibly"
+    },
+    {
+     "role": "underwriter",
+     "wants": "the risk factors that drove the price",
+     "fears": "a decision they cannot reconstruct",
+     "decides": true,
+     "designImplication": "a price is shown with its factors, not as a single number"
+    },
+    {
+     "role": "claims adjuster",
+     "wants": "evidence and policy terms side by side",
+     "fears": "paying outside cover, or refusing inside it",
+     "decides": true,
+     "designImplication": "the claim screen and the policy screen are one screen"
+    },
+    {
+     "role": "actuary",
+     "wants": "clean structured data out of every form",
+     "fears": "free text where a code was needed",
+     "decides": false,
+     "designImplication": "free-text fields are a data decision, and each one needs a reason"
+    }
+   ],
+   "standards": [
+    "ACORD standards for policy and claims data exchange"
+   ],
+   "regulator": "insurance supervisory authority",
+   "requiredConstraints": [
+    "identity",
+    "retention",
+    "restricted claims",
+    "data protection"
+   ],
+   "colour": {
+    "leads": "blue or teal, with a strict semantic triad for cover status: green covered, amber pending, red not covered",
+    "why": "the product's whole job is to answer covered / pending / not covered, and that answer must be readable before any text is",
+    "avoid": [
+     {
+      "what": "using the status triad decoratively anywhere else",
+      "why": "once green means covered, a green button means covered"
+     },
+     {
+      "what": "colour as the only channel for cover status",
+      "why": "an exclusion the user missed because of colour vision is a dispute, and the sector is regulated on disclosure"
+     }
+    ],
+    "reserved": [
+     {
+      "hue": "green",
+      "for": "covered"
+     },
+     {
+      "hue": "amber",
+      "for": "pending"
+     },
+     {
+      "hue": "red",
+      "for": "not covered"
+     }
+    ]
+   },
+   "style": {
+    "tradition": "editorial, document-forward, restrained",
+    "why": "the deliverable genuinely is a document. Designing away from that makes the terms feel optional, and they are not",
+    "notThis": [
+     {
+      "what": "maximalism, which competes with the small print that is legally load-bearing",
+      "names": [
+       "maximalism",
+       "maximalist"
+      ]
+     },
+     {
+      "what": "anything that renders terms in a scrolling box shorter than four lines",
+      "names": [
+       "scrolling terms box",
+       "terms in a scroll"
+      ]
+     }
+    ]
+   },
+   "density": "high in policy detail, deliberately low in the claim wizard: a person filing a claim has just had a bad day",
+   "typography": "body text minimum 16px. Exclusions set at the same size and weight as benefits, always",
+   "tone": "plain language, and in several markets that is a legal requirement rather than a style preference",
+   "forbidden": [
+    "exclusions in smaller type than benefits",
+    "a quote with no visible expiry",
+    "pre-ticked consent for data sharing"
+   ],
+   "evidence": [
+    "Lemonade",
+    "Vitality",
+    "Ping An",
+    "Root"
+   ]
+  },
+  "healthcare": {
+   "label": "Clinical and patient-facing healthcare",
+   "aka": [
+    "health",
+    "clinic",
+    "hospital",
+    "medical",
+    "telehealth",
+    "ehr",
+    "emr",
+    "patient",
+    "health record",
+    "primary care"
+   ],
+   "stakeholders": [
+    {
+     "role": "patient",
+     "wants": "to understand what happens next",
+     "fears": "being told something they cannot act on",
+     "decides": false,
+     "designImplication": "low density, plain language, one action per screen. This is the opposite of the clinician's screen"
+    },
+    {
+     "role": "doctor",
+     "wants": "everything relevant without navigating",
+     "fears": "a fact that existed and was not shown",
+     "decides": true,
+     "designImplication": "high density is a clinical safety requirement here, not a preference. Pagination hides facts"
+    },
+    {
+     "role": "nurse",
+     "wants": "to act fast, often standing, often gloved",
+     "fears": "mis-tapping a dose",
+     "decides": false,
+     "designImplication": "larger targets than the clinician's desktop screen, and dose entry that cannot be ambiguous"
+    },
+    {
+     "role": "receptionist",
+     "wants": "to book and correct records quickly",
+     "fears": "attaching a record to the wrong person",
+     "decides": false,
+     "designImplication": "patient identity confirmation is its own step, with more than one identifier"
+    },
+    {
+     "role": "carer or family member",
+     "wants": "to help without being the patient",
+     "fears": "not being allowed to see what they need",
+     "decides": false,
+     "designImplication": "delegated access is a first-class concept, not an afterthought"
+    },
+    {
+     "role": "medical records officer",
+     "wants": "a defensible retention and access trail",
+     "fears": "an access with no recorded reason",
+     "decides": true,
+     "designImplication": "reason-for-access prompts belong in the design, not in policy"
+    }
+   ],
+   "standards": [
+    "HL7 FHIR for records exchange",
+    "SNOMED CT for clinical terms",
+    "ICD-10 or ICD-11 for diagnosis coding",
+    "DICOM where imaging is involved"
+   ],
+   "regulator": "national health authority plus the professional registration body",
+   "requiredConstraints": [
+    "data protection",
+    "retention",
+    "audit trail",
+    "restricted claims",
+    "professional duty",
+    "identity"
+   ],
+   "colour": {
+    "leads": "calm blues and teals, with red reserved absolutely",
+    "why": "red means clinical emergency in every hospital in the world. A product that spends it on a delete button has broken a convention older than the product",
+    "avoid": [
+     {
+      "what": "red and green as the only distinction between two states",
+      "why": "colour vision deficiency is roughly one in twelve men, and clinicians are not screened for it"
+     },
+     {
+      "what": "saturated warning colours on routine screens",
+      "why": "alarm fatigue is a documented clinical harm, not a metaphor"
+     }
+    ],
+    "reserved": [
+     {
+      "hue": "red",
+      "for": "clinical emergency"
+     }
+    ]
+   },
+   "style": {
+    "tradition": "flat, clinical, high-contrast, near-zero ornament",
+    "why": "every pixel of decoration is a pixel not spent on a value someone will act on",
+    "notThis": [
+     {
+      "what": "playful or illustrative treatments on clinician screens",
+      "names": [
+       "playful",
+       "illustrative",
+       "illustration-led",
+       "whimsical",
+       "cartoon"
+      ]
+     },
+     {
+      "what": "low-contrast greys, which fail under the lighting these screens actually run in",
+      "names": [
+       "low-contrast",
+       "low contrast",
+       "muted grey",
+       "soft grey"
+      ]
+     }
+    ]
+   },
+   "density": "two products in one: high for clinicians, low for patients. Declare them as separate density decisions or one of the two will be wrong",
+   "typography": "tabular numerals for every dose, vital sign and result. Drug names never abbreviated and never truncated with an ellipsis",
+   "tone": "factual, never reassuring about outcome, never diagnostic. The product reports; the clinician decides",
+   "forbidden": [
+    "a dose field that accepts an ambiguous unit",
+    "truncating a drug name",
+    "any screen that offers a clinical interpretation the product is not registered to give",
+    "colour as the only channel for an abnormal result"
+   ],
+   "evidence": [
+    "Epic MyChart",
+    "Babylon",
+    "Doctolib",
+    "Practice Fusion",
+    "Ada"
+   ]
+  },
+  "pharmacy": {
+   "label": "Pharmacy, dispensing and medication management",
+   "aka": [
+    "dispensing",
+    "chemist",
+    "drugstore",
+    "prescription",
+    "medication"
+   ],
+   "stakeholders": [
+    {
+     "role": "pharmacist",
+     "wants": "to catch an interaction before dispensing",
+     "fears": "dispensing against a look-alike name",
+     "decides": true,
+     "designImplication": "look-alike drug names are the sector's signature failure. Tall-man lettering is the conventional mitigation and it is a typographic decision"
+    },
+    {
+     "role": "dispensing technician",
+     "wants": "a queue that is unambiguous",
+     "fears": "picking the wrong strength",
+     "decides": false,
+     "designImplication": "strength is never rendered as a suffix in the same weight as the name"
+    },
+    {
+     "role": "patient",
+     "wants": "to know when and how to take it",
+     "fears": "taking two things that conflict",
+     "decides": false,
+     "designImplication": "schedule is a picture, not a sentence"
+    },
+    {
+     "role": "prescriber",
+     "wants": "to know it was collected",
+     "fears": "silent non-adherence",
+     "decides": false,
+     "designImplication": "collection status is a state worth designing"
+    },
+    {
+     "role": "pharmacy regulator",
+     "wants": "a controlled-drug trail",
+     "fears": "a dispense with no attributable pharmacist",
+     "decides": true,
+     "designImplication": "the responsible pharmacist is a required field on the screen, not an inferred session value"
+    }
+   ],
+   "standards": [
+    "HL7 FHIR for prescription exchange",
+    "dispensing and controlled-drug record requirements set by the national regulator"
+   ],
+   "regulator": "pharmacy council or equivalent registration body",
+   "requiredConstraints": [
+    "identity",
+    "retention",
+    "audit trail",
+    "restricted claims",
+    "professional duty"
+   ],
+   "colour": {
+    "leads": "green or teal for health and availability, with amber hard-reserved for interaction and dispensing warnings",
+    "why": "the sector inherits green from health signage, and the warning channel has to survive being the only thing a rushed reader sees",
+    "avoid": [
+     {
+      "what": "differentiating strengths by colour alone",
+      "why": "5mg and 50mg differing only in hue is a dispensing error waiting for a tired afternoon"
+     }
+    ],
+    "reserved": [
+     {
+      "hue": "amber",
+      "for": "interaction or dispensing warning"
+     }
+    ]
+   },
+   "style": {
+    "tradition": "flat and utilitarian, with typographic emphasis doing the safety work",
+    "why": "the safety mechanism in this sector is legibility, and legibility is typography",
+    "notThis": [
+     {
+      "what": "decorative type on any surface carrying a drug name or strength",
+      "names": [
+       "decorative type",
+       "display type",
+       "expressive type",
+       "script face"
+      ]
+     }
+    ]
+   },
+   "density": "high at the dispensing counter, low on the patient's schedule view",
+   "typography": "tall-man lettering for confusable drug names, tabular numerals for strengths, strength always adjacent to the name and never wrapped away from it",
+   "tone": "instructional and unambiguous. Never soften a warning to be friendly",
+   "forbidden": [
+    "truncating a drug name or strength",
+    "colour as the only distinction between strengths",
+    "a dispense action with no named responsible pharmacist"
+   ],
+   "evidence": [
+    "Pharmacy2U",
+    "Capsule",
+    "Echo",
+    "MedAdvisor"
+   ]
+  },
+  "education": {
+   "label": "Education and learning, from schools to training",
+   "aka": [
+    "edtech",
+    "school",
+    "learning",
+    "lms",
+    "university",
+    "training",
+    "course",
+    "tutoring",
+    "higher education",
+    "e-learning",
+    "classroom"
+   ],
+   "stakeholders": [
+    {
+     "role": "learner",
+     "wants": "to know what to do next and whether they are getting it",
+     "fears": "being shown they are behind, in front of others",
+     "decides": false,
+     "designImplication": "progress is shown against the learner's own past, never ranked against peers by default. And the age band changes the product entirely: a seven-year-old and a seventeen-year-old are not one audience"
+    },
+    {
+     "role": "teacher",
+     "wants": "to see the whole class and act on the outliers",
+     "fears": "marking work twice, or missing a student who went quiet",
+     "decides": false,
+     "designImplication": "the teacher's gradebook is dense and tabular. The learner's screen is not. Same product, two densities"
+    },
+    {
+     "role": "parent or guardian",
+     "wants": "to know how their child is doing without decoding jargon",
+     "fears": "finding out about a problem too late",
+     "decides": true,
+     "designImplication": "the parent view is a third density, and it must translate rather than expose the teacher's terms"
+    },
+    {
+     "role": "school administrator",
+     "wants": "enrolment, attendance and reporting to reconcile",
+     "fears": "a statutory return that does not tie out",
+     "decides": true,
+     "designImplication": "attendance and enrolment are audit surfaces, not conveniences"
+    },
+    {
+     "role": "education authority",
+     "wants": "safeguarding and data minimisation for minors",
+     "fears": "child data leaving the jurisdiction or the purpose",
+     "decides": true,
+     "designImplication": "consent is parental below the age threshold, and the threshold varies by market"
+    }
+   ],
+   "standards": [
+    "not applicable in most builds: no mandated external exchange. Where interoperability is required, SCORM or xAPI for course content and OneRoster for rostering"
+   ],
+   "regulator": "education authority, plus the data protection regulator acting on child data",
+   "requiredConstraints": [
+    "data protection",
+    "retention",
+    "audit trail",
+    "identity"
+   ],
+   "colour": {
+    "leads": "warm and optimistic: a trustworthy blue or green base with a warm accent such as amber or coral",
+    "why": "the sector's job is to make a person feel safe enough to be wrong in public. Cool corporate palettes read as assessment, and assessment is what learners are already afraid of",
+    "avoid": [
+     {
+      "what": "red for an incorrect answer, especially for young learners",
+      "why": "red marking carries a shame response that is well documented in classroom practice. Use a neutral state plus guidance toward the right answer"
+     },
+     {
+      "what": "corporate grey and navy as the dominant pair",
+      "why": "it reads as administration software, and the learner is not an administrator"
+     },
+     {
+      "what": "leaderboards by default",
+      "why": "ranking is a motivation decision with known harm to the bottom of the ranking, so it is a decision to argue, not a default"
+     }
+    ],
+    "reserved": [
+     {
+      "hue": "red",
+      "for": "nothing a learner did. It is not spent on wrong answers"
+     }
+    ]
+   },
+   "style": {
+    "tradition": "friendly geometric with generous rounding and illustration, restrained toward the teacher and admin surfaces",
+    "why": "illustration is expected and effective for learners and actively counterproductive on a gradebook a teacher uses for four hours",
+    "notThis": [
+     {
+      "what": "business or admin dashboard styling on the learner surface, which is the single most common failure in this sector",
+      "names": [
+       "admin dashboard",
+       "business dashboard",
+       "dashboard styling",
+       "enterprise console",
+       "admin console"
+      ]
+     },
+     {
+      "what": "dense data-table styling for anyone under about fourteen",
+      "names": [
+       "data-table styling",
+       "dense table",
+       "data table styling"
+      ]
+     }
+    ]
+   },
+   "density": "three densities in one product: low for the learner, high for the teacher's gradebook, medium and translated for the parent",
+   "typography": "generous line height and a larger minimum size for younger learners. Dyslexia-considerate choices matter here more than in any other sector: avoid tightly-spaced geometric letterforms where b, d, p and q mirror each other",
+   "tone": "encouraging and specific. 'Not quite, try the second step again' beats both 'Wrong' and 'Great effort!', because only one of the three says what to do",
+   "forbidden": [
+    "ranking learners against each other without an explicit decision to do so",
+    "collecting more child data than the stated purpose needs",
+    "red-marking a young learner's mistake as the only feedback"
+   ],
+   "evidence": [
+    "Duolingo",
+    "Khan Academy",
+    "Seesaw",
+    "Google Classroom",
+    "Kahoot"
+   ]
+  },
+  "legal": {
+   "label": "Legal practice and contract work",
+   "aka": [
+    "law",
+    "lawyer",
+    "solicitor",
+    "attorney",
+    "contract",
+    "litigation",
+    "legaltech",
+    "compliance"
+   ],
+   "stakeholders": [
+    {
+     "role": "lawyer",
+     "wants": "the document and its history without losing the thread",
+     "fears": "acting on a superseded version",
+     "decides": true,
+     "designImplication": "version is always on screen, never inferred from a filename"
+    },
+    {
+     "role": "paralegal",
+     "wants": "to assemble and cross-reference at speed",
+     "fears": "a citation that does not resolve",
+     "decides": false,
+     "designImplication": "every reference is a link that can be proven to resolve"
+    },
+    {
+     "role": "client",
+     "wants": "to know cost and position in plain words",
+     "fears": "an invoice they cannot map to work",
+     "decides": true,
+     "designImplication": "time entries map to a matter and are visible to the client"
+    },
+    {
+     "role": "partner",
+     "wants": "matter profitability and risk exposure",
+     "fears": "a conflict of interest discovered late",
+     "decides": true,
+     "designImplication": "conflict checking is a gate in the flow, not a report"
+    },
+    {
+     "role": "bar association",
+     "wants": "privilege and client confidentiality preserved",
+     "fears": "privileged material in a shared surface",
+     "decides": true,
+     "designImplication": "sharing controls are per document, defaulting closed"
+    }
+   ],
+   "standards": [
+    "not applicable: no mandated exchange format in most jurisdictions. Court filing systems impose their own where relevant"
+   ],
+   "regulator": "bar association or law society",
+   "requiredConstraints": [
+    "identity",
+    "retention",
+    "audit trail",
+    "restricted claims",
+    "professional duty",
+    "data protection"
+   ],
+   "colour": {
+    "leads": "deep neutrals with a single restrained accent, often burgundy, navy or forest",
+    "why": "the sector's visual language is inherited from print and from institutions that advertise longevity. Restraint reads as competence here in a way it does not elsewhere",
+    "avoid": [
+     {
+      "what": "bright multi-hue palettes",
+      "why": "they read as consumer software, and the buyer is buying judgement"
+     }
+    ],
+    "reserved": [],
+    "reservedNote": "no hue is load-bearing in this sector, so the palette is a brand decision rather than an inherited constraint"
+   },
+   "style": {
+    "tradition": "editorial, typographic, print-derived",
+    "why": "the artefact is a document and the reading experience is the product",
+    "notThis": [
+     {
+      "what": "card-heavy dashboard styling that fragments a document into tiles",
+      "names": [
+       "card-heavy",
+       "dashboard styling",
+       "tile grid",
+       "card grid"
+      ]
+     }
+    ]
+   },
+   "density": "high. These are professional users reading long documents for hours, and whitespace that helps a consumer costs them scrolling",
+   "typography": "a serif or humanist face for document body is conventional and defensible. Line length capped for sustained reading. Clause numbering never reflows",
+   "tone": "precise and hedged where the law is hedged. The product must never state a legal conclusion",
+   "forbidden": [
+    "presenting output as legal advice",
+    "a document view that does not name its version",
+    "sharing that defaults open"
+   ],
+   "evidence": [
+    "Clio",
+    "Ironclad",
+    "Harvey",
+    "Relativity"
+   ]
+  },
+  "ecommerce": {
+   "label": "Retail and e-commerce",
+   "aka": [
+    "retail",
+    "shop",
+    "store",
+    "marketplace",
+    "commerce",
+    "dtc",
+    "checkout",
+    "online retail",
+    "retailer",
+    "d2c"
+   ],
+   "stakeholders": [
+    {
+     "role": "shopper",
+     "wants": "to find it, trust it, and know the real total",
+     "fears": "a cost that appears at the last step",
+     "decides": false,
+     "designImplication": "the full price including shipping and tax appears before the final step. Late-revealed cost is the single largest documented cause of cart abandonment"
+    },
+    {
+     "role": "merchandiser",
+     "wants": "to control what is seen first",
+     "fears": "a product surfaced with a bad image",
+     "decides": false,
+     "designImplication": "image quality is a system constraint, and the design must specify what happens when it is not met"
+    },
+    {
+     "role": "customer service agent",
+     "wants": "the order and its history in one place",
+     "fears": "contradicting the tracking page",
+     "decides": false,
+     "designImplication": "the agent sees exactly the states the customer sees, named identically"
+    },
+    {
+     "role": "warehouse and fulfilment",
+     "wants": "unambiguous pick data",
+     "fears": "a variant that reads the same as another",
+     "decides": false,
+     "designImplication": "variant naming is a design decision with a physical consequence"
+    },
+    {
+     "role": "consumer protection regulator",
+     "wants": "honest pricing and a working right to return",
+     "fears": "a dark pattern in the checkout",
+     "decides": true,
+     "designImplication": "no pre-ticked add-ons, no countdown that is not real, no obstructed cancellation"
+    }
+   ],
+   "standards": [
+    "not applicable to the storefront: payment is delegated to a provider, which carries PCI DSS. Product data exchange conventionally uses GS1 identifiers"
+   ],
+   "regulator": "consumer protection authority",
+   "requiredConstraints": [
+    "data protection",
+    "retention",
+    "restricted claims"
+   ],
+   "colour": {
+    "leads": "brand-led, with a single high-contrast action colour that appears nowhere else",
+    "why": "this is the one sector where the palette is genuinely the brand's to choose. What is not negotiable is that the buy action owns a colour exclusively",
+    "avoid": [
+     {
+      "what": "spending the action colour on secondary controls",
+      "why": "if three things are the action colour, none of them is the action"
+     },
+     {
+      "what": "red for urgency banners while also using red for errors",
+      "why": "the two collide at exactly the moment the checkout fails"
+     }
+    ],
+    "reserved": [],
+    "reservedNote": "no hue is load-bearing in this sector, so the palette is a brand decision rather than an inherited constraint"
+   },
+   "style": {
+    "tradition": "editorial for considered purchases, flat and utilitarian for high-frequency ones",
+    "why": "the style follows the purchase cadence: a sofa is browsed, a razor refill is repurchased. They are not the same product",
+    "notThis": [
+     {
+      "what": "heavy chrome or ornament between the product image and the buy action",
+      "names": [
+       "heavy chrome",
+       "ornament",
+       "ornamental"
+      ]
+     }
+    ]
+   },
+   "density": "low on product, high on order history and admin",
+   "typography": "price is the second most important run on the page after the product name, and it uses tabular numerals wherever prices stack",
+   "tone": "direct. Say what it costs and when it arrives",
+   "forbidden": [
+    "revealing shipping cost only at the final step",
+    "a countdown or stock-scarcity claim that is not true",
+    "pre-ticked add-ons or subscriptions",
+    "making cancellation harder than signing up"
+   ],
+   "evidence": [
+    "Shopify storefronts",
+    "ASOS",
+    "Uniqlo",
+    "Amazon",
+    "Everlane"
+   ]
+  },
+  "hospitality": {
+   "label": "Food, restaurants and hospitality",
+   "aka": [
+    "restaurant",
+    "food",
+    "cafe",
+    "hotel",
+    "booking",
+    "dining",
+    "delivery",
+    "kitchen",
+    "food delivery",
+    "restaurant ordering",
+    "table service"
+   ],
+   "stakeholders": [
+    {
+     "role": "diner or guest",
+     "wants": "to decide quickly and eat",
+     "fears": "an allergen they were not told about",
+     "decides": false,
+     "designImplication": "allergen information is never behind a tap. In several markets that is law, not courtesy"
+    },
+    {
+     "role": "server",
+     "wants": "to fire an order without going back to a terminal",
+     "fears": "a modifier that did not reach the kitchen",
+     "decides": false,
+     "designImplication": "modifiers are confirmed visually at the point of sending, not assumed"
+    },
+    {
+     "role": "kitchen",
+     "wants": "the order in preparation sequence",
+     "fears": "a rush of tickets with no ordering",
+     "decides": false,
+     "designImplication": "the kitchen display is a different product from the menu, with its own density and its own colour logic"
+    },
+    {
+     "role": "manager",
+     "wants": "covers, turn time and stock in one view",
+     "fears": "selling something that ran out an hour ago",
+     "decides": true,
+     "designImplication": "availability is a live state on the menu, not a nightly update"
+    },
+    {
+     "role": "food standards authority",
+     "wants": "accurate allergen declaration",
+     "fears": "an undeclared allergen",
+     "decides": true,
+     "designImplication": "the allergen field is required, and the design must state what happens when it is unknown"
+    }
+   ],
+   "standards": [
+    "not applicable for exchange. Allergen declaration requirements are set nationally and are binding on the interface"
+   ],
+   "regulator": "food standards or public health authority",
+   "requiredConstraints": [
+    "data protection",
+    "restricted claims"
+   ],
+   "colour": {
+    "leads": "warm appetite colours: reds, oranges, warm neutrals, deep greens for fresh and plant-based",
+    "why": "warm hues are conventionally associated with appetite and the sector has built on that for a century. Deep green now reads as fresh rather than as institutional",
+    "avoid": [
+     {
+      "what": "blue as a dominant colour on food imagery surfaces",
+      "why": "blue is rare in edible food and reads as spoilage or artificiality against a plate. It is fine in the booking flow and wrong on the menu"
+     },
+     {
+      "what": "colour as the only allergen signal",
+      "why": "an allergen notice that a colour-blind guest cannot read is an allergen notice that does not exist"
+     }
+    ],
+    "reserved": [],
+    "reservedNote": "no hue is load-bearing in this sector, so the palette is a brand decision rather than an inherited constraint"
+   },
+   "style": {
+    "tradition": "editorial and photographic for the menu, flat and utilitarian for the kitchen display",
+    "why": "the menu sells with photography and typography; the kitchen screen is read at three metres in a hurry",
+    "notThis": [
+     {
+      "what": "low-contrast type over food photography without a scrim, which is the sector's most common legibility failure",
+      "names": [
+       "low-contrast",
+       "low contrast",
+       "type over photography",
+       "no scrim"
+      ]
+     }
+    ]
+   },
+   "density": "low on the menu, very high on the kitchen display, medium at the point of sale",
+   "typography": "menu type may be expressive. Allergen and price runs may not, and they never sit below 14px",
+   "tone": "appetising for the menu, terse for operations. They are different voices in the same product",
+   "forbidden": [
+    "allergen information behind an extra tap",
+    "a price that excludes service charge without saying so",
+    "photography that misrepresents portion or preparation"
+   ],
+   "evidence": [
+    "Toast",
+    "Deliveroo",
+    "OpenTable",
+    "Square for Restaurants"
+   ]
+  },
+  "logistics": {
+   "label": "Logistics, freight and last-mile delivery",
+   "aka": [
+    "shipping",
+    "freight",
+    "delivery",
+    "courier",
+    "supplychain",
+    "warehouse",
+    "fleet",
+    "3pl",
+    "last mile",
+    "last-mile"
+   ],
+   "stakeholders": [
+    {
+     "role": "warehouse operative",
+     "wants": "to scan and move on",
+     "fears": "a mis-scan they do not notice",
+     "decides": false,
+     "designImplication": "this user is gloved, standing, in cold or noise, often on a rugged handheld. Control targets go well above the usual minimum and confirmation is haptic or audible, not only visual"
+    },
+    {
+     "role": "driver",
+     "wants": "the next stop and proof of delivery",
+     "fears": "an address they cannot find and a clock that is running",
+     "decides": false,
+     "designImplication": "one-handed, in sunlight, sometimes moving. Maximum contrast, minimum reading"
+    },
+    {
+     "role": "dispatcher",
+     "wants": "the whole network state and the exceptions",
+     "fears": "an exception nobody surfaced",
+     "decides": true,
+     "designImplication": "the exception queue is the primary screen, not a filter on a list"
+    },
+    {
+     "role": "consignee",
+     "wants": "to know when, within an hour",
+     "fears": "a window so wide it is useless",
+     "decides": false,
+     "designImplication": "a tracking state with no time attached is not a tracking state"
+    },
+    {
+     "role": "customs or transport authority",
+     "wants": "documentation that matches the goods",
+     "fears": "a consignment with no attributable chain",
+     "decides": true,
+     "designImplication": "custody handover is an audited event with a named actor at each end"
+    }
+   ],
+   "standards": [
+    "UN/EDIFACT for consignment messaging",
+    "GS1 barcode and SSCC identifiers for units and pallets"
+   ],
+   "regulator": "transport and customs authority",
+   "requiredConstraints": [
+    "audit trail",
+    "identity",
+    "retention"
+   ],
+   "colour": {
+    "leads": "high-contrast utility palette, usually a strong single brand hue with amber and red reserved for exception states",
+    "why": "these screens are read in sunlight, in cold stores, and through scratched screen protectors. Contrast is a functional requirement rather than an aesthetic one",
+    "avoid": [
+     {
+      "what": "subtle greys and low-contrast secondary text",
+      "why": "they disappear entirely in the lighting these devices actually live in"
+     },
+     {
+      "what": "pastels",
+      "why": "they wash out under warehouse sodium and outdoor sun alike"
+     }
+    ],
+    "reserved": [
+     {
+      "hue": "amber",
+      "for": "exception"
+     },
+     {
+      "hue": "red",
+      "for": "failed scan or blocked consignment"
+     }
+    ]
+   },
+   "style": {
+    "tradition": "flat, utilitarian, near-zero ornament, oversized targets",
+    "why": "every design decision here is subordinate to being operable with gloves on, in a hurry, in bad light",
+    "notThis": [
+     {
+      "what": "glassmorphism or any translucency, which collapses in direct sunlight",
+      "names": [
+       "glassmorphism",
+       "glassmorphic",
+       "translucen",
+       "backdrop-filter",
+       "frosted"
+      ]
+     },
+     {
+      "what": "hover-dependent affordances, because there is no hover on a handheld",
+      "names": [
+       "hover-dependent",
+       "hover reveal",
+       "hover state only"
+      ]
+     }
+    ]
+   },
+   "density": "low on the handheld, very high on the dispatcher's desk",
+   "typography": "large, high weight, tabular numerals for consignment and unit counts. Reference numbers grouped so they can be read aloud over radio",
+   "tone": "imperative and short. 'Scan the pallet label' beats 'Please scan the pallet label to continue'",
+   "forbidden": [
+    "control targets sized for an office pointer on a device used with gloves",
+    "a tracking state with no timestamp",
+    "a custody transfer with no named receiving actor"
+   ],
+   "evidence": [
+    "Zebra handheld software",
+    "Flexport",
+    "Onfleet",
+    "project44"
+   ]
+  },
+  "realestate": {
+   "label": "Property, real estate and rental",
+   "aka": [
+    "property",
+    "housing",
+    "rental",
+    "letting",
+    "estate",
+    "proptech",
+    "mortgage"
+   ],
+   "stakeholders": [
+    {
+     "role": "buyer or renter",
+     "wants": "to judge a place without visiting",
+     "fears": "discovering a material fact after committing",
+     "decides": false,
+     "designImplication": "material facts, from tenure to service charge to flood risk, sit with the price and not in a downloadable pack"
+    },
+    {
+     "role": "agent",
+     "wants": "to list fast and qualify leads",
+     "fears": "a listing that misrepresents and comes back on them",
+     "decides": false,
+     "designImplication": "a listing form that permits omission of a material fact is a liability, so required fields here are a legal decision"
+    },
+    {
+     "role": "landlord",
+     "wants": "occupancy and compliance",
+     "fears": "a certificate that expired",
+     "decides": true,
+     "designImplication": "compliance certificates are dated objects with expiry states"
+    },
+    {
+     "role": "tenant",
+     "wants": "repairs done and a record of asking",
+     "fears": "a request with no trail",
+     "decides": false,
+     "designImplication": "the repair request is an audited thread, visible to both sides identically"
+    },
+    {
+     "role": "property regulator",
+     "wants": "accurate advertising and deposit protection",
+     "fears": "a misdescription",
+     "decides": true,
+     "designImplication": "advertised measurements and images carry provenance and date"
+    }
+   ],
+   "standards": [
+    "not applicable universally. Where a national property data standard exists it governs listing fields"
+   ],
+   "regulator": "property or estate agency regulator, plus advertising standards",
+   "requiredConstraints": [
+    "identity",
+    "retention",
+    "restricted claims",
+    "data protection"
+   ],
+   "colour": {
+    "leads": "warm neutrals and muted greens or navies, letting photography carry the colour",
+    "why": "the product is photography. A saturated interface competes with the only thing the user came to look at",
+    "avoid": [
+     {
+      "what": "strong branded colour adjacent to property imagery",
+      "why": "it shifts the perceived colour of the room in the photo, which is a misrepresentation risk"
+     }
+    ],
+    "reserved": [],
+    "reservedNote": "no hue is load-bearing in this sector, so the palette is a brand decision rather than an inherited constraint"
+   },
+   "style": {
+    "tradition": "editorial with generous imagery, restrained interface chrome",
+    "why": "the sector sells aspiration through photography and reassurance through detail. Both need the interface to get out of the way",
+    "notThis": [
+     {
+      "what": "dense card grids that crop photography to a square, which hides room proportion",
+      "names": [
+       "dense card grid",
+       "square crop",
+       "card grid"
+      ]
+     }
+    ]
+   },
+   "density": "low on the listing, high on the agent's pipeline and the landlord's compliance register",
+   "typography": "price and floor area use tabular numerals. Measurements always carry units, and both metric and local convention where the market expects it",
+   "tone": "descriptive, never superlative. Advertising standards bind the copy here",
+   "forbidden": [
+    "a material fact available only in a downloadable document",
+    "photography with no capture date",
+    "an area figure with no stated measurement basis"
+   ],
+   "evidence": [
+    "Rightmove",
+    "Zillow",
+    "Idealista",
+    "Airbnb"
+   ]
+  },
+  "travel": {
+   "label": "Travel, transport and mobility",
+   "aka": [
+    "airline",
+    "flight",
+    "train",
+    "transit",
+    "tourism",
+    "mobility",
+    "ride",
+    "hotel booking"
+   ],
+   "stakeholders": [
+    {
+     "role": "traveller",
+     "wants": "to get there, and to know immediately when that changes",
+     "fears": "a disruption they learn about at the gate",
+     "decides": false,
+     "designImplication": "the disruption state is a designed screen with rebooking on it, not a red banner"
+    },
+    {
+     "role": "gate or platform staff",
+     "wants": "to process a queue",
+     "fears": "a passenger record that disagrees with the system",
+     "decides": false,
+     "designImplication": "staff screens show the same record the passenger sees, with the same wording"
+    },
+    {
+     "role": "operations controller",
+     "wants": "to reallocate capacity",
+     "fears": "a cascade nobody modelled",
+     "decides": true,
+     "designImplication": "knock-on effects are shown, not left to be inferred"
+    },
+    {
+     "role": "accessibility passenger",
+     "wants": "assistance that is actually booked",
+     "fears": "arriving to find no record of it",
+     "decides": false,
+     "designImplication": "assistance is a booking object with a confirmation, not a checkbox"
+    },
+    {
+     "role": "civil aviation or transport authority",
+     "wants": "passenger rights honoured",
+     "fears": "compensation entitlement not disclosed",
+     "decides": true,
+     "designImplication": "entitlement appears in the disruption flow, at the moment it arises"
+    }
+   ],
+   "standards": [
+    "IATA NDC for airline content and ordering",
+    "GTFS for public transit schedules and real-time"
+   ],
+   "regulator": "civil aviation or national transport authority",
+   "requiredConstraints": [
+    "identity",
+    "data protection",
+    "retention",
+    "restricted claims"
+   ],
+   "colour": {
+    "leads": "a confident brand hue with a strictly reserved disruption channel in amber and red",
+    "why": "the product's hardest moment is disruption, and the palette must have kept a channel free for it",
+    "avoid": [
+     {
+      "what": "amber or red used for promotion",
+      "why": "it is the exact colour the user must trust to mean 'your journey changed'"
+     }
+    ],
+    "reserved": [
+     {
+      "hue": "amber",
+      "for": "disruption"
+     },
+     {
+      "hue": "red",
+      "for": "cancellation"
+     }
+    ]
+   },
+   "style": {
+    "tradition": "flat and wayfinding-derived, drawing on transit signage conventions",
+    "why": "the sector has a century of signage practice behind it, and travellers already read it",
+    "notThis": [
+     {
+      "what": "ornament on time-critical screens, which are read while walking",
+      "names": [
+       "ornament",
+       "ornamental",
+       "decorative"
+      ]
+     }
+    ]
+   },
+   "density": "low while travelling, high in operations and in the booking comparison",
+   "typography": "times and gate or platform identifiers are the largest runs on the screen. Tabular numerals for times and durations, and the 24-hour convention where the market uses it",
+   "tone": "calm and factual under disruption. State the new fact and the next action in that order",
+   "forbidden": [
+    "a fare quoted without mandatory taxes and charges",
+    "a disruption notice with no next action",
+    "an assistance request with no confirmation object"
+   ],
+   "evidence": [
+    "Trainline",
+    "Citymapper",
+    "KLM",
+    "Hopper",
+    "Transit"
+   ]
+  },
+  "media": {
+   "label": "Media, publishing and entertainment",
+   "aka": [
+    "publishing",
+    "news",
+    "streaming",
+    "magazine",
+    "video",
+    "music",
+    "games"
+   ],
+   "stakeholders": [
+    {
+     "role": "reader or viewer",
+     "wants": "the thing, without obstruction",
+     "fears": "paying and still being interrupted",
+     "decides": false,
+     "designImplication": "the paid state must visibly differ from the free one, or the payment feels unhonoured"
+    },
+    {
+     "role": "editor",
+     "wants": "to shape what leads",
+     "fears": "an automated feed burying the thing that matters",
+     "decides": true,
+     "designImplication": "editorial override is a first-class control, not a database edit"
+    },
+    {
+     "role": "journalist or creator",
+     "wants": "their work presented as they built it",
+     "fears": "a layout that breaks a long-form piece",
+     "decides": false,
+     "designImplication": "long-form templates are a design deliverable, tested at real length"
+    },
+    {
+     "role": "advertiser",
+     "wants": "viewable placement",
+     "fears": "placement next to unsuitable content",
+     "decides": false,
+     "designImplication": "ad slots are designed into the layout with declared adjacency rules, not injected"
+    },
+    {
+     "role": "media regulator",
+     "wants": "clear separation of editorial and paid",
+     "fears": "advertorial indistinguishable from editorial",
+     "decides": true,
+     "designImplication": "sponsored labelling is a component with a minimum specification"
+    }
+   ],
+   "standards": [
+    "not applicable for exchange. RSS and schema.org article markup are conventional; broadcast subtitling standards bind where video is served"
+   ],
+   "regulator": "press or broadcast regulator, plus advertising standards",
+   "requiredConstraints": [
+    "data protection",
+    "restricted claims",
+    "retention"
+   ],
+   "colour": {
+    "leads": "a restrained editorial base, usually near-monochrome, with one signature accent",
+    "why": "the content supplies the colour. A publication that colours its own chrome competes with its photography and its illustration",
+    "avoid": [
+     {
+      "what": "a palette that changes per section",
+      "why": "it dissolves the masthead, which is the only thing distinguishing this publication from any other"
+     }
+    ],
+    "reserved": [],
+    "reservedNote": "no hue is load-bearing in this sector, so the palette is a brand decision rather than an inherited constraint"
+   },
+   "style": {
+    "tradition": "editorial, unambiguously. This is the tradition's home sector",
+    "why": "typographic hierarchy, measure, and grid are what make long-form readable, and long-form is the product",
+    "notThis": [
+     {
+      "what": "card grids that give every story the same weight, which is the abdication of editing",
+      "names": [
+       "card grid",
+       "uniform card",
+       "equal-weight grid"
+      ]
+     }
+    ]
+   },
+   "density": "low in the reading experience, high in the newsroom or content management surface",
+   "typography": "the central decision of the whole product. Measure capped for sustained reading, a real typographic scale, and a distinct voice between headline and body",
+   "tone": "the publication's own. This is the one sector where house voice outranks any convention here",
+   "forbidden": [
+    "sponsored content not labelled to the regulator's minimum",
+    "an interstitial between a paying reader and the content they paid for",
+    "autoplay with sound"
+   ],
+   "evidence": [
+    "The Guardian",
+    "NYT",
+    "Netflix",
+    "Spotify",
+    "Substack"
+   ]
+  },
+  "manufacturing": {
+   "label": "Manufacturing, industrial and plant operations",
+   "aka": [
+    "factory",
+    "industrial",
+    "production",
+    "plant",
+    "mes",
+    "scada",
+    "maintenance",
+    "iot"
+   ],
+   "stakeholders": [
+    {
+     "role": "machine operator",
+     "wants": "to know the line is right and stop it if not",
+     "fears": "a stop they caused and cannot explain",
+     "decides": false,
+     "designImplication": "the stop control is the largest, most reachable thing on the screen, and it is never adjacent to anything destructive"
+    },
+    {
+     "role": "shift supervisor",
+     "wants": "throughput, downtime and the reason for both",
+     "fears": "an unattributed stoppage",
+     "decides": true,
+     "designImplication": "a downtime event requires a reason code at the moment it ends, not at end of shift"
+    },
+    {
+     "role": "maintenance engineer",
+     "wants": "the fault history of this asset",
+     "fears": "replacing a part that was not the cause",
+     "decides": false,
+     "designImplication": "asset history is a first-class screen keyed to a physical tag"
+    },
+    {
+     "role": "quality inspector",
+     "wants": "to record a result against a batch",
+     "fears": "a result recorded against the wrong batch",
+     "decides": true,
+     "designImplication": "batch identity is confirmed by scan, never typed"
+    },
+    {
+     "role": "safety regulator",
+     "wants": "traceability from finished unit back to inputs",
+     "fears": "a recall that cannot be bounded",
+     "decides": true,
+     "designImplication": "genealogy is a designed capability, not a report someone writes later"
+    }
+   ],
+   "standards": [
+    "OPC UA for machine data",
+    "ISA-95 for the enterprise-to-control integration model",
+    "GS1 for unit and batch identifiers"
+   ],
+   "regulator": "occupational safety authority, plus sector-specific product safety bodies",
+   "requiredConstraints": [
+    "audit trail",
+    "identity",
+    "retention"
+   ],
+   "colour": {
+    "leads": "industrial signalling conventions: red for stop and fault, amber for warning and degraded, green for running",
+    "why": "this triad is not a design choice. It is inherited from physical plant signage and from ISO safety colours, and operators read it before they read language",
+    "avoid": [
+     {
+      "what": "green, amber or red for anything other than machine state",
+      "why": "an operator glancing at a screen from four metres reads only colour, and any other use of those three hues is a safety defect"
+     },
+     {
+      "what": "low-contrast interfaces",
+      "why": "these screens are behind polycarbonate, in dust, under high ambient light"
+     }
+    ],
+    "reserved": [
+     {
+      "hue": "red",
+      "for": "stop and fault"
+     },
+     {
+      "hue": "amber",
+      "for": "warning and degraded"
+     },
+     {
+      "hue": "green",
+      "for": "running"
+     }
+    ]
+   },
+   "style": {
+    "tradition": "flat, utilitarian, oversized, high contrast",
+    "why": "read at distance, operated with gloves, often through a protective panel",
+    "notThis": [
+     {
+      "what": "any ornament, animation or translucency on a control surface",
+      "names": [
+       "ornament",
+       "animation on controls",
+       "translucen",
+       "decorative"
+      ]
+     }
+    ]
+   },
+   "density": "medium on the line, high in the supervisor and quality surfaces",
+   "typography": "very large for state and counts, tabular numerals throughout, unit always adjacent to the number",
+   "tone": "imperative and unambiguous. No hedging on a machine state",
+   "forbidden": [
+    "a stop control that can be reached accidentally, or that requires a confirmation",
+    "using the safety colour triad decoratively",
+    "a quality result recorded against a typed batch number"
+   ],
+   "evidence": [
+    "Ignition SCADA",
+    "Tulip",
+    "Augury",
+    "Siemens Opcenter"
+   ]
+  },
+  "energy": {
+   "label": "Energy, utilities and metering",
+   "aka": [
+    "utility",
+    "electricity",
+    "gas",
+    "water",
+    "meter",
+    "grid",
+    "solar",
+    "renewables"
+   ],
+   "stakeholders": [
+    {
+     "role": "household or business customer",
+     "wants": "to understand a bill and reduce it",
+     "fears": "an estimated bill that turns out to be wrong",
+     "decides": false,
+     "designImplication": "an estimated reading is labelled as estimated everywhere it appears, including in the total"
+    },
+    {
+     "role": "field engineer",
+     "wants": "the job, the asset and the safety notes",
+     "fears": "arriving at an asset that is not what the record says",
+     "decides": false,
+     "designImplication": "asset records carry a last-verified date, outdoors, offline"
+    },
+    {
+     "role": "network controller",
+     "wants": "load and fault location",
+     "fears": "a fault they localise wrongly",
+     "decides": true,
+     "designImplication": "confidence in a fault location is shown, not hidden behind a single pin"
+    },
+    {
+     "role": "billing operations",
+     "wants": "readings that reconcile",
+     "fears": "a tariff change applied to the wrong period",
+     "decides": true,
+     "designImplication": "tariff periods are visible objects with boundaries"
+    },
+    {
+     "role": "energy regulator",
+     "wants": "tariff transparency and vulnerable-customer protection",
+     "fears": "a disconnection path with no safeguard",
+     "decides": true,
+     "designImplication": "any flow that can end supply carries a mandated safeguard step"
+    }
+   ],
+   "standards": [
+    "IEC 61968 and 61970 for utility data exchange",
+    "DLMS/COSEM for smart meter communication"
+   ],
+   "regulator": "energy or water regulator",
+   "requiredConstraints": [
+    "audit trail",
+    "retention",
+    "identity",
+    "data protection"
+   ],
+   "colour": {
+    "leads": "a calm base with a consumption scale that is not itself a judgement",
+    "why": "a consumption chart coloured red at the high end tells a customer they are bad, which is a claim the product cannot support without knowing their circumstances",
+    "avoid": [
+     {
+      "what": "red for high consumption",
+      "why": "it moralises a number that may reflect a medical need, a cold house, or a larger family"
+     },
+     {
+      "what": "green as a reward for low usage",
+      "why": "the same problem in reverse, and it is the one that draws complaints"
+     }
+    ],
+    "reserved": [
+     {
+      "hue": "red",
+      "for": "a safety or supply fault, never high consumption"
+     }
+    ]
+   },
+   "style": {
+    "tradition": "flat and data-forward for the customer, utilitarian for the field",
+    "why": "the customer product is a chart and a bill; the field product is a rugged offline tool. Two styles, declared separately",
+    "notThis": [
+     {
+      "what": "gamified treatments of consumption, which fail badly for customers in fuel poverty",
+      "names": [
+       "gamified",
+       "gamification",
+       "streak",
+       "badge"
+      ]
+     }
+    ]
+   },
+   "density": "medium for the customer, high for control room, low for field",
+   "typography": "tabular numerals for readings and amounts. Units always present, and a reading never rendered without its date and its estimated-or-actual flag",
+   "tone": "factual and non-judgemental about consumption. Directive about safety",
+   "forbidden": [
+    "an estimated reading presented as actual",
+    "colouring consumption as good or bad",
+    "a disconnection flow with no vulnerability check"
+   ],
+   "evidence": [
+    "Octopus Energy",
+    "Bulb",
+    "Sense",
+    "Tesla Energy"
+   ]
+  },
+  "government": {
+   "label": "Government and public sector services",
+   "aka": [
+    "public sector",
+    "civic",
+    "council",
+    "municipal",
+    "gov",
+    "citizen",
+    "tax",
+    "welfare",
+    "benefits"
+   ],
+   "stakeholders": [
+    {
+     "role": "citizen",
+     "wants": "to complete an obligation and be done",
+     "fears": "a form they get wrong and a consequence they cannot appeal",
+     "decides": false,
+     "designImplication": "the audience is everyone, which means the lowest assumed literacy, the oldest device, and the worst connection are the design targets, not edge cases"
+    },
+    {
+     "role": "caseworker",
+     "wants": "to decide consistently",
+     "fears": "a decision they cannot justify on review",
+     "decides": true,
+     "designImplication": "the evidence behind a decision is on the decision screen"
+    },
+    {
+     "role": "policy owner",
+     "wants": "the rule implemented as written",
+     "fears": "an interface that quietly changes eligibility",
+     "decides": true,
+     "designImplication": "eligibility logic is surfaced in language, not only in code"
+    },
+    {
+     "role": "advocate or support worker",
+     "wants": "to act for someone else",
+     "fears": "a system with no concept of assisted digital",
+     "decides": false,
+     "designImplication": "acting on behalf of another person is a designed role, not a shared password"
+    },
+    {
+     "role": "audit and oversight body",
+     "wants": "equal treatment demonstrated",
+     "fears": "a service that excludes a group",
+     "decides": true,
+     "designImplication": "accessibility conformance is a statutory floor here, commonly WCAG 2.2 AA, and it is auditable"
+    }
+   ],
+   "standards": [
+    "not applicable for exchange in most services. National design systems, such as the UK GOV.UK Design System or US Web Design System, are often mandatory rather than advisory"
+   ],
+   "regulator": "the sponsoring department, plus a statutory accessibility and equalities regime",
+   "requiredConstraints": [
+    "data protection",
+    "retention",
+    "audit trail",
+    "identity"
+   ],
+   "colour": {
+    "leads": "whatever the mandated national design system specifies, and if none is mandated, a high-contrast restrained palette with a single action colour",
+    "why": "in this sector a house style is frequently a legal instrument. Check for a mandated system before proposing anything, because proposing a palette against one is proposing non-compliance",
+    "avoid": [
+     {
+      "what": "a bespoke palette where a national design system applies",
+      "why": "it is not a taste disagreement, it is a compliance failure"
+     },
+     {
+      "what": "contrast ratios at the minimum",
+      "why": "the statutory floor is a floor, and this audience includes every vision profile in the population"
+     }
+    ],
+    "reserved": [],
+    "reservedNote": "no hue is load-bearing in this sector, so the palette is a brand decision rather than an inherited constraint"
+   },
+   "style": {
+    "tradition": "flat, plain, typographic, near-zero ornament, in the lineage of GOV.UK",
+    "why": "the sector proved empirically that plainness raises completion rates for services people are obliged to use and do not enjoy",
+    "notThis": [
+     {
+      "what": "marketing styling on a statutory service, which reads as an attempt to persuade someone who has no choice",
+      "names": [
+       "marketing styling",
+       "marketing-led",
+       "promotional styling",
+       "hero marketing"
+      ]
+     }
+    ]
+   },
+   "density": "low for the citizen, deliberately: one thing per page is the sector's established pattern and it outperforms grouped forms",
+   "typography": "large body text, generous line height, and a reading age target well below the national average. Plain-language testing is part of the deliverable",
+   "tone": "plain, direct, second person. Say what happens next and by when",
+   "forbidden": [
+    "a service with no non-digital route",
+    "accessibility below the statutory conformance level",
+    "eligibility rules a citizen cannot read in language",
+    "a bespoke component where a mandated design system provides one"
+   ],
+   "evidence": [
+    "GOV.UK",
+    "USWDS services",
+    "Service NSW",
+    "Estonia e-services"
+   ]
+  },
+  "nonprofit": {
+   "label": "Charity, non-profit and fundraising",
+   "aka": [
+    "charity",
+    "ngo",
+    "fundraising",
+    "donation",
+    "volunteer",
+    "philanthropy",
+    "social"
+   ],
+   "stakeholders": [
+    {
+     "role": "donor",
+     "wants": "to give easily and know it landed somewhere real",
+     "fears": "that most of it goes on overheads",
+     "decides": false,
+     "designImplication": "the donation flow is the shortest path in the product, and impact is stated with a source"
+    },
+    {
+     "role": "beneficiary",
+     "wants": "help without humiliation",
+     "fears": "being made into a case study",
+     "decides": false,
+     "designImplication": "beneficiary imagery and stories require consent, and the design must carry that as a field. This is the sector's central ethical failure mode"
+    },
+    {
+     "role": "volunteer",
+     "wants": "a shift and what to bring",
+     "fears": "turning up to the wrong thing",
+     "decides": false,
+     "designImplication": "volunteer-facing screens are as considered as donor-facing ones, which is rarely true in practice"
+    },
+    {
+     "role": "trustee",
+     "wants": "restricted and unrestricted funds separated",
+     "fears": "restricted funds spent outside their restriction",
+     "decides": true,
+     "designImplication": "fund restriction is a data concept that must appear in the interface"
+    },
+    {
+     "role": "charity regulator",
+     "wants": "honest fundraising and safeguarding",
+     "fears": "pressure tactics on vulnerable donors",
+     "decides": true,
+     "designImplication": "no urgency device that a regulator would read as pressure"
+    }
+   ],
+   "standards": [
+    "not applicable. Gift Aid or equivalent tax-relief schemes impose their own declaration requirements where they exist"
+   ],
+   "regulator": "charity commission or equivalent, plus fundraising standards bodies",
+   "requiredConstraints": [
+    "data protection",
+    "retention",
+    "restricted claims"
+   ],
+   "colour": {
+    "leads": "a warm, human palette, usually a single strong brand hue with generous neutral",
+    "why": "the sector runs on identification with a cause. Corporate restraint reads as distance",
+    "avoid": [
+     {
+      "what": "distress-signalling colour combined with urgency copy",
+      "why": "together they constitute the pressure pattern fundraising regulators act on"
+     }
+    ],
+    "reserved": [],
+    "reservedNote": "no hue is load-bearing in this sector, so the palette is a brand decision rather than an inherited constraint"
+   },
+   "style": {
+    "tradition": "editorial and photographic, warm, human",
+    "why": "the product is a story that asks for something. Photography and typographic voice carry it",
+    "notThis": [
+     {
+      "what": "dashboard styling on a donation page",
+      "names": [
+       "dashboard styling",
+       "admin dashboard",
+       "data dashboard"
+      ]
+     }
+    ]
+   },
+   "density": "low throughout the donor and volunteer surfaces, higher in fund administration",
+   "typography": "readable at length, because the case for support is long-form. Amounts in tabular numerals",
+   "tone": "honest and specific. A named, sourced outcome beats an emotional superlative, and it converts better",
+   "forbidden": [
+    "beneficiary imagery without recorded consent",
+    "a recurring-gift default the donor did not choose",
+    "an unsubstantiated impact claim",
+    "urgency devices that are not true"
+   ],
+   "evidence": [
+    "JustGiving",
+    "charity: water",
+    "GiveDirectly",
+    "Crisis Text Line"
+   ]
+  },
+  "hr": {
+   "label": "Human resources, recruitment and people operations",
+   "aka": [
+    "recruitment",
+    "hiring",
+    "people",
+    "talent",
+    "payroll",
+    "hrms",
+    "ats",
+    "employee",
+    "people ops",
+    "applicant tracking"
+   ],
+   "stakeholders": [
+    {
+     "role": "candidate",
+     "wants": "to apply without re-typing their life and to hear back",
+     "fears": "silence, and a filter they cannot see",
+     "decides": false,
+     "designImplication": "the candidate is the least-served user in this sector's products, and rejection is a designed state with a real message"
+    },
+    {
+     "role": "hiring manager",
+     "wants": "to compare fairly and quickly",
+     "fears": "a hire that was a mistake",
+     "decides": true,
+     "designImplication": "structured comparison surfaces, not free-text impressions"
+    },
+    {
+     "role": "recruiter",
+     "wants": "pipeline throughput",
+     "fears": "a candidate lost between stages",
+     "decides": false,
+     "designImplication": "stage age is visible on every candidate"
+    },
+    {
+     "role": "employee",
+     "wants": "leave, pay and personal data without asking a person",
+     "fears": "their manager seeing something private",
+     "decides": false,
+     "designImplication": "the visibility boundary between employee, manager and HR is a design surface, and getting it wrong is the sector's classic incident"
+    },
+    {
+     "role": "employment regulator or works council",
+     "wants": "non-discrimination and lawful processing",
+     "fears": "automated decisions with no human review",
+     "decides": true,
+     "designImplication": "any automated ranking or filter is disclosed, explainable, and has a human review path"
+    }
+   ],
+   "standards": [
+    "not applicable for exchange. Payroll interfaces are set nationally by the tax authority"
+   ],
+   "regulator": "employment authority and data protection regulator, plus works councils where they exist",
+   "requiredConstraints": [
+    "data protection",
+    "identity",
+    "retention",
+    "audit trail",
+    "restricted claims"
+   ],
+   "colour": {
+    "leads": "a professional but warm palette, typically a confident blue, green or purple with human neutrals",
+    "why": "the product sits between an institution and a person, and it must not read as purely institutional to the person",
+    "avoid": [
+     {
+      "what": "red for a rejected or unsuccessful state",
+      "why": "the person reading it is being told no about their livelihood, and a red badge adds nothing but sting"
+     }
+    ],
+    "reserved": [],
+    "reservedNote": "no hue is load-bearing in this sector, so the palette is a brand decision rather than an inherited constraint"
+   },
+   "style": {
+    "tradition": "flat, clean, professional, with restrained warmth",
+    "why": "it is workplace software that people use on some of the worst days of their working life",
+    "notThis": [
+     {
+      "what": "celebratory or gamified treatments around performance and compensation",
+      "names": [
+       "gamified",
+       "gamification",
+       "celebratory",
+       "confetti",
+       "badge"
+      ]
+     }
+    ]
+   },
+   "density": "high in the recruiter's pipeline and the HR admin, low in every candidate and employee surface",
+   "typography": "unremarkable and legible. Salary and leave balances in tabular numerals",
+   "tone": "human and clear. A rejection says a real thing; a leave balance says exactly what is left and when it expires",
+   "forbidden": [
+    "an automated filter with no disclosure and no human review path",
+    "a candidate outcome that is silence",
+    "manager visibility of an employee's protected or medical data",
+    "collecting protected characteristics without a stated lawful purpose"
+   ],
+   "evidence": [
+    "Greenhouse",
+    "Personio",
+    "Lattice",
+    "Deel"
+   ]
+  },
+  "agriculture": {
+   "label": "Agriculture, farming and agritech",
+   "aka": [
+    "farming",
+    "farm",
+    "agri",
+    "crop",
+    "livestock",
+    "agronomy",
+    "food production"
+   ],
+   "stakeholders": [
+    {
+     "role": "farmer or grower",
+     "wants": "a decision for this field, this week",
+     "fears": "acting on data that was not from their land",
+     "decides": true,
+     "designImplication": "outdoors, in sun, with gloves, on a phone with poor signal. Offline capability is a design requirement, not a nice-to-have"
+    },
+    {
+     "role": "agronomist",
+     "wants": "trial and treatment history per parcel",
+     "fears": "a recommendation that breaks a residue rule",
+     "decides": false,
+     "designImplication": "withholding periods and application limits are hard constraints in the interface"
+    },
+    {
+     "role": "farm worker",
+     "wants": "the task and where",
+     "fears": "a map they cannot read in a cab",
+     "decides": false,
+     "designImplication": "very large targets, high contrast, one-handed, glanceable from a moving vehicle"
+    },
+    {
+     "role": "buyer or processor",
+     "wants": "traceability and assurance status",
+     "fears": "a consignment that fails assurance at intake",
+     "decides": true,
+     "designImplication": "assurance status is a visible state on a batch"
+    },
+    {
+     "role": "agricultural authority",
+     "wants": "input records and subsidy compliance",
+     "fears": "a treatment applied inside a withholding period",
+     "decides": true,
+     "designImplication": "treatment records carry dates that the system can enforce against"
+    }
+   ],
+   "standards": [
+    "not applicable universally. ISOBUS for machinery interoperability, and national farm-assurance schemes govern record-keeping"
+   ],
+   "regulator": "agriculture or rural payments authority, plus food safety",
+   "requiredConstraints": [
+    "retention",
+    "audit trail",
+    "identity"
+   ],
+   "colour": {
+    "leads": "earth and crop greens with high-contrast utility accents",
+    "why": "the sector's own colour language, and it survives being viewed on a cracked phone in a field",
+    "avoid": [
+     {
+      "what": "green as a status colour in a product whose base palette is green",
+      "why": "the status disappears into the brand"
+     },
+     {
+      "what": "low-contrast anything",
+      "why": "direct sunlight is the normal operating condition"
+     }
+    ],
+    "reserved": [],
+    "reservedNote": "no hue is load-bearing in this sector, so the palette is a brand decision rather than an inherited constraint"
+   },
+   "style": {
+    "tradition": "flat, rugged, oversized, map-forward",
+    "why": "the primary object is a parcel of land, so cartography is the central design problem",
+    "notThis": [
+     {
+      "what": "dense desktop dashboards as the primary surface, when the primary device is a phone in a tractor cab",
+      "names": [
+       "desktop dashboard",
+       "dense dashboard",
+       "desktop-first"
+      ]
+     }
+    ]
+   },
+   "density": "low in the field, high in the office planning surface",
+   "typography": "large, high-weight, tabular numerals for areas, rates and yields. Units always adjacent",
+   "tone": "practical and specific to the parcel. Generic advice is worthless here",
+   "forbidden": [
+    "a treatment recommendation that ignores a withholding period",
+    "a product that is unusable offline",
+    "data attributed to a field it did not come from"
+   ],
+   "evidence": [
+    "John Deere Operations Center",
+    "Climate FieldView",
+    "Agrivi",
+    "Hectare"
+   ]
+  },
+  "construction": {
+   "label": "Construction, engineering and the built environment",
+   "aka": [
+    "building",
+    "contractor",
+    "site",
+    "bim",
+    "architecture practice",
+    "civil",
+    "infrastructure"
+   ],
+   "stakeholders": [
+    {
+     "role": "site operative",
+     "wants": "today's task and the current drawing",
+     "fears": "building from a superseded revision",
+     "decides": false,
+     "designImplication": "drawing revision is the most prominent thing on any drawing screen. This is the sector's costliest recurring failure"
+    },
+    {
+     "role": "site manager",
+     "wants": "progress, and the blockers",
+     "fears": "a safety incident on their site",
+     "decides": true,
+     "designImplication": "safety observations are a one-tap capture from anywhere in the product"
+    },
+    {
+     "role": "architect or engineer",
+     "wants": "their intent built as specified",
+     "fears": "a substitution nobody told them about",
+     "decides": true,
+     "designImplication": "a change request is an audited object with a named approver"
+    },
+    {
+     "role": "quantity surveyor",
+     "wants": "measured progress tied to valuation",
+     "fears": "paying for work not done",
+     "decides": true,
+     "designImplication": "progress claims reference evidence, and the evidence is dated and located"
+    },
+    {
+     "role": "building safety regulator",
+     "wants": "a golden thread of information",
+     "fears": "a building whose as-built record does not exist",
+     "decides": true,
+     "designImplication": "the record of what was actually built is a product output, not a byproduct"
+    }
+   ],
+   "standards": [
+    "IFC for building information exchange",
+    "ISO 19650 for information management across the asset lifecycle"
+   ],
+   "regulator": "building safety and occupational safety authorities",
+   "requiredConstraints": [
+    "audit trail",
+    "retention",
+    "professional duty",
+    "identity"
+   ],
+   "colour": {
+    "leads": "high-visibility utility palette echoing site signage, with a hard-reserved safety channel",
+    "why": "site users already read hi-vis and hazard conventions, and the screen should not contradict the hoarding",
+    "avoid": [
+     {
+      "what": "hazard yellow and black for non-safety UI",
+      "why": "on a construction site that pairing means hazard, and it means it before anyone reads a word"
+     },
+     {
+      "what": "low contrast",
+      "why": "outdoors, dusty screen, gloved hands, bright sky"
+     }
+    ],
+    "reserved": [
+     {
+      "hue": "yellow and black together",
+      "for": "hazard, inherited from site signage"
+     }
+    ]
+   },
+   "style": {
+    "tradition": "flat, rugged, document-and-drawing-forward",
+    "why": "the artefacts are drawings and records, and the environment is hostile to anything delicate",
+    "notThis": [
+     {
+      "what": "thin weights and light greys, which are unreadable in the actual operating conditions",
+      "names": [
+       "thin weight",
+       "hairline",
+       "light grey",
+       "low-contrast",
+       "low contrast"
+      ]
+     }
+    ]
+   },
+   "density": "low on site, high in the office coordination surface",
+   "typography": "large and heavy. Revision codes and drawing numbers never truncate and never wrap",
+   "tone": "instructional and unambiguous. Safety copy is never softened",
+   "forbidden": [
+    "a drawing shown without its revision",
+    "a superseded revision reachable without a warning",
+    "a safety observation flow that takes more than one tap to start"
+   ],
+   "evidence": [
+    "Procore",
+    "Autodesk Construction Cloud",
+    "Fieldwire",
+    "Dalux"
+   ]
+  },
+  "fitness": {
+   "label": "Fitness, wellness and consumer health",
+   "aka": [
+    "gym",
+    "workout",
+    "wellness",
+    "nutrition",
+    "training",
+    "habit",
+    "mindfulness",
+    "sport"
+   ],
+   "stakeholders": [
+    {
+     "role": "member or user",
+     "wants": "to keep going",
+     "fears": "being made to feel like a failure by their own app",
+     "decides": false,
+     "designImplication": "a broken streak is the sector's most damaging designed moment. Design the recovery, not the loss"
+    },
+    {
+     "role": "coach or trainer",
+     "wants": "to programme and see adherence",
+     "fears": "prescribing into an injury",
+     "decides": false,
+     "designImplication": "the coach surface is dense and structured; the member surface is not"
+    },
+    {
+     "role": "studio operator",
+     "wants": "class occupancy and retention",
+     "fears": "no-shows blocking a full class",
+     "decides": true,
+     "designImplication": "booking and cancellation states are the commercial heart of the product"
+    },
+    {
+     "role": "clinician, where health data is involved",
+     "wants": "data they can trust",
+     "fears": "a consumer metric presented as clinical",
+     "decides": false,
+     "designImplication": "consumer sensor data is labelled as such wherever it approaches a clinical reading"
+    },
+    {
+     "role": "advertising standards regulator",
+     "wants": "health and body claims that can be substantiated",
+     "fears": "an outcome claim with no evidence",
+     "decides": true,
+     "designImplication": "outcome claims carry substantiation, and body-composition claims are the most scrutinised"
+    }
+   ],
+   "standards": [
+    "not applicable. Where the product touches clinical data, the healthcare standards apply instead and the product changes category"
+   ],
+   "regulator": "advertising standards, plus the health regulator once claims become medical",
+   "requiredConstraints": [
+    "data protection",
+    "restricted claims",
+    "retention"
+   ],
+   "colour": {
+    "leads": "energetic but not aggressive: a confident accent over calm neutrals, frequently with a dark mode as the primary",
+    "why": "much of this product's use is early morning, late evening, and in a dim gym, so dark is often the default rather than the alternative",
+    "avoid": [
+     {
+      "what": "red for a missed day or a broken streak",
+      "why": "it punishes the user for the exact behaviour the product exists to rebuild"
+     },
+     {
+      "what": "clinical blues and whites",
+      "why": "they position a wellness product as a medical one, which is a regulatory claim as well as a tonal one"
+     }
+    ],
+    "reserved": [],
+    "reservedNote": "no hue is load-bearing in this sector, so the palette is a brand decision rather than an inherited constraint"
+   },
+   "style": {
+    "tradition": "flat with bold typographic treatment, dark-first, imagery-supported",
+    "why": "the product is read at a glance mid-activity, and legibility under motion outranks nuance",
+    "notThis": [
+     {
+      "what": "dense data-dashboard styling for a consumer, which is the most common overreach in this sector",
+      "names": [
+       "data-dashboard",
+       "dense dashboard",
+       "analytics dashboard"
+      ]
+     }
+    ]
+   },
+   "density": "low for the member, high for the coach",
+   "typography": "large numerals for the current metric, tabular where series are compared. The number being tracked is the largest thing on the screen",
+   "tone": "supportive and non-judgemental. Never shame a lapse, and never imply a body outcome",
+   "forbidden": [
+    "a body-composition or weight-loss claim with no substantiation",
+    "presenting consumer sensor data as a clinical measurement",
+    "punitive framing of a missed day",
+    "default-public sharing of health or location data"
+   ],
+   "evidence": [
+    "Strava",
+    "Whoop",
+    "Apple Fitness",
+    "Nike Training Club",
+    "Streaks"
+   ]
+  },
+  "telecom": {
+   "label": "Telecommunications and connectivity",
+   "aka": [
+    "telco",
+    "mobile operator",
+    "isp",
+    "broadband",
+    "network",
+    "sim",
+    "carrier"
+   ],
+   "stakeholders": [
+    {
+     "role": "subscriber",
+     "wants": "to know what they are using and what it costs",
+     "fears": "a bill shock from something they did not know was chargeable",
+     "decides": false,
+     "designImplication": "usage against allowance is the primary screen, and any chargeable action outside the allowance is confirmed before it happens"
+    },
+    {
+     "role": "support agent",
+     "wants": "line state and history",
+     "fears": "telling a customer something the network contradicts",
+     "decides": false,
+     "designImplication": "the agent and the customer see the same diagnostic result, worded the same way"
+    },
+    {
+     "role": "network operations",
+     "wants": "incident scope and restoration time",
+     "fears": "an outage customers learn about from social media first",
+     "decides": true,
+     "designImplication": "the outage state is a designed, proactive screen with an estimate on it"
+    },
+    {
+     "role": "retail or channel partner",
+     "wants": "to provision without escalating",
+     "fears": "an activation that half-completes",
+     "decides": false,
+     "designImplication": "provisioning is a state machine with every intermediate state designed"
+    },
+    {
+     "role": "communications regulator",
+     "wants": "contract transparency and switching that works",
+     "fears": "a barrier to leaving",
+     "decides": true,
+     "designImplication": "contract end date, exit terms and the switching code are reachable in one step"
+    }
+   ],
+   "standards": [
+    "not applicable at the interface. Number portability and switching processes are mandated nationally by the regulator"
+   ],
+   "regulator": "communications regulator",
+   "requiredConstraints": [
+    "identity",
+    "retention",
+    "data protection",
+    "restricted claims"
+   ],
+   "colour": {
+    "leads": "a strong single brand hue, this being one of the most brand-driven sectors, over neutral chrome",
+    "why": "telco brands are built on colour recognition, and the interface is a brand surface. What is not negotiable is that service state keeps its own channel",
+    "avoid": [
+     {
+      "what": "the brand hue used for service state",
+      "why": "if the brand is red, an outage cannot be red"
+     }
+    ],
+    "reserved": [
+     {
+      "hue": "the service-state channel",
+      "for": "outage and degradation, kept clear of the brand hue"
+     }
+    ]
+   },
+   "style": {
+    "tradition": "flat and consumer-friendly on self-serve, utilitarian in operations",
+    "why": "self-serve exists to deflect calls, so it must be legible to everyone the network serves, which is everyone",
+    "notThis": [
+     {
+      "what": "ornament between the customer and their usage figure",
+      "names": [
+       "ornament",
+       "ornamental",
+       "decorative"
+      ]
+     }
+    ]
+   },
+   "density": "low on self-serve, high in operations and support tooling",
+   "typography": "usage figures and allowances in tabular numerals with the unit adjacent. Contract dates never abbreviated ambiguously",
+   "tone": "plain about cost, honest about outages. An estimate is better than silence and worse than a wrong promise",
+   "forbidden": [
+    "a chargeable action outside the allowance with no confirmation",
+    "an outage the product does not acknowledge",
+    "a switching or cancellation path that is longer than the sign-up path",
+    "speed or coverage claims without the regulator's required qualification"
+   ],
+   "evidence": [
+    "Giffgaff",
+    "EE",
+    "Mint Mobile",
+    "Reliance Jio"
+   ]
+  },
+  "professional": {
+   "label": "Professional services: agency, studio, consultancy and personal practice",
+   "aka": [
+    "agency",
+    "studio",
+    "consultancy",
+    "consulting",
+    "freelance",
+    "portfolio",
+    "cv",
+    "resume",
+    "design practice",
+    "architecture firm",
+    "personal portfolio",
+    "design studio",
+    "creative practice"
+   ],
+   "stakeholders": [
+    {
+     "role": "prospective client",
+     "wants": "to know whether this person or firm has done their problem before",
+     "fears": "hiring someone whose best work was somebody else's",
+     "decides": true,
+     "designImplication": "every piece of work states what THIS practitioner did on it. A case study with no stated role is the sector's defining failure, and an experienced buyer discounts it entirely"
+    },
+    {
+     "role": "hiring manager or recruiter",
+     "wants": "evidence of level, in about forty seconds",
+     "fears": "a portfolio that looks good and shows no thinking",
+     "decides": true,
+     "designImplication": "the outcome and the constraint are as prominent as the visual. Screenshots without a problem statement read as decoration"
+    },
+    {
+     "role": "peer or collaborator",
+     "wants": "to judge craft",
+     "fears": "nothing, they are the most forgiving reader",
+     "decides": false,
+     "designImplication": "the peer audience is the one everyone designs for and the one who does not hire. Design for the buyer instead"
+    },
+    {
+     "role": "the practitioner",
+     "wants": "work that resembles the work they want next",
+     "fears": "being typecast by their oldest project",
+     "decides": true,
+     "designImplication": "the ordering of work is a positioning decision, not a chronology"
+    },
+    {
+     "role": "former client under confidentiality",
+     "wants": "their material not published",
+     "fears": "commercially sensitive work made public",
+     "decides": true,
+     "designImplication": "an NDA state is a real state: work shown in outline, without the artefact, and labelled as such"
+    }
+   ],
+   "standards": [
+    "not applicable: there is no exchange format and no regulator for most practices. Regulated professions such as architecture, accountancy or law inherit their own body's rules on advertising and title use"
+   ],
+   "regulator": "advertising standards for claims. A regulated profession also answers to its registration body on how it may describe itself",
+   "requiredConstraints": [
+    "restricted claims",
+    "data protection"
+   ],
+   "colour": {
+    "leads": "a restrained near-neutral base with one signature accent, letting the work carry the colour",
+    "why": "the page's job is to make the work look like the work. A strongly coloured interface changes the perceived colour of every screenshot on it, which is a misrepresentation as much as an aesthetic problem",
+    "avoid": [
+     {
+      "what": "a saturated background behind work samples",
+      "why": "it shifts the apparent hue of the work and makes two projects look like one palette"
+     },
+     {
+      "what": "gradient-heavy treatments borrowed from whatever launched last year",
+      "why": "it dates the page to a season, and the page has to hold for two years"
+     }
+    ],
+    "reserved": [],
+    "reservedNote": "no hue is load-bearing in this sector, so the palette is a brand decision rather than an inherited constraint"
+   },
+   "style": {
+    "tradition": "editorial or minimalism, with typography carrying the craft argument",
+    "why": "in this sector the interface is itself a work sample. The typographic decisions are read as evidence of judgement before a single case study is opened",
+    "notThis": [
+     {
+      "what": "template-derived layouts that a buyer has seen forty times, which say the practitioner did not make a decision",
+      "names": [
+       "template-derived",
+       "off-the-shelf template",
+       "theme template"
+      ]
+     },
+     {
+      "what": "maximalism, unless maximalism is demonstrably the practice's actual discipline",
+      "names": [
+       "maximalism",
+       "maximalist"
+      ]
+     }
+    ]
+   },
+   "density": "low. The work is the content and it needs air. The one dense surface is a detailed index for a buyer who already wants to compare",
+   "typography": "the single strongest signal in the whole sector. A real scale, a considered pairing, and correct measure will be read as competence; defaults will be read as its absence. Numbers in outcomes use tabular figures so results align",
+   "tone": "specific and evidenced. 'Rebuilt checkout, cart abandonment fell 18 percent over two quarters' beats every adjective. Never 'passionate about'",
+   "forbidden": [
+    "a case study that does not state what this practitioner personally did",
+    "an outcome claim with no number or no timeframe",
+    "client work shown without permission where confidentiality applies",
+    "a contact route that does not work, which is the most common defect in the entire sector"
+   ],
+   "evidence": [
+    "Pentagram",
+    "Bruno Simon",
+    "Brittany Chiang",
+    "Stripe Press",
+    "Basic Agency"
+   ]
+  },
+  "devtools": {
+   "label": "Developer tools, APIs and technical infrastructure",
+   "aka": [
+    "developer tools",
+    "devtool",
+    "api",
+    "sdk",
+    "infrastructure",
+    "devops",
+    "observability",
+    "database product",
+    "open source",
+    "developer platform",
+    "developer experience"
+   ],
+   "stakeholders": [
+    {
+     "role": "developer evaluating",
+     "wants": "to reach a working call in minutes",
+     "fears": "a product whose docs hide whether it does the thing",
+     "decides": true,
+     "designImplication": "time to first successful call is the product's primary metric, and the landing page's job is to shorten it. This audience reads code before prose"
+    },
+    {
+     "role": "developer integrating",
+     "wants": "an error message that names the fix",
+     "fears": "a failure mode the docs do not cover",
+     "decides": false,
+     "designImplication": "error copy is product surface here, not an afterthought. It is read more often than the marketing site"
+    },
+    {
+     "role": "engineering lead",
+     "wants": "pricing, limits and an exit path",
+     "fears": "a dependency they cannot leave",
+     "decides": true,
+     "designImplication": "rate limits, pricing tiers and data export are first-class pages, not footer links"
+    },
+    {
+     "role": "platform or SRE team",
+     "wants": "status, incidents and versioning honesty",
+     "fears": "a breaking change in a minor version",
+     "decides": true,
+     "designImplication": "a public status page and a real deprecation policy are product features"
+    },
+    {
+     "role": "security reviewer",
+     "wants": "auth model, data handling and compliance posture",
+     "fears": "secrets in an example",
+     "decides": true,
+     "designImplication": "no code sample anywhere contains a plausible-looking real credential"
+    }
+   ],
+   "standards": [
+    "OpenAPI for HTTP interface description",
+    "Semantic Versioning for release contracts",
+    "OAuth 2.0 and OIDC where third-party auth is involved"
+   ],
+   "regulator": "none for the interface. Data protection law applies to whatever the product processes",
+   "requiredConstraints": [
+    "identity",
+    "audit trail",
+    "data protection"
+   ],
+   "colour": {
+    "leads": "dark-first, with a restrained accent and syntax colouring that survives both themes",
+    "why": "this audience works in a dark editor all day and switches to the docs in the same glance. A light-only product is read as unserious by a measurable share of the audience",
+    "avoid": [
+     {
+      "what": "a syntax palette that fails contrast in one of the two themes",
+      "why": "code samples are the primary content, and half the audience reads them in the other theme"
+     },
+     {
+      "what": "marketing gradients over code blocks",
+      "why": "they reduce the legibility of the one thing the visitor came for"
+     }
+    ],
+    "reserved": [],
+    "reservedNote": "no hue is load-bearing in this sector, so the palette is a brand decision rather than an inherited constraint"
+   },
+   "style": {
+    "tradition": "flat, typographic, docs-forward, with the terminal as an acknowledged visual ancestor",
+    "why": "credibility in this sector comes from showing the actual interface early, and the actual interface is text",
+    "notThis": [
+     {
+      "what": "illustration-led marketing pages that delay the first code sample",
+      "names": [
+       "illustration-led",
+       "illustrative",
+       "marketing-led",
+       "hero illustration"
+      ]
+     },
+     {
+      "what": "skeuomorphism, which reads as a decade out of date to this audience specifically",
+      "names": [
+       "skeuomorphism",
+       "skeuomorphic",
+       "skeuomorph"
+      ]
+     }
+    ]
+   },
+   "density": "high. This audience prefers a dense reference to a friendly walkthrough, and resents pagination in documentation",
+   "typography": "a real monospace pairing is mandatory, and code is never rendered in a proportional face. Line numbers and diffs need tabular alignment. Copy buttons on every sample",
+   "tone": "terse, technical, honest about limits. State the rate limit and the failure mode. This audience punishes marketing language harder than any other",
+   "forbidden": [
+    "a code sample that does not run as written",
+    "a real or realistic credential in an example",
+    "a breaking change shipped in a non-major version",
+    "documentation that lags the shipped version with no version selector"
+   ],
+   "evidence": [
+    "Stripe Docs",
+    "Vercel",
+    "Linear",
+    "Supabase",
+    "Tailwind CSS docs"
+   ]
+  },
+  "gaming": {
+   "label": "Games and interactive entertainment",
+   "aka": [
+    "game",
+    "games",
+    "esports",
+    "player",
+    "studio game",
+    "mobile game",
+    "console"
+   ],
+   "stakeholders": [
+    {
+     "role": "player",
+     "wants": "to get into the game",
+     "fears": "a menu between them and playing",
+     "decides": false,
+     "designImplication": "every screen outside gameplay is friction the player is tolerating. Path length to play is the design's primary constraint"
+    },
+    {
+     "role": "paying player",
+     "wants": "to know exactly what they are buying",
+     "fears": "a currency conversion designed to obscure real cost",
+     "decides": false,
+     "designImplication": "virtual currency that hides real money cost is regulated in a growing number of markets and is a design decision with legal weight"
+    },
+    {
+     "role": "parent of a minor player",
+     "wants": "spend controls that work",
+     "fears": "an unexpected charge",
+     "decides": true,
+     "designImplication": "spend limits and purchase confirmation are product features, and in several markets they are mandatory"
+    },
+    {
+     "role": "community moderator",
+     "wants": "tools to act fast",
+     "fears": "harassment they cannot action",
+     "decides": false,
+     "designImplication": "reporting and blocking are first-class flows, reachable from wherever the harm happens"
+    },
+    {
+     "role": "platform holder and age ratings body",
+     "wants": "compliance with store and rating rules",
+     "fears": "content or monetisation outside the rating",
+     "decides": true,
+     "designImplication": "the platform's own interface guidelines outrank house style, and store rejection is the enforcement"
+    }
+   ],
+   "standards": [
+    "platform certification requirements from each console or app store",
+    "PEGI, ESRB or the local equivalent for age rating"
+   ],
+   "regulator": "age ratings body, plus consumer and gambling regulators where loot mechanics are involved",
+   "requiredConstraints": [
+    "identity",
+    "data protection",
+    "restricted claims",
+    "retention"
+   ],
+   "colour": {
+    "leads": "whatever the game's own art direction dictates, with an interface palette derived from it rather than imposed on it",
+    "why": "this is the one sector where the interface serves an existing visual world. A generic product palette breaks the fiction the game spent its budget building",
+    "avoid": [
+     {
+      "what": "interface colour that competes with gameplay legibility",
+      "why": "a health bar that is hard to read is a defect, not a style"
+     },
+     {
+      "what": "colour as the only channel for team, faction or status",
+      "why": "competitive play at speed plus colour vision deficiency is a fairness problem"
+     }
+    ],
+    "reserved": [
+     {
+      "hue": "team or faction colour",
+      "for": "identity, and never the only channel for it"
+     }
+    ]
+   },
+   "style": {
+    "tradition": "diegetic or art-directed, extending the game's own world into its menus",
+    "why": "the interface is part of the fiction, and the sector's best work makes it feel like an artefact from inside the game",
+    "notThis": [
+     {
+      "what": "default flat product styling, which reads as placeholder art",
+      "names": [
+       "default flat",
+       "generic flat",
+       "flat product styling",
+       "stock component"
+      ]
+     },
+     {
+      "what": "an interface that ignores the game's own typography and palette",
+      "names": [
+       "generic product palette",
+       "house design system",
+       "stock ui kit"
+      ]
+     }
+    ]
+   },
+   "density": "low in-game, higher in inventory, progression and store surfaces",
+   "typography": "legible at distance on a television and at arm's length on a handheld, which is a harder constraint than it looks. Numerals tabular wherever stats compare",
+   "tone": "in the game's voice, always. Except for purchase, safety and age-gating copy, which is plain and outside the fiction",
+   "forbidden": [
+    "obscuring the real-money cost of a purchase behind a currency conversion",
+    "a loot mechanic with undisclosed odds where disclosure is required",
+    "a reporting flow that is harder to reach than the harm",
+    "gameplay-critical information conveyed by colour alone"
+   ],
+   "evidence": [
+    "Steam",
+    "Destiny 2",
+    "Among Us",
+    "Nintendo Switch UI",
+    "Discord"
+   ]
+  },
+  "automotive": {
+   "label": "Automotive: retail, service, fleet and in-vehicle",
+   "aka": [
+    "car",
+    "vehicle",
+    "dealership",
+    "ev",
+    "charging",
+    "garage",
+    "motor",
+    "fleet management"
+   ],
+   "stakeholders": [
+    {
+     "role": "buyer",
+     "wants": "the real total cost including finance",
+     "fears": "a monthly figure that hides the term and the balloon",
+     "decides": false,
+     "designImplication": "finance illustrations carry APR, term and total payable with equal prominence to the monthly figure, and in most markets that is a legal requirement"
+    },
+    {
+     "role": "driver",
+     "wants": "to act without looking away from the road",
+     "fears": "a distraction that causes an incident",
+     "decides": false,
+     "designImplication": "in-vehicle surfaces are governed by driver-distraction guidelines with real limits on interaction depth and glance time. This is a safety constraint, not a usability one"
+    },
+    {
+     "role": "service advisor",
+     "wants": "an authorisation the customer understood",
+     "fears": "a bill disputed at collection",
+     "decides": false,
+     "designImplication": "work authorisation is an evidenced, timestamped agreement with the items itemised"
+    },
+    {
+     "role": "fleet manager",
+     "wants": "utilisation, cost per mile and compliance",
+     "fears": "a vehicle out of test or insurance",
+     "decides": true,
+     "designImplication": "expiry dates are states with warning thresholds, not fields"
+    },
+    {
+     "role": "vehicle safety regulator",
+     "wants": "recall reach and distraction compliance",
+     "fears": "a recall notice nobody saw",
+     "decides": true,
+     "designImplication": "a safety recall is a designed interruption, not a notification among others"
+    }
+   ],
+   "standards": [
+    "ISO 15118 for EV charging communication",
+    "OCPP for charge point management",
+    "NHTSA or equivalent driver-distraction guidelines for in-vehicle interfaces"
+   ],
+   "regulator": "vehicle safety authority, plus consumer credit regulation on finance",
+   "requiredConstraints": [
+    "identity",
+    "retention",
+    "restricted claims",
+    "audit trail"
+   ],
+   "colour": {
+    "leads": "a restrained automotive palette letting vehicle imagery lead, with a hard-reserved warning channel for vehicle state",
+    "why": "the vehicle telltale conventions are internationally standardised, and a product that borrows amber or red for anything else contradicts the dashboard the driver is already reading",
+    "avoid": [
+     {
+      "what": "amber or red for anything but vehicle or safety state",
+      "why": "they mean something specific on every dashboard in the world"
+     },
+     {
+      "what": "a coloured background behind vehicle photography",
+      "why": "paint colour is a purchase decision and the interface must not tint it"
+     }
+    ],
+    "reserved": [
+     {
+      "hue": "amber",
+      "for": "vehicle warning"
+     },
+     {
+      "hue": "red",
+      "for": "vehicle fault or safety"
+     }
+    ]
+   },
+   "style": {
+    "tradition": "editorial and photographic in retail, flat and oversized in-vehicle",
+    "why": "retail sells with imagery; the in-vehicle surface is read in under two seconds at a time",
+    "notThis": [
+     {
+      "what": "dense information architecture on any in-vehicle surface, which is a documented safety failure",
+      "names": [
+       "dense information architecture",
+       "deep navigation",
+       "nested menu"
+      ]
+     },
+     {
+      "what": "low-contrast styling anywhere the sun reaches, which in a car is everywhere",
+      "names": [
+       "low-contrast",
+       "low contrast",
+       "muted grey"
+      ]
+     }
+    ]
+   },
+   "density": "medium in retail, very low in-vehicle, high in fleet and service management",
+   "typography": "large and high contrast in-vehicle. Prices, ranges and finance figures in tabular numerals, with units always present",
+   "tone": "factual on cost and range. Range estimates carry their conditions, because a range figure without conditions is the sector's most complained-about claim",
+   "forbidden": [
+    "a monthly finance figure without APR, term and total payable",
+    "an in-vehicle interaction requiring more glances than the distraction guideline allows",
+    "a range or efficiency claim with no stated test condition",
+    "a safety recall delivered as an ordinary notification"
+   ],
+   "evidence": [
+    "Tesla app",
+    "Polestar",
+    "Carvana",
+    "ChargePoint",
+    "Cazoo"
+   ]
+  },
+  "events": {
+   "label": "Events, ticketing and venues",
+   "aka": [
+    "ticketing",
+    "ticket",
+    "venue",
+    "conference",
+    "festival",
+    "box office",
+    "event"
+   ],
+   "stakeholders": [
+    {
+     "role": "attendee",
+     "wants": "a ticket that will scan and a seat they understood",
+     "fears": "arriving with a ticket that does not work",
+     "decides": false,
+     "designImplication": "the ticket must work offline, at a gate, on a dying phone, in bright sun. That single constraint drives most of the design"
+    },
+    {
+     "role": "organiser",
+     "wants": "to sell out and to control the on-sale",
+     "fears": "a queue that collapses at on-sale",
+     "decides": true,
+     "designImplication": "the queue and the sold-out states are primary designed screens, because they are what most buyers will actually see"
+    },
+    {
+     "role": "venue and gate staff",
+     "wants": "to scan fast in a crowd",
+     "fears": "a scan that is ambiguous",
+     "decides": false,
+     "designImplication": "scan feedback is unmistakable at a metre, in noise, in the dark"
+    },
+    {
+     "role": "accessibility attendee",
+     "wants": "a seat that meets their needs, bookable directly",
+     "fears": "a phone-only path that is closed when they need it",
+     "decides": false,
+     "designImplication": "accessible seating is bookable in the same flow as any other seat. Routing it to a phone line is the sector's standing failure"
+    },
+    {
+     "role": "consumer protection regulator",
+     "wants": "the full price shown up front and resale rules honoured",
+     "fears": "fees revealed at the final step",
+     "decides": true,
+     "designImplication": "all-in pricing at first display is now mandated in a growing number of markets"
+    }
+   ],
+   "standards": [
+    "not applicable for exchange. Barcode and NFC ticket formats are set by the scanning infrastructure in use"
+   ],
+   "regulator": "consumer protection authority, plus local licensing for the venue",
+   "requiredConstraints": [
+    "identity",
+    "data protection",
+    "retention",
+    "restricted claims"
+   ],
+   "colour": {
+    "leads": "the event's or artist's own identity, over a neutral transactional chrome",
+    "why": "people buy the event, not the platform, and the platform's colour should not compete with the poster",
+    "avoid": [
+     {
+      "what": "urgency red used both for scarcity and for errors",
+      "why": "they collide at the checkout, which is the exact moment both appear"
+     }
+    ],
+    "reserved": [],
+    "reservedNote": "no hue is load-bearing in this sector, so the palette is a brand decision rather than an inherited constraint"
+   },
+   "style": {
+    "tradition": "editorial and poster-derived for discovery, utilitarian for checkout and the ticket itself",
+    "why": "discovery is culture and checkout is infrastructure. Styling them the same makes one of them fail",
+    "notThis": [
+     {
+      "what": "decorative treatments on the ticket surface, which must survive a low-brightness screen and a scratched protector",
+      "names": [
+       "decorative",
+       "ornament",
+       "expressive type"
+      ]
+     }
+    ]
+   },
+   "density": "low in discovery, high in the seat map, minimal on the ticket",
+   "typography": "date, time, door and seat are the largest runs on the ticket, and they never truncate. Times carry the timezone where an event can be booked from elsewhere",
+   "tone": "clear about what is included and what it costs in total. Factual under queue and sold-out states",
+   "forbidden": [
+    "fees revealed only at the final step",
+    "a ticket that requires connectivity to display",
+    "accessible seating that cannot be booked in the normal flow",
+    "a scarcity claim that is not true"
+   ],
+   "evidence": [
+    "Dice",
+    "Eventbrite",
+    "Ticketmaster",
+    "Resident Advisor"
+   ]
+  },
+  "beauty": {
+   "label": "Beauty, salon, spa and personal care services",
+   "aka": [
+    "salon",
+    "spa",
+    "barber",
+    "hair",
+    "nails",
+    "aesthetics",
+    "grooming",
+    "cosmetics"
+   ],
+   "stakeholders": [
+    {
+     "role": "client",
+     "wants": "the right person, at a time that works, at a price they knew",
+     "fears": "a result that is not what they asked for",
+     "decides": false,
+     "designImplication": "reference imagery is part of the booking, because the gap between described and expected outcome is this sector's whole risk"
+    },
+    {
+     "role": "stylist or therapist",
+     "wants": "a column that reflects real service durations",
+     "fears": "a booking that does not leave enough time",
+     "decides": false,
+     "designImplication": "service duration varies by practitioner and by client history, so a fixed-duration booking model will be wrong"
+    },
+    {
+     "role": "salon owner",
+     "wants": "utilisation and reduced no-shows",
+     "fears": "a deposit policy that loses clients",
+     "decides": true,
+     "designImplication": "the deposit and cancellation policy is shown before booking, not in terms"
+    },
+    {
+     "role": "client with allergies or a skin condition",
+     "wants": "a patch test recorded",
+     "fears": "a reaction to a product nobody checked",
+     "decides": false,
+     "designImplication": "patch test status is a booking precondition for the services that require it, and it expires"
+    },
+    {
+     "role": "local health or trading standards authority",
+     "wants": "hygiene and cosmetic claims within the law",
+     "fears": "a treatment claim that is medical",
+     "decides": true,
+     "designImplication": "a cosmetic product may not claim a medical effect, and the copy is where that line is crossed"
+    }
+   ],
+   "standards": [
+    "not applicable. Cosmetic product claims are governed by national cosmetics regulation, and aesthetic treatments may fall under medical regulation"
+   ],
+   "regulator": "local authority environmental health, plus advertising standards on claims",
+   "requiredConstraints": [
+    "data protection",
+    "restricted claims",
+    "retention"
+   ],
+   "colour": {
+    "leads": "the salon's own identity, typically warm neutrals, muted earth tones or a single sophisticated accent",
+    "why": "the sector sells taste, and the interface is read as evidence of the salon's taste before any photograph is",
+    "avoid": [
+     {
+      "what": "strong interface colour beside before-and-after imagery",
+      "why": "it shifts perceived skin tone and hair colour, which is both a trust and a claims problem"
+     },
+     {
+      "what": "clinical white and blue for a non-medical service",
+      "why": "it implies a medical claim the business is not licensed to make"
+     }
+    ],
+    "reserved": [],
+    "reservedNote": "no hue is load-bearing in this sector, so the palette is a brand decision rather than an inherited constraint"
+   },
+   "style": {
+    "tradition": "editorial and photographic, restrained, with generous whitespace",
+    "why": "this is an aspiration purchase and the reference imagery is the product",
+    "notThis": [
+     {
+      "what": "dense booking-system styling on the client-facing surface, which is what most salon software looks like and why salons dislike it",
+      "names": [
+       "booking-system styling",
+       "dense scheduler",
+       "calendar-grid styling"
+      ]
+     }
+    ]
+   },
+   "density": "low for the client, high on the practitioner's day view",
+   "typography": "an expressive display face is appropriate and expected here. Prices, durations and policy text stay plain and never fall below 14px",
+   "tone": "warm and specific. Precise about duration, price and what the appointment includes",
+   "forbidden": [
+    "a medical claim for a cosmetic treatment",
+    "before-and-after imagery that is retouched or not from this practitioner",
+    "a deposit or cancellation charge disclosed only after booking",
+    "booking a patch-test-required service with no valid patch test"
+   ],
+   "evidence": [
+    "Fresha",
+    "Treatwell",
+    "Booksy",
+    "Glossier"
+   ]
+  },
+  "security": {
+   "label": "Cybersecurity, identity and trust operations",
+   "aka": [
+    "cybersecurity",
+    "infosec",
+    "soc",
+    "siem",
+    "identity access",
+    "iam",
+    "fraud detection",
+    "threat"
+   ],
+   "stakeholders": [
+    {
+     "role": "security analyst",
+     "wants": "to triage the real thing among the noise",
+     "fears": "alert fatigue burying the one that mattered",
+     "decides": false,
+     "designImplication": "severity must be honest. A product that marks everything critical has no severity, and this is the sector's endemic design failure"
+    },
+    {
+     "role": "incident responder",
+     "wants": "scope, blast radius and containment in one place",
+     "fears": "acting on a stale picture during an incident",
+     "decides": true,
+     "designImplication": "every view during an incident carries its own freshness, because a dashboard that silently stopped updating is worse than no dashboard"
+    },
+    {
+     "role": "security lead or CISO",
+     "wants": "posture and residual risk they can present",
+     "fears": "a score that cannot be explained to a board",
+     "decides": true,
+     "designImplication": "any composite score shows its inputs, or it will not survive its first challenge"
+    },
+    {
+     "role": "the employee being protected",
+     "wants": "to do their job",
+     "fears": "a control that makes the job impossible",
+     "decides": false,
+     "designImplication": "friction has a budget. A control that is routinely bypassed is a control that does not exist"
+    },
+    {
+     "role": "auditor",
+     "wants": "evidence that a control operated",
+     "fears": "a control asserted with no record",
+     "decides": true,
+     "designImplication": "evidence export is a designed capability"
+    }
+   ],
+   "standards": [
+    "ISO/IEC 27001 for the management system",
+    "NIST Cybersecurity Framework for structure",
+    "OWASP ASVS for application verification",
+    "MITRE ATT&CK for describing technique coverage"
+   ],
+   "regulator": "sector regulator plus the data protection authority, with breach notification deadlines that are hard limits",
+   "requiredConstraints": [
+    "identity",
+    "audit trail",
+    "retention",
+    "data protection",
+    "restricted claims"
+   ],
+   "colour": {
+    "leads": "dark-first operational palette with a strictly graduated severity scale",
+    "why": "analysts work in dark rooms for long shifts, and the severity scale is the single most-read encoding in the product",
+    "avoid": [
+     {
+      "what": "red for anything that is not the top severity",
+      "why": "the moment two severities are red, the scale has collapsed to one"
+     },
+     {
+      "what": "severity by colour alone",
+      "why": "an analyst on a long shift with any colour vision deficiency is exactly the reader who will miss it"
+     }
+    ],
+    "reserved": [
+     {
+      "hue": "red",
+      "for": "the top severity only"
+     }
+    ]
+   },
+   "style": {
+    "tradition": "flat, dense, data-forward, in the operations-console lineage",
+    "why": "the work is correlation across many signals, and every pixel of ornament is a pixel not spent on a signal",
+    "notThis": [
+     {
+      "what": "marketing-styled dashboards that prioritise a big number over the queue",
+      "names": [
+       "marketing-styled",
+       "marketing styling",
+       "big-number hero",
+       "kpi hero"
+      ]
+     },
+     {
+      "what": "gauge and speedometer metaphors, which occupy area proportional to nothing",
+      "names": [
+       "gauge",
+       "speedometer",
+       "dial",
+       "radial meter"
+      ]
+     }
+    ]
+   },
+   "density": "very high. This is the densest category of professional interface, and analysts resent whitespace that costs them a row",
+   "typography": "monospace for hashes, addresses and identifiers, always, so that a transposed character is visible. Timestamps carry timezone and never abbreviate the year",
+   "tone": "precise and calibrated. Never dramatise a finding, and never soften one",
+   "forbidden": [
+    "a severity scale where everything is critical",
+    "a dashboard that does not show when it last updated",
+    "an identifier or hash rendered in a proportional face",
+    "a composite risk score with no visible inputs"
+   ],
+   "evidence": [
+    "Splunk",
+    "CrowdStrike Falcon",
+    "Okta",
+    "Snyk",
+    "1Password"
+   ]
+  }
+ },
+ "ambiguous": {
+  "training": [
+   "education",
+   "fitness"
+  ],
+  "delivery": [
+   "hospitality",
+   "logistics"
+  ],
+  "games": [
+   "gaming",
+   "media"
+  ],
+  "infrastructure": [
+   "construction",
+   "devtools"
+  ]
+ }
+}

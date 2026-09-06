@@ -206,6 +206,43 @@ Two rules the ancestor walk cannot handle:
 
 Both were audit bugs, not design bugs. **Verify any surprising contrast result before acting on it.**
 
+### WCAG is the wrong instrument near black, and near white
+
+The contrast ratio has a `+0.05` flare term on both luminances. Near the ends of the scale that term
+dominates, so the formula stops discriminating exactly where dark-mode surfaces live.
+
+A bottom sheet painted the same colour as the page under it measured **1.03:1**. Lifting it one step up
+the neutral scale — a change a designer sees instantly — moved it to **1.13:1**. Ten hundredths, on a
+fix that solved the complaint. Reading only that number, you would conclude nothing had happened.
+
+For **surface against surface**, use perceptual lightness instead: `ΔL*` in CIELAB. The same change
+reads **1.3 → 6.2**, which is the size of the effect. A rough scale: under 2 is invisible, 4 to 6 is a
+clear step, 12 or more is a strong lift.
+
+Keep WCAG for what it was built for — **text against its background** — where both colours are usually
+far enough apart for the flare term not to dominate. Using one instrument for both jobs is how a real
+defect passes a contrast check.
+
+## A surface role must stay distinguishable from its neighbours
+
+Checking that each role carries the right VALUE is not the same as checking that two roles are still
+telling apart. A palette can be reproduced perfectly and still collapse: on the project this comes from,
+`surface/page` and `surface/primary` are both `#0A0A0A` in the client's own inverse palette, so in dark
+mode the screen ground and every card were the same colour — `ΔL* = 0.0`.
+
+That is not automatically a defect. Cards there separate with a stroke, which is a legitimate answer.
+It becomes a defect the moment something relies on **fill alone**, which is what happened to the sheet.
+
+So the check is a pair:
+
+1. **Value parity** — each role equals what the reference uses for that role.
+2. **Role separation** — for each adjacent pair in one theme, either `ΔL*` clears a floor, or the
+   nearer surface carries a stroke or a shadow. Sweep every panel whose fill equals its background and
+   has neither; the ones that remain must be ground **by design** and named as such.
+
+And the rule dark mode forces: **an elevated surface steps UP the scale.** A scrim cannot substitute —
+darkening a near-black page moves it *towards* a near-black sheet, not away from it.
+
 ## Pixel sampling: only near native resolution
 
 When you must measure from a render, for example text over photography:
@@ -387,3 +424,33 @@ restore.
 If a precondition fails, either fix the precondition or throw. Never continue past it with the work
 undone, because the file is then in exactly the state the guard existed to prevent, and the only trace is
 a line in a log nobody re-reads.
+
+---
+
+## Definition of done
+
+Every other governing rule in this repository ends with one of these and these two did not. Nothing here
+is new: each line restates a rule stated above, in the form a person can tick.
+
+**Every review**
+
+- [ ] Report and fix were separate passes. Nothing was repaired inside the pass that found it
+- [ ] Every number published was recounted from the artefact, not carried over from an earlier run
+- [ ] Every named check ran, and anything that could not run is reported as such rather than omitted
+- [ ] No proxy asserted: what was measured is what is claimed, and the two are the same sentence
+- [ ] Contrast computed, never sampled from a screenshot, and never judged from an isolated crop
+- [ ] Every state the product can actually enter was measured, not only the states it was designed in
+- [ ] The probe was checked before its result was believed
+
+**Any new or changed check**
+
+- [ ] Verified by reintroducing the defect it was written for, and seen to fail on it
+- [ ] Fails closed: an empty input, a selector matching nothing and a missing file all exit non-zero
+- [ ] Ships. A check named in a rule with no executable behind it is a rule nobody can follow
+- [ ] Its numbers are readable against a baseline, or the baseline is reported beside them
+
+**Before handing anything back**
+
+- [ ] Rendered and looked at, per viewport, and the main flow clicked end to end
+- [ ] Said what was checked and what was found, never that it is done
+- [ ] Measurement and review both ran. Neither was treated as a substitute for the other

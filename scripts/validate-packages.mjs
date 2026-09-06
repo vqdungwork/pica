@@ -171,12 +171,61 @@ for (const name of dirs) {
   }
 }
 
-/* 7. relative markdown links resolve.
+/* 6b. the marketplace listing matches each plugin's own manifest.
 
-   Rules sit where they sit, so their links resolve against the repo. The design-flow skill
-   does not: packages/core/skills/design-flow ships as <root>/skills/design-flow, so a link
-   written ../../packages/x resolves to <root>/packages/x. Resolve each file from the place
-   it will actually be read from, or this check enforces the wrong layout. */
+   Two files carried a description for the same plugin and nothing compared them. Six
+   packages were listed in the marketplace with NO description at all, four more had a
+   stale one, and the bundle advertised a check count two releases old — which is the first
+   sentence anyone reads before installing.
+
+   plugin.json is the source. The marketplace mirrors it, and here that mirroring is
+   checked rather than remembered. */
+{
+  const mkPath = path.join(ROOT, ".claude-plugin", "marketplace.json");
+  let mk = null;
+  try { mk = JSON.parse(fs.readFileSync(mkPath, "utf8")); } catch (e) {
+    findings.push(`.claude-plugin/marketplace.json could not be read (${e.message})`);
+  }
+  if (mk) {
+    const listed = new Map((mk.plugins || []).map((p) => [p.name, p]));
+    const manifests = [path.join(ROOT, ".claude-plugin", "plugin.json"),
+      ...dirs.map((d) => path.join(PKG_DIR, d, ".claude-plugin", "plugin.json"))];
+    for (const mp of manifests) {
+      if (!fs.existsSync(mp)) continue;
+      let pj;
+      try { pj = JSON.parse(fs.readFileSync(mp, "utf8")); } catch { continue; }
+      const row = listed.get(pj.name);
+      if (!row) { findings.push(`${pj.name} has a plugin.json and is not listed in the marketplace`); continue; }
+      if (!row.description) findings.push(`${pj.name} is listed in the marketplace with no description`);
+      else if (row.description !== pj.description)
+        findings.push(`${pj.name}: the marketplace description differs from its own plugin.json`);
+      if (row.version && pj.version && row.version !== pj.version)
+        findings.push(`${pj.name}: marketplace says version ${row.version}, plugin.json says ${pj.version}`);
+      listed.delete(pj.name);
+    }
+    for (const name of listed.keys())
+      findings.push(`the marketplace lists "${name}", which has no plugin.json`);
+  }
+}
+
+/* 7. relative markdown links resolve, and no link crosses a package boundary.
+
+   This check carried a model of the layout that stopped being true at 0.6.0. It resolved
+   the skill from <repo>/skills/<name>, which was the shipped location back when the whole
+   repository was ONE plugin. Since the split, packages/core IS the plugin root: the file's
+   repo location and its shipped location are the same path, so the base is its own
+   directory like every other markdown file here.
+
+   The consequence of the stale model was worse than a wrong base. It made
+   ../../packages/<pkg>/rules/x.md look correct, and that form resolves in NEITHER layout:
+   not in the repo, where it lands on packages/core/packages/..., and not installed, where a
+   sibling package is a separate plugin directory named pica-<pkg> and there is no packages/
+   at all. Thirty-eight links in the map of the whole flow pointed at nothing, in every
+   layout, for three releases.
+
+   So cross-package links are now rejected outright rather than resolved. A rule in another
+   package is named as a repo path in a code span, which is true wherever the reader is,
+   instead of as a link that promises a click it cannot deliver. */
 const mdLink = /\]\((\.[^)#\s]+)/g;
 const mdFiles = [];
 for (const name of dirs) {
@@ -190,7 +239,7 @@ for (const name of dirs) {
       if (!d.isDirectory()) continue;
       const f = path.join(skillsDir, d.name, "SKILL.md");
       if (fs.existsSync(f))
-        mdFiles.push({ file: f, base: path.join(ROOT, "skills", d.name) });  // shipped location
+        mdFiles.push({ file: f, base: path.join(skillsDir, d.name) });
     }
 }
 if (!mdFiles.length) findings.push("no rule or skill markdown found — the link check validated nothing");
@@ -200,8 +249,18 @@ for (const { file, base } of mdFiles) {
   let m;
   while ((m = mdLink.exec(text)) !== null) {
     linksChecked++;
-    if (!fs.existsSync(path.resolve(base, m[1])))
+    const target = path.resolve(base, m[1]);
+    if (!fs.existsSync(target)) {
       findings.push(`${path.relative(ROOT, file)} links to ${m[1]}, which does not resolve`);
+      continue;
+    }
+    /* A link that leaves its own package resolves in the repo and breaks the moment
+       somebody installs that package on its own, which is the whole point of the split. */
+    const owner = path.relative(PKG_DIR, file).split(path.sep)[0];
+    const targetOwner = path.relative(PKG_DIR, target).split(path.sep)[0];
+    if (!path.relative(PKG_DIR, target).startsWith("..") && targetOwner !== owner)
+      findings.push(`${path.relative(ROOT, file)} links to ${m[1]} in package "${targetOwner}". ` +
+        `A single-package install has no sibling to resolve it against: name it as a repo path instead`);
   }
 }
 if (!linksChecked) findings.push("0 markdown links checked — the link check did nothing");

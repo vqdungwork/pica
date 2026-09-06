@@ -1,0 +1,54 @@
+{
+  "name": "estimate",
+  "status": "stable",
+  "description": "Three-point effort by role once scope and deadline are frozen, the work order derived from the deadline, and the real hours logged back at closeout.",
+  "owns": {
+    "commands": [
+      "pica-estimate.md"
+    ],
+    "rules": [
+      "estimation.md"
+    ],
+    "scripts": [
+      "estimate-check.mjs"
+    ]
+  },
+  "requires": {
+    "state": [
+      "scopeFrozen",
+      "deadline"
+    ],
+    "artifacts": [],
+    "gates": []
+  },
+  "produces": {
+    "state": [
+      "estimate",
+      "workPackages",
+      "durationWeeks",
+      "effortLog"
+    ],
+    "artifacts": []
+  },
+  "checks": [
+    {
+      "run": "estimate-check.mjs",
+      "passes": "0 findings"
+    }
+  ],
+  "definitionOfDone": [
+    {
+      "type": "check",
+      "run": "estimate-check.mjs",
+      "passes": "0 findings"
+    },
+    {
+      "type": "human",
+      "says": "the work order shows the arithmetic from effort and duration to headcount"
+    },
+    {
+      "type": "gate",
+      "grants": "estimateSent"
+    }
+  ]
+}
