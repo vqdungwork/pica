@@ -1,6 +1,943 @@
 # Changelog
 
+## 0.8.0
+
+### Six new packages, and the flow now reaches past the design
+
+pica was four packages that took a brief to an approved HTML design. It is now ten, and the chain runs
+from a thin brief to a released product: **`pica-analyst`** (elicitation, domain knowledge, AS-IS and
+TO-BE, business rules, the domain model, the PRD), **`pica-content`** (the words), **`pica-designqa`**
+(independent evaluators and the build-versus-design comparison), **`pica-architect`** (feasibility,
+C4, ADRs, NFRs), **`pica-estimate`** (three-point effort, the work order, the effort record), and
+**`pica-impl`** (the definition of done for building and releasing).
+
+Each installs on its own with only what it needs. A team that wants the business analysis takes
+`pica-analyst` and gets `pica-core` with it, and nothing else.
+
+**`/picaflow <brief>` runs phases 0 to 3 unattended**, and never pauses to ask: anything it cannot
+derive becomes a labelled assumption the client corrects at review. That is the whole design. Ask a
+client what their business flow is and you get hesitation; show them a wrong one that clicks and you
+get the correction in three seconds.
+
+### Every runnable check now runs on every project
+
+Three scripts had only ever run on the six hand-built fixtures, which meant "84 of 84 green" described
+ten checks and not thirteen. All three now run on all eighty-four:
+
+| | |
+|---|---|
+| `code-tokens-check` | 84 of 84 clean, against a real token file and front-end source per project |
+| `impl-check` | 84 of 84 clean, against **84 real git repositories** with CI, branches and tests |
+| `build-diff` | 84 of 84 clean on an identical build, and **84 of 84 caught** on a seeded divergence |
+
+The divergences were spread across the four kinds it exists to find, 21 projects each: a radius changed,
+a control height changed, a hue introduced, and a screen deleted from the build. Every one was caught,
+and the identical builds stayed silent, which is the pair that matters. A check that only fires is as
+useless as one that never does.
+
+### Three assertions the direction could declare and nothing evaluated
+
+`shadow.blur.max`, `type.roles.max` and `motion.easing.linear` were in the vocabulary, named in the
+style signature table, and evaluated by **nothing**: the census carried no shadow and no easing, and
+nobody counted type roles. `shadow.blur.max: 0` beside a blurred shadow passed every gate, while the
+style check read that same key to detect a contradiction and so implied an enforcement that did not
+exist.
+
+The census records shadow blur and timing functions now, a type role is counted as a distinct size and
+weight pair, and **any assertion outside the eight is reported rather than skipped**. An assertion nobody
+can evaluate is worse than an absent one: it reads as a constraint and constrains nothing.
+
+### An empty glossary passed the entire analysis gate
+
+`glossary-closure` only flags a word the glossary itself declares wrong. With an empty glossary there are
+none, so an analysis with **no ubiquitous language at all** reported "0 findings, 4 items scanned", which
+reads as clean. The glossary is what the other three checks stand on and its absence is the one thing
+they could not see.
+
+Next to it: `entity-terms` read `e.name`, every generator and every project writes `entity`, and no
+command documented either. **The loop skipped every entry and reported zero on a data model that had
+invented every word in it.** Both spellings accepted, the shape documented, and `attributes` accepted
+alongside `fields`.
+
+### Seven rules had no definition of done, including the two that govern everything
+
+`reference-discipline.md` and `review-discipline.md` carry the discipline every other rule depends on,
+and neither ended in a checklist, so what they require could be agreed to and never checked against.
+`research.md` had none either, and its criteria — the intake packet, token provenance, `copyRules`,
+`dataOwnership` — appeared in no other rule's. `figma-rebuild.md` replaces several of the port's gates
+and had no checklist of its own.
+
+All four now have one, written from what those files already say rather than from new criteria. The three
+remaining without a DoD carry a line saying where theirs lives, or that they should not have one:
+`figma-mcp.md` is operational and nothing in it is a criterion a package passes or fails.
+
+133 definition-of-done items became **173**.
+
+### The mutation tests were not repeatable, and that is not a test
+
+Every check but one had been mutation-tested by hand, at a keyboard, once, with the commands thrown away.
+A test that cannot be re-run does not catch a regression; it proves one thing at one moment.
+
+`mutate-all.py` runs **19 deliberate defects past all ten project checks**, and demands the same two
+things the sector suite already did: the defect is caught, and no other check fires. It found two the ad
+hoc runs had not: the empty glossary, and a `parity` mutation of mine that was inert because it used a
+container query on a frame that declares no container type, so it proved nothing while appearing to pass.
+
+One case of two checks firing together is recorded as legitimate rather than suppressed: `domain-check`
+and `industry-check` both require the same constraint category, independently, and both should say so.
+
+### The shapes I documented incompletely while fixing the same defect elsewhere
+
+Scanning for fields a script reads that no documented JSON writes found two, and both were mine, written
+earlier in this same release while fixing exactly that class: `arch-check`'s `risks`, `nfr` and `adr`
+entry shapes, and `contrast-check`'s `contrastExemptions`. A command that says `"risks": []` and nothing
+about what goes in one is a command nobody can follow. Both documented, with the matching keys named.
+
+### The measurement this harness never made
+
+pica measures geometry to a tenth of a pixel. Until 0.8.0 it never measured **contrast**, which is the
+one accessibility property that is objective, computable, and in one sector legally binding: the
+knowledge base records WCAG 2.2 AA as a statutory floor for public-sector services, and four more sectors
+call contrast functional rather than aesthetic — a handheld in sunlight, a plant screen behind
+polycarbonate, a clinician's monitor under theatre lighting, a phone in a tractor cab.
+
+`evaluation.md` has required "contrast computed from tokens" since 0.5.0 and **nothing computed it**. The
+Figma audit had a contrast metric; the HTML side, which is where every project starts and where an
+HTML-only project ends, had none. The capture recorded no colour pair, so nothing downstream could.
+
+The capture now records the resolved foreground and the background it actually sits on, walking up until
+a non-transparent one is found, because `background-color` on the element itself is transparent far more
+often than not and a ratio against `rgba(0,0,0,0)` is a ratio against nothing. `contrast-check.mjs`
+computes WCAG 2.x relative luminance, composites a translucent foreground over its background first
+because that is what the eye sees, and applies AA or AAA from `state.contrastLevel`.
+
+**Text over an image, a gradient or a translucent layer is reported as unresolved, never as clean.** A
+confident wrong ratio is worse than an admitted gap, and this is exactly where a naive implementation
+produces one.
+
+### It found two real defects on the first project it ran against
+
+The habit tracker's teal read **3.74:1** on white, below AA. That is the streak numbers and the primary
+button, the two most-looked-at things on the screen, and it looks fine.
+
+The second was worse: the error message sat at **2.15:1**, less than half the required ratio, on the one
+line a person most needs to read on the worst screen in the product. Both invisible to review, both
+obvious to measurement, which is the sentence this whole project is built on.
+
+### The only package with a definition of done and nothing to run
+
+`pica-architect` shipped twelve definition-of-done items and **no executable**, alone in the repository
+in that position. Seven of the twelve are decidable from state, and leaving those to memory is this
+project's own definition of a preference.
+
+`arch-check.mjs` decides them: the feasibility verdict and its reason, whether a risky item names what it
+affects so 5.1 has a figure to widen, whether every NFR carries a number and a condition and a
+measurement method, whether every ADR carries all four parts, whether every technology in `stack` is
+named by an ADR, and whether a native target records signing key custody and the rollback asymmetry.
+
+**The rule it makes real is the one architecture.md states most plainly and nothing enforced:**
+"retention and audit trail from `domainConstraints` become NFRs here, or they become nothing."
+
+The other five stay with a human and the script says so on every run: whether a "not possible" reads
+plainly to a non-technical reader, whether the C4 diagrams say anything, whether an ADR's consequences
+are honest, whether a screen's named data source is real, and whether the decisions were right. A check
+that pretended to judge those would be worse than no check.
+
+**Two defects surfaced while building it, both familiar shapes.** The eight-character floor on a written
+answer reported `"decision": "react"` as no decision at all — the same false positive fixed on `source`
+earlier in this release, recurring because the helper was duplicated with its default. And the check read
+`domainConstraints` without reading `industry.constraintsNotApplicable`, so a waiver a named human had
+signed in one register was invisible to a check reading the other, and the project was told to write an
+NFR for an obligation already recorded as inapplicable.
+
+### A register the documentation made unusable, and a config block that did nothing
+
+`figma-gates.md` says a deviation must be recorded in state "because a deviation recorded only in a
+review document cannot be distinguished from a defect on the next run", and that **without the register
+the definition of done is unfalsifiable**. Its worked example was
+`{"node": "29:119", "prop": "y"}` — a Figma node id and a property name.
+
+`geometry-diff` matches on **screen plus text run**, and it has to: it pairs runs by text content and
+the dump carries no node ids, so a node id matches nothing whatever it names. **An entry written exactly
+as documented could never suppress anything**, in the one register that file calls load-bearing. Both
+spellings are accepted now so an existing register keeps working, and the example is the one that does
+something. Verified by registering a real deviation: seven findings become six.
+
+`figma-audit.js` declared a `DEVIATIONS` config block at the top and **never read it** — a control anyone
+could fill in with no effect, which is worse than an absent one because it reads as working. Removed,
+with a pointer to where the register actually lives.
+
+### A direction could contradict the tradition it named
+
+`design-vocabulary.md` has said since 0.7.0 that "a declared style adds checks to `direction.assert`:
+declare neobrutalism and a blurred shadow becomes a violation." Nothing added them, and nothing compared
+the two. `direction.style` was written by nobody and read by nobody, so `style: "neobrutalism"` beside
+`shadow.blur.max: 12` was a direction contradicting its own name, and every screen passed it.
+
+`verify-html` now reports a style whose assertions say the opposite of what the style means, and a style
+naming no tradition at all. **The second earned itself in this repository's own history:** a direction
+here was once named for a quality rather than a tradition, which meant nobody could look it up, compare
+it, or measure a product against it.
+
+It deliberately does **not** generate the assertions. The vocabulary table is explicit that it is for
+recognising and naming, never for choosing, and a check that filled in the numbers would be choosing.
+
+### The sector base could not be checked against itself
+
+Twenty-eight sectors of prose, and the only way to find one contradicting itself was to read all
+twenty-eight entries. That is the reading-is-not-measuring failure this project was built around, applied
+to the project's own data.
+
+`industry-check --audit` reads the base for contradictions: a sector whose own tradition is one it rules
+out, a constraint category `domain-check` does not know, a colour to avoid with no reason, an exemplar
+list that repeats itself or is too short to characterise anything, a name that means two sectors without
+being recorded as ambiguous.
+
+**The most-repeated piece of sector knowledge was the least checkable.** Seven sectors say some version of
+"this hue already means something, do not spend it elsewhere" — red is overdrawn in finance, clinical
+emergency in healthcare, the stop signal on a factory floor — and every one of them said it in a
+different sentence. `colour.reserved` now records it as data: **22 hues across 14 sectors**, each with
+what it already means. The other 14 carry a note saying no hue is load-bearing there, because silence and
+"none" look identical.
+
+Structuring it immediately found two entries the prose had left vague: insurance described "a strict
+semantic triad for cover status" and pharmacy "a hard-reserved warning channel", **neither naming a
+single colour.** A designer reading either would have had to guess the exact thing the entry existed to
+pin down.
+
+### A third of the repository had never been looked at
+
+Enumerating every file rather than globbing the directories the audit already knew about found 47 files
+under `spike/`, correctly gitignored and never shipped, and three things that were not correct:
+
+- **A 311-line design record was silently excluded from every clone.** It sat in
+  `docs/superpowers/specs/`, which is where the brainstorming tool writes by default and which this
+  repository's allowlist does not publish, while the two records of exactly its kind sit in `docs/specs/`
+  and ship. Its status line still said "awaiting human review" three releases after the release it
+  describes shipped. Screened for client content, moved to the repo's own convention, and its evidence
+  base annotated so a reader knows the spike it cites is deliberately not redistributable
+- **`SKILL.md` said implementation was "not built"** while `pica-impl` ships and is stable. README already
+  had the accurate framing: pica ships the definition of done for implementation, not a coding agent
+- **Two plan and spec records had stale or missing statuses**, so a reader could not tell what was
+  outstanding
+
+### The first sentence anyone reads before installing was two releases old
+
+`.claude-plugin/plugin.json` advertised **"Sixty-five checks"**. That description is what the plugin
+marketplace shows.
+
+And the marketplace listing had drifted from the manifests it lists: **six packages were listed with no
+description at all**, four more carried a stale one. Two files held a description for the same plugin and
+nothing compared them.
+
+`plugin.json` is the source, the marketplace mirrors it, and `validate-packages.mjs` now checks the
+mirroring rather than trusting it: a missing description, a differing one, a version mismatch, a plugin
+with no listing, or a listing with no plugin.
+
+### The repository's own validator had gone unrun, and it was right about everything
+
+`scripts/validate-packages.mjs` lives at the repo root, outside `packages/`, and every sweep this release
+globbed `packages/*/scripts/*`. So the one check whose entire job is to verify the manifests was the one
+check never run — through an audit that spent a full round fixing those manifests by hand.
+
+It reported 61 findings, and every one was real:
+
+- **The six manifests written earlier this release used shapes it does not accept.** `checks` must be
+  `{run, passes}` objects, not script names, and `definitionOfDone` types are `check | human | gate |
+  artifact`, not the `script` and `state` invented for them. Written against a guess when the schema was
+  enforced two directories up
+- **`pica-core` owned neither its hooks nor its skill.** Four hook files and the design-flow skill were
+  shipped and unclaimed, which is the orphan condition the validator exists to report
+
+### Thirty-eight links pointed at nothing in every layout, for three releases
+
+The remaining findings were the flow map's rule links, and getting them right meant finding out the
+validator's own model of the layout had gone stale.
+
+It resolved the skill from `<repo>/skills/<name>`, which was the shipped location back when the whole
+repository was **one plugin**. Since 0.6.0 each package is its own plugin, so `packages/core` **is** the
+plugin root and the repo location and shipped location are the same path.
+
+The stale model did worse than pick a wrong base: it made `../../packages/<pkg>/rules/x.md` look correct,
+and that form resolves in **neither** layout. Not in the repo, where it lands on
+`packages/core/packages/…`. Not installed, where a sibling package is a separate plugin directory named
+`pica-<pkg>` and there is no `packages/` at all.
+
+An earlier round of this same audit "fixed" those links by changing the prefix, which made them resolve
+in the repo and left them broken installed, and a filesystem link check confirmed the fix because it only
+ever checked the repo. Two checks, two layouts, and neither one alone could see it.
+
+**Cross-package links are now rejected outright** rather than resolved: a rule in another package is
+named as a repo path in a code span, which is true wherever the reader is, instead of as a link that
+promises a click it cannot deliver. Seven such links in the rules were converted too.
+
+### Following the documentation exactly made the sector gate unpassable
+
+Building a state file from the two documented skeletons and nothing else, then running every check
+against it, found three keys the checks need that no skeleton mentions:
+
+- **`field`.** `/pica` said to write it **inside `direction`**, and `industry-check` reads
+  `state.field` at the top level. A project built by the book had the field in the one place nothing
+  reads, and the sector gate reported "state.field is empty" forever. The field is narrowed at 1.3, long
+  before a direction exists at 3.1, so the top level is where it belongs and the copy inside `direction`
+  is how the two drift
+- **`measured`.** Nothing wrote it. The measurement table went to `docs/research/measured.json`, and
+  `industry-check`'s evidence check and `picaflow`'s `schema-check` invocation both read
+  `state.measured`. Both commands now say to write the same table to both places, and the file is what a
+  human reads while the state key is what the scripts read
+- **`branchProtection`**, added earlier this release and documented only in a code comment
+
+`schema-check` is invoked by `/pica` against `docs/research/measured.json` and by `/picaflow` against
+`.pica/state.json`. Both are legitimate and it accepts either, but the report never said which one it
+read, so a surprising count sent the reader to the wrong file. It names the source now.
+
+With those three fixed, a state file assembled strictly from the documentation resolves its sector and
+the remaining failures are the genuine work of the step, which is what a skeleton should produce.
+
+### Five manifests promised files nothing writes
+
+`produces` had drifted the way `owns` had. `analyst` promised `docs/prd.md`, and `pica-analyse` assembles
+the PRD into `docs/contract.md` — a path no command writes means every run puts it somewhere different.
+`architect` promised `docs/architecture.md` and `docs/adr/`; it writes risks, NFRs and ADRs to state and
+no file at all. `estimate` promised `docs/work-order.md`; 5.2 presents the work order and writes nothing.
+Two state keys, `packages.figma.annotated` and `packages.research.tokensDerived`, were written by nobody
+and read by nobody.
+
+None of the five was required by another package, so nothing deadlocked. They were simply untrue, in the
+file whose whole job is to say what a package does.
+
+### Two rules about gates, both stated and neither checked
+
+The flow says **"No package may grant a gate it benefits from"** and, implicitly, that a gate somebody
+requires has to be granted by somebody. Writing six new manifests broke both at once, and nothing
+noticed:
+
+- **`clientApproved` was required by two packages and granted by none**, which leaves them permanently
+  BLOCKED with no way to unblock them. That is the deadlock shape this repository has now found three
+  times — `scopeFrozen`, then `exclusionsConfirmed`, now this. Both packages require the state their own
+  scripts actually read instead
+- **`html` granted `htmlApproved:<wp>`**, which the flow says core grants on human approval. The manifest
+  and the architecture disagreed about who holds the gate that stops every Figma write
+
+`pica-status` checks both now. Neither was expensive to check and neither was checked, which is the same
+sentence this release has had to write about a dozen different things.
+
+### The port never named the script that verifies the port
+
+`/pica-port` described the geometry comparison in prose — "diff geometry against the captured reference,
+match by text content, compare position only, tolerance roughly 3px" — and **named no script and showed
+no command**, for three releases. `geometry-diff.mjs` ships, does exactly that, and every port
+reconstructed the comparison by hand instead.
+
+It now carries the command, the dump shape, and the three things the script refuses to start without,
+each of which produced a clean report on an unverified file the one time it was skipped: a `frameMap`, a
+per-frame font matching the capture, and a non-zero number of runs compared.
+
+Every script in the repository is now invoked by name from a command, a rule or the skill. Two were not:
+this one, and `pica-status`.
+
+### Non-ASCII, spaces in paths, and 240 frames
+
+Content in Vietnamese, Arabic, Chinese and emoji passes every gate with the text captured intact. So do
+project paths containing spaces and containing Vietnamese diacritics. At 240 frames and 1,200 text runs
+every check completes in under a tenth of a second; the capture takes 23 seconds, which is a browser
+rendering 240 frames and is inherent.
+
+Running each check three times on identical input returns byte-identical output. The capture differs in
+exactly one field across runs, `meta.capturedAt`, out of 1,188 — which is provenance, and correct.
+
+### The three in-Figma scripts had never been executed anywhere
+
+`figma-audit.js` is 542 lines. `capture-baseline.js` and `source-parity.js` are another 250 between them.
+All three are pasted as the `code` argument of a `use_figma` call, so **the only way to find out whether
+one still worked was to paste it into a paid Figma session against a real file.** Nobody edits code they
+cannot run, and this release had been calling them untestable.
+
+They do not need Figma. They need the small part of its API they call, and everything that matters in
+them — traversal, counting, pairing, comparison — is ordinary JavaScript once that surface exists.
+`mock-figma.mjs` provides it, and `node packages/figma/scripts/mock-figma.mjs` asserts each still reports
+the defect it exists for. It is not a Figma emulator and must never become one.
+
+Running them for the first time: all three parse and run, `capture-baseline` catches a scrim whose alpha
+was rounded to opaque, `figma-audit` reports an oval and correctly does **not** report a circle, and
+`source-parity` sees a dropped string. Every claim they make about themselves held.
+
+**The self-test needed the same treatment as everything else.** Its first version asserted only the paint
+channel, so deleting `capture-baseline`'s node-opacity capture entirely still printed "all pass" — a test
+that could not see the thing it was watching. Both channels are asserted now, and both were verified by
+breaking the script and confirming the test fails.
+
+### Six scripts answered a malformed state file with a stack trace
+
+Given a state file with the right keys and the wrong types, six of nine check scripts exited on an
+uncaught `TypeError`: `glossary.map is not a function`. They still failed closed, so no gate was let
+through — but the person running one got a stack trace instead of a sentence naming the field, and a tool
+that answers a bad input that way reads as a broken tool. The next thing that happens is that somebody
+stops running it.
+
+Every script now names the field and its expected shape, including arrays that are arrays and contain
+`null`, which throws in exactly the same place as a string does. `geometry-diff` gained the same guard
+and is the likeliest of all of them to be handed something hand-assembled, because it is pasted out of a
+Figma session.
+
+### Every rule link in the flow map was broken
+
+`SKILL.md` is the map of the whole flow and its rule links were written `../../packages/<pkg>/rules/...`
+from `packages/core/skills/design-flow/`, which resolves to `packages/core/packages/...`. **All
+thirty-eight of them.** Nobody had followed one from that file, which is its own finding about a document
+whose entire job is to point at the others.
+
+### Smaller things, each found by looking at one specific thing rather than reading
+
+- **`picaflow`'s measured block is now a self-guarding shell script.** The check-before-calling contract
+  was stated once in prose at the top of the file and the block below it called nine scripts unguarded, so
+  holding the contract meant remembering it mid-execution. `run` names the missing package and prints a
+  line for every check that did not run
+- **`/pica` called `schema-check` across a package boundary with no guard at all**, which on a core-only
+  install fails with a path error rather than saying which package is missing
+- **`verify-html`'s header listed its checks 1, 2, 3, 4, 7, 6, 5** after two were inserted, and called one
+  of them "HORIZONTAL OVERFLOW" while the report printed `overflow`. The name in the header is now the
+  name the report prints, so a finding greps straight back to the paragraph explaining it
+- **`parity-check` printed the same benign sentence for one viewport and for none.** One is a project with
+  nothing to compare; zero is a project with no viewport declaration, which `verify-html` refuses to run
+  on at all
+
+### The gate that fails open
+
+`gate-figma-write` is the only thing in pica enforced by anything other than a person
+remembering. It holds four rules: no Figma write before the human approves that package's HTML, none
+while a review is running in report mode, none after delivery, and none without the skill loaded.
+
+**Feed it a state file where `writeAuthorization` is a string instead of `{"granted": true}` and it
+raises `AttributeError` and exits 1.** A PreToolUse hook blocks on exit code 2; every other non-zero exit
+is reported as a hook error and **the tool call proceeds**. So a malformed field in a file anyone can
+edit did not stop a Figma write, it permitted one, silently.
+
+It now denies on any unexpected error and says what shape it expected. Tested across all seven paths:
+one allow, six denies, including a state file that is not JSON at all.
+
+### Nothing had ever run pica-status, and it knew four of ten packages
+
+Six packages shipped in 0.8.0 with no `package.json`, so the tool that answers "what is ready and what is
+blocked" could not see them. README says each package "declares what it requires, produces, checks and
+considers done, in its own `package.json`", and for six of ten that was untrue.
+
+All four manifests that did exist had an `owns` that disagreed with the directory beside it. `research`
+declared no scripts while shipping `schema-check.mjs`, which the flow depends on.
+
+Ten manifests now, written against the filesystem. And `pica-status` compares each manifest to its own
+directory and reports the drift, because the comparison is free and nothing was doing it.
+
+### Four scripts had never been run, and running them found five defects
+
+`flow-check`, `build-diff`, `impl-check` and `code-tokens-check` were not in any test path. Building the
+fixtures they need — interactive prototypes with routers, review shells, built variants, git repositories
+with CI, and front-end source with a token file — surfaced:
+
+- **`code-tokens-check` reported "border-radius 1px" from `border: 1px solid`.** Both the spacing and the
+  radius checks gated on whether a LINE mentioned the property and then scanned every px on it.
+  `border: 1px solid` appears in essentially every stylesheet ever written, so as shipped this check cried
+  wolf on every real project. Scoped to the declaration value
+- **`impl-check` reported "does not run type check" on a pipeline that runs `tsc` on every push.** The
+  workflow says `npm run types`; what `types` does lives in package.json, which the check never read. It
+  now follows `npm run X` into the scripts block
+- **`impl-check`'s stack check searched only package.json**, so `"ci": "github-actions"` was always
+  reported missing, along with every Python, Go, Ruby, JVM or Swift component in a polyglot build. The
+  haystack is now every manifest that exists plus the tracked file list
+- **`impl-check`'s branch protection had no escape.** Without `gh`, or on a repository not hosted on
+  GitHub, it could never pass, and a check that cannot be passed is one people route around. Every other
+  deliberate exception here has a signed register; this one now does too, and the report says the evidence
+  is a person's word rather than an API read
+- **`flow-check`'s `orphan-prototype` printed "ok" whenever there was no `review.html`**, and
+  `flow-declared` only walked declared → file, so a project declaring no flows passed while shipping
+  interactive prototypes. Both directions now, and the inert case says so
+
+### A build against a stale capture read as a redesign
+
+`build-diff` treated a frame with no `census` as a frame with an empty one: every radius and control
+height read as "dropped by the build", and a build identical to the design reported ten divergences. That
+happens whenever the approved capture and the build capture came from different versions of the harness,
+which is the normal case for an approval in one month and a build in the next — and it happened in this
+session, when the capture gained a field. Now reported as paired-but-not-measurable.
+
+### Two rules with a register and no executable
+
+- **`dataOwnership`** sat in a table in `research.md` under a column headed **"Enforced by"**, reading
+  "no editable control inside the declared read-only regions". Nothing enforced it, and nothing could:
+  the register named an entity in prose, and prose is not a region. It now carries `region`, and
+  `verify-html` checks it. That required the capture to record tag names, and then to record controls at
+  all — `boxes` holds only classed elements, and an `<input>` frequently has none, so the first working
+  version of the check found nothing on a page that had one
+- **`exclusionsConfirmed`** had a register, a command saying "refuse to pass GATE 1 while it is false",
+  and a definition-of-done line. Nothing read it. `trace-check` does now: an empty `exclusions` means
+  either nobody was asked or there is genuinely nothing, and in week three nobody can tell which
+
+### The rule the harness cannot measure, unenforced since 0.4.0
+
+`html-prototype.md` says "responsive is `@container`, never a width `@media`". Every frame is laid out in
+one browser window, so a width media query fires for all frames or none. A prototype using one renders
+correctly in a browser and is measured against the wrong layout by `verify-html`, `parity-check` and
+`build-diff` alike, **all three reporting clean**.
+
+`verify-html` now reports them. The first implementation read the CSSOM and found nothing on every real
+project: Chrome throws `SecurityError` on `cssRules` for a linked stylesheet on a `file://` URL, which is
+how every pica prototype is opened. It reads the stylesheets from disk instead.
+
+### A copy rule that flagged the thing it was protecting
+
+`research.md` gives "a mixed-case wordmark that must never be upper-cased" as its worked example of a
+`copyRules` entry. Writing that rule reported **every correct occurrence of the wordmark as a violation**,
+because `expect` defaults to 0 and a spelling rule has no expected count. Two different kinds of rule
+shared one shape. An `exactCase` rule with no stated `expect` is now a spelling rule and its count is not
+checked.
+
+### The same void defeated four checks, and a length test was the wrong fix
+
+`industry-check` was defeated end to end by writing `"n/a"` into every field it required: a healthcare
+project with voided convention notes, voided preventions and ten unsigned stakeholder waivers passed all
+seven checks with **zero findings**. Probing for the same shape found it in three more scripts:
+
+- **`domain-check`** — a constraint whose `source` read `"n/a"` was traceable to nothing and passed
+- **`trace-check`** — a business rule's source, the same way
+- **`estimate-check`** — a **sixty per cent effort variance "explained" with `"n/a"`** passed the closeout
+  gate, and the effort log is the one artefact that makes the next estimate better than a guess
+
+**The first fix was wrong and had to be replaced.** A twenty-character floor rejected `"Dark by
+default."` and `"Docs-forward, flat."`, which are real decisions written by someone who writes well, and
+this project's own rule is that a false positive is worse than a miss because it teaches people to skip
+the check. Length was the wrong instrument: what is being detected is a field that has been **emptied**,
+not one that is short.
+
+So a shared void list does the work and the floor only clears `"x"`. Two floors, because two kinds of
+field: a source or a person is legitimately short (`PM`, `BA`, `client`, `brief`), while a reason has to
+be a sentence. The helper is duplicated per script rather than imported, because these scripts run
+standalone after a single-package install where no sibling package's path exists.
+
+Waiving is still allowed and now needs a reason **and a name**, in `constraintsNotApplicable` and
+`stakeholdersNotApplicable`. Writing "not applicable" into `domainConstraints` waives nothing: that field
+answers whether the question was asked. Three real projects had voided a sector requirement there, one of
+them with sound reasoning written in the place nothing reads it.
+
+### The mutation suite only tested one direction
+
+It checked that defects are caught and never that valid work passes, which is how the twenty-character
+floor shipped at all. A second lane now runs six legitimate changes that must produce **zero** findings:
+short but real notes, a departure with a real reason, signed waivers, an ambiguous field with the key
+declared, and a recorded reason for measuring no precedent.
+
+Current state: **20 of 20 defects caught, none missed, none firing the wrong check; 6 of 6 legitimate
+changes passing clean.**
+
+### Eight scripts had never run on the test corpus
+
+The gate exercised seven checks across the projects. `schema-check`, `estimate-check`, `flow-check`,
+`build-diff`, `impl-check`, `code-tokens-check`, `geometry-diff` and `pica-status` were not in it, so
+"90 of 90 green" described less than it sounded like.
+
+Running `schema-check` for the first time found that **the shape it demands existed only inside the
+checker.** `nullReasons` appeared in no rule, no command and no example, so anyone writing
+`measured.json` by hand produced something the gate rejected for a reason it could not explain. The shape
+is now documented in `design-vocabulary.md` with a worked example, and the script header says to change
+both in the same commit.
+
+Writing that documentation reproduced the defect immediately: the first version described
+`typography: {roles: [...], scale: [...]}`, which reads reasonably and which the check rejects, because
+it reads the object's **keys**. Corrected from the code rather than from memory.
+
+`schema-check` also accepted a bare `"none"` for a product's tradition, while `"none"` is a void
+everywhere else in this repository. One word with two meanings across scripts is the kind of
+contradiction that survives every careful re-reading, so a deliberate `"none"` now carries a
+`traditionWhy`, like every other deliberate exception here.
+
+`estimate-check`'s tier comparison printed **pass** whenever every package sat in one tier, which is the
+exact state produced by relabelling the hard package as standard to make an estimate look tighter. It
+cannot know which package is genuinely hard, so it now says the tier system compared nothing and leaves
+the judgement to a human, instead of reporting a pass it did not earn.
+
+### Domain knowledge stopped meaning the regulation
+
+For most of this project's life, "domain knowledge" meant which standard governs the exchange, who the
+regulator is, and how long the data has to be kept. That is the part that is easiest to look up and the
+smallest part of what matters.
+
+**An education product built like an admin dashboard passes every other check in this repository.** The
+tokens reference correctly, the geometry measures clean, every use case has a screen. A teacher opens it
+and knows in one second that nobody involved has watched a classroom.
+
+`packages/analyst/data/industries.json` now carries **28 sectors**, and for each one: every stakeholder
+with what they want, what they fear and what that means for the design; the sector's standards and
+regulator; the constraint categories it requires; the colour convention **with the reason each reserved
+hue is reserved**; the design tradition it settled on and the ones that misread in it, each with the
+words that would appear in a direction that chose it; density per audience; typography; tone; what the
+sector treats as a defect regardless of the brief; and shipped products worth measuring.
+
+141 stakeholders, 98 sector defects, 49 colour avoidances and 39 ruled-out traditions.
+
+`industry-check.mjs` enforces seven of these. Read the base with `--list` and `--show <sector>`.
+
+**One product frequently has two or three densities**, and this is the finding that recurs across
+sectors and is missed most often. Education is low for the learner, high for the teacher's gradebook,
+medium and translated for the parent. Healthcare is high for the clinician, because pagination hides
+facts, and low for the patient. Declare each separately or one of them will be wrong.
+
+**Colour in most sectors is already spent.** Red in healthcare means clinical emergency; it meant that
+in every hospital before it meant anything in your product. Red in finance means overdrawn. Green, amber
+and red on a factory floor are inherited from plant signage, so using them decoratively is a safety
+defect rather than a taste disagreement. Blue on a food menu reads as spoilage. Each is recorded with
+its reason, because a convention without its reason gets overridden by the next person who finds it
+inconvenient, and they cannot tell whether they are correcting an error or making one.
+
+**Departing from a convention is allowed. Departing silently is not.** Each of five axes is followed
+with a note or departed from with a reason. Silence on an axis is the failure, because an undecided axis
+does not stay undecided: it gets filled with whatever the model produced by default, and afterwards
+nobody can tell a decision was never made.
+
+### An unknown sector fails, and that is the point
+
+If the brief names a sector the base does not cover, `industry-check` **fails and refuses to run the six
+checks below it**. Passing it would mean the least-supported projects get the quietest gate, which is
+backwards, and it is the same failure this repository keeps finding in itself: a check returning zero on
+the thing it exists to catch.
+
+**It immediately caught a real hole.** This project's own north-star test, a portfolio for a fullstack
+developer, resolved to no sector at all: the base had twenty-one industries and none of them was
+professional practice. Seven were added as a result, including the developer-tools and security sectors,
+whose dark-first conventions and severity scales nothing else in the repository knew about.
+
+Four terms name two sectors each and the check refuses to guess at any of them: `training` could be
+education or fitness, `delivery` hospitality or logistics, `games` gaming or media, `infrastructure`
+construction or devtools. Their conventions are opposites, so a guess is worse than a question.
+
+### The mutation suite, and three bugs it found that 84 green projects did not
+
+84 projects were generated across the 28 sectors in three shapes each, and all 84 passed all seven
+gates. That proves the gate runs. It does not prove it **bites**, because a project generated from the
+knowledge base satisfies a check written against the same base by construction.
+
+So each of the seven checks was then given a deliberate defect on eight real projects, 104 runs, with
+the requirement that the check catch its own defect and **no other check fire**. Three bugs surfaced
+that all 84 green runs had hidden:
+
+- **An incidental match outvoted a declared ambiguity.** `"a training platform"` resolved cleanly to
+  devtools, because `platform` matched, silently discarding a term that named two other sectors.
+  Resolution now only accepts an ambiguous term when the sector it resolved to is one the term could
+  have meant
+- **`style-excluded` matched on the first word of a sentence.** `"illustration-led marketing pages..."`
+  became the token `illustrationled` and matched nothing, so a direction naming a ruled-out tradition
+  passed on three of eight sectors. Rewritten against a register: each ruled-out entry now carries the
+  words that would actually appear in a direction that chose it. **A rule with no register is a
+  preference,** and prose describing what is ruled out was a preference
+- **The constraint mutation was harmless on the sector it was run against.** It removed `data
+  protection` everywhere, and logistics does not require it, so a no-op looked like a miss. The test was
+  weaker than it appeared, which is the same class of defect as the code it was testing
+
+After the fixes: 13 of 13 mutations caught, none missed, none firing a check they should not have.
+
+`coverage-check`'s header claimed four checks while shipping five; `target-buildable` arrived with build
+targets and the header did not. Corrected, and counted rather than described.
+
+### One flow, four numbering systems, and the rules used the one nobody read
+
+The rules and scripts refer to work by decimal id: `2.1b`, `3.7`, `4.6`, `7.10`. The skill's flow table
+matched them. The README's flow table did not: it carried **its own flat sequence from 0 to 14**, so the
+work a rule called `7.10` appeared there as "step 12", and the dependency tables in both files carried a
+**fourth** sequence left over from 0.2.0 — under which they promised that Figma was required for "steps 4,
+6" while step 4 is now the client approval gate.
+
+The README table is renumbered to the ids everything else uses, and both dependency tables now name the
+work instead of numbering it. Numbers drift across a renumbering; names do not.
+
+The 0.1.0 design record in `docs/specs/` keeps its original sequence, because renumbering a dated record
+falsifies it. Its status note now says so explicitly.
+
+### Fifteen checks became eighty-six
+
+Every new criterion has been **seen to fail on the defect it was written for**, which is this project's
+own rule and the only reason to trust a number that grew this fast.
+
+The two worth naming separately were both found by running the flow on a real project rather than by
+reading it:
+
+**`coverage-check`** exists because the boundary between analysis and design was the only boundary
+nothing verified. The Analyst produced use cases, the Designer produced screens, and every other
+artefact here is checked against the one before it. On the test project `verify-html` returned
+*"0 findings, HTML passes the measured gate"* on a capture where **one agreed requirement had no screen
+at all and one screen served no requirement**. Every frame was tagged, in bounds, paired and covered.
+The geometry was perfect and the product was both incomplete and over-scoped. Screens now declare what
+they serve with `data-uc`, tagged rather than inferred, for the same reason `data-viewport` is.
+
+**`build-diff`** is step 7.10, the check the industry reliably leaves undone: the designer assumes QA
+covers it, QA assumes the designer does, and the code quietly reinterprets the design in between.
+Everything needed already existed — the approved capture is the reference, and `--url` points the same
+harness at a running build. Only the comparison was missing. Pairing is by `data-uc` plus viewport,
+**never by caption**, because a build's captions come from its own markup.
+
+### Domain knowledge, without shipping a table of laws
+
+`domainConstraints` was added and then read by nothing, which this project has a rule against: a
+register nothing reads is noise, exactly as a rule with no register is a preference.
+
+`domain-check` reads it now. It requires **all eight categories answered, including "not applicable"**,
+because an unasked question and a null answer look identical otherwise. Every entry carries a source
+and a `verifiedBy` of `human` or `agent`, and **anything an agent inferred must also exist as a
+low-confidence assumption**, so a retention period nobody confirmed arrives at the client as a question
+rather than as a fact. Getting that wrong is not a design defect, it is a liability.
+
+What ships is the method, not the regulations: look at the **sector's standards body first**, then the
+regulator, then the client's compliance officer. Rules differ by country and change without notice, and
+stating a legal requirement wrongly is worse than stating nothing.
+
+Running it across ten domains found a false positive: `regulator` was being asked to name what it
+affects, and four of the ten produced a made-up entry to satisfy it. Naming the supervisor is
+**context**; its consequences arrive as the other seven categories. A false positive is worse than a
+miss, because it teaches people to skip the check.
+
+### One design, three viewports, and targets choose
+
+The first attempt put a `surface` field on each viewport, which was the wrong axis. A responsive
+website and a native app are not one product at more sizes, but they are **one design**: desktop,
+tablet and mobile, produced once.
+
+Implementation `targets` then declare which viewports they consume. A website takes all three; a native
+app takes tablet and mobile and never desktop. `coverage-check` fails a target naming a viewport the
+design never produced, so *"we cannot build iOS, nobody drew tablet"* is found in Phase 3 rather than in
+Phase 7 by a developer with nothing to work from.
+
+### The gaps an audit found that reading had not
+
+Mechanical audits over the whole repository found seven defects that every review had missed:
+
+- **`/pica-analyse` listed `accessibility mandate`; `domain-check` required `standard`.** Every project
+  would have failed the gate on a category mismatch
+- The same command told you to write `verifiedBy: "assumption"`, a value the check does not accept
+- **`pica-impl` called a script in `pica-designqa` without declaring the dependency**, so a standalone
+  install had a command pointing at a file that was not there
+- **`estimate-check` refused to run without `scopeFrozen`, and nothing wrote it.** A deadlock: two
+  correct artefacts with nothing joining them, which is the same shape as the analysis-to-design gap
+- `schema-check` and `domain-knowledge.md` were written and never wired to a command
+- `flow-check` threw an unhandled filesystem error instead of printing usage
+- `SKILL.md` still described four packages and listed twenty-eight fewer state keys than the scripts read
+
+`scopeFrozen` is now documented as **deliberately written by no command**: it is the moment an Account
+records that a human client agreed, and refusing to price work without it is the point rather than an
+obstacle.
+
+
+### The design direction, and the reason there is no catalogue of fields
+
+Every product has a house style its field already expects, and a brief almost never states it. Until now
+pica had no step that proposed one: `research.md` could **derive** tokens from a client's sources and it
+explicitly refused to invent, which is right, but it left greenfield work with nothing between the audit
+and the UI kit. The palette got chosen anyway — silently, by whoever built the kit first.
+
+Step **2c** now settles it. Intake gains a sixth input (the field named narrowly, the audience, and the
+conditions of use), and step 2c proposes two or three named directions from **three to five real products
+in that field that were measured** — radius, control height, hue count, tabular figures, spacing. Same
+shape as `1d`: options that cannot be compared are not a choice. GATE 2 approves the direction alongside
+the audit and the tokens, so no new gate and no renumbering.
+
+**pica ships no table of what a field looks like.** No "banking means small radii". Such a table is
+precisely what this flow already refuses — *"best practice suggests" is not research* — it cannot be
+defended in a client review, and it is wrong the moment a field moves. What ships is the method, and the
+method does not go out of date. A precedent with no measurement is not a precedent: "Stripe feels clean"
+cites nothing.
+
+Two modes, and the second is where the value is. **Propose** covers greenfield. **Audit** runs when a
+brand already exists: the direction is then the client's own system, scored against what its field does,
+and the gaps are presented as questions rather than corrections. The brand still wins; each accepted gap
+lands in `deviations` with its reason, because an accepted gap and an unnoticed one look identical three
+weeks later. Tokens with no client source take a third origin, `proposed`, naming the direction and the
+measured precedent — `taken` and `derived` claim a client source, and the separate word is what stops a
+greenfield palette from later reading as reuse.
+
+### A direction is written as numbers or it is not written
+
+The part that is actually hard is not choosing a direction, it is still having it at package eleven. A
+direction agreed in conversation and recorded as prose lasts about as long as a copy rule does, which
+this changelog's own history puts at about a day.
+
+So `state.direction.assert` is machine-checkable, and **`verify-html` gains a fifth check**. The capture
+artefact gains a per-frame `census`: corner radii with counts, control heights, non-neutral hues in 30°
+buckets, and how many numeric runs render with tabular figures. Aggregated per frame, never per element —
+a direction is a property of the kit, and recording it per node would multiply the file by the node count
+to say the same thing.
+
+Three decisions that make the check usable rather than merely present:
+
+- **Hues are counted across the whole capture, not per frame.** A three-hue budget spent one hue per
+  screen is still three; scoring frames alone calls that a pass and lets a palette sprawl one screen at a
+  time.
+- **One finding per violating value, not per frame.** A single wrong token appears on every screen that
+  uses it, and forty identical lines bury the one value anybody has to change.
+- **A percentage radius is a circle, not a corner style.** Scoring an avatar against a px maximum is a
+  category error, so `%` is excluded outright.
+
+The contract when the data is thin follows `geometry-diff` from 0.7.1 exactly. **No direction declared →
+not applicable, and it says so** rather than reporting a silent green. **Declared but captured before
+0.8.0 → FAIL**, because a check that cannot run is not a pass. And a direction with an empty `assert`
+block is itself a finding: a direction nothing can breach passes every screen by default and is worse
+than none.
+
+### pica-core failed to load, at install and ever after
+
+`packages/core/.claude-plugin/plugin.json` declared `"hooks": "./hooks/hooks.json"`. Claude Code loads
+that path automatically, so the declaration made it a duplicate and the plugin refused to load:
+
+```
+pica-core  0.7.0  ✘ failed to load
+Error: Hook load failed: Duplicate hooks file detected: ./hooks/hooks.json resolves to
+already-loaded file …/hooks/hooks.json. The standard hooks/hooks.json is loaded
+automatically, so manifest.hooks should only reference additional hook files.
+```
+
+`manifest.hooks` is for **additional** hook files only. One line deleted. Reproduced from a clean install
+of the published marketplace, and verified fixed by a second clean install: all five plugins load, and
+`pica-core` still registers both hooks — SessionStart and the PreToolUse Figma write gate — because the
+conventional path was always the one doing the work.
+
+`claude plugin validate` does not catch this. It passed `packages/core` before the fix and after it,
+which is why the manifest survived three releases.
+
+### The brief was demanded, never stored, and required again at the end
+
+Intake input 1 asks for the brief raw and unedited. Step 1 then wrote five files — `contract`,
+`exclusions`, `effort-log`, `rationale`, `annotations` — and **none of them was the brief**. `state.json`
+carried 33 keys and none held it either.
+
+Closeout opens with *"Re-read the original brief. Cold. The brief. Not `docs/contract.md`, not the plan,
+not your memory of it"*, and that step has already earned its place once: it recovered a scored
+deliverable that the plan had dropped entirely. But this flow also says **no session survives a
+multi-day project**, and Phase B is measured in days. So on every project long enough to need closeout,
+the brief existed only in a chat window that was gone by the time the step ran.
+
+By this flow's own standard — *a rule with no register is a preference* — input 1 was not a rule. It
+demanded something be written down, had a later step read it, and named no place for it to live.
+
+Fixed at all three points: 1a writes `docs/brief.md` verbatim **the moment the brief arrives**, state
+gains `briefPath`, and closeout reads that path and **fails loudly** if it is gone rather than silently
+reading the contract instead — which is the exact substitution the step exists to prevent.
+
+### An empty exclusions list meant two different things
+
+`docs/exclusions.md` is *"the single highest-value artefact in the whole flow"*, and it is weakest
+exactly where it is needed most. Its first half is quoted from the brief, so a one-line brief rules
+nothing out and produces nothing — on the projects with the least defined scope, which are the ones
+whose scope grows. The second half, *"then ask the human what else to add"*, was the entire defence and
+had no register behind it.
+
+So an empty `exclusions` could mean the human was asked and there is genuinely nothing, or that nobody
+asked. Nothing could tell those apart, including the author three weeks later — in the one register
+whose whole purpose is separating a decision from an oversight.
+
+`exclusionsConfirmed` now records the ask, and **GATE 1 refuses to pass while it is false** or while
+`docs/brief.md` is missing. One question and one file, both unrecoverable afterwards.
+
+### GATE 7 did not exist
+
+The gates run 1 to 9, one per step, and the sequence skipped 7. Step 7 is `/pica-review` — the one step
+that can **write** to a delivered file, via `--fix` — and it was the only step with no gate at the end of
+it. The write hook still held (report mode denies every mutation), so nothing was unsafe; what was
+missing was the stop that hands the findings to a human and ends there.
+
+It is deliberately not shaped like the others. Every gate before it asks for approval of finished work;
+this one hands over a list and asks which of it is worth doing, because the right fix is frequently a
+design decision rather than a repair — a contrast failure is solved by darkening the scrim or by changing
+the text colour, and that is not the flow's to pick. Zero findings still passes through it, since a review
+that found nothing and a review that never ran look identical in a transcript.
+
+### The check count was two different wrong numbers
+
+`plugin.json` claimed "Eight checks that fail closed" and the README claimed "the seven checks", and they
+had disagreed for three releases. Neither was right, and the reason is that the number counted **scripts**
+while calling them checks: 0.7.0 added `source-parity.js` and bumped 7 to 8 in one file and not the other.
+Two of those eight are captures that check nothing.
+
+Both were corrected to **fifteen** at the time, and the README gained the table that derives it — `verify-html` 5,
+`parity-check` 2, `flow-check` 7, `geometry-diff` 1 — with the definition it is counted under: a named
+criterion with a stated pass condition that returns non-zero and stops the step. An undefined number is
+what let this drift; a number with its working shown next to it can be recounted by anyone who doubts it.
+
+*(The count reached eighty-six later in the same release. The table is still the thing that makes that
+claim checkable rather than a boast.)*
+
+"Four gates enforced by hook" was checked at the same time and is correct: `gate-figma-write` denies on
+the `figma-use` contract, a delivered file, an active report-mode review, and missing write authorization.
+
+### Every command was shipping without a description
+
+All seven command files had no frontmatter, so every `/pica…` command installed with no description and
+`claude plugin validate` warned on all seven. Each now declares `description` and, where it takes them,
+`argument-hint`. All four packages validate clean.
+
+## 0.7.1
+
+### geometry-diff compares the edge the alignment makes meaningful
+
+The diff compared the HTML's glyph **ink** left edge against Figma's **layout box** left edge. Those
+share an edge only for left-aligned text. For a right-aligned FILL label the box starts at the
+container's left while the ink ends at its right, so `dx` was the container's width minus the string —
+a number that is neither a defect nor a pass. Centred text had the same problem, scaling with the
+string.
+
+Until now the answer was to tolerate it: annotate centred findings, and write a `deviations` entry per
+run. On the project that produced this change that meant **eleven hand-written exemptions**, and one of
+them hid a real **258px** error for days, because the exemption dropped the very run that would have
+caught it. A human found it by opening the frame.
+
+`geometry-diff.mjs` now compares **left for left, right for right, centre for centred**. A right-aligned
+label is checked against the margin it must sit on, which is what the design promises. Proven on the
+case that motivated it: the same design that produced a phantom `-258.4` now passes with no exemption,
+and a genuinely 56px-short right edge is caught as `dR=-56`.
+
+**The dump contract gains two optional fields**: `texts: [[string, x, y, w, align], ...]`. A three-field
+dump still runs and falls back to left-edge comparison, but **says so in the output** — because a gate
+that silently cannot check right-aligned text is worse than one that admits it.
+
+### Both sides must name their font
+
+`capture-html-reference.mjs` now records the family the browser actually resolved in `meta.font`,
+forced or not — `forcedFont` only ever said what was *asked for*, and was null on a native run.
+
+The Figma dump gains a `font` field per frame, and `geometry-diff` refuses to run unless every frame
+carries one and they all match the capture. Unknown is not a pass, and a partly labelled dump is
+rejected: accepting one lets the unlabelled frames through in whatever family they were taken in, which
+is the failure the guard exists to prevent.
+
+This came from a team that designs in one font and hands over in another, flipping constantly. Position
+depends on the family — the swap moved hug-width nodes 2 to 5 percent, several times the tolerance — so
+without the guard every other run silently attributes typeface to layout.
+
+### Rules the same project paid for
+
+- **figma-gates** — an exemption is a claim, and claims age. A stale entry does not just go out of date,
+  it blinds the check at the point it was aimed. Write it on the invariant, and give any measurable
+  premise a lens that re-measures it. First ask whether it excuses a decision or a measurement bug.
+- **figma-gates** — reachability is a walk, not a count. Breadth-first from the entry, once per lane,
+  plus an assertion that no edge crosses viewport or theme.
+- **review-discipline** — WCAG is the wrong instrument near black; use `ΔL*` for surface against
+  surface. A change that took a sheet from invisible to clearly separated moved WCAG from 1.03 to 1.13.
+- **review-discipline** — a surface role must stay distinguishable from its neighbours. Value parity and
+  role separation are two different checks, and a palette can be reproduced perfectly while two roles
+  collapse into one colour.
+- **html-prototype** — the builder is the source of the file it builds. Editing generated output is a
+  mine that goes off the next time anyone runs the script.
+
 ## 0.7.0
+
+### Tablet is a first class viewport
+
+`768 x 1024` joins desktop and mobile as a documented entry in the viewport catalogue, with an 8
+column grid at 16 gutter and 24 margin. Nothing in the flow needed changing: `data-viewport` was
+already a tag the scripts read rather than a device class they guessed at, so tablet worked all along.
+What was missing was a canonical size, which meant every project invented one.
+
+768 is chosen because it is the breakpoint minimum, so the tightest case is covered, and because the
+8 column grid puts the column width within a pixel of the 4 column mobile grid at 375. A card that
+spans two columns is then the same width at both sizes, so tablet fits more of them per row rather
+than stretching each one. Components reflow instead of being redrawn, which is what makes a tablet
+pass cheap. Reaching for 834 or 810 to match a particular iPad loses that relationship and buys
+nothing.
+
 
 Fifth project of evidence, and the first that was **not a port**: a client's own Figma file rebuilt into
 a design-system-quality one — 92 components, 389 variables, 163 screens — with no brief, no HTML and
