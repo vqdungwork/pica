@@ -1,5 +1,186 @@
 # Changelog
 
+## 0.9.0
+
+### The flow reaches the product, and every step has a role
+
+0.8.0 claimed a chain "from a brief to a released product" while `implementation.md` said, in its own
+first paragraph, that it did not ship a coding agent. Both statements shipped. The banner, the README
+and the release commit carried the first; the package carried the second. **The claim was wrong and the
+package was right**, and the gap was found by running the flow rather than by reading it again.
+
+Two packages close it:
+
+**`pica-developer`** — the code. The API contract as a seam with mandatory `errors`, the four places
+state is allowed to live and why each is wrong for the other three, the four kinds of failure and the
+shape each needs so the copy can reach it, components before screens, a performance budget with the
+condition it holds under, accessibility written in rather than retrofitted, and security at the
+boundary. `dev-check.mjs` decides seven of those from the source.
+
+**`pica-qa`** — the tests. The pyramid with an owner per layer, one end-to-end test per use case rather
+than per screen, every business rule asserted somewhere, a regression test that failed before it passed,
+four severity levels with a release gate that reads severity rather than a count, and test data that is
+never real. `qa-check.mjs` decides seven of those.
+
+`pica-impl` keeps the repository — pipeline, branches, environments, secrets — and its "what this is
+not" section now names the split instead of denying the capability.
+
+### Nine role agents, and none of them were loading
+
+Every step now runs as the agent that owns it: `pica-researcher`, `pica-analyst`, `pica-architect`,
+`pica-designer`, `pica-writer`, `pica-evaluator`, `pica-estimator`, `pica-developer`, `pica-tester`.
+Each loads its own craft rules **and reads the sector entry before it starts**, which is what keeps a
+clinician's screen and a warehouse handheld from coming out of the same template.
+
+Three defects were found in that wiring, and only by measuring it:
+
+- **No `plugin.json` declared `agents`, so not one of the nine loaded.** Nine files, correct in
+  themselves, in a directory Claude Code never read.
+- **`validate-packages.mjs` did not know `agents/` existed**, so all nine shipped unowned and the
+  orphan scan reported clean. A directory the validator does not know about is a directory that can be
+  wrong forever, which is the failure mode it was written to end. `agents` now sits alongside
+  `commands`, `rules`, `scripts` and `hooks` in both loops.
+- **Six of the nine did not load the sector**, while `/picaflow` asserted in writing that all of them
+  did. Each now names what the sector decides for its own role: NFRs the client will never raise
+  because to them it is the law they already live under; a register the reader is fluent in; hues
+  already spent on a meaning; the approval body that lands on the critical path.
+
+### `/picaflow` runs the whole project, and stops in three places
+
+It covered phases 0 to 3. It now runs to whichever `--to` target is named, and **each of the three is a
+complete project rather than a truncated one**: `design` ends at a measured, clickable `review.html`;
+`figma` adds the ported file verified frame by frame; `product` adds working front end and back end,
+tested and released.
+
+**Figma is off the critical path.** `--to product` goes straight from the approved HTML to production
+code without touching it. That was always the intent and was never stated as a supported route.
+
+Between the three confirmations it does not ask. Everything the sources cannot settle becomes a
+labelled assumption carrying a confidence and a blast radius, surfaced beside the screen it produced.
+
+### Eight defects the flow found in itself, by being run
+
+The chain was run end to end on a real product — a community-pharmacy dispensing queue,
+brief to released code, Figma skipped — and it found more in pica than pica found in it.
+Every fix below is a check that could not have bitten before, and every one was
+mutation-tested in both directions afterwards: the defect is caught, no other check
+co-fires, and the legitimate artefact still passes clean.
+
+**`copy-check` printed a pass over a state it never looked at.** Its error-state scan
+matched "error", "failed" and "offline", and the product's refusal screens were captioned
+"refused" — so it reported `0 findings (0 error frames)`. Now it also matches refused,
+denied, blocked, rejected and unavailable.
+
+**And then it passed a dead end anyway.** With the frames finally in scope, a refusal
+reading only "This item cannot be checked by this person" still passed, because an
+unrelated card on the same screen was titled "Check against the prescription" and "check"
+is in the imperative list. The scan now narrows to the runs the error component owns, and
+says so in the report when it has to fall back to the whole frame.
+
+**Which needed the capture to record something it never had.** A message inside
+`<span class="warn"><span>…</span></span>` has an empty owner class, so scoping on it
+alone saw the label and not the sentence beneath it. Text runs now carry the nearest
+classed ancestor at index 11, appended so every existing consumer keeps its positions.
+
+**`dev-check` crashed on the documented shape.** `enforcedBy` is a string in
+`business-analysis.md` and in `trace-check`, and `dev-check` read it as an array —
+`TypeError: (r.enforcedBy || []).map is not a function` on the first project that
+followed the documentation.
+
+**Its server-guard vocabulary missed the strongest guarantee in the build.** A rule
+enforced by revoking `UPDATE` on an append-only table was reported as client-only,
+because the word list had "database" and not "table" or "grant".
+
+**And it had no way to say a rule is presentational.** "A drug name is never truncated"
+is a rendering guarantee no API can hold. `presentationOnly` plus `presentationWhy` is
+now the register — declared, reasoned, counted in the report — because every other
+deliberate exception in this repository has one.
+
+**`impl-check` could not see Postgres.** The stack alias map held one needle per
+technology, and a JavaScript repository spells Postgres `pg` in `package.json` and
+`postgres:16` in a compose file. Aliases are lists now, matched on a word boundary below
+four characters so `pg` does not match `jpg`.
+
+**It also reported someone else's test fixture as your credential.** A tracked
+`node_modules` flooded the secrets scan; the one finding was a credential-shaped string
+in a vendored type definition. Vendored paths are still scanned — a real secret vendored
+in is real — and a finding inside one says so, while the tracked dependency directory is
+reported as the defect to fix first.
+
+**`branch-protect` told you how to satisfy it and then ignored the answer.** Its message
+said "record `state.branchProtection` with who verified it, when, and what they saw", the
+field is `note`, and a project that wrote `what` kept failing with the same advice. It
+names the three fields now.
+
+**`arch-check` could not match "GitHub Actions" to `github-actions`.** Punctuation is
+normalised on both sides.
+
+**`qa-check` demanded a bare `true` for the rollback.** `rollbackExecuted: true` is a
+claim with nothing behind it; `{on, by, what}` records who ran it and what happened, which
+is what someone asks for six months later. Both are accepted, the object is reported, and
+one that says nothing is refused.
+
+### What the run could not have found any other way
+
+Three defects in the product itself came from steps no script performs, and they are
+worth naming because they are the argument for those steps existing:
+
+- **Two tall-man forms were wrong** — `ceftAZIDime` for `cefTAZidime`, and `morphINE`,
+  which is not on the ISMP list at all. A patient-safety error in a pharmacy product that
+  all eleven design gates passed. Found by rendering the screen and reading it.
+- **Every queue row opened the clinical screen** whatever stage its item was at, so a
+  checked item opened the pharmacist's screening form. `flow-check` passed it: the target
+  existed and was reachable. Found by clicking.
+- **A control labelled "Back to the queue" went to the accuracy check** the user had just
+  been refused on. Found by clicking.
+
+A fourth came from using real data rather than invented data: `co-amoxiclav 875mg/125mg
+film-coated tablets` is an ordinary dispensed product and it overflowed the 390 viewport,
+where six invented drug names had all fitted.
+
+### Two more, from ten review passes that ran things instead of reading them
+
+**Every cross-package script path was wrong in an install.** In the repository, packages
+sit side by side under `packages/`, so a sibling is `${CLAUDE_PLUGIN_ROOT}/../<name>`.
+Installed, each package has its own versioned directory as `pica-<name>/<version>`, and
+that path resolves to nothing. Seven commands and all nine agents carried it. `/picaflow`
+therefore reported **every one of its measured checks as SKIPPED on every real install** —
+honest, and the whole chain silently unavailable. The agents were worse: they used
+repo-relative paths, which resolve only when the project being worked on *is* the pica
+repository.
+
+Both now resolve at runtime and were verified by running the flow end to end against a
+simulated install, not by reading the paths again. The runner also tells the two absences
+apart: "pica-html is not installed" sent someone to install a package they already had,
+when what was missing was one script that version does not ship.
+
+**The delivery freeze could be turned off by a typo.** `gate-figma-write` checked
+`delivered is True`, so `"delivered": "true"` — a plausible hand-edit of a file anyone can
+edit — read as not-delivered and let writes through. A non-boolean is now refused as
+malformed. This is the same fail-open the file's own closing comment exists to prevent, in
+the one gate nobody would think to re-test, because the project it protects is already
+handed over.
+
+The ten passes also confirmed, by running them: 26 bad-input probes and every script fails
+closed; 26 adversarial payloads and the hook holds; 49 mutations and every one is caught
+with no co-fire; 380 check runs across the existing corpus with zero crashes; every count
+in the README matching what the repository actually contains.
+
+### Counted rather than claimed
+
+| | 0.8.0 | 0.9.0 |
+|---|---|---|
+| packages | 10 | 12 |
+| commands | 14 | 16 |
+| rule modules | 20 | 22 |
+| check scripts | 15 | 18 |
+| checks | 86 | 100 |
+| role agents | 1 | 9 |
+
+The README's check table sums to its own total, and the badge follows the table rather than the other
+way round. The first recount put it at 101: `trace-check` was credited with eight checks because a
+summary-table row and a `fail()` label were counted as two different things. Seven is correct.
+
 ## 0.8.0
 
 ### Six new packages, and the flow now reaches past the design

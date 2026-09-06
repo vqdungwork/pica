@@ -231,7 +231,16 @@ than failing with a path error. A silently skipped verification is the failure t
 prevent.
 
 ```bash
-S=${CLAUDE_PLUGIN_ROOT}/../research/scripts/schema-check.mjs
+# Two layouts: the repository, where packages sit side by side under packages/, and an
+# install, where each has its own versioned directory under the marketplace cache. A path
+# that assumed only the first resolves to nothing on every real install.
+pica_find() {
+  R="${CLAUDE_PLUGIN_ROOT}"
+  [ -f "$R/../$1/scripts/$2" ] && { printf '%s' "$R/../$1/scripts/$2"; return 0; }
+  find "$R/../.." -maxdepth 4 -path "*/pica-$1/*/scripts/$2" -print 2>/dev/null | sort -V | tail -1
+}
+S=$(pica_find research schema-check.mjs)
+[ -n "$S" ] || echo "SKIPPED schema-check: pica-research is not installed. NOT a pass."
 if [ -f "$S" ]; then node "$S" docs/research/measured.json
 else echo "pica-research is not installed, so the measurement table was NOT verified. That is a stated limitation, not a pass."; fi
 ```

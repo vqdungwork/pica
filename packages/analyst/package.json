@@ -15,6 +15,9 @@
       "domain-check.mjs",
       "industry-check.mjs",
       "trace-check.mjs"
+    ],
+    "agents": [
+      "pica-analyst.md"
     ]
   },
   "requires": {

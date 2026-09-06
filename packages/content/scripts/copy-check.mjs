@@ -50,12 +50,14 @@ if (!frames.length) {
   process.exit(2);
 }
 
-/* Text runs are [string, x, y, w, h, size, weight, ownerClass, align]. Index 0 is the
- * only field this check needs, and index 7 attributes a finding to a component. */
+/* Text runs are [string, x, y, w, h, size, weight, ownerClass, align, colour, background,
+ * ancestorClass]. Index 0 is the only field this check needs; index 7 attributes a finding
+ * to a component and index 11 to the component that CONTAINS it, which is where an error
+ * message's identity actually lives. */
 const runs = [];
 for (const f of frames)
   for (const t of f.texts || [])
-    runs.push({ text: String(t[0] || ""), owner: String(t[7] || ""), where: `${f.pkg} :: ${f.cap}` });
+    runs.push({ text: String(t[0] || ""), owner: String(t[7] || "") || String(t[11] || ""), where: `${f.pkg} :: ${f.cap}` });
 
 if (!runs.length) {
   console.error("FAIL  the capture recorded no text runs. Copy cannot be checked, and that is not a pass.");
@@ -201,16 +203,45 @@ const ACTION = new RegExp("\\b(" + [
   "go back", "return", "close", "cancel", "undo", "remove", "delete",
   "update", "change", "edit", "fix", "enable", "allow", "grant",
   "wait", "connect", "reconnect", "upload", "download", "save",
+  "another", "someone else", "sign", "switch", "hand", "give",
 ].join("|") + ")\\b", "i");
 let deadEnds = 0;
+let errorFrames = 0;
+let wholeFrameScoped = 0;
+
+/* WHICH TEXT the next step has to be in. The first version joined every run on the
+ * frame, and that made the check inert: a refusal reading only "This item cannot be
+ * checked by this person" passed, because an unrelated card on the same screen was
+ * titled "Check against the prescription" and "check" is in the list above.
+ *
+ * Verified by mutation — the dead end was introduced deliberately and the check still
+ * reported "0 findings (2 error frames)", which is the silence-reads-as-success failure
+ * this file argues against.
+ *
+ * So the scan narrows to the runs the error component owns, identified by the owning
+ * element's class. When no run on an error frame is owned by anything error-shaped, the
+ * scan falls back to the whole frame and SAYS SO in the report, because a narrowed scan
+ * that silently matched nothing would be the same failure in a new place. */
+const ERR_OWNER = /error|refus|warn|alert|fail|offline|denied|blocked|rejected|unavailable|danger|critical/i;
+
 for (const f of frames) {
-  if (!/\berror\b|\bfail(ed|ure)?\b|\boffline\b/i.test(f.cap || "")) continue;
-  const text = (f.texts || []).map((t) => String(t[0] || "")).join(" ");
+  if (!/\berror\b|\bfail(ed|ure)?\b|\boffline\b|\brefus(ed|al)\b|\bdenied\b|\bblocked\b|\brejected\b|\bunavailable\b/i.test(f.cap || "")) continue;
+  errorFrames++;
+  /* Index 7 is the run's own class and index 11 the nearest classed ancestor. A message
+   * inside `<span class="refuse"><span>…</span></span>` has an empty index 7, so scoping
+   * on it alone saw the label and not the sentence. */
+  const owned = (f.texts || []).filter((t) => ERR_OWNER.test(String(t[7] || "")) || ERR_OWNER.test(String(t[11] || "")));
+  const scoped = owned.length ? owned : (f.texts || []);
+  if (!owned.length) wholeFrameScoped++;
+  const text = scoped.map((t) => String(t[0] || "")).join(" ");
   if (!text.trim()) continue;
   if (!ACTION.test(text)) {
     deadEnds++;
     fail("error-next-step", `${f.pkg} :: ${f.cap}`,
-      "the error state names what happened but nothing the user can do. An error with no next step is a dead end");
+      owned.length
+        ? "the error message names what happened but nothing the user can do. An error with no next step is a dead end"
+        : "no run on this frame is owned by an error-shaped class, so the whole frame was scanned, and even then " +
+          "nothing tells the user what to do. Give the error component a class the scan can find");
   }
 }
 
@@ -243,7 +274,8 @@ const table = [
   ["no-placeholder", placeholders, `${runs.length} runs`],
   ["glossary-terms", wrongTerms, wrongTerm.size ? `${wrongTerm.size} non-terms declared` : "no non-terms declared"],
   ["copy-rules", ruleViolations, `${copyRules.length} rules`],
-  ["error-next-step", deadEnds, `${frames.filter((f) => /error/i.test(f.cap || "")).length} error frames`],
+  ["error-next-step", deadEnds, `${errorFrames} error, refusal or offline frame(s)`
+     + (wholeFrameScoped ? `, ${wholeFrameScoped} scanned whole because no run is owned by an error-shaped class` : "")],
   ["length-realism", uniform, `${frames.length} frames`],
 ];
 for (const [name, n, scope] of table)
@@ -253,6 +285,10 @@ if (!glossary.length)
   console.log("\nNOTE  no glossary in state. Term checking did not run; that is not the same as passing it.");
 if (!copyRules.length)
   console.log("NOTE  no copyRules declared. Any house rule stated in conversation is not being enforced.");
+if (wholeFrameScoped)
+  console.log(`NOTE  ${wholeFrameScoped} error frame(s) have no run owned by an error-shaped class, so the next-step\n` +
+              "      scan fell back to the whole frame. An imperative anywhere on the screen then counts, which\n" +
+              "      is weaker than it looks. Give the error component a class carrying error, warning or refused.");
 
 if (findings.length) {
   console.log("");

@@ -10,6 +10,9 @@
     ],
     "scripts": [
       "schema-check.mjs"
+    ],
+    "agents": [
+      "pica-researcher.md"
     ]
   },
   "requires": {

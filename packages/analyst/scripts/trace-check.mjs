@@ -18,11 +18,11 @@
  *                         PASS: 0 invented names.
  *   5. AS-IS PRESENT      a TO-BE with no AS-IS cannot show what changed.
  *                         PASS: both present, or neither.
+ *   6. ASSUMPTION RADIUS  every assumption records what it produced and what it
+ *                         affects.  PASS: 0 assumptions with no blast radius.
  *   7. EXCLUSIONS ASKED  the scope question was asked, and the answer recorded.
  *                        PASS: exclusionsConfirmed is true.
  *
- *   6. ASSUMPTION RADIUS  every assumption records what it produced and what it
- *                         affects.  PASS: 0 assumptions with no blast radius.
  *
  * Exit 0 only when every check passes. A check that could not run is a failure, not a
  * pass — see the "green check" rule in core's review-discipline.md.

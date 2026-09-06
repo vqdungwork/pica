@@ -29,9 +29,15 @@ These seven rules hold for the whole session. They are not suggestions and they 
    decision; the flow is what the human uses, and it is where the defects nothing can measure live. One
    prototype per application, linked to each other for real.
 
-**`/picaflow <brief>` runs the whole chain** from a thin brief to a reviewable, measured, clickable
-`review.html`, without stopping to ask. Everything it cannot derive becomes a labelled assumption the
-client corrects, because reacting to a built thing is far cheaper than specifying one.
+**`/picaflow <brief>` runs the whole chain**, stopping only at the three points where a person has to
+decide: the design, the scope and deadline, and the finished product. Everything it cannot derive in
+between becomes a labelled assumption the client corrects, because reacting to a built thing is far
+cheaper than specifying one.
+
+`--to design` ends at a measured, clickable `review.html`. `--to figma` adds the ported file, verified
+frame by frame. `--to product` adds working front end and back end, tested and released. **Each is a
+complete project, and Figma is off the critical path.** Every step runs as the agent that owns it, and
+each agent reads the sector entry before it starts.
 
 Or run the steps yourself:
 
@@ -44,6 +50,8 @@ Or run the steps yourself:
 | `/pica-copy` | the words, every state, bound to the glossary |
 | `/pica-evaluate` | 3 to 5 independent evaluators, walkthrough, build vs design |
 | `/pica-estimate` | three-point effort by role, work order, effort logged back |
-| `/pica-build` | the definition of done for building and releasing |
+| `/pica-develop` | the code: the API contract, where state lives, how failure is shaped |
+| `/pica-test` | the shape of the suite, one end-to-end test per use case, the release gate |
+| `/pica-build` | the repository: pipeline, branches, environments, secrets |
 | `/pica-port` · `/pica-review` · `/pica-prototype` | the Figma half, optional |
 | `/pica-close` · `/pica-feedback` | handover, and triaging someone else's review |

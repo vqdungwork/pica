@@ -1,7 +1,7 @@
 {
   "name": "pica",
-  "description": "From the brief to the shipped product. Analyse the domain and the sector, design in HTML at every viewport you declare, verify by measurement rather than opinion, then estimate, build and release. Seventy-five checks that fail closed, four gates enforced by hook.",
-  "version": "0.8.0",
+  "description": "From the brief to the shipped product. Analyse the domain and its sector, design in HTML at every viewport you declare, verify by measurement rather than opinion, then estimate, architect, build, test and release. Nine role agents, 100 checks that fail closed, four gates enforced by hook.",
+  "version": "0.9.0",
   "author": {
     "name": "Dung Vuong"
   },
@@ -18,7 +18,9 @@
     "pica-architect",
     "pica-estimate",
     "pica-content",
-    "pica-impl"
+    "pica-impl",
+    "pica-developer",
+    "pica-qa"
   ],
   "keywords": [
     "design",

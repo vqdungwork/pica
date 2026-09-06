@@ -1,12 +1,26 @@
 {
   "name": "pica-estimate",
   "description": "pica estimate: three-point effort by role, a work order derived from the deadline, and the effort record that makes the next estimate better than this one.",
-  "version": "0.8.0",
-  "author": { "name": "Dung Vuong" },
+  "version": "0.9.0",
+  "author": {
+    "name": "Dung Vuong"
+  },
   "homepage": "https://github.com/vqdungwork/pica",
   "repository": "https://github.com/vqdungwork/pica",
   "license": "MIT",
-  "commands": ["./commands"],
-  "dependencies": ["pica-core"],
-  "keywords": ["estimation", "pert", "resourcing", "effort"]
+  "commands": [
+    "./commands"
+  ],
+  "dependencies": [
+    "pica-core"
+  ],
+  "keywords": [
+    "estimation",
+    "pert",
+    "resourcing",
+    "effort"
+  ],
+  "agents": [
+    "./agents/pica-estimator.md"
+  ]
 }

@@ -177,7 +177,9 @@ if (manual) {
   unprotected++;
   fail("branch-protect", "gh",
     "GitHub CLI not available, so branch protection could not be read. A check that cannot run is not a pass: " +
-    "install gh, or record state.branchProtection with who verified it, when, and what they saw");
+    'install gh, or record state.branchProtection as { verifiedBy, on, note } — naming the fields ' +
+    'because "who verified it, when, and what they saw" was written into a `what` key on the first ' +
+    'project that followed this sentence, and the check went on failing with the same advice');
 } else {
   const json = sh("gh api repos/{owner}/{repo}/branches/main/protection 2>/dev/null");
   if (!json) {
@@ -248,6 +250,16 @@ const SECRET = [
   [/\b(password|passwd|secret|api_?key)\s*[:=]\s*['"][^'"\s]{8,}['"]/gi, "hardcoded credential"],
 ];
 const tracked = (sh("git ls-files") || "").split("\n").filter(Boolean);
+/* A dependency directory that is TRACKED is its own defect, and it also floods this scan
+ * with other people's test fixtures: one repository produced a single finding, and it was
+ * a credential-shaped string inside a vendored type definition. Reporting that as "a
+ * hardcoded credential in your repository" is a false positive in everything but the
+ * literal sense, and a false positive here teaches people to stop reading the check.
+ *
+ * So vendored paths are still scanned — a real secret vendored in is a real secret — and
+ * a finding inside one says so, while the tracking itself is reported once. */
+const VENDORED = /(^|\/)(node_modules|vendor|third_party|bower_components)\//;
+const vendoredTracked = tracked.filter((f) => VENDORED.test(f)).length;
 for (const rel of tracked) {
   if (!/\.(js|jsx|ts|tsx|json|ya?ml|env|sh|py|rb|go|java|kt|swift|toml|properties)$/i.test(rel)) continue;
   if (/(^|\/)(package-lock\.json|yarn\.lock|pnpm-lock\.yaml)$/.test(rel)) continue;
@@ -256,7 +268,10 @@ for (const rel of tracked) {
   for (const [re, what] of SECRET) {
     if (re.test(text)) {
       secrets++;
-      fail("secrets", rel, `contains what looks like a ${what}, and it is tracked in git`);
+      fail("secrets", rel, VENDORED.test(rel)
+        ? `contains what looks like a ${what}, inside a VENDORED dependency that is tracked in git. `
+          + `It is probably not yours, and a tracked dependency directory is the defect to fix first`
+        : `contains what looks like a ${what}, and it is tracked in git`);
       break;
     }
   }
@@ -304,17 +319,37 @@ if (Object.keys(stack).length) {
     try { return fs.readFileSync(path.join(repoDir, f), "utf8"); } catch { return ""; }
   });
   parts.push(sh("git ls-files") || "");
+  /* Aliases are LISTS, because a technology's evidence is rarely its own name. Postgres
+   * appears in a JavaScript repository as the dependency `pg` and in a compose file as
+   * the image `postgres:16`, and neither contains the word "postgresql" — so a repository
+   * with both was reported as showing no sign of it.
+   *
+   * A needle of three characters or fewer is matched on a word boundary. Without that,
+   * "pg" matches "jpg" and every check passes for the wrong reason, which is worse than
+   * the false positive it was fixing. */
   const ALIAS = {
-    "github-actions": ".github/workflows", "gitlab-ci": ".gitlab-ci", "circleci": ".circleci",
-    "node": "package.json", "postgres": "postgres", "postgresql": "postgres",
+    "github-actions": [".github/workflows"], "gitlab-ci": [".gitlab-ci"], "circleci": [".circleci"],
+    "node": ["package.json"],
+    "postgres": ["postgres", "pg", "psql", ".sql"], "postgresql": ["postgres", "pg", "psql", ".sql"],
+    "mysql": ["mysql", "mariadb"], "sqlite": ["sqlite", ".db"],
+    "redis": ["redis", "ioredis"], "mongodb": ["mongo"],
+    "playwright": ["playwright"], "vitest": ["vitest"], "jest": ["jest"],
+    "typescript": ["typescript", "tsconfig", ".ts"],
   };
   const stackHay = parts.join("\n").toLowerCase();
   const NATIVE = /swift|kotlin|flutter|react-native/i;
+  const found = (needle) => {
+    const q = needle.toLowerCase();
+    if (q.length > 3) return stackHay.includes(q);
+    /* Short needles get a boundary, or "pg" matches "jpg". Dots are literal here on
+     * purpose: ".ts" should match a path segment, not any three characters. */
+    return new RegExp(`(^|[^a-z0-9])${q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}([^a-z0-9]|$)`, "m").test(stackHay);
+  };
   for (const [role, name] of Object.entries(stack)) {
     const n = String(name).toLowerCase();
     if (NATIVE.test(n)) continue;
-    const needle = (ALIAS[n] || n).toLowerCase();
-    if (!stackHay.includes(needle) && !stackHay.includes(n)) {
+    const needles = ALIAS[n] || [n];
+    if (!needles.some(found) && !found(n)) {
       stackMismatch++;
       fail("stack-declared", role,
         `state declares "${name}" and the repository shows no sign of it. Either the declaration is stale or the build is not what was agreed`);
@@ -336,7 +371,8 @@ const table = [
   ["branch-protect", unprotected, manualProtection ? "recorded by a human, not read from the API" : hasGh ? "via gh" : "gh unavailable"],
   ["branch-age", stale, `${branches.length} branches, ${MAX_AGE}-day window`],
   ["environments", envMissing, "dev, staging, prod"],
-  ["secrets", secrets, `${tracked.length} tracked files`],
+  ["secrets", secrets, `${tracked.length} tracked files`
+     + (vendoredTracked ? `, of which ${vendoredTracked} are a VENDORED dependency that should not be tracked` : "")],
   ["nfr-measured", nfrUnmeasured, `${nfrs.length} NFR(s)`],
   ["stack-declared", stackMismatch, Object.keys(stack).length ? `${Object.keys(stack).length} declared` : "none declared"],
 ];

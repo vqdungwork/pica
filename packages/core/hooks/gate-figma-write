@@ -128,7 +128,20 @@ def main():
     if not is_write:
         allow()
 
-    if state.get("delivered") is True:
+    # `is True` and not truthiness, so a project is frozen only when something said so
+    # deliberately. But a NON-BOOLEAN here is a hand-edit gone wrong, not a decision, and
+    # `"delivered": "true"` silently unfreezing a delivered file is the same fail-open
+    # this file's closing comment exists to prevent — in the one gate nobody would think
+    # to re-test, because the project it protects is already handed over.
+    delivered = state.get("delivered")
+    if delivered is not None and not isinstance(delivered, bool):
+        deny(
+            f'pica: .pica/state.json has "delivered" set to {delivered!r}, which is a '
+            f"{type(delivered).__name__} rather than true or false. The delivery freeze cannot be "
+            "read, so Figma writes are blocked. Set it to a JSON boolean."
+        )
+
+    if delivered is True:
         deny(
             "pica: this project is delivered and its Figma file is frozen. Writes are blocked. "
             "If something is wrong, report it; do not repair it. To reopen deliberately, set "

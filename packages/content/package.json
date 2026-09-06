@@ -11,6 +11,9 @@
     ],
     "scripts": [
       "copy-check.mjs"
+    ],
+    "agents": [
+      "pica-writer.md"
     ]
   },
   "requires": {

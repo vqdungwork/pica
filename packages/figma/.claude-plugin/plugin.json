@@ -1,12 +1,23 @@
 {
   "name": "pica-figma",
   "description": "pica figma: port an approved package or rebuild an existing Figma file, annotate it, and verify it by measurement.",
-  "version": "0.8.0",
-  "author": { "name": "Dung Vuong" },
+  "version": "0.9.0",
+  "author": {
+    "name": "Dung Vuong"
+  },
   "homepage": "https://github.com/vqdungwork/pica",
   "repository": "https://github.com/vqdungwork/pica",
   "license": "MIT",
-  "commands": ["./commands"],
-  "dependencies": ["pica-core", "pica-html"],
-  "keywords": ["design", "figma", "handoff"]
+  "commands": [
+    "./commands"
+  ],
+  "dependencies": [
+    "pica-core",
+    "pica-html"
+  ],
+  "keywords": [
+    "design",
+    "figma",
+    "handoff"
+  ]
 }
