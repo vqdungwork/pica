@@ -12,7 +12,7 @@
  *   4. displaced     — which nodes sit at their screen's origin where the source has them elsewhere?
  *
  * Why position and not name: duplicate screen names are normal in a client file (four screens called
- * "Detail objednávky" on the project this came from) and renames are part of the job. Keep the rebuilt
+ * a localised heading, say) and renames are part of the job. Keep the rebuilt
  * screens at the source's canvas coordinates and pairing is exact.
  *
  * A distance of 0 with different strings is the finding that matters: right geometry, wrong content.

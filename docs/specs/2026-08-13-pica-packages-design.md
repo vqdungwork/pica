@@ -46,7 +46,7 @@ platform. Figma describes what a screen looks like without prescribing how it is
 which is what a native implementer needs.
 
 *Why the transfer must be earned rather than declared.* The port is lossy; every serious
-defect in the source projects appeared during or after it. Authority passes only on
+defect in one implementations appeared during or after it. Authority passes only on
 proof — a measured diff of zero — never on the port having been performed.
 
 *What remains true.* HTML stays the verification baseline. It is executable, so its
@@ -213,7 +213,7 @@ Each item is typed, so `/pica status` can report what is satisfied:
 - `gate` — the human approval this package requests on completion
 - `artifact` — a file that must exist
 
-The `human` type is load-bearing. On the fourth source project ten harnesses ran green
+The `human` type is load-bearing. Ten harnesses once ran green
 three times and a human found four defects in a screenshot the same afternoon. Encoding
 that as data rather than prose is what stops it being skipped.
 
@@ -261,7 +261,7 @@ things.
   a running application. `e2e` is a partial answer, not a complete one.
 - **Whether annotations can be verified as *correct*** rather than merely present and
   matching `state.json`. A wrong reflow rule recorded consistently in both still ships.
-- **Usability testing.** No source project has ever run any. Nothing here should be read
+- **Usability testing.** None informed any of this. Nothing here should be read
   as claiming otherwise.
 
 ## Risks

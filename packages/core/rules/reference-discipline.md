@@ -39,7 +39,7 @@ Zero, or it is no longer a reference.
 ## Names are not identity. Establish a channel that is.
 
 Pairing an artefact to its reference by name breaks on the two most ordinary events in a project:
-duplicate names and renames. One file had four screens called `Detail objednávky`; renaming is half the
+duplicate names and renames. One file can carry four screens with the same localised title; renaming is half the
 job of a rebuild.
 
 Decide the identity channel **before you build**, make it something you control, and assert it rather

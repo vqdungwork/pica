@@ -151,7 +151,7 @@ entry points because they recur over days and the session will not survive that.
 `startup|clear|compact`.
 
 **Trigger.** Automatic. Not skippable. Re-fires after compaction, which is the case that matters:
-on the source project a rule agreed on day one had decayed by day two inside one long session.
+on one implementation a rule agreed on day one had decayed by day two inside one long session.
 
 **Actions.**
 1. Read `${CLAUDE_PLUGIN_ROOT}/hooks/dispatcher.md`.
@@ -178,7 +178,7 @@ Never fail silently, because a silent failure looks identical to a working insta
 | Input | Why |
 |---|---|
 | The brief, raw and unedited | Paraphrasing at intake loses the exact wording that later resolves disputes |
-| Sources, each labelled `use` or `ignore` | On the source project an unlabelled file held several old versions of the same app, any of which could have been mistaken for current |
+| Sources, each labelled `use` or `ignore` | On one implementation an unlabelled file held several old versions of the same app, any of which could have been mistaken for current |
 | The commercial constraint, plus any disclosure policy | Hours, cap, fixed-scope or time-and-materials, and what the client must not be told |
 | Environment facts | Fonts installed, MCP servers live, and what only the human can do |
 | One declaration: is Figma a deliverable | Determines whether steps 4, 6 and 8 exist at all |
@@ -205,7 +205,7 @@ Nothing proceeds until all four are approved.
 
 **State written.** `figmaInScope`, one entry per work package with its `tier`, `disclosurePolicy`.
 
-**Why the exclusions list matters most.** On the source project a screen the brief explicitly ruled
+**Why the exclusions list matters most.** On one implementation a screen the brief explicitly ruled
 out was designed anyway, and was caught only when the human re-read the brief two days later.
 
 ---
@@ -221,9 +221,8 @@ out was designed anyway, and was caught only when the human re-read the brief tw
 **Actions.**
 1. Audit the existing product across every source labelled `use`. Log findings with stable IDs.
 2. Audit any adjacent source the brief implies. If the brief says reuse an existing design system,
-   the audit must cover that system's actual home, not just the artefact being redesigned. On the
-   source project the brief said reuse the desktop design system, and the desktop site had not been
-   looked at until the human asked.
+      the audit must cover that system's actual home, not just the artefact being redesigned. Where a
+      brief says reuse the desktop design system, the desktop site is the thing that goes unexamined.
 3. Extract tokens: colour, type scale, spacing, radii, elevation. Record provenance per token, which
    source it came from and whether it was taken or derived.
 4. Research precedent for anything the product does not already do. Cite sources.
@@ -329,7 +328,7 @@ Complex tier actions, in order:
    error plus whatever the feature implies.
 2. Build the screens in HTML at the configured frame size.
 3. Use real assets. No emoji standing in for icons, no generic stock imagery unrelated to the
-   content. On the source project fifteen emoji placeholders had reached the component library.
+   content. Fifteen emoji placeholders had reached the component library.
 4. For any screen taller than the viewport, produce a **pair**: one fixed-viewport interactive version
    with real overflow scrolling and pinned chrome, and one full-height version equivalent to a Figma
    hug. Never a separate "scrolled" duplicate frame.
@@ -355,7 +354,7 @@ entries, and for complex packages `docs/<wp>-options-report.md`.
 **Rules loaded.** `figma-screens.md`, `figma-elements.md`. `figma-use` before the first write.
 
 **Precondition, hook-enforced.** `workPackages.<wp>.htmlApproved` must be true. A `use_figma` write
-is denied otherwise. This is not advice; the hook blocks the call. On the source project a package
+is denied otherwise. This is not advice; the hook blocks the call. A package
 was ported before approval and the whole page had to be deleted.
 
 **Actions.**
@@ -385,7 +384,7 @@ measurement.
 **State written.** `workPackages.<wp>.ported = true`.
 
 **The non-negotiable.** HTML is the source of truth. Where Figma and HTML disagree, Figma is wrong.
-Measure, do not eyeball. Every hard defect on the source project was invisible to visual review and
+Measure, do not eyeball. Every hard defect  was invisible to visual review and
 obvious to measurement.
 
 ---
@@ -405,7 +404,7 @@ obvious to measurement.
 | Report | default | Reads and measures. Changes nothing. Writes only its own report file |
 | Fix | `--fix` | Applies fixes, then re-audits to zero |
 
-Report is the default because on the source project an audit ran as a write against a delivered file
+Report is the default because  an audit ran as a write against a delivered file
 and deleted a node unrecoverably. While a report-mode review is active, the `PreToolUse` hook denies
 every `use_figma` write.
 
@@ -427,7 +426,7 @@ every `use_figma` write.
 **Outputs.** `docs/reviews/<date>-<wp>.md`, one row per finding with severity, location, measured
 evidence, and the fix. Zero findings is a valid and reportable outcome.
 
-**Cadence.** Runs per package, immediately after its port. Not accumulated. On the source project
+**Cadence.** Runs per package, immediately after its port. Not accumulated. On one implementation
 review was deferred until the end and became 64 findings across 12 rounds, because two days of
 divergence had piled up.
 

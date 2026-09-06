@@ -900,7 +900,7 @@ done means for it. `requires` is what makes omitting a package safe: a package r
 start when its inputs are missing and names which. `definitionOfDone` items are typed,
 and a `human` item cannot be satisfied by any script — the schema rejects one that names
 a script, because ten green harnesses and four screenshot-obvious defects on the fourth
-source project is what that type exists to prevent.
+one place is what that type exists to prevent.
 
 `review-gates.md` is retired. Its 685 lines are split three ways: 22 medium-independent
 sections into core's `review-discipline.md`, five HTML gates into `html-gates.md`, nine

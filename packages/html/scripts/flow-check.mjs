@@ -7,7 +7,7 @@
  * A work package ships option boards AND an interactive prototype of its main
  * flow (html-prototype.md, "Options decide, the flow is the deliverable"). The
  * boards are static and measurable. The flow is not: every defect a human found
- * on the source project by *using* the prototype was a navigation defect with no
+ * by *using* a prototype rather than looking at it is a navigation defect with no
  * geometric signature — a row that opened another role's screen, a back control
  * that left the application, a deep link that bounced through the launcher, an
  * entry point that lit the wrong tab.

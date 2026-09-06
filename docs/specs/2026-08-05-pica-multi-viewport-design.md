@@ -8,13 +8,13 @@ default, and which this repository's allowlist does not publish. So a design rec
 the two beside it was silently excluded from every clone. Moved here, which is the repo's own
 convention.
 
-**Evidence base:** one desktop spike, `spike/recruitment/`, built from a real PRD. Eleven findings,
+**Evidence base:** one desktop trial build, a two-viewport trial build, built from a full set of requirements. Eleven findings,
 recorded in that project's own notes. Four of them contradict the design as originally reasoned; three
 of those were only found by building.
 
-**The spike is not in this repository and will not be.** It carries a client's brief, PRD and real copy.
+**The trial build is not in this repository and will not be.** It carries a client's brief, PRD and real copy.
 What survived it is in `CHANGELOG.md` under 0.3.0, stated as rules next to the failures that earned
-them, which is the durable form. Every path into `spike/` below is a reference for the author, not a
+them, which is the durable form. Every path into `trial build/` below is a reference for the author, not a
 file a reader can open.
 
 ---
@@ -78,7 +78,7 @@ inline axis only, so frame height stays content-driven and **the tall-screen hug
 ]
 ```
 
-Three corrections the spike forced on the original schema:
+Three corrections the trial build forced on the original schema:
 
 - **`required` per chrome entry** (F1). Chrome is not uniform across frames at one viewport — a
   filter sidebar exists on `search / results` and not on `search / entry`. `required: true` must be
@@ -147,11 +147,11 @@ one window size; here it means **the desktop frame renders mobile chrome**, and 
 gets ported to Figma. Invisible to visual review, obvious to measurement — pica's founding claim,
 reproduced. Keeping all such blocks in one trailing section makes the ordering a visible convention.
 `@layer` is the more principled fix and is plain CSS with no build step; recommended in the rule but
-**not exercised in this spike**, so it ships as a suggestion, not a verified instruction.
+**not exercised in this trial build**, so it ships as a suggestion, not a verified instruction.
 
 ## 5. Capture script — now a prerequisite, not polish
 
-`capture-html-reference.mjs` ran against the spike with **only a `--frame` selector change** and
+`capture-html-reference.mjs` ran against the trial build with **only a `--frame` selector change** and
 produced correct output: 14 frames, hidden elements properly excluded (the `r.width < 1` filter
 handles `display: none`), desktop and mobile distinguishable by width.
 
@@ -160,7 +160,7 @@ them it can never return zero:
 
 - **F8 — text runs must carry their owning element's classes.** Today a run is
   `[text, x, y, w, h, fontSize, weight]`, with no link to its element, so text belonging to a
-  registered reflow cannot be filtered out. On this spike that is 97 advisory diffs that can never be
+  registered reflow cannot be filtered out. On this trial build that is 97 advisory diffs that can never be
   silenced. Fix is one line; `el` is already in scope.
 - **F11 — boxes must carry depth and parent index.** Excusing a reflowing component must excuse what
   is *inside* it. `cand__actions` is registered and hidden below 1024, but each contains a
@@ -177,14 +177,14 @@ prototype and has no frame anywhere. It becomes a finding rather than shipping i
 
 ## 6. The parity check, redesigned
 
-The originally designed check compared the **set of screen names** per viewport. The spike shows it
+The originally designed check compared the **set of screen names** per viewport. The trial build shows it
 checks the wrong thing (F6): both columns are the same markup in one file, so name parity is
 satisfied by construction and catches nothing. The real risk is **markup drift between hand-copied
 columns** — and it is not hypothetical. Building `search.html` produced a stray `ポ` inside a
 candidate name in the desktop column only, and `id`/`for` pairs needing manual uniquification per
 column.
 
-Redesigned, and prototyped working in `spike/recruitment/docs/parity-check.mjs`:
+Redesigned, and prototyped working in a two-viewport trial build:
 
 1. Nominal parity — cheap first pass, catches a screen missing at a viewport entirely.
 2. **Structural parity on multisets, not sets** (F10). The set version reported zero findings on all
@@ -212,7 +212,7 @@ referenced in 0.2.0).
 roughly double the frame count against the MCP call budget and a half-written viewport is worse than
 an unstarted one.
 
-**None of section 7 is verified.** It needs a Figma file and the spike did not have one.
+**None of section 7 is verified.** It needs a Figma file and the trial build did not have one.
 
 ## 8. The gate
 
@@ -280,7 +280,7 @@ consumers is what makes it a register rather than a document nobody checks.
 | `SKILL.md`, `figma-mcp.md`, `figma-elements.md`, `plugin.json` | state docs, call budget, hover variants, version | small |
 | `scripts/capture-baseline.js` | none — paints are viewport-agnostic | — |
 
-**Ordering change forced by the spike:** the capture-script work (F8, F11) comes *before* the audit
+**Ordering change forced by the trial build:** the capture-script work (F8, F11) comes *before* the audit
 work, not after. The parity check cannot return zero without it.
 
 ## 11. Verification
@@ -288,7 +288,7 @@ work, not after. The parity check cannot return zero without it.
 1. **Collapse regression** — a mobile-only project through 0.3.0 must produce an identical reference
    JSON, HTML structure and set of firing audit checks to 0.2.0. Protects every existing project and
    is fully runnable today.
-2. **The spike as fixture** — `spike/recruitment/` is a working two-viewport project with a populated
+2. **The trial build as fixture** — a two-viewport trial build is a working two-viewport project with a populated
    register. Its parity check currently reports **1 finding, not zero**: the `btn--secondary`
    count mismatch from F11, which cannot be silenced until subtree pruning lands. That single
    finding is the fixture's expected value today, and reaching zero is the acceptance test for the
@@ -302,8 +302,8 @@ work, not after. The parity check cannot return zero without it.
 
 - The Figma half (section 7) is **entirely unverified**. No Figma file was available. It ships marked
   unverified, in the same register 0.2.0 uses for its own Figma half.
-- One desktop project of evidence, and it is a spike rather than a delivered engagement.
-- The spike never ran `/pica` intake to completion — only the brief existed, so GATE 1 stayed shut
+- One desktop trial build behind it, not a body of delivered work.
+- That build never ran `/pica` intake to completion — only the brief existed, so GATE 1 stayed shut
   and no package HTML was ever approved. The gate logic in section 8 is designed, not exercised.
 
 ## 13. Open question for the human

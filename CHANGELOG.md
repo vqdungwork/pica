@@ -208,14 +208,15 @@ pin down.
 ### A third of the repository had never been looked at
 
 Enumerating every file rather than globbing the directories the audit already knew about found 47 files
-under `spike/`, correctly gitignored and never shipped, and three things that were not correct:
+in a working directory that is correctly gitignored and never shipped, and three things that were not
+correct:
 
 - **A 311-line design record was silently excluded from every clone.** It sat in
   `docs/superpowers/specs/`, which is where the brainstorming tool writes by default and which this
   repository's allowlist does not publish, while the two records of exactly its kind sit in `docs/specs/`
   and ship. Its status line still said "awaiting human review" three releases after the release it
   describes shipped. Screened for client content, moved to the repo's own convention, and its evidence
-  base annotated so a reader knows the spike it cites is deliberately not redistributable
+  base annotated so a reader knows the working material it cites is deliberately not redistributable
 - **`SKILL.md` said implementation was "not built"** while `pica-impl` ships and is stable. README already
   had the accurate framing: pica ships the definition of done for implementation, not a coding agent
 - **Two plan and spec records had stale or missing statuses**, so a reader could not tell what was
@@ -1048,7 +1049,7 @@ done means for it. `requires` is what makes omitting a package safe: a package r
 start when its inputs are missing and names which. `definitionOfDone` items are typed,
 and a `human` item cannot be satisfied by any script — the schema rejects one that names
 a script, because ten green harnesses and four screenshot-obvious defects on the fourth
-source project is what that type exists to prevent.
+one place is what that type exists to prevent.
 
 `review-gates.md` is retired. Its 685 lines are split three ways: 22 medium-independent
 sections into core's `review-discipline.md`, five HTML gates into `html-gates.md`, nine
@@ -1126,7 +1127,7 @@ Seven findings.
 - **`flows` in state**, one entry per application, plus `flowExemptions` for a screen the router opens
   rather than any control. Declared at intake, because it is a fact about the product.
 - **The interactive flow leads the review tab bar and is the default tab.** Tab order reads as priority
-  order whatever you meant by it: on the source project the tabs sat in build order and the human's report
+  order whatever you meant by it: tabs left in build order once made a human's report
   was that the review page still opened on the first application built rather than on the launcher.
 - **Never assert a proxy.** `overflow: hidden` does not change `scrollWidth`; a z-index assertion run with
   the sheet closed produced 38 findings on a correct file; a scrim comparison must be a **ratio**, because
@@ -1151,14 +1152,14 @@ Seven findings.
 
 ### Known limits
 
-- Four projects of evidence. The Figma half is unchanged and untouched by this release, and is now the
+- The Figma half is unchanged and untouched by this release, and is now the
   less exercised half by some distance.
 - `flow-check` reads markup, so a link built in JavaScript is invisible to it, and it cannot judge whether
   a link goes somewhere *sensible*. Clicking remains a line in the definition of done.
 - The ten project harnesses behind F45 and F46 are not shipped. They are too project-shaped to
   generalize honestly, so what ships is the rules they produced. A future release should extract the two
   that are general: stacked separators, and every layer above a scrim measurably darker once it opens.
-- **No usability testing happened on the source project at any point.** Every finding here is from
+- **No usability testing informed any of this.** Every finding here is from
   measurement, from looking, or from the client using the prototype.
 
 ## 0.4.0
@@ -1173,7 +1174,7 @@ there. The 0.3.0 coverage audit did not catch this because it graded whether con
 Six findings, all of the same shape: **a rule that names a check, with nothing behind it.**
 
 - **F37 — the parity check and geometry diff did not ship.** Now in `skills/design-flow/scripts/`,
-  generalized off the source project. `geometry-diff.mjs` takes its Figma-to-HTML frame mapping from
+  generalized rather than hardcoded. `geometry-diff.mjs` takes its Figma-to-HTML frame mapping from
   `frameMap` in state rather than a hardcoded table.
 - **F38 — the HTML was never measured.** `/pica-wp` ran no check at all; measurement began at
   `/pica-port`. An HTML-only project (`figmaInScope: false`) therefore received *no* verification, while
@@ -1225,7 +1226,7 @@ mandatory.
 ## 0.3.0
 
 Third project of evidence, and the first that is **not mobile-only**: a desktop-shaped recruitment web
-application taken from a real PRD, designed in HTML at two declared viewports and ported to Figma in full
+application designed in HTML at two declared viewports and ported to Figma in full
 — 33 frames, 108 variables, 12 text styles, 37 component variants, two wired prototypes.
 
 **35 findings.** Four contradicted the 0.3.0 design as originally reasoned. The most valuable ones were
@@ -1296,7 +1297,7 @@ element and text-align**; and each box's **depth and nearest classed parent**.
 
 Those last two are not polish — without the owner, text inside a registered reflow reports as drift
 forever; without the parent chain, excusing a component cannot excuse its descendants. With them the
-parity check went from **305 raw deltas to 0 findings** on the source project. It also skips the
+parity check went from **305 raw deltas to 0 findings** in one implementation. It also skips the
 storybook, which is a documentation board and yields no frames.
 
 One subtlety worth the comment it carries: the parent must be the nearest **classed** ancestor.
@@ -1305,7 +1306,6 @@ breaks the chain and defeats the pruning.
 
 ### Known limits
 
-- Three projects of evidence, one of them a spike rather than a delivered engagement.
 - The geometry diff's **x-axis** comparison is still uncalibrated for centred and FILL text. The
   capture now records `text-align` so it *can* be, but the diff does not yet use it.
 - The Figma half remains less exercised than the HTML half, now across two design systems rather than
@@ -1378,7 +1378,7 @@ horizontally and said nothing about vertical centring anywhere.
     `by: "html-fix-pending"` is a promise that gets closed before handover.
   - **`exclusions`** gets a matchable form beside the prose in `docs/exclusions.md`, and closeout compares
     frame names against it. This is the check that would have caught the ruled-out screen that got designed
-    anyway on the source project.
+    anyway.
   - **`bannedChars`** moves from the audit script's config to intake, where the fact is actually
     established.
 - **The published-number recount is now implemented.** 0.1.0 listed it as a check and shipped no code, so

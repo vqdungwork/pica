@@ -79,7 +79,7 @@ if (shapeErrors.length) {
 
 
 /* Content taller than the viewport by less than this is a rounding artefact of a
- * scroll region, not a screen that needs a hug twin. Calibrated on the 0.3.0 spike:
+ * scroll region, not a screen that needs a hug twin. Calibrated rather than chosen:
  * real overflows there were 90px and up, sub-pixel noise never exceeded 8px. */
 const HUG_THRESHOLD = 24;
 
