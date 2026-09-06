@@ -1,0 +1,90 @@
+{
+  "name": "analyst",
+  "status": "stable",
+  "description": "Elicitation, domain and industry knowledge, AS-IS and TO-BE, business rules, use cases, the domain model and the PRD. Turns a brief into something a client can agree to.",
+  "owns": {
+    "commands": [
+      "pica-analyse.md"
+    ],
+    "rules": [
+      "business-analysis.md",
+      "domain-knowledge.md",
+      "industry-knowledge.md"
+    ],
+    "scripts": [
+      "domain-check.mjs",
+      "industry-check.mjs",
+      "trace-check.mjs"
+    ]
+  },
+  "requires": {
+    "state": [
+      "field"
+    ],
+    "artifacts": [
+      "docs/brief.md"
+    ],
+    "gates": []
+  },
+  "produces": {
+    "state": [
+      "glossary",
+      "businessRules",
+      "useCases",
+      "domainModel",
+      "domainConstraints",
+      "industry",
+      "asIs",
+      "toBe",
+      "delta",
+      "stakeholders",
+      "exclusionsConfirmed"
+    ],
+    "artifacts": [
+      "docs/contract.md"
+    ]
+  },
+  "checks": [
+    {
+      "run": "trace-check.mjs",
+      "passes": "0 findings"
+    },
+    {
+      "run": "domain-check.mjs",
+      "passes": "0 findings"
+    },
+    {
+      "run": "industry-check.mjs",
+      "passes": "0 findings"
+    }
+  ],
+  "definitionOfDone": [
+    {
+      "type": "check",
+      "run": "trace-check.mjs",
+      "passes": "0 findings"
+    },
+    {
+      "type": "check",
+      "run": "domain-check.mjs",
+      "passes": "0 findings"
+    },
+    {
+      "type": "check",
+      "run": "industry-check.mjs",
+      "passes": "0 findings"
+    },
+    {
+      "type": "artifact",
+      "path": "docs/contract.md"
+    },
+    {
+      "type": "human",
+      "says": "a non-technical reader can follow the TO-BE and say whether it is their business"
+    },
+    {
+      "type": "gate",
+      "grants": "analysisApproved"
+    }
+  ]
+}

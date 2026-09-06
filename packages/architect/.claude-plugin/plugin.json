@@ -1,0 +1,12 @@
+{
+  "name": "pica-architect",
+  "description": "pica architect: feasibility before anything is promised, C4 diagrams, architecture decision records, and non-functional requirements stated as numbers.",
+  "version": "0.8.0",
+  "author": { "name": "Dung Vuong" },
+  "homepage": "https://github.com/vqdungwork/pica",
+  "repository": "https://github.com/vqdungwork/pica",
+  "license": "MIT",
+  "commands": ["./commands"],
+  "dependencies": ["pica-core"],
+  "keywords": ["architecture", "adr", "c4", "nfr", "feasibility"]
+}

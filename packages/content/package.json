@@ -1,0 +1,52 @@
+{
+  "name": "content",
+  "status": "stable",
+  "description": "The words, in every state, bound to the glossary and to the client's own copy rules.",
+  "owns": {
+    "commands": [
+      "pica-copy.md"
+    ],
+    "rules": [
+      "content.md"
+    ],
+    "scripts": [
+      "copy-check.mjs"
+    ]
+  },
+  "requires": {
+    "state": [
+      "glossary"
+    ],
+    "artifacts": [
+      ".audit/html-reference.json"
+    ],
+    "gates": []
+  },
+  "produces": {
+    "state": [
+      "copyRules"
+    ],
+    "artifacts": []
+  },
+  "checks": [
+    {
+      "run": "copy-check.mjs",
+      "passes": "0 findings"
+    }
+  ],
+  "definitionOfDone": [
+    {
+      "type": "check",
+      "run": "copy-check.mjs",
+      "passes": "0 findings"
+    },
+    {
+      "type": "human",
+      "says": "every error state says what to do, not only what happened"
+    },
+    {
+      "type": "gate",
+      "grants": "copyApproved"
+    }
+  ]
+}

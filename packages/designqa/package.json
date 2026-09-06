@@ -1,0 +1,59 @@
+{
+  "name": "designqa",
+  "status": "stable",
+  "description": "Independent evaluation before the client sees anything, and the comparison of the built product against the approved design at 7.10.",
+  "owns": {
+    "commands": [
+      "pica-evaluate.md"
+    ],
+    "rules": [
+      "evaluation.md"
+    ],
+    "scripts": [
+      "build-diff.mjs"
+    ],
+    "agents": [
+      "pica-evaluator.md"
+    ]
+  },
+  "requires": {
+    "state": [
+      "useCases"
+    ],
+    "artifacts": [
+      ".audit/html-reference.json"
+    ],
+    "gates": []
+  },
+  "produces": {
+    "state": [],
+    "artifacts": [
+      "docs/reviews/"
+    ]
+  },
+  "checks": [
+    {
+      "run": "build-diff.mjs",
+      "passes": "0 findings, at 7.10 only"
+    }
+  ],
+  "definitionOfDone": [
+    {
+      "type": "human",
+      "says": "three to five evaluators ran with different lenses, none seeing another's findings"
+    },
+    {
+      "type": "human",
+      "says": "a cognitive walkthrough ran per use case"
+    },
+    {
+      "type": "check",
+      "run": "build-diff.mjs",
+      "passes": "0 findings, at 7.10 only"
+    },
+    {
+      "type": "gate",
+      "grants": "evaluated"
+    }
+  ]
+}
