@@ -4,7 +4,7 @@ Date: 2026-07-31
 Status: **implemented as 0.1.0 and superseded from 0.2.0 onward. Kept as the original design record and
 not current.** Do not read it as guidance.
 
-By 0.8.0 the divergence is large: four packages became ten, six rule modules became twenty, and the flow
+By 0.9.0 the divergence is large: four packages became twelve, six rule modules became twenty-two, and the flow
 now runs from a brief to a released product rather than to an approved design. The `state.json` schema
 below predates every register added since. **Its step numbers are the 0.1.0 sequence and do not match the
 ids the rules and scripts use today** — a rule that says 7.10 has no counterpart in this document.

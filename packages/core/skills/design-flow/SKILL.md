@@ -166,8 +166,10 @@ prove anything is neither.
 and it is not run by whoever wrote the code: someone who knows why a value was chosen will find the
 reason it is acceptable.
 
-`packages/_planned/` keeps per-platform contracts for `impl-web`, `impl-ios`, `impl-android` and `e2e`.
-Those are interfaces worth agreeing before the work starts, and they have no content.
+`packages/_planned/` keeps the two contracts still unbuilt — `impl-ios` and `impl-android`, the native
+builds `native-mobile.md` writes rules for and no package ships. `impl-web` and `e2e` are marked
+**superseded**: 0.9.0 delivered them as `pica-developer` and `pica-qa`. They are kept rather than deleted
+because what was promised, and what delivered it, is worth more than a tidy directory.
 
 ## The role agents
 

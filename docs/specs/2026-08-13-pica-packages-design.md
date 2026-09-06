@@ -1,7 +1,7 @@
 # pica as packages — design
 
 **Status:** **implemented in 0.6.0 and extended since. Kept as the design record, not as outstanding
-work.** By 0.8.0 the four packages it describes are ten, and the flow reaches past Figma to build and
+work.** By 0.9.0 the four packages it describes are twelve, and the flow reaches past Figma to build and
 release. Read `README.md` and `CHANGELOG.md` for what shipped; this file says what was intended.
 **Supersedes:** nothing. Extends the flow described in `skills/design-flow/SKILL.md` at `0.5.0`.
 

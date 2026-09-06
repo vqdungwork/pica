@@ -335,6 +335,8 @@ Twenty-two modules, loaded per step rather than all at once.
 | `content.md` | content | Glossary-bound terms, every state written, length realism, mock data provenance |
 | `evaluation.md` | designqa | Heuristic evaluation fanned out, the cognitive walkthrough, severity, contrast from tokens |
 | `estimation.md` | estimate | Three-point estimation, tiers that change the numbers, headcount as arithmetic, the effort record |
+| `engineering.md` | developer | The API contract as a seam, the four places state lives, failure shapes, accessibility in code, security at the boundary |
+| `testing.md` | qa | The pyramid and who owns each layer, one test per use case, exploratory charters, severity, test data |
 | `implementation.md` | impl | Trunk-based development, the pipeline, environments, secrets, the build-versus-design comparison |
 | `reference-discipline.md` | core | The reference is read-only, identity channels, content parity, fixing at the definition |
 | `review-discipline.md` | core | Report before fix, audit integrity, failing closed, verifying a check by breaking it |

@@ -1,14 +1,27 @@
 {
   "name": "impl-web",
-  "status": "coming-soon",
-  "description": "Implement the verified design as a web application. Contract only — content to be defined by the author.",
-  "owns": { "commands": [], "rules": [], "scripts": [] },
+  "status": "superseded",
+  "description": "The web build shipped in 0.9.0 as pica-developer, with engineering.md and dev-check.mjs. It is not per-platform: one responsive application at every declared viewport, which is what the flow produced anyway.",
+  "owns": {
+    "commands": [],
+    "rules": [],
+    "scripts": []
+  },
   "requires": {
     "state": [],
     "artifacts": [],
-    "gates": ["figmaVerified:<wp>"]
+    "gates": [
+      "figmaVerified:<wp>"
+    ]
   },
-  "produces": { "state": ["packages.impl-web.built"], "artifacts": [] },
+  "produces": {
+    "state": [
+      "packages.impl-web.built"
+    ],
+    "artifacts": []
+  },
   "checks": [],
-  "definitionOfDone": []
+  "definitionOfDone": [],
+  "supersededBy": "pica-developer",
+  "supersededIn": "0.9.0"
 }
