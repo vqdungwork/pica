@@ -10,11 +10,13 @@
       "picaflow.md"
     ],
     "rules": [
+      "proposals.md",
       "reference-discipline.md",
       "review-discipline.md"
     ],
     "scripts": [
-      "pica-status.mjs"
+      "pica-status.mjs",
+      "proposal-check.mjs"
     ],
     "hooks": [
       "dispatcher.md",
@@ -47,7 +49,12 @@
       ".pica/state.json"
     ]
   },
-  "checks": [],
+  "checks": [
+    {
+      "run": "proposal-check.mjs",
+      "passes": "every universal slot is presented or skipped with a reason, every option names its provenance, and every choice records who, when and their own words"
+    }
+  ],
   "definitionOfDone": [
     {
       "type": "artifact",

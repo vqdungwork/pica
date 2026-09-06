@@ -4,8 +4,8 @@
 
 **From a brief to a released product, checked by measurement at every step. For Claude Code.**
 
-[![version](https://img.shields.io/badge/version-0.9.0-1f2328)](https://github.com/vqdungwork/pica/releases)
-[![checks](https://img.shields.io/badge/checks-100%20fail--closed-1f2328)](#the-checks)
+[![version](https://img.shields.io/badge/version-0.9.1-1f2328)](https://github.com/vqdungwork/pica/releases)
+[![checks](https://img.shields.io/badge/checks-106%20fail--closed-1f2328)](#the-checks)
 [![agents](https://img.shields.io/badge/role%20agents-9-1f2328)](#nine-roles-one-per-step)
 [![sectors](https://img.shields.io/badge/sectors-28-1f2328)](#it-knows-the-field)
 [![licence](https://img.shields.io/badge/licence-MIT-1f2328)](LICENSE)
@@ -72,6 +72,46 @@ FAIL  captured 0 frames from 3 file(s).
 
 That last one is the whole argument in five lines. **A check that reports success for work it did not do
 is worse than no check, because its silence reads as a pass.**
+
+## What it asks you
+
+Most of pica decides. This is the part that does not.
+
+> **Propose where the decision is yours and you can judge it by looking.
+> Decide silently where it is craft and looking would not help you.**
+
+Both halves matter. "Postgres or MySQL" is a question that transfers risk to someone with no instrument
+to carry it. Which easing curve a sheet uses is a question that costs your attention and buys nothing.
+
+**Seven slots, universal on every project. What fills them is derived, never listed here** — from the
+sector entry, the measurement and the analysis. A rule offering "streak, chain or run" is a
+habit-tracker rule wearing a general one's clothes, and noise on a payments product.
+
+| | Slot | Filled from |
+|:--:|:--|:--|
+| **S1** | **The direction** — the busiest screen built three ways, same content | the products actually measured, plus the sector's own tradition as the baseline |
+| **S2** | Default mode and density | the sector's colour lead and its density conventions, which for several sectors name *two* densities — and that is itself the decision |
+| **S3** | **The sector's signature moment** | the stakeholder whose fear names the failure that field designs into its own products |
+| **S4** | The word the product turns on | the delta, crossed with the glossary |
+| **S5** | Who sees what | the actors, bounded by the sector's forbidden defaults |
+| **S6** | What is in the first release | every use case, priced in hours |
+| **S7** | Where it runs, in consequences | the targets, and the release asymmetries each one buys |
+
+**S1 is three renderings of one screen, not three palettes.** Nobody can judge `--radius-lg: 12px`. Two
+screens side by side settle it in three seconds, and each option names the measured product it argues
+from — so the choice has numbers behind it rather than three pictures a model liked.
+
+**S3 is the highest-value question in the flow and the one nobody thinks to ask**, because it does not
+look like a design question. It looks like an edge case, gets built the obvious way, and the obvious way
+is the one the field already knows causes the damage. Fitness: the broken streak. Finance: the silently
+failed transfer. Education: being shown you are behind, in front of others.
+
+A slot with no material in this project is **skipped with a reason recorded**. A question nobody asked
+and a question with no answer look identical afterwards, which is why `proposal-check` refuses to run at
+all on a project with no register: reporting zero findings there would be a lie.
+
+**What it cannot do:** tell you the options were worth choosing between. Three weak ones produce a
+choice, a recorded decision, a clean check and a bad product. It says so on every run.
 
 ## The flow
 
@@ -198,9 +238,9 @@ rejected rather than merged.
 |:--|:--|
 | **13 plugins** | 12 packages plus a bundle, each declaring what it requires, produces, checks and considers done |
 | **16 commands** | Deterministic once typed |
-| **22 rule modules** | Loaded per step, never all at once. 173 definition-of-done items across them |
-| **18 check scripts** | Plus the capture harness, the status tool, and a harness that runs the in-Figma scripts outside Figma |
-| **100 checks** | Every one fails closed |
+| **23 rule modules** | Loaded per step, never all at once. 173 definition-of-done items across them |
+| **19 check scripts** | Plus the capture harness, the status tool, and a harness that runs the in-Figma scripts outside Figma |
+| **106 checks** | Every one fails closed |
 | **28 sectors** | 264 names resolving to them, 4 deliberately refused as ambiguous |
 | **9 role agents** | One per step, each loading its own craft rules and the sector entry before it starts. The evaluator has **no write access**, because a reviewer that can fix cannot be trusted to report |
 | **2 hooks** | One loads the rules every session; one refuses a Figma write that has not earned it |
@@ -222,6 +262,7 @@ Listed so the number can be recounted rather than trusted.
 | `copy-check` | 5 | no placeholder, glossary terms, copy rules, error next step, length realism |
 | `flow-check` | 7 | dead end, dangling href, dangling target, unreachable, orphan prototype, nav target, flow declared |
 | `arch-check` | 7 | feasibility verdict, risk priced, NFR complete, constraint becomes NFR, ADR complete, technology has an ADR, mobile signing custody |
+| `proposal-check` | 6 | slot addressed, axis named, provenance, a real choice, nothing the sector forbids, choice recorded |
 | `estimate-check` | 6 | preconditions, three points, tier spread, risk reflected, headcount, effort log |
 | `impl-check` | 8 | test trace, CI pipeline, branch protection, branch age, environments, secrets, NFR measured, stack declared |
 | `code-tokens-check` | 4 | raw colour, raw spacing, raw radius, linear easing |
@@ -229,7 +270,7 @@ Listed so the number can be recounted rather than trusted.
 | `qa-check` | 7 | pyramid shape, use case covered end to end, rule asserted, regression traced, severity defined, test data, release gate |
 | `build-diff` | 5 | frame paired, control height, radius, hue budget, text position |
 | `geometry-diff` | 1 | Figma position against the HTML reference |
-| | **100** | |
+| | **106** | |
 
 **Every one has been seen to fail on the defect it was written for.** That is the only reason to trust a
 number, and it is why each is recorded next to the failure that earned it in
@@ -303,7 +344,7 @@ and ends complete, not truncated.
 
 ## The rules
 
-Twenty-two modules, loaded per step rather than all at once.
+Twenty-three modules, loaded per step rather than all at once.
 
 | Module | Package | Covers |
 |:--|:--|:--|
@@ -323,6 +364,7 @@ Twenty-two modules, loaded per step rather than all at once.
 | `testing.md` | qa | The pyramid and who owns each layer, one test per use case, exploratory charters, severity, test data |
 | `implementation.md` | impl | Trunk-based development, the pipeline, environments, secrets, the build-versus-design comparison |
 | `reference-discipline.md` | core | The reference is read-only, identity channels, content parity, fixing at the definition |
+| `proposals.md` | core | The seven proposal slots, why the slots are universal and their content derived, and the register |
 | `review-discipline.md` | core | Report before fix, audit integrity, failing closed, verifying a check by breaking it |
 | `figma-elements.md` | figma | Token layers, geometry binding, component tiers, naming by role, merge mechanics |
 | `figma-screens.md` | figma | Frames, states, alignment, chrome pinning, CSS to auto-layout, the API traps |

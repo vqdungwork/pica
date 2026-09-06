@@ -1,5 +1,83 @@
 # Changelog
 
+## 0.9.1
+
+### The flow decided almost everything, and a client cannot approve what they were never offered
+
+pica had three stops and no offers. A client first saw the design fully built, in one
+direction, with the taste question already answered by whoever wrote it. Real users asked
+for a design system proposal, which is the visible half of a larger gap.
+
+`proposals.md` and `proposal-check.mjs` close it, and the whole design is in one
+distinction: **the slots are universal, and what fills them is derived.**
+
+Getting that backwards is the obvious mistake. A rule that offered "streak, chain or run"
+as the name would be a habit-tracker rule wearing a general one's clothes, and noise on a
+payments product. So the file names seven slots that exist on every project, and every one
+of them is filled from the sector entry, the measurement and the analysis — never from a
+list in the file:
+
+| | Slot | Fills from |
+|:--:|:--|:--|
+| S1 | the direction | measured products, plus the sector tradition as the baseline |
+| S2 | default mode and density | the sector's colour lead and density conventions |
+| S3 | the sector's signature moment | the stakeholder whose fear names it |
+| S4 | the word the product turns on | the delta crossed with the glossary |
+| S5 | who sees what | the actors, bounded by the sector's forbidden defaults |
+| S6 | what is in the first release | use cases, priced |
+| S7 | where it runs | targets, stated in consequences |
+
+The material was already in the base and nothing read it that way. The same slot fills
+differently per field: fitness names the broken streak, finance the silently failed
+transfer, education being shown you are behind in front of others, pharmacy the look-alike
+name. **S3 is the highest-value question in the flow and the one nobody thinks to ask**,
+because it does not look like a design question — it looks like an edge case, gets built
+the obvious way, and the obvious way is the one the field already knows causes the damage.
+
+### The law, and both halves of it
+
+> Propose where the decision is the client's AND they can judge it by looking.
+> Decide silently where it is craft AND looking would not help them.
+
+A decision that is theirs but unjudgeable — "Postgres or MySQL" — is not a question, it is
+a transfer of risk to someone with no instrument to carry it. A decision that is judgeable
+but not theirs costs their attention and buys nothing. **A flow that asks everything
+produces a client who stops reading by the fourth question and approves the rest, which is
+worse than not asking: it looks like consent.**
+
+### Six checks, and what they refuse
+
+`proposal-check.mjs` verifies the SHAPE of a proposal and never the content: a slot
+addressed or skipped with a reason, an axis its options differ on, provenance per option,
+two or more options, nothing the sector's own forbidden list names, and a choice recorded
+with who, when and **the client's own words** — because a paraphrase is a second decision
+wearing the first one's authority.
+
+It refuses to run at all on a project with no register. Reporting zero findings there
+would be a lie: it would mean every design decision was made by whoever built it, scoring
+clean.
+
+A slot marked "not applicable" on a project that HAS the material is reported, because a
+skip on available material is a decision someone made rather than an absence. And a slot
+that always applies cannot be skipped at all, however good the reason: skipping it is a
+decision to make the client's choice for them.
+
+Verified by twelve mutations, all caught: a dropped slot, a slot skipped with a good
+reason, a skip voided to "n/a", a missing axis, an unsourced option, a source voided, a
+single-option slot, an option describing something the sector forbids, a missing
+attribution, a missing quote, a paraphrase in place of the quote, and a choice naming an
+option that was never offered.
+
+**What it cannot do**, and says on every run: tell you the options were worth choosing
+between. Three weak ones produce a choice, a recorded decision, a clean check and a bad
+product.
+
+| | 0.9.0 | 0.9.1 |
+|---|---|---|
+| rule modules | 22 | 23 |
+| check scripts | 18 | 19 |
+| checks | 100 | 106 |
+
 ## 0.9.0
 
 ### The flow reaches the product, and every step has a role

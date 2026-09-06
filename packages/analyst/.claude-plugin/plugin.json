@@ -1,7 +1,7 @@
 {
   "name": "pica-analyst",
   "description": "pica analyst: elicitation, AS-IS and TO-BE, business rules, the domain model, and a PRD a non-technical reader follows. Carries a 28-sector knowledge base: who the stakeholders are, which colours the sector has already spent and why, the design tradition it settled on, and what it treats as a defect regardless of the brief. Fails closed on a sector it does not cover.",
-  "version": "0.9.0",
+  "version": "0.9.1",
   "author": {
     "name": "Dung Vuong"
   },

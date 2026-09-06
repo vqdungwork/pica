@@ -44,8 +44,15 @@ Without `--to`, stop at `design` and say what the next two would cost.
 | **CONFIRM 2** | scope and deadline, written to `scopeFrozen` and `deadline` | a commercial commitment, and an estimate before it prices a guess |
 | **CONFIRM 3** | the released product against the original brief | whether what was built is what was wanted |
 
-At CONFIRM 1 present, in this order: the **delta** first, then the low-confidence assumptions most
-consequential first, then what was not supplied and what its absence cost.
+At CONFIRM 1 present, in this order: the **delta** first, then **what they chose and why**, then the
+low-confidence assumptions most consequential first, then what was not supplied and what its absence
+cost.
+
+**The proposals are not part of the confirmation, they precede it.** `proposals.md` names seven slots —
+universal on every project, filled from the sector entry, the measurement and the analysis, never from a
+list. A client who first sees the design fully built, in one direction, was not offered the decision that
+was theirs; a client asked twenty questions stops reading by the fourth and approves the rest, which
+looks like consent and is not.
 
 ---
 
@@ -59,6 +66,7 @@ coming out of the same template.
 |:--|:--|:--|
 | 1 · research | `pica-researcher` ×3–5, one per product, none seeing another's findings | `design-vocabulary.md` |
 | 1.8 · feasibility | `pica-architect` | `architecture.md` |
+| 3.1 · proposals | main thread, never an agent | `proposals.md` |
 | 2 · analysis | `pica-analyst` | `business-analysis.md`, `domain-knowledge.md`, `industry-knowledge.md` |
 | 3 · design | `pica-designer` | `html-prototype.md`, `html-gates.md`, `native-mobile.md` |
 | 3.5 · the words | `pica-writer` | `content.md` |
@@ -114,7 +122,8 @@ With `--resume`, read `state.chain.completed` and continue from the next step.
 | **2.1–2.1c** | Stakeholders, domain constraints, **the sector resolved** | `state.stakeholders`, `state.domainConstraints`, `state.industry` |
 | **2.2–2.11** | Glossary, AS-IS, TO-BE, **delta**, rules, flows, use cases, domain model, PRD | `state.*`, `docs/contract.md` |
 | **3.0** | IA, screen inventory traced to use cases, state matrix, data source per screen | `state.screens` |
-| **3.1–3.3** | Direction named against a tradition and asserted as numbers, tokens, kit | `state.direction`, `tokens/` |
+| **3.1** | **Offer the direction**: the busiest screen built three ways, same content, each naming its measured source. Then S2, S3, S4, S5 | `state.proposals` |
+| **3.2–3.3** | The chosen direction asserted as numbers, tokens, kit | `state.direction`, `tokens/` |
 | **3.4–3.5** | Screens at every viewport in every state, then `pica-writer` | `html/` |
 | **3.7** | **Measure** | see below |
 | **3.8–3.9** | **Fan out** `pica-evaluator`, then a walkthrough per use case | `docs/reviews/` |
@@ -169,6 +178,7 @@ run analyst   domain-check.mjs     .pica/state.json
 run analyst   industry-check.mjs   .pica/state.json
 run research  schema-check.mjs     .pica/state.json
 run architect arch-check.mjs       .pica/state.json --feasibility
+run core      proposal-check.mjs   .pica/state.json --phase design
 ```
 
 All zero, or fix and re-run. **A failing check is not an assumption**: it is a defect, and continuing
@@ -184,6 +194,7 @@ past it produces a demo that breaks in front of the client.
 
 | Step | Does | Writes |
 |---|---|---|
+| **4.5** | **Offer S6 and S7**: every use case priced, and where it runs stated in consequences | `state.proposals` |
 | **4.6–4.7** | The human records the frozen scope and the deadline | `scopeFrozen`, `deadline` |
 | **5.1–5.2** | `pica-estimator`: three points per role, work order, arithmetic shown | `state.estimate`, `state.workPackages` |
 | **6.1–6.4** | `pica-architect`: C4, ADRs, NFRs as numbers, **the API contract with its errors** | `state.nfr`, `state.adr`, `state.apiContract` |
@@ -191,6 +202,7 @@ past it produces a demo that breaks in front of the client.
 ```bash
 run estimate  estimate-check.mjs   .pica/state.json
 run architect arch-check.mjs       .pica/state.json
+run core      proposal-check.mjs   .pica/state.json --phase scope
 ```
 
 > ### ⏸ CONFIRM 2 — scope, deadline and the estimate
