@@ -1,3 +1,8 @@
+---
+description: Triage feedback from a client or reviewer — verify every claim before accepting it
+argument-hint: "[the feedback, or a path to it]"
+---
+
 # pica-feedback: triage feedback from someone else
 
 Third-party feedback has arrived — client, reviewer, stakeholder. `$ARGUMENTS` is the feedback itself, or

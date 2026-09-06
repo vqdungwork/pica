@@ -1,3 +1,7 @@
+---
+description: Prove the delivery against the original brief, hand over, then freeze the file
+---
+
 # pica-close: prove the delivery, hand over, then freeze
 
 Step 9.
@@ -9,6 +13,11 @@ Load `${CLAUDE_PLUGIN_ROOT}/rules/review-discipline.md`.
 ## 1. Re-read the original brief. Cold.
 
 **The brief. Not `docs/contract.md`, not the plan, not your memory of it.**
+
+Read the file at `briefPath` in `.pica/state.json` — `docs/brief.md` unless intake put it elsewhere. If
+that key is missing or the file is gone, **say so and stop**: this step cannot run, and reconstructing
+the brief from the contract is exactly the substitution it exists to prevent. Report it as a failed
+closeout check rather than quietly reading the contract instead.
 
 Both the contract and the plan are copies, and copies drift. On the source project this step recovered a
 scored deliverable that had been missed entirely: the brief asked for design reasoning, and nothing in

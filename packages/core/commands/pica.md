@@ -1,3 +1,8 @@
+---
+description: Start a design project: intake as a contract, research, the design direction, tokens and the HTML UI kit
+argument-hint: "[the brief, or a path to it]"
+---
+
 # pica: start a design project
 
 Runs steps 1 to 4: intake, research and tokens, the HTML UI kit, and if Figma is in scope, the
@@ -14,7 +19,11 @@ installed, stop and say so rather than proceeding without it.
 
 ### 1a. Collect the packet
 
-**Refuse to proceed without all five.** List what is missing rather than filling gaps with assumptions.
+**Refuse to proceed without the first five.** The Figma declaration is the exception: nothing before
+phase 7 depends on it, so an unknown answer is recorded as an assumption rather than treated as a
+blocker. Figma is a developer handoff artefact, and who builds is often not settled until the contract.
+
+For the rest, refuse. List what is missing rather than filling gaps with assumptions.
 
 | Input | Ask for |
 |---|---|
@@ -22,9 +31,22 @@ installed, stop and say so rather than proceeding without it.
 | Sources | Every file, URL and capture, each labelled `use` or `ignore` |
 | Commercial constraint | Hours or days, fixed-scope or T&M, any existing estimate, and **anything the client must not be told** |
 | Environment | Fonts installed, tools live, and **what only the human can do** |
-| Figma declaration | Is Figma a deliverable on this project, yes or no |
+| Figma declaration | Is Figma a deliverable, yes or no. **Ask it now because it is free; it does not bind until the contract** |
+| Field and use | The field named **narrowly**, who uses it and how often, and the conditions of use: desk, outdoors, one-handed, gloved, shared device |
 
-Ask for all five in one message. Do not interrogate one at a time.
+Ask for all six in one message. Do not interrogate one at a time.
+
+**Write the brief to `docs/brief.md` the moment it arrives, verbatim.** Not after the contract, not at
+the end of intake — the moment it arrives, before you have had a chance to tidy it. It is a reference,
+so `reference-discipline.md` governs it: never edit it, and never regenerate it from the contract.
+
+Step 9 re-reads it cold and is forbidden from reading the contract instead, so a brief that lives only
+in a chat window makes closeout impossible on any project long enough to span sessions — which is every
+project past Phase A.
+
+The last row is the one that gets skipped and the one that most often invalidates a design after it is
+built. "Fintech" has a mood behind it; "retail banking dashboard used all day at a desk" has real products
+behind it that can be measured. Step 2c cannot run on the broad answer.
 
 ### 1b. Present limitations first
 
@@ -49,7 +71,13 @@ Write `docs/contract.md`:
   rather than proceeding without it
 
 Write `docs/exclusions.md`: everything the brief rules out, **quoted from the brief**. Then ask the
-human what else to add. This is the single highest-value artefact here.
+human what else to add, and **set `exclusionsConfirmed` to true in state once you have asked.**
+
+This is the single highest-value artefact here, and it is weakest exactly where it is needed most. A
+one-line brief rules nothing out, so the quoted half comes back empty — on the projects with the least
+defined scope, which are the ones where scope grows. The ask is what fills that gap, and until it is
+recorded, an empty `exclusions` means two different things: nobody was asked, or they were asked and
+there is genuinely nothing. GATE 1 cannot tell those apart, and neither can you in week three.
 
 ### 1d. Cost the options
 
@@ -69,6 +97,9 @@ Present the labels for confirmation. The human knows which are harder than they 
 docs/  html/  tokens/  .audit/  .pica/
 ```
 
+`docs/brief.md` is already there from 1a. If it is not, stop: the project has no reference to close
+against, and nothing downstream can recover it.
+
 Write `.pica/state.json`:
 
 ```json
@@ -77,10 +108,22 @@ Write `.pica/state.json`:
   "viewports": [
     { "name": "desktop", "w": 1440, "h": 900, "idiom": "desktop web, no device chrome",
       "pointer": true,  "breakpoints": [1024], "chrome": [ ... ], "grid": { "columns": 12, "gutter": 24, "margin": 40, "maxContent": 1200 } },
+    { "name": "tablet",  "w": 768,  "h": 1024, "idiom": "tablet web in a device frame",
+      "pointer": false, "breakpoints": [768],  "chrome": [ ... ], "grid": { "columns": 8, "gutter": 16, "margin": 24, "maxContent": 1200 } },
     { "name": "mobile",  "w": 375,  "h": 812,  "idiom": "mobile web in a device frame",
       "pointer": false, "breakpoints": [],     "chrome": [ ... ], "grid": null }
   ],
+  "briefPath": "docs/brief.md",
+  "field": "",
+  "measured": [],
+  "targets": [
+    { "kind": "web",     "viewports": ["desktop", "tablet", "mobile"], "stack": "react" },
+    { "kind": "ios",     "viewports": ["tablet", "mobile"],            "stack": "swift" },
+    { "kind": "android", "viewports": ["tablet", "mobile"],            "stack": "kotlin" }
+  ],
+  "direction": null,
   "disclosurePolicy": "",
+  "exclusionsConfirmed": false,
   "delivered": false,
   "workPackages": {},
   "activeReview": null,
@@ -123,6 +166,20 @@ aspirational. Four are filled now, two accumulate:
   that the user's data could not be changed on mobile was first applied to everything and disabled the
   request and approval flows the product exists for. What was meant was the **person's own record**, while
   everything a person *does* stays interactive. Per entity, that distinction is designable and checkable.
+- **`targets`** — the implementation targets, and **which viewports each one consumes**. One design at
+  three viewports; a responsive website takes all three, a native app takes tablet and mobile and never
+  desktop. The surface is a property of the target, not of the viewport, which keeps parity a
+  single-design question and lets the target decide only what gets built. `coverage-check` fails a
+  target that names a viewport the design never produced, so "we cannot build iOS, nobody drew tablet"
+  is found in Phase 3 rather than in Phase 7.
+- **`briefPath`** — where the verbatim brief was written at 1a. Step 9 reads it and is forbidden from
+  substituting the contract, so this is the one path that must survive the whole project. A rule that
+  says "write it down" with nothing naming where is a preference; this is the name.
+- **`exclusionsConfirmed`** — false until the human has been asked what to exclude **beyond** what the
+  brief quotes. Distinguishes an empty `exclusions` that was checked from one that was never asked about.
+- **`direction`** — starts `null`, filled at step 2c with the design direction and the assertions
+  `verify-html` holds every package to. A project may finish without one; a project may not have one that
+  asserts nothing.
 - **`rawValueExemptions`** — starts empty, grows during the port when a value genuinely has no token.
 - **`deviations`** — starts empty, grows when the human approves Figma differing from the HTML.
 
@@ -140,10 +197,19 @@ Open three artefacts that run for the life of the project, and say they exist:
 - `docs/rationale.md`, every decision and why, because briefs that score product thinking score this
 - `docs/annotations.md`, what will need calling out in the file
 
+> **Under `/picaflow` this gate does not stop.** That command collapses GATE 1, 2 and 3 into the single
+> gate after the build, because a human judges a working product better than a contract. Everything
+> that would have been decided here is recorded as an assumption instead. Run `/pica` directly and the
+> gates below apply normally.
+
 ### GATE 1
 
 Present the contract, the exclusions, the costed options and the tiers. **Stop. Wait for approval of
 all four.** Do not begin research.
+
+**Refuse to pass this gate while `exclusionsConfirmed` is false, or while `docs/brief.md` does not
+exist.** Both are one question and one file, and both are unrecoverable later: the brief because the
+session that carried it will be gone, the ask because nobody remembers whether it happened.
 
 ---
 
@@ -157,29 +223,82 @@ redesigned.
 
 Write `docs/audit-findings.md` with stable IDs.
 
+**Verify the measurement table before it is handed to design:**
+
+**`pica-core` cannot depend on `pica-research`**: research depends on core, and a cycle is not
+installable. So check before calling, and when the file is absent say which package is missing rather
+than failing with a path error. A silently skipped verification is the failure this whole file exists to
+prevent.
+
+```bash
+S=${CLAUDE_PLUGIN_ROOT}/../research/scripts/schema-check.mjs
+if [ -f "$S" ]; then node "$S" docs/research/measured.json
+else echo "pica-research is not installed, so the measurement table was NOT verified. That is a stated limitation, not a pass."; fi
+```
+
+Six checks: sample size, all nine foundations, typography as roles, provenance, shipped-not-concept,
+tradition named. A measurement with no source URL is rejected rather than merged, because a lazy unit
+and a careful one have the same shape without it.
+
 ### 2b. Refuse to invent and call it reuse
 
 If the brief claims an existing design system and no accessible source exists, say so and offer the two
 honest options: ask the client for the file, or derive and label it as derived.
 
-### 2c. Extract tokens
+### 2c. Settle the design direction
+
+Load the research package's rules for this if they are not already loaded. The field, audience and
+conditions came from intake input 6.
+
+Find **three to five real products** in that field and **measure** them: radius, control height, hue
+count, whether figures are tabular, how tight the spacing runs. Then:
+
+- **No accessible brand** → propose **two or three named directions**, each citing the measured products
+  it came from, each with its consequences in numbers. Recommend one and say why. The human picks. This
+  is the same shape as `1d`: options that cannot be compared are not a choice.
+- **A brand exists** → the direction is the client's own system. Score it against what the field does and
+  present the gaps as questions, not corrections. The brand wins unless the human says otherwise; each
+  accepted gap goes into `deviations` **with its reason**.
+
+Write the pick into `.pica/state.json` as `direction`, with `name`, `mode`, `precedent` (each entry
+carrying what was **measured**, not an impression), `rationale`, and `assert`.
+
+**The field itself lives at `state.field`, not inside `direction`.** It is narrowed at 1.3, long before
+a direction exists, and `industry-check` resolves the sector from it. Carrying a second copy inside
+`direction` is how the two drift, and the copy is the one nothing reads.
+
+**The measurement table goes into `state.measured` as well as `docs/research/measured.json`.** The file
+is what a human reads; the state key is what `schema-check` and `industry-check` read, and until 0.8.0
+nothing wrote it, so the evidence check had nothing to find.
+
+**`assert` is the whole point.** A direction recorded as prose lasts about a day, exactly like a copy
+rule. `verify-html` reads `assert` and fails any package that breaches it, so the direction is still in
+force at package eleven. Do not write a direction with an empty `assert` — the check reports that as a
+finding, because a direction nothing can breach passes every screen by default.
+
+### 2d. Extract tokens
 
 Colour, type scale, spacing, radii, elevation. Record **provenance per token**: which source, and taken
 or derived, with a rationale for anything derived.
 
 Write `docs/token-provenance.md`, `tokens/tokens.json`, `tokens/tokens.css` from one source.
 
+A token with no client source takes the origin `proposed`, naming the direction and the measured
+precedent behind it. `taken` and `derived` claim a client source; `proposed` claims a field source, and
+the separate word is what stops a greenfield palette from later reading as reuse.
+
 Guardrail: the result must still read as the client's brand.
 
-### 2d. Research precedent
+### 2e. Research precedent
 
 For anything the product does not already do, research how real products handle it and **cite what you
 found**. Name products and conventions. Quote platform guidelines where they apply.
 
 ### GATE 2
 
-Present the tokens and the audit. **Stop. Wait for approval.** Everything downstream consumes these, so
-a late change is expensive.
+Present the audit, the direction and the tokens together. **Stop. Wait for approval.** Everything
+downstream consumes these, so a late change is expensive — and the direction is the most expensive of the
+three to change, because every screen built after it inherits it.
 
 ---
 
