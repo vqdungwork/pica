@@ -73,43 +73,26 @@ FAIL  captured 0 frames from 3 file(s).
 That last one is the whole argument in five lines. **A check that reports success for work it did not do
 is worse than no check, because its silence reads as a pass.**
 
-## What it does
-
-| | |
-|:--|:--|
-| **Understands the work** | The problem, the AS-IS and the TO-BE, business rules, use cases, a domain model, and a PRD a non-technical client can read |
-| **Knows the field** | 28 sectors: who decides, which hues are already spent, the tradition each settled on, what each treats as a defect regardless of the brief |
-| **Designs in HTML first** | Every viewport you declare, every state, consuming a kit built before any screen. Cheap to change, cheap to measure, and it clicks |
-| **Measures before you see it** | Geometry, contrast, coverage, viewport parity, the words, the wiring. 100 checks |
-| **Has it reviewed** | Three to five independent evaluators with different lenses, none seeing another's findings, plus a walkthrough per use case |
-| **Prices it honestly** | Three-point effort per role, but only once scope and deadline are frozen |
-| **Builds it** | The API contract as a seam with its errors, four places state is allowed to live, every failure shaped so the copy reaches it, accessibility written in rather than retrofitted |
-| **Tests it** | A pyramid with an owner per layer, one end-to-end test per use case, every business rule asserted, a regression test that failed before it passed |
-| **Holds the build to it** | A real pipeline, three environments, and the built product measured back against the approved design by someone who did not build it |
-| **Ports to Figma, optionally** | Verified frame by frame against the HTML. Where the two disagree, Figma is wrong |
-
-pica never wrote a browser, it wrote the checks. It never wrote Figma, it wrote the gates. **What it
-adds to writing code is the part usually missing: what "finished" means, and something that returns
-non-zero when it is not.**
-
 ## The flow
 
-Nine phases and three places a person has to decide. Everything between them is deterministic.
+Nine phases, each run by the agent that owns it. **One stops and waits for you**, and it is the one that
+matters. Every command is `/pica-…`, shortened here to fit.
 
-| | Phase | What happens | Command |
-|:--:|:--|:--|:--|
-| **0** | Intake | The brief verbatim, sources labelled, exclusions quoted, viewports declared. **A contract, not a mockup** | `/pica` |
-| **1** | Research | Shipped products measured across the nine foundations. Feasibility says **no** while saying no is still free | `/pica-architect --feasibility` |
-| **2** | Analysis | Sector, glossary, AS-IS, TO-BE, **the delta**, business rules, use cases, domain model, PRD | `/pica-analyse` |
-| **3** | Design | Direction asserted as numbers, tokens in three tiers, kit, screens at every viewport and state, the words. Then **measure**, then evaluate, then look | `/pica-wp` · `/pica-copy` · `/pica-evaluate` |
-| ⏸ **4** | **Client approves** | The business flow **and** the design. Scope and deadline frozen. **Nothing downstream runs until they are** | you |
-| **5** | Estimate | Three points per role, a work order derived from the deadline, arithmetic shown | `/pica-estimate` |
-| **6** | Architecture | C4, decision records carrying their downside, NFRs as numbers with a way to measure each | `/pica-architect` |
-| **7** | Build | The API contract as a seam with its errors, state in one of four places, every failure shaped so the copy reaches it | `/pica-develop` |
-| **7.8** | Test | A pyramid with an owner per layer, one end-to-end test per use case, every rule asserted, then the pipeline and the environments | `/pica-test` · `/pica-build` |
-| **7.10** | Compare | **The built product measured back against the approved design**, by someone who did not build it | `/pica-evaluate --build` |
-| **7f** | Figma | Only if it is a deliverable. Port, verify by measurement, wire the prototype | `/pica-port` · `/pica-review` |
-| **8** | Closeout | Proved against the original brief, handed over, then the real hours logged back | `/pica-close` |
+| Phase | Agent | What happens | Run |
+|:--|:--|:--|:--|
+| **0 · Intake** | — | The brief verbatim, sources labelled, exclusions quoted, viewports declared. **A contract, not a mockup** | `/pica` |
+| **1 · Research** | researcher ×3–5, then architect | Shipped products measured across the nine foundations, by researchers who never see each other's findings. Then feasibility says **no**, while saying no is still free | `-architect` |
+| **2 · Analysis** | analyst | Sector, glossary, AS-IS, TO-BE, **the delta**, business rules, use cases, domain model, and a PRD a non-technical client can read | `-analyse` |
+| **3 · Design** | designer, writer,<br>evaluator ×3–5 | Direction asserted as numbers, tokens in three tiers, a kit, then screens at every viewport in every state, then the words. **Measured, evaluated and looked at** before you see it | `-wp`<br>`-copy`<br>`-evaluate` |
+| **4 · You approve** | **you** | The business flow **and** the design. Scope and deadline frozen. **Nothing downstream runs until they are** | — |
+| **5 · Estimate** | estimator | Three points per role, a work order derived from the deadline, arithmetic shown | `-estimate` |
+| **6 · Architecture** | architect | C4, decision records carrying their downside, NFRs as numbers with a way to measure each | `-architect` |
+| **7 · Build** | **developer**, tester, evaluator | **The developer writes the code** — the API contract as a seam, four places state may live, every failure shaped so the copy reaches it. The tester decides whether the suite is a suite. Then the pipeline. Then the built product is measured back against the approved design, **never by whoever built it** | `-develop`<br>`-test`<br>`-build` |
+| **8 · Closeout** | analyst | Proved against the **original brief**, handed over, then the real hours logged back | `-close` |
+
+**Figma is optional and sits beside phase 7, never in front of it.** Port an approved package, verify it
+frame by frame against the HTML, wire the prototype: `/pica-port` · `/pica-review` · `/pica-prototype`.
+Where the two disagree, Figma is wrong.
 
 **Or hand it the brief and let it run.** `/picaflow` runs the chain and stops only at those three
 decisions, turning every gap in between into a labelled assumption carrying a confidence and a blast
@@ -117,8 +100,9 @@ radius. Each step runs as the agent that owns it, and each agent reads the secto
 
 `--to` says where to finish, and **every one of them is a complete project rather than a truncated one**:
 
-| `--to design` | a measured, clickable `review.html`, the PRD, and the assumptions register |
+| Stop at | You get |
 |:--|:--|
+| `--to design` | a measured, clickable `review.html`, the PRD, and the assumptions register |
 | `--to figma` | that, plus the Figma file verified frame by frame against the HTML |
 | `--to product` | that, plus working front end and back end, tested, released |
 
@@ -184,21 +168,21 @@ in scope, and what the brief says. It adapts to that and refuses to invent the r
 
 ## Nine roles, one per step
 
-Each step runs as the agent that owns it. Every agent loads its own craft rules **and reads the sector
-entry before it starts** — which is what keeps a clinician's screen and a warehouse handheld from coming
+Each step runs as the agent that owns it — `pica-analyst`, `pica-designer` and so on, shortened below.
+Every agent loads its own craft rules **and reads the sector entry before it starts** — which is what keeps a clinician's screen and a warehouse handheld from coming
 out of the same template.
 
-| Agent | Owns | Reads |
+| Agent | Owns | Reads before it starts |
 |:--|:--|:--|
-| `pica-researcher` | measuring shipped products across the nine foundations | which products count as precedent here, and which mislead |
-| `pica-analyst` | glossary, AS-IS, TO-BE, the delta, rules, use cases, the PRD | who can veto, and what the field requires whatever the brief says |
-| `pica-architect` | feasibility, C4, ADRs, NFRs as numbers | the obligations that become NFRs nobody asked for |
-| `pica-designer` | the kit, every screen, every state, every viewport | the hues already spent, the tradition, the density, the type |
-| `pica-writer` | the words, every state, bound to the glossary | the register the reader is fluent in, and the phrasings the field treats as defects |
-| `pica-evaluator` | independent evaluation — **no write access** | the sector's own defect list, as a lens |
-| `pica-estimator` | three points per role, the work order | the approval bodies that land on the critical path |
-| `pica-developer` | the code, the contract, the failure shapes | the conventions the field expects in a build |
-| `pica-tester` | the suite's shape, the release gate | what this field considers a blocker |
+| **researcher** | measuring shipped products across the nine foundations | which products count as precedent here, and which mislead |
+| **analyst** | glossary, AS-IS, TO-BE, the delta, rules, use cases, the PRD | who can veto, and what the field requires whatever the brief says |
+| **architect** | feasibility, C4, ADRs, NFRs as numbers | the obligations that become NFRs nobody asked for |
+| **designer** | the kit, every screen, every state, every viewport | the hues already spent, the tradition, the density, the type |
+| **writer** | the words, every state, bound to the glossary | the register the reader is fluent in, and the phrasings the field treats as defects |
+| **evaluator** | independent evaluation — **no write access** | the sector's own defect list, as a lens |
+| **estimator** | three points per role, the work order | the approval bodies that land on the critical path |
+| **developer** | the code, the contract, the failure shapes | the conventions the field expects in a build |
+| **tester** | the suite's shape, the release gate | what this field considers a blocker |
 
 **The evaluator cannot write.** An audit that fixes destroys the record of what was wrong, and picks
 solutions that are not its to pick: a contrast failure can be solved by darkening the scrim or by
@@ -210,7 +194,7 @@ rejected rather than merged.
 
 ## What ships
 
-| | |
+| | What each one is |
 |:--|:--|
 | **13 plugins** | 12 packages plus a bundle, each declaring what it requires, produces, checks and considers done |
 | **16 commands** | Deterministic once typed |
