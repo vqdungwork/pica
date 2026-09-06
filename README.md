@@ -1,68 +1,158 @@
 <div align="center">
 
-<img alt="pica — from the brief to the shipped product. Analyse, design in HTML, evaluate, estimate, architect, build and release. Every step verified by measurement, never by opinion." src="assets/banner.svg" width="100%">
+<img alt="pica. From the brief to the shipped product. Analyse, design in HTML, evaluate, estimate, architect, build and release. Every step verified by measurement, never by opinion." src="assets/banner.svg" width="100%">
 
-**From a brief to a released product, checked by measurement at every step. For Claude Code.**
+**Describe the product you want. Get a design you can click, then a product you can ship.**
+<br>An expert team for Claude Code, with the checking built in.
 
 [![version](https://img.shields.io/badge/version-0.9.1-1f2328)](https://github.com/vqdungwork/pica/releases)
-[![checks](https://img.shields.io/badge/checks-106%20fail--closed-1f2328)](#the-checks)
-[![agents](https://img.shields.io/badge/role%20agents-9-1f2328)](#nine-roles-one-per-step)
-[![sectors](https://img.shields.io/badge/sectors-28-1f2328)](#it-knows-the-field)
+[![checks](https://img.shields.io/badge/checks-106%20fail--closed-1f2328)](#what-gets-checked)
+[![agents](https://img.shields.io/badge/specialists-9-1f2328)](#who-does-the-work)
+[![sectors](https://img.shields.io/badge/industries-28-1f2328)](#it-already-knows-your-industry)
 [![licence](https://img.shields.io/badge/licence-MIT-1f2328)](LICENSE)
-[![requires](https://img.shields.io/badge/requires-Claude%20Code-1f2328)](#requirements)
 
 </div>
 
 ---
 
-> A **pica** is the unit designers have measured type in for six centuries.
-> The name is the whole argument: work is checked against a measurement, not against an impression.
+## Start in two lines
+
+```bash
+/plugin marketplace add vqdungwork/pica
+/plugin install pica@pica
+```
+
+Restart Claude Code, then describe what you want in your own words:
+
+> *A dispensing queue for our four pharmacies. Staff lose an hour a day finding where a prescription
+> is. Assembly and the final check have to be two different people.*
+
+That is enough to start. It asks you a handful of questions on the way, and it stops once for your
+approval before anything expensive gets built.
+
+## What you get
+
+| You want | You say | You get back |
+|:--|:--|:--|
+| **To see it first** | *show me a review page* | a design you can click, at every screen size and every state, plus the written requirements and a list of everything it had to assume |
+| **A design file** | *and port it to Figma* | the above, plus a Figma file checked frame by frame against the design |
+| **A working product** | *build it* | the above, plus front end, back end, tests and a release pipeline |
+
+All three are finished pieces of work, not truncated ones. Figma is optional and you can skip it.
+
+## What pica does for you
+
+| It | What that means |
+|:--|:--|
+| **Understands the work** | Turns your paragraph into requirements your team recognises: what happens today, what changes, the rules, and a document a non-technical reader can follow |
+| **Knows your industry** | 28 of them. Who can say no, which colours already mean something, what the field treats as a mistake no matter what you asked for |
+| **Designs it so you can click it** | Real screens at every size and every state, in a day rather than a fortnight, cheap to change while your mind is still changing |
+| **Checks it before you see it** | 106 automated checks: contrast, coverage, the words, the wiring. Nothing reaches you having only been looked at |
+| **Has it reviewed by others** | Three to five independent reviewers, none of them seeing each other's findings |
+| **Prices it honestly** | Effort per role with the arithmetic shown, and only once the scope is actually settled |
+| **Builds and tests it** | Working code, a test for everything the product promises, and a pipeline that will not release without them |
+| **Proves it back to you** | The finished product measured against the design you approved, by someone who did not build it |
 
 ---
 
-## What it catches
+## It already knows your industry
 
-A design that looks right is not the same as a design that is right. Here is what that means in
-practice, before anyone is asked to approve anything.
+An education product built like a bank's admin panel passes every technical check. A teacher spots it in
+a second. pica carries what each field already settled, so you are not paying to rediscover it.
 
-**The one the eye cannot see.** Contrast is computed from the resolved colours and composited through
-translucency, never sampled from a screenshot:
+<div align="center">
 
-```
-FAIL  body-contrast     1 finding(s)   (60 runs)
+**Banking and payments**&nbsp;&nbsp;·&nbsp;&nbsp;**Insurance**&nbsp;&nbsp;·&nbsp;&nbsp;**Healthcare**&nbsp;&nbsp;·&nbsp;&nbsp;**Pharmacy**&nbsp;&nbsp;·&nbsp;&nbsp;**Education**&nbsp;&nbsp;·&nbsp;&nbsp;**Legal**&nbsp;&nbsp;·&nbsp;&nbsp;**Retail and e-commerce**&nbsp;&nbsp;·&nbsp;&nbsp;**Food and hospitality**&nbsp;&nbsp;·&nbsp;&nbsp;**Logistics and delivery**&nbsp;&nbsp;·&nbsp;&nbsp;**Property and rental**&nbsp;&nbsp;·&nbsp;&nbsp;**Travel and mobility**&nbsp;&nbsp;·&nbsp;&nbsp;**Media and publishing**&nbsp;&nbsp;·&nbsp;&nbsp;**Manufacturing**&nbsp;&nbsp;·&nbsp;&nbsp;**Energy and utilities**&nbsp;&nbsp;·&nbsp;&nbsp;**Government**&nbsp;&nbsp;·&nbsp;&nbsp;**Charity and non-profit**&nbsp;&nbsp;·&nbsp;&nbsp;**HR and recruitment**&nbsp;&nbsp;·&nbsp;&nbsp;**Agriculture**&nbsp;&nbsp;·&nbsp;&nbsp;**Construction**&nbsp;&nbsp;·&nbsp;&nbsp;**Fitness and wellness**&nbsp;&nbsp;·&nbsp;&nbsp;**Telecoms**&nbsp;&nbsp;·&nbsp;&nbsp;**Agencies and consultancies**&nbsp;&nbsp;·&nbsp;&nbsp;**Developer tools**&nbsp;&nbsp;·&nbsp;&nbsp;**Games**&nbsp;&nbsp;·&nbsp;&nbsp;**Automotive**&nbsp;&nbsp;·&nbsp;&nbsp;**Events and ticketing**&nbsp;&nbsp;·&nbsp;&nbsp;**Beauty and salon**&nbsp;&nbsp;·&nbsp;&nbsp;**Cybersecurity**
 
-FINDING  [body-contrast] "Could not save that check-in"
-         2.15:1 at 16px/400, and AA needs 4.5:1 for normal text.
-         rgb(245, 158, 11) on rgb(255, 255, 255)
-```
+</div>
 
-Less than half the required ratio, on the one line a person most needs to read. It looked fine.
+**For each one it knows** who can veto, which colours are already taken and why, how dense the screens
+should be, how the product should speak, and what the field treats as a defect regardless of the brief.
 
-**The one a measurement cannot see either.** Every frame tagged, in bounds, paired and covered — and the
-product both incomplete and over-scoped:
+Red means overdrawn in a bank and clinical emergency in a hospital. Red, amber and green on a factory
+floor are inherited from site signage, so using them decoratively is a safety problem rather than a taste
+disagreement. Blue on a food menu reads as spoilage.
 
-```
-FAIL  uc-covered       1 finding(s)   (4 use cases)
-FAIL  screen-traced    1 finding(s)   (11 screens)
+**If your field is not one of the 28, pica says so and stops** rather than guessing. Four words that
+could mean two different industries are refused for the same reason.
 
-FINDING  [uc-covered] UC-03 review a statement
-         was agreed and has no screen. Nobody notices until UAT, because every
-         screen that DOES exist looks correct
-```
+---
 
-**The one only the field can see.** The sector gate does not report an empty box, it says why the field
-cares:
+## The seven questions it asks you
 
-```
-FINDING  [stakeholders] parent or guardian
-         this sector's "parent or guardian" can decide or veto and appears in no
-         register. They fear: finding out about a problem too late. Design
-         consequence: the parent view is a third density, and it must translate
-         rather than expose the teacher's terms
-```
+Most decisions are craft and pica makes them. Seven are yours.
 
-**And every check fails closed.** Point one at a directory matching nothing and it refuses to write an
-artefact rather than reporting a clean run over zero files:
+> Ask you where the decision is yours and you can judge it by looking.
+> Decide quietly where it is craft and looking would not help you.
+
+"Postgres or MySQL" hands you a risk you have no way to weigh. These seven you can answer by looking:
+
+| | It asks | So you decide |
+|:--:|:--|:--|
+| **1** | **How it should look.** Your busiest screen, built three ways, same content | which one is the product you wanted |
+| **2** | Light or dark, roomy or dense | how it feels to use where you actually use it |
+| **3** | **What happens at the worst moment** your industry has | whether the product punishes people or helps them recover |
+| **4** | The one word your product will be judged by | what that word promises your users |
+| **5** | What each person can see of the others | how much your team, or your customers, share |
+| **6** | What goes in the first release, each item priced | where you draw the line, knowing what each thing costs |
+| **7** | Where it needs to run | phone, laptop, or both, and what each one costs to fix when it breaks |
+
+**Question 1 changes the product more than anything else.** You get your busiest screen built three
+different ways, same content, and you point at one. Three seconds. Each version is argued from real
+products that were measured, not from three pictures that looked nice.
+
+**Question 3 is the one nobody thinks to ask.** Every industry has a moment it handles badly by default.
+In fitness it is the broken streak. In banking, the transfer that quietly failed. In education, being
+shown you are behind in front of other people. pica knows which one is yours, and asks how you want it
+handled.
+
+---
+
+## The flow
+
+Nine steps. **One stops and waits for you**, and it is the one that matters. Or say *run the whole
+thing* and it does all nine, pausing only there.
+
+| Step | Who | What happens | Command |
+|:--|:--|:--|:--|
+| **0 · Intake** | you | Your brief, kept word for word. What is in scope, what is out, which screen sizes it has to work on | `/pica` |
+| **1 · Research** | 3 to 5 researchers, then an architect | Real products in your field, measured rather than admired. Then someone says what **cannot** be built, while saying it is still free | `/pica-architect` |
+| **2 · Analysis** | analyst | What happens today, what changes, the rules your business runs on, and a requirements document your team can actually read | `/pica-analyse` |
+| **3 · Design** | designer, writer, 3 to 5 reviewers | Every screen, every size, every state, and the words on them. **Measured, reviewed and looked at** before it reaches you | `/pica-wp` |
+| **4 · You approve** | **you** | The business flow **and** the design. Scope and deadline settled. **Nothing further runs until they are** | none |
+| **5 · Estimate** | estimator | Effort per role with the arithmetic shown, and a sensible order to build in | `/pica-estimate` |
+| **6 · Architecture** | architect | How it is put together, every technology choice recorded with its downside, every performance promise written as a number | `/pica-architect` |
+| **7 · Build** | **developer**, tester, reviewer | **The code gets written.** Then tested. Then a release pipeline. Then the finished thing is measured back against the design you approved, **never by whoever built it** | `/pica-develop` |
+| **8 · Handover** | analyst | Proved against your **original brief**, not against a plan that drifted. Then the real hours are recorded so the next estimate is better | `/pica-close` |
+
+Figma is optional and sits beside step 7, never in front of it. Where Figma and the design disagree,
+Figma is wrong.
+
+## Who does the work
+
+Nine specialists. Each has a trade of its own, and each reads up on your industry before it starts work.
+
+| Specialist | Does | Reads about your industry first |
+|:--|:--|:--|
+| **researcher** | measures real products in your field, nine things about each | which products are worth copying here, and which will mislead you |
+| **analyst** | what happens today, what changes, the rules, the requirements document | who can say no, and what your field requires whatever your brief says |
+| **architect** | what can and cannot be built, how it fits together, every promise as a number | the obligations your field carries that nobody thought to mention |
+| **designer** | every screen, every state, every size | which colours already mean something, how dense, what the field's products look like |
+| **writer** | the words on every screen, including the ones nobody writes | how your field speaks, and the phrasings it treats as a mistake |
+| **reviewer** | independent review, and **it cannot change anything** | what your field already knows counts as a defect |
+| **estimator** | effort per role, and the order to build in | the approvals and inspections that will land on your timeline |
+| **developer** | the code, and what happens when things go wrong | the conventions your field expects in a working product |
+| **tester** | the tests, and whether the product is fit to release | what your field considers a blocker rather than a niggle |
+
+**The reviewer cannot change anything.** A reviewer who can fix things destroys the record of what was
+wrong, and quietly makes design decisions that were never theirs to make.
+
+---
+
+## What gets checked
+
+A design that looks right is not the same as a design that is right. 106 checks run before anything
+reaches you, and the important part is what they do when they cannot do their job:
 
 ```
 FAIL  captured 0 frames from 3 file(s).
@@ -70,190 +160,13 @@ FAIL  captured 0 frames from 3 file(s).
       reference would pass every downstream check while measuring nothing.
 ```
 
-That last one is the whole argument in five lines. **A check that reports success for work it did not do
-is worse than no check, because its silence reads as a pass.**
+**A check that reports success for work it did not do is worse than no check**, because its silence
+reads as a pass. Every one here refuses rather than pretends.
 
-## What it asks you
+<details>
+<summary><b>All 106, by the script that runs them</b></summary>
 
-Most of pica decides. This is the part that does not.
-
-> **Propose where the decision is yours and you can judge it by looking.
-> Decide silently where it is craft and looking would not help you.**
-
-Both halves matter. "Postgres or MySQL" is a question that transfers risk to someone with no instrument
-to carry it. Which easing curve a sheet uses is a question that costs your attention and buys nothing.
-
-**Seven slots, universal on every project. What fills them is derived, never listed here** — from the
-sector entry, the measurement and the analysis. A rule offering "streak, chain or run" is a
-habit-tracker rule wearing a general one's clothes, and noise on a payments product.
-
-| | Slot | Filled from |
-|:--:|:--|:--|
-| **S1** | **The direction** — the busiest screen built three ways, same content | the products actually measured, plus the sector's own tradition as the baseline |
-| **S2** | Default mode and density | the sector's colour lead and its density conventions, which for several sectors name *two* densities — and that is itself the decision |
-| **S3** | **The sector's signature moment** | the stakeholder whose fear names the failure that field designs into its own products |
-| **S4** | The word the product turns on | the delta, crossed with the glossary |
-| **S5** | Who sees what | the actors, bounded by the sector's forbidden defaults |
-| **S6** | What is in the first release | every use case, priced in hours |
-| **S7** | Where it runs, in consequences | the targets, and the release asymmetries each one buys |
-
-**S1 is three renderings of one screen, not three palettes.** Nobody can judge `--radius-lg: 12px`. Two
-screens side by side settle it in three seconds, and each option names the measured product it argues
-from — so the choice has numbers behind it rather than three pictures a model liked.
-
-**S3 is the highest-value question in the flow and the one nobody thinks to ask**, because it does not
-look like a design question. It looks like an edge case, gets built the obvious way, and the obvious way
-is the one the field already knows causes the damage. Fitness: the broken streak. Finance: the silently
-failed transfer. Education: being shown you are behind, in front of others.
-
-A slot with no material in this project is **skipped with a reason recorded**. A question nobody asked
-and a question with no answer look identical afterwards, which is why `proposal-check` refuses to run at
-all on a project with no register: reporting zero findings there would be a lie.
-
-**What it cannot do:** tell you the options were worth choosing between. Three weak ones produce a
-choice, a recorded decision, a clean check and a bad product. It says so on every run.
-
-## The flow
-
-Nine phases, each run by the agent that owns it. **One stops and waits for you**, and it is the one that
-matters. Every command is `/pica-…`, shortened here to fit.
-
-| Phase | Agent | What happens | Run |
-|:--|:--|:--|:--|
-| **0 · Intake** | — | The brief verbatim, sources labelled, exclusions quoted, viewports declared. **A contract, not a mockup** | `/pica` |
-| **1 · Research** | researcher ×3–5, then architect | Shipped products measured across the nine foundations, by researchers who never see each other's findings. Then feasibility says **no**, while saying no is still free | `-architect` |
-| **2 · Analysis** | analyst | Sector, glossary, AS-IS, TO-BE, **the delta**, business rules, use cases, domain model, and a PRD a non-technical client can read | `-analyse` |
-| **3 · Design** | designer, writer,<br>evaluator ×3–5 | Direction asserted as numbers, tokens in three tiers, a kit, then screens at every viewport in every state, then the words. **Measured, evaluated and looked at** before you see it | `-wp`<br>`-copy`<br>`-evaluate` |
-| **4 · You approve** | **you** | The business flow **and** the design. Scope and deadline frozen. **Nothing downstream runs until they are** | — |
-| **5 · Estimate** | estimator | Three points per role, a work order derived from the deadline, arithmetic shown | `-estimate` |
-| **6 · Architecture** | architect | C4, decision records carrying their downside, NFRs as numbers with a way to measure each | `-architect` |
-| **7 · Build** | **developer**, tester, evaluator | **The developer writes the code** — the API contract as a seam, four places state may live, every failure shaped so the copy reaches it. The tester decides whether the suite is a suite. Then the pipeline. Then the built product is measured back against the approved design, **never by whoever built it** | `-develop`<br>`-test`<br>`-build` |
-| **8 · Closeout** | analyst | Proved against the **original brief**, handed over, then the real hours logged back | `-close` |
-
-**Figma is optional and sits beside phase 7, never in front of it.** Port an approved package, verify it
-frame by frame against the HTML, wire the prototype: `/pica-port` · `/pica-review` · `/pica-prototype`.
-Where the two disagree, Figma is wrong.
-
-**Or hand it the brief and let it run.** `/picaflow` runs the chain and stops only at those three
-decisions, turning every gap in between into a labelled assumption carrying a confidence and a blast
-radius. Each step runs as the agent that owns it, and each agent reads the sector before it starts.
-
-`--to` says where to finish, and **every one of them is a complete project rather than a truncated one**:
-
-| Stop at | You get |
-|:--|:--|
-| `--to design` | a measured, clickable `review.html`, the PRD, and the assumptions register |
-| `--to figma` | that, plus the Figma file verified frame by frame against the HTML |
-| `--to product` | that, plus working front end and back end, tested, released |
-
-Figma is off the critical path. `--to product` goes straight from the approved HTML to production code
-without touching it, and it is a supported route rather than a corner cut.
-
-Running without stopping is the argument, not a shortcut. Reacting to a built thing is far cheaper than
-specifying one from nothing: ask a client what their business flow is and you get hesitation; show them a wrong one that
-clicks and you get the correction in three seconds. **The demo is the question. It is only packaged as an
-answer.** What makes it safe is the assumptions register and nothing else.
-
-## Install
-
-```bash
-/plugin marketplace add vqdungwork/pica
-/plugin install pica@pica
-```
-
-**Upgrading from an earlier version, install rather than update.** `/plugin install pica@pica` pulls
-every package the bundle depends on, including ones that did not exist when you first installed.
-`/plugin marketplace update pica` followed by an update of the bundle alone leaves the new packages
-absent — and pica will then correctly report every check they own as `SKIPPED … NOT a pass`, which is
-honest and not what you wanted.
-
-Restart Claude Code. The workflow announces itself at the start of every session, including after a
-compaction, so you never have to remember to load it. Then just talk:
-
-```
-Design the onboarding screens for our mobile app
-
-Design this dashboard for desktop and mobile
-
-Port the approved HTML to Figma
-
-Here is the brief. Run the whole thing and show me a review page
-```
-
-**Or install only what you need.** Every package pulls `pica-core` with it, so any single install brings
-the state schema and the gates.
-
-| Install | You get | Because |
-|:--|:--:|:--|
-| `pica-analyst` · `pica-architect` · `pica-estimate` · `pica-research` | 2 | they need the state schema and nothing else |
-| `pica-html` | 3 | it consumes `tokens/tokens.css`, which research produces |
-| `pica-qa` | 3 | a test asserts a business rule, and the rules live in the analyst's state |
-| `pica-content` · `pica-designqa` · `pica-figma` | 4 | all three read the capture artefact html produces |
-| `pica-developer` | 5 | it builds an approved HTML design against the analyst's contract |
-| `pica-impl` | 5 | the build-versus-design comparison belongs to Design QA, not the builder |
-| `pica` | 13 | the bundle |
-
-### Where the line is
-
-| pica is for | pica is not for |
-|:--|:--|
-| Applications — web, mobile, desktop | Illustration, images, photography |
-| Websites and landing pages | Video, motion, animation |
-| Dashboards, admin tools, internal products | Logos, brand marks, identity work |
-| Design systems and component libraries | Presentation decks and documents |
-| The PRD, use cases and domain model behind them | Diagrams, charts, terminal output |
-| The code, the tests, and whether the build still matches the design | Bespoke infrastructure and cloud operations |
-
-**pica designs things people navigate and someone has to build.** If nothing will be implemented from
-the output, it will get in your way: every gate exists to protect an implementation that would otherwise
-be built from an unverified design.
-
-Nothing in it assumes a client, a stack, a brand or a team. You declare the viewports, whether Figma is
-in scope, and what the brief says. It adapts to that and refuses to invent the rest.
-
-
-## Nine roles, one per step
-
-Each step runs as the agent that owns it — `pica-analyst`, `pica-designer` and so on, shortened below.
-Every agent loads its own craft rules **and reads the sector entry before it starts** — which is what keeps a clinician's screen and a warehouse handheld from coming
-out of the same template.
-
-| Agent | Owns | Reads before it starts |
-|:--|:--|:--|
-| **researcher** | measuring shipped products across the nine foundations | which products count as precedent here, and which mislead |
-| **analyst** | glossary, AS-IS, TO-BE, the delta, rules, use cases, the PRD | who can veto, and what the field requires whatever the brief says |
-| **architect** | feasibility, C4, ADRs, NFRs as numbers | the obligations that become NFRs nobody asked for |
-| **designer** | the kit, every screen, every state, every viewport | the hues already spent, the tradition, the density, the type |
-| **writer** | the words, every state, bound to the glossary | the register the reader is fluent in, and the phrasings the field treats as defects |
-| **evaluator** | independent evaluation — **no write access** | the sector's own defect list, as a lens |
-| **estimator** | three points per role, the work order | the approval bodies that land on the critical path |
-| **developer** | the code, the contract, the failure shapes | the conventions the field expects in a build |
-| **tester** | the suite's shape, the release gate | what this field considers a blocker |
-
-**The evaluator cannot write.** An audit that fixes destroys the record of what was wrong, and picks
-solutions that are not its to pick: a contrast failure can be solved by darkening the scrim or by
-changing the text colour, and that is a design decision.
-
-**Fan out measurement. Never fan out judgement.** Research and evaluation are the two places agents run
-in parallel — same return schema, none seeing another's findings, and a result with no provenance is
-rejected rather than merged.
-
-## What ships
-
-| | What each one is |
-|:--|:--|
-| **13 plugins** | 12 packages plus a bundle, each declaring what it requires, produces, checks and considers done |
-| **16 commands** | Deterministic once typed |
-| **23 rule modules** | Loaded per step, never all at once. 173 definition-of-done items across them |
-| **19 check scripts** | Plus the capture harness, the status tool, and a harness that runs the in-Figma scripts outside Figma |
-| **106 checks** | Every one fails closed |
-| **28 sectors** | 264 names resolving to them, 4 deliberately refused as ambiguous |
-| **9 role agents** | One per step, each loading its own craft rules and the sector entry before it starts. The evaluator has **no write access**, because a reviewer that can fix cannot be trusted to report |
-| **2 hooks** | One loads the rules every session; one refuses a Figma write that has not earned it |
-
-## The checks
-
-Listed so the number can be recounted rather than trusted.
+<br>Listed so the number can be recounted rather than trusted.
 
 | Script | | What each one is |
 |:--|:--:|:--|
@@ -278,54 +191,15 @@ Listed so the number can be recounted rather than trusted.
 | `geometry-diff` | 1 | Figma position against the HTML reference |
 | | **106** | |
 
-**Every one has been seen to fail on the defect it was written for.** That is the only reason to trust a
-number, and it is why each is recorded next to the failure that earned it in
-[`CHANGELOG.md`](CHANGELOG.md).
+Every one has been seen to fail on the defect it was written for. That is the only reason to trust a
+number, and each is recorded next to the failure that earned it in [`CHANGELOG.md`](CHANGELOG.md).
 
-Two more check the tooling rather than a design. `validate-packages.mjs` asserts every declared file
-exists, every shipped file is owned, and no markdown link crosses a package boundary. `mock-figma.mjs`
-runs the three in-Figma scripts outside Figma and self-tests them, so 800 lines that could otherwise only
-be verified inside a paid session can be verified in a terminal.
+</details>
 
-## It knows the field
+<details>
+<summary><b>What is enforced by a hook rather than by a promise</b></summary>
 
-An education product built like an admin dashboard passes every other check here. Tokens reference
-correctly, geometry measures clean, every use case has a screen. A teacher spots it instantly.
-
-For each of 28 sectors the base records:
-
-- **every stakeholder** — what they want, what they fear, whether they can veto, and what that means for
-  the design
-- **the colour convention with its reason.** 22 hues across 14 sectors are already spent: red means
-  overdrawn in banking and clinical emergency in a hospital; red, amber and green on a factory floor are
-  inherited from plant signage, so spending them decoratively is a safety defect rather than a taste
-  disagreement; blue on a food menu reads as spoilage
-- **the tradition it settled on**, and the ones that misread in it
-- **density per audience** — education runs three in one product, because a learner, a teacher and a
-  parent are not one audience
-- **what it treats as a defect** regardless of what the brief asked for
-
-**Departing from a convention is allowed. Departing silently is not.** Each of five axes is followed with
-a note or departed from with a reason, because an undecided axis does not stay undecided: it gets filled
-with whatever came out by default, and afterwards nobody can tell a decision was never made.
-
-**A sector the base does not cover fails the gate.** Passing an unknown one would give the least
-supported work the quietest gate. Four terms name two sectors each and the check refuses to guess at any
-of them, because their conventions are opposites.
-
-```bash
-# The base is queryable. This finds it wherever pica was installed from.
-IC=$(find ~/.claude/plugins -maxdepth 8 -path "*analyst/scripts/industry-check.mjs" | sort -V | tail -1)
-
-node "$IC" --list                 # the 28, and the 4 terms it refuses to guess at
-node "$IC" --show education       # everything it knows about one
-node "$IC" --audit                # the base against itself
-```
-
-## What is enforced, and how
-
-Three layers, with honest reliability. This is built on the assumption that model judgement is
-unreliable.
+<br>Built on the assumption that model judgement is unreliable.
 
 | Layer | Fires | Bypassable |
 |:--|:--|:--|
@@ -333,13 +207,54 @@ unreliable.
 | Commands | When you type them, deterministic after that | Yes, by not typing them |
 | `PreToolUse` hook | On every matching tool call | **No** |
 
-Four things are held by a hook rather than by instruction, because instructions decay: no Figma write for
-a package whose HTML is not approved, none while a report-mode review is running, none after delivery,
-and none before the Figma API rules are loaded.
+Four things are held by a hook because instructions decay: no Figma write for a package whose design is
+not approved, none while a review is running, none after delivery, and none before the Figma rules are
+loaded. Approvals live on disk, because a hook is a script and cannot know you said yes out loud.
 
-Approvals live in `.pica/state.json`. A hook is a script; it cannot know you said yes out loud.
+</details>
 
-## Requirements
+---
+
+## What ships
+
+| Count | What each one is |
+|:--|:--|
+| **13 plugins** | 12 packages plus a bundle, each declaring what it requires, produces, checks and considers done |
+| **16 commands** | Deterministic once typed |
+| **23 rule modules** | Loaded per step, never all at once. 173 definition-of-done items across them |
+| **19 check scripts** | Plus the capture harness, the status tool, and a harness that runs the in-Figma scripts outside Figma |
+| **106 checks** | Every one fails closed |
+| **28 sectors** | 264 names resolving to them, 4 deliberately refused as ambiguous |
+| **9 role agents** | One per step, each loading its own craft rules and the sector entry before it starts. The evaluator has **no write access**, because a reviewer that can fix cannot be trusted to report |
+| **2 hooks** | One loads the rules every session; one refuses a Figma write that has not earned it |
+
+<details>
+<summary><b>Install only the parts you need</b></summary>
+
+<br>Every package brings `pica-core` with it, so any single install has the state schema and the gates.
+
+| Install | You get | Because |
+|:--|:--:|:--|
+| `pica-analyst` · `pica-architect` · `pica-estimate` · `pica-research` | 2 | they need the state schema and nothing else |
+| `pica-html` | 3 | it consumes `tokens/tokens.css`, which research produces |
+| `pica-qa` | 3 | a test asserts a business rule, and the rules live in the analyst's state |
+| `pica-content` · `pica-designqa` · `pica-figma` | 4 | all three read the capture artefact html produces |
+| `pica-developer` | 5 | it builds an approved HTML design against the analyst's contract |
+| `pica-impl` | 5 | the build-versus-design comparison belongs to Design QA, not the builder |
+| `pica` | 13 | the bundle |
+| pica is for | pica is not for |
+|:--|:--|
+| Applications: web, mobile, desktop | Illustration, images, photography |
+| Websites and landing pages | Video, motion, animation |
+| Dashboards, admin tools, internal products | Logos, brand marks, identity work |
+| Design systems and component libraries | Presentation decks and documents |
+| The PRD, use cases and domain model behind them | Diagrams, charts, terminal output |
+| The code, the tests, and whether the build still matches the design | Bespoke infrastructure and cloud operations |
+
+</details>
+
+<details>
+<summary><b>Requirements</b></summary>
 
 | Tier | Needs | Gives you |
 |:--|:--|:--|
@@ -348,16 +263,16 @@ Approvals live in `.pica/state.json`. A hook is a script; it cannot know you sai
 | **Figma** | the Figma MCP server, plus a Dev or Full seat | Phase 7f only |
 | **Enhanced** | [superpowers](https://github.com/obra/superpowers) | Stronger intake and planning, plus the agent panel |
 
-**The core tier works with nothing else installed.** If you never touch Figma, the whole HTML flow runs
-and ends complete, not truncated.
+**The core tier works with nothing else installed.** If you never touch Figma, the whole flow runs and
+ends complete, not truncated.
 
-## The rules
-
-Twenty-three modules, loaded per step rather than all at once. **173 definition-of-done items
-across them**, each item either decided by a check or explicitly left to a human.
+</details>
 
 <details>
-<summary><b>All twenty-three, and what each covers</b></summary>
+<summary><b>The 23 rule modules</b></summary>
+
+<br>Loaded per step rather than all at once. 173 definition of done items across them, each either
+decided by a check or explicitly left to a human.
 
 | Module | Package | Covers |
 |:--|:--|:--|
@@ -387,30 +302,24 @@ across them**, each item either decided by a check or explicitly left to a human
 
 </details>
 
-## Philosophy
+<details>
+<summary><b>Where the line is, and what is in this repository</b></summary>
 
-- **Measure, do not eyeball** — the defects that matter most survive a visual review
-- **The cheap medium first** — nothing expensive gets built before the cheap one is approved
-- **Report before you fix** — finding and fixing are separate passes; an audit that writes is not an audit
-- **A check must fail closed** — if it cannot do its job it exits non-zero, never a clean run over nothing
-- **A green check is not evidence the check works** — make it fail on purpose before you trust it
-- **A rule with no register is a preference** — if something must be written down it needs a named key in
-  state and something that reads it, or a deliberate exception looks exactly like an oversight
-- **A false positive is worse than a miss** — a check that cries wolf gets switched off, and then it
-  catches nothing at all
-- **Measurement and review find different defects** — neither substitutes for the other
-- **Approval is a decision, not an inference** — silence, "looks ready" and moving on are not approval
-- **Every rule names the failure that earned it** — a rule without one gets deleted by the next person
-- **The last step is a person looking** — measurement narrows what a human has to check; it never
-  replaces the checking
+| pica is for | pica is not for |
+|:--|:--|
+| Applications: web, mobile, desktop | Illustration, images, photography |
+| Websites and landing pages | Video, motion, animation |
+| Dashboards, admin tools, internal products | Logos, brand marks, identity work |
+| Design systems and component libraries | Presentation decks and documents |
+| The PRD, use cases and domain model behind them | Diagrams, charts, terminal output |
+| The code, the tests, and whether the build still matches the design | Bespoke infrastructure and cloud operations |
 
-## What this repo contains
-
-The **method**: rules, commands, hooks, scripts, the sector base, the checks. Nothing else, by design.
+**pica designs things people navigate and someone has to build.** If nothing will be implemented from
+the output, it will get in your way. Nothing in it assumes a client, a stack, a brand or a team.
 
 ```
 packages/
-  core/        intake, the contract, the state schema, every gate, the hooks
+  core/        intake, the contract, the state schema, every gate, the hooks, the proposals
   research/    the source audit, the nine foundations, token provenance
   analyst/     elicitation, domain and industry knowledge, use cases, the PRD
   architect/   feasibility, C4, decision records, non-functional requirements
@@ -422,30 +331,50 @@ packages/
   qa/          the tests: the shape of the suite, and the release gate
   impl/        the repository: pipeline, branches, environments, secrets
   figma/       the port, the rebuild, the geometry diff
-scripts/       validate-packages.mjs — this repository checking itself
-docs/          design records and implementation plans
-
-Each package carries its own commands/, rules/, scripts/ and agents/, and its own
-manifest declaring what it requires, produces, checks and considers done.
 ```
 
-## Community
+</details>
 
+---
+
+## Upgrading
+
+Use `install`, not `update`.
+
+```bash
+/plugin install pica@pica
+```
+
+`install` brings packages that did not exist in your version. `update` only refreshes what you already
+have, and pica then reports the missing checks as `SKIPPED. NOT a pass`, which is honest and not what
+you wanted.
+
+## Philosophy
+
+- **Measure, do not eyeball.** The defects that matter most survive a visual review
+- **The cheap medium first.** Nothing expensive gets built before the cheap one is approved
+- **Report before you fix.** Finding and fixing are separate passes. An audit that writes is not an audit
+- **A check must fail closed.** If it cannot do its job it exits non-zero, never a clean run over nothing
+- **A green check is not evidence the check works.** Make it fail on purpose before you trust it
+- **A rule with no register is a preference.** If something must be written down it needs a named key in
+- **A false positive is worse than a miss.** A check that cries wolf gets switched off, and then it
+- **Measurement and review find different defects.** Neither substitutes for the other
+- **Approval is a decision, not an inference.** Silence, "looks ready" and moving on are not approval
+- **Every rule names the failure that earned it.** A rule without one gets deleted by the next person
+- **The last step is a person looking.** Measurement narrows what a human has to check. It never
 - **Issues and questions**: <https://github.com/vqdungwork/pica/issues>
-- **Changelog**: [CHANGELOG.md](CHANGELOG.md) — every rule beside the failure that earned it
+- **Changelog**: [CHANGELOG.md](CHANGELOG.md), every rule beside the failure that earned it
 - **Design notes**: [`docs/specs/`](docs/specs) and [`docs/plans/`](docs/plans)
 
-## Contributing
+---
 
-Rules earn their place by naming a failure. A pull request adding one without saying what went wrong will
-be asked for the failure first. New checks must fail closed, and must be demonstrated failing on the
-defect they were written for.
+**Issues and questions**: <https://github.com/vqdungwork/pica/issues>
+&nbsp;&nbsp;**Changelog**: [CHANGELOG.md](CHANGELOG.md), every rule beside the failure that earned it
 
-## Attribution
+**Contributing.** Rules earn their place by naming a failure. A pull request adding one without saying
+what went wrong will be asked for the failure first. New checks must fail closed, and must be
+demonstrated failing on the defect they were written for.
 
 Built for [Claude Code](https://claude.com/claude-code). Optional integration with
-[superpowers](https://github.com/obra/superpowers) by Jesse Vincent, MIT licensed.
-
-## Licence
-
-MIT — see [LICENSE](LICENSE).
+[superpowers](https://github.com/obra/superpowers) by Jesse Vincent, MIT licensed. MIT, see
+[LICENSE](LICENSE).
