@@ -1,10 +1,11 @@
 <div align="center">
 
-<img alt="pica — from the brief to the shipped screen. Intake, research, HTML, Figma, then implementation and test. Every step verified by measurement, never by opinion." src="assets/banner.svg" width="100%">
+<img alt="pica — from the brief to the shipped product. Analyse, research, design in HTML, evaluate, estimate, architect, build and release. Every step verified by measurement, never by opinion." src="assets/banner.svg" width="100%">
 
-**A design workflow for Claude Code.**
+**From a brief to a released product, checked by measurement at every step. For Claude Code.**
 
-[![version](https://img.shields.io/badge/version-0.7.0-1f2328)](https://github.com/vqdungwork/pica/releases)
+[![version](https://img.shields.io/badge/version-0.8.0-1f2328)](https://github.com/vqdungwork/pica/releases)
+[![checks](https://img.shields.io/badge/checks-86%20fail--closed-1f2328)](#what-is-enforced-and-how)
 [![licence](https://img.shields.io/badge/licence-MIT-1f2328)](LICENSE)
 [![requires](https://img.shields.io/badge/requires-Claude%20Code-1f2328)](https://claude.com/claude-code)
 [![figma](https://img.shields.io/badge/Figma-optional-1f2328)](#requirements)
@@ -20,54 +21,154 @@
 
 ## Contents
 
-[The problem](#the-problem) · [What it is for](#what-it-is-for) · [How it works](#how-it-works) ·
-[Install](#install) · [The flow](#the-flow) · [In practice](#what-this-looks-like-in-practice) ·
+[What it does](#what-it-does) · [The problem](#the-problem) · [What you get](#what-you-get) ·
+[How it works](#how-it-works) · [Just ask for it](#just-ask-for-it) · [Install](#install) ·
+[The flow](#the-flow) · [In practice](#what-this-looks-like-in-practice) ·
 [The steps in detail](#the-steps-in-detail) · [What is enforced](#what-is-enforced-and-how) ·
 [Requirements](#requirements) · [The rules](#the-rules) · [Philosophy](#philosophy) ·
 [Community](#community)
 
+## What it does
+
+You give it a brief. It gives you back a clickable, measured product — and it argues with you at every
+step where a person would otherwise guess.
+
+| | |
+|:--|:--|
+| **Understands the work** | Elicits the problem, the AS-IS and the TO-BE, the business rules and the use cases, and writes a PRD a non-technical client can actually read |
+| **Knows the field** | 28 sectors of stakeholders, colour conventions and their reasons, the design tradition each settled on, and what each treats as a defect regardless of the brief |
+| **Designs in HTML first** | At every viewport you declare, in every state, consuming a kit built before any screen. Cheap to change, cheap to measure, and it clicks |
+| **Measures before it shows you** | Geometry, contrast, coverage, parity, the words, the wiring. **86 checks that fail closed** |
+| **Has it reviewed** | Three to five independent evaluators, each with a different lens, none seeing another's findings, plus a cognitive walkthrough per use case |
+| **Prices it honestly** | Three-point effort per role — but only after **scope and deadline are frozen**, because an estimate before that prices a guess and the guess becomes the commitment |
+| **Holds the build to it** | Tests traced to use cases, a real pipeline, three environments, and the built product measured back against the design you approved |
+| **Ports to Figma, if you want it** | Verified frame by frame against the HTML. Where the two disagree, Figma is wrong |
+
+**What it will not do is write your code.** Writing code is the most mature thing in this ecosystem and a
+worse version of it here would help nobody. pica never wrote a browser, it wrote the checks. It never
+wrote Figma, it wrote the gates. **A coding agent executes; this decides whether what came out is
+finished.**
+
 ## The problem
 
-Your design looks right. It is not right.
+**Your design looks right. It is not right.**
 
-A hero sitting 47px low across three screens. A primary button hugging its label when it should fill
-the width. Inputs holding a stale fixed height, quietly clipping their own error messages. A
-component library with fifteen emoji standing in for icons. Forty-one text nodes bound to no font at
-all, on the one page the client is actually scoring.
+A hero sitting 47px low across three screens. A primary button hugging its label when it should fill the
+width. Inputs holding a stale fixed height, quietly clipping their own error messages. A component
+library with fifteen emoji standing in for icons. Forty-one text nodes bound to no font at all, on the
+one page the client is actually scoring.
 
 Every one of those passed visual review. Every one was obvious to a measurement.
 
-Meanwhile the expensive medium gets built before anyone approved the cheap one, reviews and fixes
-collapse into the same pass so nothing is auditable, and the file gets declared clean by comparing it
-against itself.
+**Then there is the half a measurement does not catch either.**
 
-`pica` fixes the order of operations and refuses to trust the eye.
+> An error message at **2.15:1** contrast — less than half the legal floor — on the one line a person
+> most needs to read, on the worst screen in the product.
+>
+> A requirement everyone agreed to that has **no screen at all**, beside a screen serving no requirement,
+> in a file where every frame is tagged, in bounds, paired and covered.
+>
+> An education product built like an accounting console. Tokens correct, geometry clean, and a teacher
+> knows in one second that nobody involved has watched a classroom.
 
-## What it is for
+None of those is a rendering defect. Each is a product that measures clean and is still wrong, and each
+one here was found by a check written the day after it happened.
 
-**Interfaces someone is going to build.** An application, a website, a landing page, a dashboard, a set
-of screens, or the design system behind them. Say *"design the app"*, *"design this landing page"*,
-*"design these screens"*, *"build a design system"*, *"port the HTML to Figma"* — and the flow starts.
+Meanwhile the expensive medium gets built before anyone approved the cheap one, review and fix collapse
+into one pass so nothing is auditable, an estimate goes out before scope is frozen, and the file gets
+declared clean by comparing it against itself.
 
-| pica is for | pica is not for |
-|:--|:--|
-| Applications — web, mobile, desktop | Illustration, images, photography |
-| Websites and landing pages | Video, motion pieces, animation |
-| Dashboards, admin tools, internal products | Logos, brand marks, identity work |
-| Design systems and component libraries | Presentation decks and documents |
-| Screens that need a spec someone can implement | Diagrams, charts, CLI and terminal output |
+**`pica` fixes the order of operations, refuses to trust the eye, and refuses to trust a check nobody has
+watched fail.**
 
-The line is simple: **pica designs things people navigate and someone has to build.** If nothing will be
-implemented from the output, this is the wrong tool and it will get in your way — every gate it enforces
-exists to protect an implementation that would otherwise be built from an unverified design.
+## What you get
 
-It also works on **any project, for anyone**. Nothing in it assumes a particular client, stack, brand or
-team. You declare the viewports, whether Figma is in scope, and what the brief actually says; the flow
-adapts to that and refuses to invent the rest.
+<table>
+<tr>
+<td width="33%" valign="top">
 
-### Just ask for it
+### 86 checks
+Every one **fails closed**. An empty input, a missing file, a selector matching nothing: each says so out
+loud rather than reporting a clean run over nothing.
 
-The skill activates on its own. Talk normally:
+</td>
+<td width="33%" valign="top">
+
+### 28 sectors
+141 stakeholders, 98 sector defects, 22 hues that are already spent. **Fails closed on a sector it does
+not know**, because passing an unknown one gives the least-supported project the quietest gate.
+
+</td>
+<td width="33%" valign="top">
+
+### 11 packages
+Each installs on its own and pulls only what it needs. Never touching Figma? You never see that half.
+
+</td>
+</tr>
+</table>
+
+**And a claim that can be checked rather than believed:** every one of those 86 criteria has been *seen
+to fail* on the defect it was written for. That is the only reason a number that grew from 15 to 86 in
+one release is worth anything.
+
+It was verified on **90 projects** — 84 generated across the 28 sectors in three viewport shapes, plus 6
+built by hand through the entire lifecycle — with every runnable check on all of them, including the
+implementation gate against **84 real git repositories**. Then **45 deliberate defects** were run past
+every check at once, demanding both halves: the defect is caught, **and no other check fires**. Plus 6
+legitimate changes that must pass clean, because a suite that only tests one direction cannot see a check
+that cries wolf.
+
+## How it works
+
+It starts the moment you ask for design work. Instead of opening a file and drawing, it asks what you are
+actually building — and it refuses to start until it has the brief in your words, your sources labelled
+as ones to use or ignore, the commercial constraint, and one decision: **is Figma a deliverable here, or
+not.**
+
+**What comes back first is a contract, not a mockup.** One section per work package with acceptance
+criteria, an exclusions list quoting everything the brief rules out, two or three costed options, and a
+complexity tier for each. Nothing proceeds until you approve it.
+
+Before a single screen exists it resolves the **sector**, and that decides more than a palette: education
+runs three densities in one product because a learner, a teacher and a parent are not one audience;
+red in a hospital means clinical emergency and cannot be spent on a delete button; blue on a food menu
+reads as spoilage. Conventions are recorded **with the reason**, because a convention without one gets
+overridden by the next person who finds it inconvenient.
+
+Then it designs — **in HTML, at every viewport you declared** — because HTML is cheap to change, cheap to
+measure, and real: it reflows, it scrolls, you can click it. Screens consume a kit built first, so a
+one-off control invented mid-screen is a review finding rather than a shortcut.
+
+**Before it shows you anything, it measures.** Overflow behind a frame edge. Contrast, computed rather
+than sampled, composited through translucency. Screens taller than their viewport with no full-height
+twin. Drift between viewports. A requirement with no screen, or a screen with no requirement. Copy that
+says what broke and not what to do. Dead links and unreachable screens. **Every check returns zero or it
+fixes and runs them again** — then it renders every frame and looks, because measurement and eyes catch
+different defects.
+
+Only then does it ask you to approve. And only after you approve does anything reach Figma — **enforced
+by a hook, not by good intentions**. The port is verified back against the HTML frame by frame, and where
+the two disagree the HTML wins.
+
+If Figma is not in scope you stop after approval with a fully verified HTML design. That is a complete
+pica project, not a truncated one.
+
+**And if the client says yes, the flow keeps going.** Scope and deadline get frozen first. Then
+three-point effort per role, a work order derived from the deadline with the arithmetic shown, C4
+diagrams and decision records where every choice carries its downside, and non-functional requirements
+stated as numbers with a way to measure each. Then the build: tests traced to use cases, a pipeline that
+runs what a human should not be reviewing, short-lived branches, three environments deploying from main,
+and finally **the comparison the industry reliably leaves undone** — the built product measured against
+the design you approved, by the same harness, so the two cannot disagree about what was captured.
+
+At closeout the real hours are logged back against the estimate, with a reason on any variance over 20
+per cent. Without that the next estimate learns nothing and stays a guess forever.
+
+## Just ask for it
+
+The workflow announces itself at the start of every session, including after a compaction. You never have
+to remember to load it. Talk normally:
 
 ```
 Design the onboarding screens for our mobile app
@@ -78,36 +179,36 @@ Design this dashboard for desktop and mobile
 
 Port the approved HTML to Figma
 
-Review the Figma file against the HTML
+Here is the brief. Run the whole thing and show me a review page
 ```
 
-## How it works
+That last one is **`/picaflow`**, and it is the one worth knowing about. It runs from a thin brief to a
+clickable `review.html` **without stopping to ask**, turning every gap into a labelled assumption
+carrying a confidence and a blast radius.
 
-It starts the moment you ask for design work. Instead of opening a file and drawing, it asks what
-you are actually building — and it refuses to start until it has the brief in your words, your sources
-labelled as ones to use or ignore, the commercial constraint, and one decision: **is Figma a deliverable
-here, or not.**
+That is not a shortcut, it is the argument. Reacting to a built thing is far cheaper than specifying one
+from nothing: ask a client what their business flow is and you get hesitation; show them a wrong one that
+clicks and you get the correction in three seconds. **The demo is the question. It is only packaged as an
+answer.** What makes it safe is the assumptions register and nothing else.
 
-What comes back first is a contract, not a mockup. One section per work package with acceptance
-criteria, an exclusions list quoting everything the brief rules out, two or three costed options, and a
-complexity tier for each package. Nothing proceeds until you approve it.
+### Where the line is
 
-Then it designs — **in HTML, at every viewport you declared**, because HTML is cheap to change, cheap to
-measure, and it is real: it reflows, it scrolls, you can click it. The screens consume a UI kit built
-first, so a one-off control invented mid-screen is a review finding rather than a shortcut.
+| pica is for | pica is not for |
+|:--|:--|
+| Applications — web, mobile, desktop | Illustration, images, photography |
+| Websites and landing pages | Video, motion pieces, animation |
+| Dashboards, admin tools, internal products | Logos, brand marks, identity work |
+| Design systems and component libraries | Presentation decks and documents |
+| The PRD, use cases and domain model behind them | Diagrams, charts, CLI and terminal output |
+| Deciding whether the build matches the design | Writing the implementation code itself |
 
-Before it shows you anything, it measures. Overflow behind a frame edge. Screens taller than their
-viewport with no full-height twin. Drift between viewports, compared by counting elements rather than
-listing them. Dead links and unreachable screens in the prototype. **Every check has to return zero, or
-it fixes and runs them again** — and then it renders every frame and looks at them, because measurement
-and eyes catch different defects.
+**pica designs things people navigate and someone has to build.** If nothing will be implemented from the
+output, this is the wrong tool and it will get in your way: every gate it enforces exists to protect an
+implementation that would otherwise be built from an unverified design.
 
-Only then does it ask you to approve. And only after you approve does anything reach Figma — enforced by
-a hook, not by good intentions. The port is verified back against the HTML by measurement, frame by
-frame, and where the two disagree the HTML wins.
-
-If Figma is not in scope, you stop after approval with a fully verified HTML design. That is a complete
-pica project, not a truncated one.
+It works on **any project, for anyone**. Nothing assumes a particular client, stack, brand or team. You
+declare the viewports, whether Figma is in scope, and what the brief actually says. The flow adapts to
+that and refuses to invent the rest.
 
 ## Install
 
@@ -251,7 +352,11 @@ pass  viewport-tagged      0 finding(s)   (33 frames checked)
 pass  overflow             0 finding(s)   (33 frames checked)
 pass  tall-screen-pair     0 finding(s)   (8 frames exceed their viewport by >24px)
 pass  viewport-coverage    0 finding(s)   (2 viewports declared)
-pass  direction            0 finding(s)   (direction "Instrument", 4 assertion(s))
+pass  direction            0 finding(s)   (direction "International, Material elevation",
+                                           5 assertion(s), style "international" checked
+                                           against its signature)
+pass  data-ownership       0 finding(s)   (1 read-only region)
+pass  width-media          0 finding(s)   (0 width @media rules)
 
 0 finding(s). HTML passes the measured gate.
 ```
@@ -282,6 +387,56 @@ FAIL  captured 0 frames from 3 file(s).
 
 That last one is the whole argument in six lines. A check that reports success for work it did not do is
 worse than no check, because its silence reads as a pass.
+
+**The sector gate is the one people do not expect.** It resolves the field, then checks the design
+against what that field already decided:
+
+```
+$ node industry-check.mjs .pica/state.json
+
+field:  primary school classroom learning and gradebook
+sector: education — Education and learning, from schools to training
+        5 stakeholders known, 3 sector defects, 5 exemplars
+
+pass  industry-known     0 finding(s)   (resolved to education)
+FAIL  stakeholders       1 finding(s)   (3 deciding)
+FAIL  conventions        1 finding(s)   (5 axes)
+
+FINDING  [stakeholders] parent or guardian
+         this sector's "parent or guardian" can decide or veto and appears in no register.
+         They fear: finding out about a problem too late. Design consequence: the parent
+         view is a third density, and it must translate rather than expose the teacher's terms
+
+FINDING  [conventions] colour
+         no decision recorded on colour. The sector's convention is: warm and optimistic,
+         a trustworthy blue or green base with a warm accent. Follow it with a note, or
+         depart from it with a reason, but do not leave it undecided
+```
+
+Nothing there is a rendering defect. It is a product that would have measured clean and been wrong, and
+the check tells you **why the sector cares**, not just that a box is empty.
+
+**And the one that is legally binding.** Contrast is computed from the resolved colours, composited
+through translucency, never sampled from a screenshot:
+
+```
+$ node contrast-check.mjs .audit/html-reference.json .pica/state.json
+
+runs measured: 60
+level:         AA (4.5:1 normal, 3.0:1 large)
+
+FAIL  body-contrast     1 finding(s)   (60 runs)
+
+FINDING  [body-contrast] screens :: Today · error · mobile :: "Could not save that check-in"
+         2.15:1 at 16px/400, and AA needs 4.5:1 for normal text.
+         rgb(245, 158, 11) on rgb(255, 255, 255)
+```
+
+That is a real finding from the first project this check ever ran against: the error message, at less
+than half the required ratio, on the worst screen in the product. It looked fine.
+
+Text over an image, a gradient or a translucent layer is reported as **unresolved**, never as clean. A
+confident wrong ratio is worse than an admitted gap.
 
 ---
 
@@ -714,6 +869,14 @@ codebase. Any Figma community plugin. Responsive breakpoints as a continuum — 
 - **A green check is not evidence the check works** — make it fail on purpose before you trust it
 - **Approval is a decision, not an inference** — silence, "looks ready" and moving on are not approval
 - **Every rule names the failure that earned it** — a rule without one gets deleted by the next person
+- **A rule with no register is a preference** — if something "must be written down" it needs a named key
+  in state and something that reads it, or a deliberate exception is indistinguishable from an oversight
+- **A check that cannot run is not a pass** — an empty input, a missing file, a selector matching nothing:
+  each says so out loud rather than reporting clean
+- **A false positive is worse than a miss** — a check that cries wolf gets switched off, and then it
+  catches nothing at all
+- **Measurement and review find different defects** — neither substitutes for the other, and ten green
+  checks once coexisted with four screenshot-obvious defects
 
 ## Community
 

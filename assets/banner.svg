@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 460" width="1200" height="460" role="img" aria-label="pica - from the brief to the shipped screen. Intake, research, HTML, Figma, then implementation and test. Every step verified by measurement, never by opinion. Nothing passes the approval gate without you.">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 460" width="1200" height="460" role="img" aria-label="pica - from the brief to the shipped product. Analyse, research, design in HTML, evaluate, estimate, architect, build and release. Every step verified by measurement, never by opinion.">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0%" stop-color="#0d1117"/><stop offset="100%" stop-color="#010409"/>
@@ -141,7 +141,7 @@
 
   <text x="72" y="228" fill="#f0f6fc" font-size="168" font-family="Iowan Old Style, Palatino Linotype, Palatino, Georgia, 'Times New Roman', serif" letter-spacing="2">pica</text>
 
-  <text x="1128" y="152" fill="#f0f6fc" font-size="24" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" text-anchor="end">From the brief to the shipped screen.</text>
+  <text x="1128" y="152" fill="#f0f6fc" font-size="24" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" text-anchor="end">From the brief to the shipped product.</text>
   <text x="1128" y="190" fill="#8b949e" font-size="19" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" text-anchor="end">Every step verified by measurement, never by opinion.</text>
   <text x="1128" y="217" fill="#8b949e" font-size="19" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" text-anchor="end">Each stage a package you can use, swap or skip.</text>
 
@@ -154,22 +154,20 @@
     <line x1="713.5999999999999" y1="356" x2="908.8" y2="356" stroke="#30363d" stroke-width="1.5" stroke-dasharray="4 5"/>
     <line x1="924.8" y1="356" x2="1120" y2="356" stroke="#30363d" stroke-width="1.5" stroke-dasharray="4 5"/>
     <circle cx="72" cy="356" r="5" fill="#0d1117" stroke="#f0883e" stroke-width="2"/>
-    <text x="72" y="336" fill="#f0f6fc" font-size="16" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" text-anchor="middle">intake</text>
+    <text x="72" y="336" fill="#f0f6fc" font-size="16" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" text-anchor="middle">analyse</text>
     <circle cx="283.2" cy="356" r="5" fill="#0d1117" stroke="#f0883e" stroke-width="2"/>
-    <text x="283.2" y="336" fill="#f0f6fc" font-size="16" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" text-anchor="middle">research</text>
+    <text x="283.2" y="336" fill="#f0f6fc" font-size="16" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" text-anchor="middle">design</text>
     <circle cx="494.4" cy="356" r="5" fill="#0d1117" stroke="#f0883e" stroke-width="2"/>
-    <text x="494.4" y="336" fill="#f0f6fc" font-size="16" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" text-anchor="middle">HTML</text>
+    <text x="494.4" y="336" fill="#f0f6fc" font-size="16" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" text-anchor="middle">evaluate</text>
     <circle cx="705.5999999999999" cy="356" r="5" fill="#0d1117" stroke="#f0883e" stroke-width="2"/>
-    <text x="705.5999999999999" y="336" fill="#f0f6fc" font-size="16" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" text-anchor="middle">Figma</text>
+    <text x="705.5999999999999" y="336" fill="#f0f6fc" font-size="16" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" text-anchor="middle">estimate</text>
     <circle cx="916.8" cy="356" r="5" fill="#010409" stroke="#30363d" stroke-width="2"/>
-    <text x="916.8" y="336" fill="#484f58" font-size="16" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" text-anchor="middle">implement</text>
-    <text x="916.8" y="382" fill="#30363d" font-size="10.5" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" text-anchor="middle" letter-spacing="0.6">PLANNED</text>
+    <text x="916.8" y="336" fill="#f0f6fc" font-size="16" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" text-anchor="middle">build</text>
     <circle cx="1128" cy="356" r="5" fill="#010409" stroke="#30363d" stroke-width="2"/>
-    <text x="1128" y="336" fill="#484f58" font-size="16" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" text-anchor="middle">test</text>
-    <text x="1128" y="382" fill="#30363d" font-size="10.5" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" text-anchor="middle" letter-spacing="0.6">PLANNED</text>
+    <text x="1128" y="336" fill="#f0f6fc" font-size="16" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" text-anchor="middle">release</text>
     <path d="M 600 347 L 609 356 L 600 365 L 591 356 Z" fill="#f0883e"/>
     <text x="600" y="384" fill="#f0883e" font-size="11.5" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" text-anchor="middle" letter-spacing="0.4">you approve</text>
   </g>
 
-  <text x="72" y="428" fill="#8b949e" font-size="13" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">7 shipped checks, every one fails closed  &#183;  4 projects of evidence  &#183;  49 findings, each recorded with the failure that earned it</text>
+  <text x="72" y="428" fill="#8b949e" font-size="13" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">86 checks, every one fails closed  &#183;  90 projects of evidence  &#183;  every criterion seen to fail on the defect it was written for</text>
 </svg>
