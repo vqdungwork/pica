@@ -3,30 +3,90 @@
   "status": "stable",
   "description": "The UI kit and work packages in HTML at every declared viewport, and the measured gate before approval.",
   "owns": {
-    "commands": ["pica-wp.md"],
-    "rules": ["html-prototype.md", "html-gates.md"],
-    "scripts": ["capture-html-reference.mjs", "verify-html.mjs", "parity-check.mjs", "flow-check.mjs"]
+    "commands": [
+      "pica-wp.md"
+    ],
+    "rules": [
+      "html-gates.md",
+      "html-prototype.md",
+      "native-mobile.md"
+    ],
+    "scripts": [
+      "capture-html-reference.mjs",
+      "code-tokens-check.mjs",
+      "contrast-check.mjs",
+      "coverage-check.mjs",
+      "flow-check.mjs",
+      "parity-check.mjs",
+      "verify-html.mjs"
+    ]
   },
   "requires": {
-    "state": ["viewports"],
-    "artifacts": ["tokens/tokens.css"],
-    "gates": ["intakeApproved"]
+    "state": [
+      "viewports"
+    ],
+    "artifacts": [
+      "tokens/tokens.css"
+    ],
+    "gates": [
+      "intakeApproved"
+    ]
   },
   "produces": {
-    "state": ["packages.html.built"],
-    "artifacts": ["html/", ".audit/html-reference.json", ".audit/html-reference-forced.json"]
+    "state": [
+      "packages.html.built"
+    ],
+    "artifacts": [
+      "html/",
+      ".audit/html-reference.json",
+      ".audit/html-reference-forced.json"
+    ]
   },
   "checks": [
-    { "run": "verify-html.mjs",  "passes": "0 findings across viewport-tagged, overflow, tall-screen-pair, viewport-coverage" },
-    { "run": "parity-check.mjs", "passes": "0 findings, nominal and structural" },
-    { "run": "flow-check.mjs",   "passes": "0 findings, or --allow-none for a boards-only package" }
+    {
+      "run": "verify-html.mjs",
+      "passes": "0 findings across viewport-tagged, overflow, tall-screen-pair, viewport-coverage"
+    },
+    {
+      "run": "parity-check.mjs",
+      "passes": "0 findings, nominal and structural"
+    },
+    {
+      "run": "flow-check.mjs",
+      "passes": "0 findings, or --allow-none for a boards-only package"
+    },
+    {
+      "run": "contrast-check.mjs",
+      "passes": "0 findings"
+    }
   ],
   "definitionOfDone": [
-    { "type": "check", "run": "verify-html.mjs",  "passes": "0 findings" },
-    { "type": "check", "run": "parity-check.mjs", "passes": "0 findings" },
-    { "type": "check", "run": "flow-check.mjs",   "passes": "0 findings" },
-    { "type": "human", "says": "every frame rendered and looked at, per viewport, after the last change" },
-    { "type": "human", "says": "the main flow clicked end to end" },
-    { "type": "gate",  "grants": "htmlApproved:<wp>" }
+    {
+      "type": "check",
+      "run": "verify-html.mjs",
+      "passes": "0 findings"
+    },
+    {
+      "type": "check",
+      "run": "parity-check.mjs",
+      "passes": "0 findings"
+    },
+    {
+      "type": "check",
+      "run": "flow-check.mjs",
+      "passes": "0 findings"
+    },
+    {
+      "type": "human",
+      "says": "every frame rendered and looked at, per viewport, after the last change"
+    },
+    {
+      "type": "human",
+      "says": "the main flow clicked end to end"
+    },
+    {
+      "type": "human",
+      "says": "the client approved this package's HTML; core records htmlApproved:<wp>. This package requests that gate and does not grant it"
+    }
   ]
 }
