@@ -1024,7 +1024,7 @@ Ten findings.
   with the old paths, 0 with the new. Found while adding this release's own rule to the map.
 
 Also: naming by role rather than measurement, including inside variant axes — 58 components, 95 variant
-values and 13 effect styles renamed on this project, and the observation that when a size scale cannot
+values and 13 effect styles renamed in one file, and the observation that when a size scale cannot
 name an axis's members uniquely, it is not a size axis. Four new Plugin API traps in `figma-screens.md`
 (`return` inside a traversal exits the script; property references cannot be set on an instance sublayer;
 `figma.mixed` is not only `cornerRadius`; never filter a delete list by a key you transformed).

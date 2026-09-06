@@ -89,8 +89,8 @@ Three corrections the trial build forced on the original schema:
   stretches on the axis the schema treated as the pin. The zero-gap assertion applies only to a
   pinned axis, never a stretched one.
 - **Chrome is declared, never defaulted** (F3, the most important). 0.2.0's chrome list is not
-  "the mobile contract", it is **the native-iOS-app contract**. This project is a web application:
-  at 375 it has no status bar, no home indicator and no safe-area inset. Applying 0.2.0's universal
+  "the mobile contract", it is **the native-iOS-app contract**. A web application at 375 has no status
+  bar, no home indicator and no safe-area inset. Applying 0.2.0's universal
   home-indicator rule would raise a false finding on every mobile frame, and "fixing" it would mean
   drawing iOS chrome into a web page. **A width of 375 tells you nothing about whether a home
   indicator belongs.** `/pica` intake must ask what each viewport *is* — native app, mobile web,
@@ -107,7 +107,7 @@ Registers:
 `scope` is required (F9): either a screen name or `"*"` for chrome reflowing on every screen. A flat
 global list was tried first and was too blunt — `.cand` reflows on `compare / results` but appears
 legitimately at both viewports on `search / results`, so a global entry would blind the check to real
-drift. Measured split on this project: 11 entries at `"*"`, 30 scoped to four screens.
+drift. A measured split in one build: 11 entries at `"*"`, 30 scoped to four screens.
 
 Work packages:
 
