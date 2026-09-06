@@ -11,7 +11,16 @@ Load `${CLAUDE_PLUGIN_ROOT}/rules/testing.md`. Read the sector entry first — w
 defect decides what the highest-risk paths are:
 
 ```bash
-node ${CLAUDE_PLUGIN_ROOT}/../analyst/scripts/industry-check.mjs --show <state.industry.key>
+# pica_find <package> <script> — two layouts: the repository, where packages sit side by
+# side under packages/, and an install, where each has its own versioned directory under
+# the marketplace cache. A path that assumed only the first resolves to nothing on every
+# real install. Prints nothing when the package is absent, which is a finding, not a skip.
+pica_find() {
+  R="${CLAUDE_PLUGIN_ROOT}"
+  [ -f "$R/../$1/scripts/$2" ] && { printf '%s' "$R/../$1/scripts/$2"; return 0; }
+  find "$R/../.." -maxdepth 4 -path "*/pica-$1/*/scripts/$2" -print 2>/dev/null | sort -V | tail -1
+}
+node "$(pica_find analyst industry-check.mjs)" --show <state.industry.key>
 ```
 
 A dispensing queue and a portfolio have the same test pyramid and completely different blockers.

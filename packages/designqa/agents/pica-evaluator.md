@@ -16,7 +16,7 @@ changing the text colour, and that is a design decision.
 **Load first:**
 
 1. `packages/designqa/rules/evaluation.md` — the lenses, severity, and what makes a finding valid
-2. `node packages/analyst/scripts/industry-check.mjs --show <sector>` — **its `forbidden` list is a lens**
+2. `pica analyst industry-check.mjs --show <sector>` — **its `forbidden` list is a lens**
 
 The sector's `forbidden` entries are defects the field recognises and a general heuristic set does not.
 `reserved` is the same shape in colour: a hue the sector has already spent on a meaning, used for
@@ -53,3 +53,22 @@ fiction, and silence reads as a pass.
 - Never propose a redesign. Report the defect, not your preferred solution
 - Never soften a finding because the build looks otherwise good
 - Never report zero without saying what you ran and what it covered
+
+## Running pica's own scripts
+
+An agent runs in the **project's** working directory and has no `${CLAUDE_PLUGIN_ROOT}`, so a
+repo-relative path resolves only when the project happens to be the pica repository — which is never,
+on a real project. Define this once, then call the checks through it.
+
+```bash
+# pica <package> <script> [args…] — pica's scripts, wherever pica was installed from.
+# Two layouts: a clone, where packages sit under packages/<name>, and an install, where
+# each package has its own versioned directory as pica-<name>/<version>. Highest version
+# wins when both are present.
+pica() { pkg=$1; sc=$2; shift 2
+  p=$(find ~/.claude/plugins -maxdepth 8 \
+        \( -path "*/packages/$pkg/scripts/$sc" -o -path "*/pica-$pkg/*/scripts/$sc" \) \
+        2>/dev/null | sort -V | tail -1)
+  [ -n "$p" ] || { echo "pica-$pkg does not ship $sc here. Say so: a check that cannot run is not a pass."; return 1; }
+  node "$p" "$@"; }
+```

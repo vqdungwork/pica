@@ -68,8 +68,16 @@ the issue.
 ## 7.10 Build versus design, with `--build <url>`
 
 ```bash
-S=${CLAUDE_PLUGIN_ROOT}/../html/scripts
-node $S/capture-html-reference.mjs --url <live-url> --out .built
+# Two layouts: the repository, where packages sit side by side under packages/, and an
+# install, where each has its own versioned directory under the marketplace cache. A path
+# that assumed only the first resolves to nothing on every real install.
+pica_find() {
+  R="${CLAUDE_PLUGIN_ROOT}"
+  [ -f "$R/../$1/scripts/$2" ] && { printf '%s' "$R/../$1/scripts/$2"; return 0; }
+  find "$R/../.." -maxdepth 4 -path "*/pica-$1/*/scripts/$2" -print 2>/dev/null | sort -V | tail -1
+}
+CAP=$(pica_find html capture-html-reference.mjs)
+node "$CAP" --url <live-url> --out .built
 node ${CLAUDE_PLUGIN_ROOT}/scripts/build-diff.mjs .audit/html-reference.json .built/html-reference.json
 ```
 

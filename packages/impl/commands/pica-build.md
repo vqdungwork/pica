@@ -48,8 +48,16 @@ error states are done badly at the end, by someone tired.
 ## Check
 
 ```bash
-S=${CLAUDE_PLUGIN_ROOT}/../html/scripts
-node $S/code-tokens-check.mjs <src-dir> tokens/tokens.json .pica/state.json
+# Two layouts: the repository, where packages sit side by side under packages/, and an
+# install, where each has its own versioned directory under the marketplace cache. A path
+# that assumed only the first resolves to nothing on every real install.
+pica_find() {
+  R="${CLAUDE_PLUGIN_ROOT}"
+  [ -f "$R/../$1/scripts/$2" ] && { printf '%s' "$R/../$1/scripts/$2"; return 0; }
+  find "$R/../.." -maxdepth 4 -path "*/pica-$1/*/scripts/$2" -print 2>/dev/null | sort -V | tail -1
+}
+CAP=$(pica_find html capture-html-reference.mjs)
+node "$(pica_find html code-tokens-check.mjs)" <src-dir> tokens/tokens.json .pica/state.json
 ```
 
 And against the repository itself:

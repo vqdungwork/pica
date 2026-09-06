@@ -4,8 +4,9 @@
 
 **From a brief to a released product, checked by measurement at every step. For Claude Code.**
 
-[![version](https://img.shields.io/badge/version-0.8.0-1f2328)](https://github.com/vqdungwork/pica/releases)
+[![version](https://img.shields.io/badge/version-0.9.0-1f2328)](https://github.com/vqdungwork/pica/releases)
 [![checks](https://img.shields.io/badge/checks-100%20fail--closed-1f2328)](#the-checks)
+[![agents](https://img.shields.io/badge/role%20agents-9-1f2328)](#nine-roles-one-per-step)
 [![sectors](https://img.shields.io/badge/sectors-28-1f2328)](#it-knows-the-field)
 [![licence](https://img.shields.io/badge/licence-MIT-1f2328)](LICENSE)
 [![requires](https://img.shields.io/badge/requires-Claude%20Code-1f2328)](#requirements)
@@ -87,15 +88,9 @@ is worse than no check, because its silence reads as a pass.**
 | **Holds the build to it** | A real pipeline, three environments, and the built product measured back against the approved design by someone who did not build it |
 | **Ports to Figma, optionally** | Verified frame by frame against the HTML. Where the two disagree, Figma is wrong |
 
-**It writes the code too, and holds it to the same standard as everything else.** `pica-developer`
-builds the approved design — the API contract as a seam with its errors, four places state is allowed to
-live, every failure shaped so the copy reaches it — and `pica-qa` decides whether the suite is a suite
-or a number. Then the built product is measured back against the approved design, by someone who did not
-build it.
-
 pica never wrote a browser, it wrote the checks. It never wrote Figma, it wrote the gates. **What it
-adds to writing code is the part that is usually missing: what "finished" means, and something that
-returns non-zero when it is not.**
+adds to writing code is the part usually missing: what "finished" means, and something that returns
+non-zero when it is not.**
 
 ## The flow
 
@@ -185,6 +180,33 @@ be built from an unverified design.
 
 Nothing in it assumes a client, a stack, a brand or a team. You declare the viewports, whether Figma is
 in scope, and what the brief says. It adapts to that and refuses to invent the rest.
+
+
+## Nine roles, one per step
+
+Each step runs as the agent that owns it. Every agent loads its own craft rules **and reads the sector
+entry before it starts** — which is what keeps a clinician's screen and a warehouse handheld from coming
+out of the same template.
+
+| Agent | Owns | Reads |
+|:--|:--|:--|
+| `pica-researcher` | measuring shipped products across the nine foundations | which products count as precedent here, and which mislead |
+| `pica-analyst` | glossary, AS-IS, TO-BE, the delta, rules, use cases, the PRD | who can veto, and what the field requires whatever the brief says |
+| `pica-architect` | feasibility, C4, ADRs, NFRs as numbers | the obligations that become NFRs nobody asked for |
+| `pica-designer` | the kit, every screen, every state, every viewport | the hues already spent, the tradition, the density, the type |
+| `pica-writer` | the words, every state, bound to the glossary | the register the reader is fluent in, and the phrasings the field treats as defects |
+| `pica-evaluator` | independent evaluation — **no write access** | the sector's own defect list, as a lens |
+| `pica-estimator` | three points per role, the work order | the approval bodies that land on the critical path |
+| `pica-developer` | the code, the contract, the failure shapes | the conventions the field expects in a build |
+| `pica-tester` | the suite's shape, the release gate | what this field considers a blocker |
+
+**The evaluator cannot write.** An audit that fixes destroys the record of what was wrong, and picks
+solutions that are not its to pick: a contrast failure can be solved by darkening the scrim or by
+changing the text colour, and that is a design decision.
+
+**Fan out measurement. Never fan out judgement.** Research and evaluation are the two places agents run
+in parallel — same return schema, none seeing another's findings, and a result with no provenance is
+rejected rather than merged.
 
 ## What ships
 
@@ -287,7 +309,7 @@ Approvals live in `.pica/state.json`. A hook is a script; it cannot know you sai
 
 | Tier | Needs | Gives you |
 |:--|:--|:--|
-| **Core** | `bash` and `python3` | Everything up to an approved design, and everything after it except Figma |
+| **Core** | `bash` and `python3` | Everything: analysis, design, estimate, architecture, the build, the tests, the release. All of it except Figma |
 | **Measured** | `playwright` | The capture harness every measured check reads |
 | **Figma** | the Figma MCP server, plus a Dev or Full seat | Phase 7f only |
 | **Enhanced** | [superpowers](https://github.com/obra/superpowers) | Stronger intake and planning, plus the agent panel |
@@ -297,7 +319,7 @@ and ends complete, not truncated.
 
 ## The rules
 
-Twenty modules, loaded per step rather than all at once.
+Twenty-two modules, loaded per step rather than all at once.
 
 | Module | Package | Covers |
 |:--|:--|:--|
@@ -336,6 +358,8 @@ Twenty modules, loaded per step rather than all at once.
 - **Measurement and review find different defects** — neither substitutes for the other
 - **Approval is a decision, not an inference** — silence, "looks ready" and moving on are not approval
 - **Every rule names the failure that earned it** — a rule without one gets deleted by the next person
+- **The last step is a person looking** — measurement narrows what a human has to check; it never
+  replaces the checking
 
 ## What this repo contains
 
@@ -351,10 +375,15 @@ packages/
   content/     the words
   designqa/    independent evaluation, and the build against the design
   estimate/    three-point effort, the work order, the effort record
-  impl/        the definition of done for building and releasing
+  developer/   the code: the contract as a seam, where state lives, failure shapes
+  qa/          the tests: the shape of the suite, and the release gate
+  impl/        the repository: pipeline, branches, environments, secrets
   figma/       the port, the rebuild, the geometry diff
 scripts/       validate-packages.mjs — this repository checking itself
 docs/          design records and implementation plans
+
+Each package carries its own commands/, rules/, scripts/ and agents/, and its own
+manifest declaring what it requires, produces, checks and considers done.
 ```
 
 ## Community

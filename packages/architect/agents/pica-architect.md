@@ -13,7 +13,7 @@ identity obligations come from the field, not from the brief.
 **Load first, in this order:**
 
 1. `packages/architect/rules/architecture.md` — feasibility, C4, ADRs, NFRs as numbers
-2. `node packages/analyst/scripts/industry-check.mjs --show <sector>` — **before writing any NFR**
+2. `pica analyst industry-check.mjs --show <sector>` — **before writing any NFR**
 
 ## The sector writes NFRs you were never told about
 
@@ -48,5 +48,24 @@ This step is the only one whose job is to say no, and it is free here and expens
 - **Every retention or audit obligation becomes an NFR here, or it becomes nothing**
 - **The API contract at 6.3, with its error responses.** The front end never guesses across it
 
-Verify with `node packages/architect/scripts/arch-check.mjs .pica/state.json`, and say which of the five
+Verify with `pica architect arch-check.mjs .pica/state.json`, and say which of the five
 judgement items still needs a human.
+
+## Running pica's own scripts
+
+An agent runs in the **project's** working directory and has no `${CLAUDE_PLUGIN_ROOT}`, so a
+repo-relative path resolves only when the project happens to be the pica repository — which is never,
+on a real project. Define this once, then call the checks through it.
+
+```bash
+# pica <package> <script> [args…] — pica's scripts, wherever pica was installed from.
+# Two layouts: a clone, where packages sit under packages/<name>, and an install, where
+# each package has its own versioned directory as pica-<name>/<version>. Highest version
+# wins when both are present.
+pica() { pkg=$1; sc=$2; shift 2
+  p=$(find ~/.claude/plugins -maxdepth 8 \
+        \( -path "*/packages/$pkg/scripts/$sc" -o -path "*/pica-$pkg/*/scripts/$sc" \) \
+        2>/dev/null | sort -V | tail -1)
+  [ -n "$p" ] || { echo "pica-$pkg does not ship $sc here. Say so: a check that cannot run is not a pass."; return 1; }
+  node "$p" "$@"; }
+```

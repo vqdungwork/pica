@@ -138,6 +138,34 @@ A fourth came from using real data rather than invented data: `co-amoxiclav 875m
 film-coated tablets` is an ordinary dispensed product and it overflowed the 390 viewport,
 where six invented drug names had all fitted.
 
+### Two more, from ten review passes that ran things instead of reading them
+
+**Every cross-package script path was wrong in an install.** In the repository, packages
+sit side by side under `packages/`, so a sibling is `${CLAUDE_PLUGIN_ROOT}/../<name>`.
+Installed, each package has its own versioned directory as `pica-<name>/<version>`, and
+that path resolves to nothing. Seven commands and all nine agents carried it. `/picaflow`
+therefore reported **every one of its measured checks as SKIPPED on every real install** —
+honest, and the whole chain silently unavailable. The agents were worse: they used
+repo-relative paths, which resolve only when the project being worked on *is* the pica
+repository.
+
+Both now resolve at runtime and were verified by running the flow end to end against a
+simulated install, not by reading the paths again. The runner also tells the two absences
+apart: "pica-html is not installed" sent someone to install a package they already had,
+when what was missing was one script that version does not ship.
+
+**The delivery freeze could be turned off by a typo.** `gate-figma-write` checked
+`delivered is True`, so `"delivered": "true"` — a plausible hand-edit of a file anyone can
+edit — read as not-delivered and let writes through. A non-boolean is now refused as
+malformed. This is the same fail-open the file's own closing comment exists to prevent, in
+the one gate nobody would think to re-test, because the project it protects is already
+handed over.
+
+The ten passes also confirmed, by running them: 26 bad-input probes and every script fails
+closed; 26 adversarial payloads and the hook holds; 49 mutations and every one is caught
+with no co-fire; 380 check runs across the existing corpus with zero crashes; every count
+in the README matching what the repository actually contains.
+
 ### Counted rather than claimed
 
 | | 0.8.0 | 0.9.0 |

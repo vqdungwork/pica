@@ -13,7 +13,16 @@ Load `${CLAUDE_PLUGIN_ROOT}/rules/engineering.md`. For a native target also load
 are the sector's rather than yours:
 
 ```bash
-node ${CLAUDE_PLUGIN_ROOT}/../analyst/scripts/industry-check.mjs --show <state.industry.key>
+# pica_find <package> <script> — two layouts: the repository, where packages sit side by
+# side under packages/, and an install, where each has its own versioned directory under
+# the marketplace cache. A path that assumed only the first resolves to nothing on every
+# real install. Prints nothing when the package is absent, which is a finding, not a skip.
+pica_find() {
+  R="${CLAUDE_PLUGIN_ROOT}"
+  [ -f "$R/../$1/scripts/$2" ] && { printf '%s' "$R/../$1/scripts/$2"; return 0; }
+  find "$R/../.." -maxdepth 4 -path "*/pica-$1/*/scripts/$2" -print 2>/dev/null | sort -V | tail -1
+}
+node "$(pica_find analyst industry-check.mjs)" --show <state.industry.key>
 ```
 
 A dense clinician screen and a gloved warehouse handheld are the same framework and opposite builds.
@@ -51,7 +60,7 @@ error states are done badly at the end, by someone tired.
 
 ```bash
 node ${CLAUDE_PLUGIN_ROOT}/scripts/dev-check.mjs <src-dir> .pica/state.json
-node ${CLAUDE_PLUGIN_ROOT}/../html/scripts/code-tokens-check.mjs <src-dir> tokens/tokens.json .pica/state.json
+node "$(pica_find html code-tokens-check.mjs)" <src-dir> tokens/tokens.json .pica/state.json
 ```
 
 All zero, or fix and re-run. Then hand to `/pica-test` for the test suite, and `/pica-build` for the

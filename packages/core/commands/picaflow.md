@@ -121,22 +121,54 @@ With `--resume`, read `state.chain.completed` and continue from the next step.
 | **3.11** | Assemble `review.html`, flow leading, assumptions beside the screens that produced them | `html/review.html` |
 
 ```bash
-P=${CLAUDE_PLUGIN_ROOT}/..
-run() { if [ -f "$1" ]; then node "$@"; else
-  echo "SKIPPED $(basename "$1"): package $(basename "$(dirname "$(dirname "$1")")") is not installed. NOT a pass."; fi; }
+# pica_find <package> <script> — the script's path, or nothing when the package is absent.
+#
+# Two layouts, and only one of them is the one users have. In the repository, packages sit
+# side by side under packages/, so a sibling is ${CLAUDE_PLUGIN_ROOT}/../<name>. Installed,
+# each package has its own versioned directory under the marketplace cache, so a sibling is
+# ../../pica-<name>/<version>. A path that assumed only the first resolved to nothing on
+# every real install, and a guarded runner then reported every measured check as SKIPPED:
+# honest, and the whole chain silently unavailable.
+#
+# find, not a glob: an unmatched glob is a hard error in zsh.
+pica_find() {
+  R="${CLAUDE_PLUGIN_ROOT}"
+  [ -f "$R/../$1/scripts/$2" ] && { printf '%s' "$R/../$1/scripts/$2"; return 0; }
+  find "$R/../.." -maxdepth 4 -path "*/pica-$1/*/scripts/$2" -print 2>/dev/null | sort -V | tail -1
+}
 
-run $P/html/scripts/capture-html-reference.mjs --dir html --out .audit
-run $P/html/scripts/verify-html.mjs      .audit/html-reference.json .pica/state.json
-run $P/html/scripts/contrast-check.mjs   .audit/html-reference.json .pica/state.json
-run $P/html/scripts/coverage-check.mjs   .audit/html-reference.json .pica/state.json
-run $P/html/scripts/parity-check.mjs     .audit/html-reference.json .pica/state.json
-run $P/html/scripts/flow-check.mjs       --dir html --state .pica/state.json
-run $P/content/scripts/copy-check.mjs    .audit/html-reference.json .pica/state.json
-run $P/analyst/scripts/trace-check.mjs    .pica/state.json
-run $P/analyst/scripts/domain-check.mjs   .pica/state.json
-run $P/analyst/scripts/industry-check.mjs .pica/state.json
-run $P/research/scripts/schema-check.mjs  .pica/state.json
-run $P/architect/scripts/arch-check.mjs   .pica/state.json --feasibility
+# Every call is guarded and names the package it could not find. A chain reported as
+# complete with four of its checks silently absent is the exact failure this project
+# exists to prevent.
+# Two different absences, and telling them apart matters: "pica-html is not installed"
+# sent someone to install a package they already had, when what was missing was one
+# script that version does not ship.
+pica_has() {
+  R="${CLAUDE_PLUGIN_ROOT}"
+  [ -d "$R/../$1" ] && return 0
+  [ -n "$(find "$R/../.." -maxdepth 1 -name "pica-$1" -print 2>/dev/null)" ]
+}
+run() { pkg="$1"; sc="$2"; shift 2
+  p=$(pica_find "$pkg" "$sc")
+  if [ -n "$p" ]; then node "$p" "$@"
+  elif pica_has "$pkg"; then
+    echo "SKIPPED $sc: pica-$pkg is installed but ships no $sc. Upgrade it. NOT a pass."
+  else
+    echo "SKIPPED $sc: pica-$pkg is not installed. NOT a pass."
+  fi; }
+
+run html      capture-html-reference.mjs --dir html --out .audit
+run html      verify-html.mjs      .audit/html-reference.json .pica/state.json
+run html      contrast-check.mjs   .audit/html-reference.json .pica/state.json
+run html      coverage-check.mjs   .audit/html-reference.json .pica/state.json
+run html      parity-check.mjs     .audit/html-reference.json .pica/state.json
+run html      flow-check.mjs       --dir html --state .pica/state.json
+run content   copy-check.mjs       .audit/html-reference.json .pica/state.json
+run analyst   trace-check.mjs      .pica/state.json
+run analyst   domain-check.mjs     .pica/state.json
+run analyst   industry-check.mjs   .pica/state.json
+run research  schema-check.mjs     .pica/state.json
+run architect arch-check.mjs       .pica/state.json --feasibility
 ```
 
 All zero, or fix and re-run. **A failing check is not an assumption**: it is a defect, and continuing
@@ -157,8 +189,8 @@ past it produces a demo that breaks in front of the client.
 | **6.1–6.4** | `pica-architect`: C4, ADRs, NFRs as numbers, **the API contract with its errors** | `state.nfr`, `state.adr`, `state.apiContract` |
 
 ```bash
-run $P/estimate/scripts/estimate-check.mjs .pica/state.json
-run $P/architect/scripts/arch-check.mjs    .pica/state.json
+run estimate  estimate-check.mjs   .pica/state.json
+run architect arch-check.mjs       .pica/state.json
 ```
 
 > ### ⏸ CONFIRM 2 — scope, deadline and the estimate
@@ -178,11 +210,11 @@ run $P/architect/scripts/arch-check.mjs    .pica/state.json
 | **8.1–8.5** | Prove against the **original brief**, hand over, freeze, log the real hours | `state.effortLog` |
 
 ```bash
-run $P/developer/scripts/dev-check.mjs        src .pica/state.json
-run $P/html/scripts/code-tokens-check.mjs     src tokens/tokens.json .pica/state.json
-run $P/qa/scripts/qa-check.mjs                . .pica/state.json
-run $P/impl/scripts/impl-check.mjs            . .pica/state.json
-run $P/estimate/scripts/estimate-check.mjs    .pica/state.json --closeout
+run developer dev-check.mjs         src .pica/state.json
+run html      code-tokens-check.mjs src tokens/tokens.json .pica/state.json
+run qa        qa-check.mjs          . .pica/state.json
+run impl      impl-check.mjs        . .pica/state.json
+run estimate  estimate-check.mjs    .pica/state.json --closeout
 ```
 
 **7.10 is not run by whoever built it.** The builder does not grade their own build: someone who knows

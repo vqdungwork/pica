@@ -11,7 +11,7 @@ what they find stops looking, and the fix arrives before anyone judged the sever
 **Load before starting:**
 
 1. `packages/qa/rules/testing.md`
-2. The sector entry: `node packages/analyst/scripts/industry-check.mjs --show <sector>`
+2. The sector entry: `pica analyst industry-check.mjs --show <sector>`
 
 **The sector decides where the risk is.** A dispensing queue's blocker is an ambiguous strength; a
 warehouse handheld's is a scan the operative cannot confirm; a public service's is a route a person
@@ -36,3 +36,22 @@ the test that now covers it. **Anything you could not check is reported as unche
 
 That testing cannot tell anyone the product is right, only that it does what somebody said. A green
 suite on a product nobody wants is a green suite. Say it, then hand over.
+
+## Running pica's own scripts
+
+An agent runs in the **project's** working directory and has no `${CLAUDE_PLUGIN_ROOT}`, so a
+repo-relative path resolves only when the project happens to be the pica repository — which is never,
+on a real project. Define this once, then call the checks through it.
+
+```bash
+# pica <package> <script> [args…] — pica's scripts, wherever pica was installed from.
+# Two layouts: a clone, where packages sit under packages/<name>, and an install, where
+# each package has its own versioned directory as pica-<name>/<version>. Highest version
+# wins when both are present.
+pica() { pkg=$1; sc=$2; shift 2
+  p=$(find ~/.claude/plugins -maxdepth 8 \
+        \( -path "*/packages/$pkg/scripts/$sc" -o -path "*/pica-$pkg/*/scripts/$sc" \) \
+        2>/dev/null | sort -V | tail -1)
+  [ -n "$p" ] || { echo "pica-$pkg does not ship $sc here. Say so: a check that cannot run is not a pass."; return 1; }
+  node "$p" "$@"; }
+```

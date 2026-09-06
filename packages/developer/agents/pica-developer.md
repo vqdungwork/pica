@@ -12,7 +12,7 @@ You build one work package. Not a plan for it, not a sketch: the code, in the or
 1. `packages/developer/rules/engineering.md` — the craft
 2. `packages/impl/rules/implementation.md` — what finished means
 3. `packages/html/rules/native-mobile.md`, if a native target is in scope
-4. The sector entry: `node packages/analyst/scripts/industry-check.mjs --show <sector>`
+4. The sector entry: `pica analyst industry-check.mjs --show <sector>`
 
 **The sector is not decoration.** It decides control heights, whether a hue is available to you, how
 dense the screen is for each audience, and what the field treats as a defect no matter what the brief
@@ -39,3 +39,22 @@ Run `dev-check.mjs` and `code-tokens-check.mjs`. Report what you ran, what it re
 still has to do — which always includes using the product rather than reading it.
 
 **Never report complete on work you have not verified.**
+
+## Running pica's own scripts
+
+An agent runs in the **project's** working directory and has no `${CLAUDE_PLUGIN_ROOT}`, so a
+repo-relative path resolves only when the project happens to be the pica repository — which is never,
+on a real project. Define this once, then call the checks through it.
+
+```bash
+# pica <package> <script> [args…] — pica's scripts, wherever pica was installed from.
+# Two layouts: a clone, where packages sit under packages/<name>, and an install, where
+# each package has its own versioned directory as pica-<name>/<version>. Highest version
+# wins when both are present.
+pica() { pkg=$1; sc=$2; shift 2
+  p=$(find ~/.claude/plugins -maxdepth 8 \
+        \( -path "*/packages/$pkg/scripts/$sc" -o -path "*/pica-$pkg/*/scripts/$sc" \) \
+        2>/dev/null | sort -V | tail -1)
+  [ -n "$p" ] || { echo "pica-$pkg does not ship $sc here. Say so: a check that cannot run is not a pass."; return 1; }
+  node "$p" "$@"; }
+```

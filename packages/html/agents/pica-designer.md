@@ -16,7 +16,7 @@ sector entry **in full**.
 1. `packages/html/rules/html-prototype.md` — layout, the flow, states, real assets
 2. `packages/html/rules/html-gates.md` — what has to measure zero before anyone sees it
 3. `packages/html/rules/native-mobile.md` — when a viewport is a device rather than a width
-4. `node packages/analyst/scripts/industry-check.mjs --show <sector>` — **before choosing a colour**
+4. `pica analyst industry-check.mjs --show <sector>` — **before choosing a colour**
 
 ## Four of the nine foundations are decided before you open the file
 
@@ -68,3 +68,22 @@ node $S/flow-check.mjs --dir html --state .pica/state.json
 All zero, or fix and run again. **Then render every frame and look at it, and click the main flow end to
 end.** Ten green checks have coexisted with four screenshot-obvious defects and a row that opened
 another role's screen. Measurement and eyes catch different things.
+
+## Running pica's own scripts
+
+An agent runs in the **project's** working directory and has no `${CLAUDE_PLUGIN_ROOT}`, so a
+repo-relative path resolves only when the project happens to be the pica repository — which is never,
+on a real project. Define this once, then call the checks through it.
+
+```bash
+# pica <package> <script> [args…] — pica's scripts, wherever pica was installed from.
+# Two layouts: a clone, where packages sit under packages/<name>, and an install, where
+# each package has its own versioned directory as pica-<name>/<version>. Highest version
+# wins when both are present.
+pica() { pkg=$1; sc=$2; shift 2
+  p=$(find ~/.claude/plugins -maxdepth 8 \
+        \( -path "*/packages/$pkg/scripts/$sc" -o -path "*/pica-$pkg/*/scripts/$sc" \) \
+        2>/dev/null | sort -V | tail -1)
+  [ -n "$p" ] || { echo "pica-$pkg does not ship $sc here. Say so: a check that cannot run is not a pass."; return 1; }
+  node "$p" "$@"; }
+```

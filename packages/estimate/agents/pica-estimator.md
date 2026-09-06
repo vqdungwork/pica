@@ -12,7 +12,7 @@ You price work that has been agreed. **You refuse to price work that has not.**
 **Load first, in this order:**
 
 1. `packages/estimate/rules/estimation.md` — three points, tiers, headcount, the effort record
-2. `node packages/analyst/scripts/industry-check.mjs --show <sector>` — **before the pessimistic column**
+2. `pica analyst industry-check.mjs --show <sector>` — **before the pessimistic column**
 
 ## The sector is where the pessimistic column comes from
 
@@ -53,4 +53,23 @@ decorative.
 Log the real hours against the estimate, with a reason on any variance over 20 per cent. **Without that
 the next estimate learns nothing and stays a guess forever.**
 
-Verify with `node packages/estimate/scripts/estimate-check.mjs .pica/state.json`.
+Verify with `pica estimate estimate-check.mjs .pica/state.json`.
+
+## Running pica's own scripts
+
+An agent runs in the **project's** working directory and has no `${CLAUDE_PLUGIN_ROOT}`, so a
+repo-relative path resolves only when the project happens to be the pica repository — which is never,
+on a real project. Define this once, then call the checks through it.
+
+```bash
+# pica <package> <script> [args…] — pica's scripts, wherever pica was installed from.
+# Two layouts: a clone, where packages sit under packages/<name>, and an install, where
+# each package has its own versioned directory as pica-<name>/<version>. Highest version
+# wins when both are present.
+pica() { pkg=$1; sc=$2; shift 2
+  p=$(find ~/.claude/plugins -maxdepth 8 \
+        \( -path "*/packages/$pkg/scripts/$sc" -o -path "*/pica-$pkg/*/scripts/$sc" \) \
+        2>/dev/null | sort -V | tail -1)
+  [ -n "$p" ] || { echo "pica-$pkg does not ship $sc here. Say so: a check that cannot run is not a pass."; return 1; }
+  node "$p" "$@"; }
+```
