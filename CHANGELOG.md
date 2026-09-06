@@ -940,10 +940,10 @@ pass cheap. Reaching for 834 or 810 to match a particular iPad loses that relati
 nothing.
 
 
-Fifth project of evidence, and the first that was **not a port**: a client's own Figma file rebuilt into
-a design-system-quality one — 92 components, 389 variables, 163 screens — with no brief, no HTML and
-nothing to approve, because the design already existed. The flow had no name for that job, so half of
-this release is the job and half is what it exposed about the checks.
+**The first job that is not a port.** An existing Figma file rebuilt into a design-system-quality one at
+92 components, 389 variables and 163 screens, with no brief, no HTML and nothing to approve, because the
+design already exists. The flow had no name for that job, so half of this release is the job and half is
+what it exposed about the checks.
 
 Most of what it exposed is **not specific to rebuilding**, and the release says so. Six criteria
 discovered in a Figma rebuild are medium-independent and now live in a new core rule,
@@ -1000,8 +1000,8 @@ Ten findings.
   with that asymmetry, pointing at core, and `html-prototype.md` carries the CSS form of it: a shared
   class is a promotion, a custom property is not. A component is a thing, not an arrangement of things.
   Two conditions dissolve a wrapper (no own content, separators excluded; no variant axis), plus a
-  single-use clause — 36 components on this project. The heuristic then caught a component the client
-  had named as correct, so `granularityExemptions` joins the registers. Reconciled with "never detach":
+  single-use clause, which dissolved 36 components in one file. The heuristic then caught a component a
+  human had already judged correct, so `granularityExemptions` joins the registers. Reconciled with "never detach":
   never detach so an instance can differ, do detach to delete a component that should not exist.
 
 - **F57 — moving a component out of its set wipes every instance override.** Not just the swapped ones.
@@ -1072,10 +1072,10 @@ Those packages are planned, not built, and are shown as `PLANNED` everywhere the
 
 ## 0.5.0
 
-Fourth project of evidence, and the first **HTML-only** one: the mobile design of a live enterprise
-product, several applications behind one launcher. 31 files, 4 interactive prototypes, 60 screens, no
-Figma anywhere in it. It ran to ten hand-written harnesses, all green three runs in a row, and the human
-still found four defects in a screenshot the same afternoon and a mis-routed link by clicking. Both facts
+**The first HTML-only release.** Exercised on a multi-application mobile design behind one launcher: 31
+files, 4 interactive prototypes, 60 screens, no Figma anywhere in it. It ran to ten hand-written
+harnesses, all green three runs in a row, and a human still found four defects in a screenshot the same
+afternoon and a mis-routed link by clicking. Both facts
 drove this release.
 
 Seven findings.
@@ -1314,11 +1314,11 @@ breaks the chain and defeats the pruning.
 
 ## 0.2.0
 
-Second project of evidence: a client review of the 0.1.0 pilot output, then the repair pass. The client
+**Driven by an outside review of 0.1.0's output, and by the repair pass that followed it.** The review
 raised two items. **0.1.0 would have caught neither**, and the repair pass introduced a worse defect than
 the ones it fixed. Both facts drove this release.
 
-### The client's two items, and why they were missed
+### The two items raised, and why they were missed
 
 **Incomplete variable bindings** — all four corner radii, horizontal and vertical padding, border width,
 fills and strokes. 0.1.0 bound type thoroughly and geometry not at all: the 17-check audit had nothing for
@@ -1458,7 +1458,7 @@ things, and comparing them produced 120 phantom findings on a substantially corr
 
 ### Known limits
 
-- One project of evidence. The HTML half is better tested than the Figma half.
+- The HTML half is better tested than the Figma half.
 - Mobile-shaped. No desktop or web variant.
 - No motion design, no code generation, no token export to a codebase.
 - The write gate classifies scripts as reads or writes by pattern matching the Plugin API calls in them.
