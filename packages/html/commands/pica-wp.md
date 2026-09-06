@@ -16,6 +16,35 @@ passes.
 
 ---
 
+
+## Before the direction is asserted: offer it
+
+Load core's `proposals.md`. Slots **S1 to S5** run in this phase, and every one of them is a decision
+the client can judge by looking and pica cannot make for them.
+
+**S1 is the one that changes the product.** Build the busiest screen the analysis produced **three
+times, same content**, each naming the measured product it argues from, and one of the three being the
+sector's own tradition as the baseline. Three palettes are not a proposal; nobody can judge
+`--radius-lg: 12px`.
+
+Record every offer and every answer in `state.proposals`, then:
+
+```bash
+# pica_find <package> <script> — two layouts: the repository, where packages sit side by
+# side under packages/, and an install, where each has its own versioned directory under
+# the marketplace cache. A path assuming only the first resolves to nothing on every real
+# install. Prints nothing when the package is absent, which is a finding, not a skip.
+pica_find() {
+  R="${CLAUDE_PLUGIN_ROOT}"
+  [ -f "$R/../$1/scripts/$2" ] && { printf '%s' "$R/../$1/scripts/$2"; return 0; }
+  find "$R/../.." -maxdepth 4 -path "*/pica-$1/*/scripts/$2" -print 2>/dev/null | sort -V | tail -1
+}
+node "$(pica_find core proposal-check.mjs)" .pica/state.json --phase design
+```
+
+A slot with no material in this project is skipped **with a reason**. A question nobody asked and a
+question with no answer look identical afterwards.
+
 ## Branch on tier
 
 Read the package's `tier` from `.pica/state.json`.

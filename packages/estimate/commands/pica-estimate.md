@@ -11,6 +11,28 @@ Load `${CLAUDE_PLUGIN_ROOT}/rules/estimation.md` before anything else.
 
 ---
 
+
+## S6: the client draws the line, and sees the price of each thing they are drawing it around
+
+Load core's `proposals.md`. This is the one proposal that can be **priced rather than argued**, because
+the use cases exist by 2.7 and the estimate by 5.1.
+
+Offer every use case with what it costs **in hours or days, never in points** — a unit the client cannot
+convert is a unit that hides the decision. Record it in `state.proposals`, then:
+
+```bash
+# pica_find <package> <script> — two layouts: the repository, where packages sit side by
+# side under packages/, and an install, where each has its own versioned directory under
+# the marketplace cache. A path assuming only the first resolves to nothing on every real
+# install. Prints nothing when the package is absent, which is a finding, not a skip.
+pica_find() {
+  R="${CLAUDE_PLUGIN_ROOT}"
+  [ -f "$R/../$1/scripts/$2" ] && { printf '%s' "$R/../$1/scripts/$2"; return 0; }
+  find "$R/../.." -maxdepth 4 -path "*/pica-$1/*/scripts/$2" -print 2>/dev/null | sort -V | tail -1
+}
+node "$(pica_find core proposal-check.mjs)" .pica/state.json --phase scope
+```
+
 ## Refuse to run before scope is frozen
 
 Two preconditions, both hard:

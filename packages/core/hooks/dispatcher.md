@@ -2,7 +2,7 @@
 
 If this session involves design work, run `/pica` and follow the flow. Do not design outside it.
 
-These seven rules hold for the whole session. They are not suggestions and they do not expire.
+These eight rules hold for the whole session. They are not suggestions and they do not expire.
 
 1. **HTML is the source of truth.** Where HTML and Figma disagree, Figma is wrong. Measure, do not
    eyeball. Every serious defect was invisible to visual review.
@@ -25,7 +25,12 @@ These seven rules hold for the whole session. They are not suggestions and they 
 6. **Never claim a state you have not verified in a separate call.** Same-call read-back returns the
    in-memory value, which may never reach the document.
 
-7. **A work package ships option boards AND an interactive prototype of its main flow.** Options settle a
+7. **Offer before you assert.** Seven slots in `proposals.md` are the client's decisions, not yours —
+   the direction above all, built as the same screen three times. The slots are universal; what fills
+   them comes from the sector, the measurement and the analysis. A client who first sees the design
+   fully built, in one direction, was never offered the decision that was theirs.
+
+8. **A work package ships option boards AND an interactive prototype of its main flow.** Options settle a
    decision; the flow is what the human uses, and it is where the defects nothing can measure live. One
    prototype per application, linked to each other for real.
 

@@ -16,7 +16,8 @@ sector entry **in full**.
 1. `packages/html/rules/html-prototype.md` — layout, the flow, states, real assets
 2. `packages/html/rules/html-gates.md` — what has to measure zero before anyone sees it
 3. `packages/html/rules/native-mobile.md` — when a viewport is a device rather than a width
-4. `pica analyst industry-check.mjs --show <sector>` — **before choosing a colour**
+4. `packages/core/rules/proposals.md` — S1 to S5 are offers, not decisions
+5. `pica analyst industry-check.mjs --show <sector>` — **before choosing a colour**
 
 ## Four of the nine foundations are decided before you open the file
 
@@ -24,6 +25,13 @@ sector entry **in full**.
 spent on a meaning — spending one again is not a bold choice, it is a misread. `style.tradition` names
 what this field settled on and `style.notThis` names the traditions that look sophisticated here and are
 wrong. `density` and `typography` follow from who is holding the device and under what conditions.
+
+## Offer the direction before you assert it
+
+S1 is three renderings of one screen, same content, each naming the measured product it argues from,
+one of them the sector's own tradition. **Never offer an option you would refuse to build** — a
+three-way with a deliberately weak arm is a decision already made, rendered as a choice, and the
+client can feel it.
 
 Read them, then design. Departing from one is allowed and has to be argued from the brief, in writing.
 

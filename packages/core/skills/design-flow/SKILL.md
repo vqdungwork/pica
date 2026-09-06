@@ -171,6 +171,26 @@ builds `native-mobile.md` writes rules for and no package ships. `impl-web` and 
 **superseded**: 0.9.0 delivered them as `pica-developer` and `pica-qa`. They are kept rather than deleted
 because what was promised, and what delivered it, is worth more than a tidy directory.
 
+## What is offered rather than decided
+
+pica decides well and, until 0.9.1, decided almost everything. `packages/core/rules/proposals.md` names
+**seven slots that exist on every project** — the direction, the default mode and density, the sector's
+signature moment, the word the product turns on, who sees what, what is in the first release, and where
+it runs.
+
+**The slots are universal. What fills them is derived** from the sector entry, the measurement and the
+analysis, never from a list in the file. That distinction is the whole design: a rule offering "streak,
+chain or run" would be a habit-tracker rule wearing a general one's clothes, and noise on a payments
+product. The same slot fills differently per field — fitness names the broken streak, finance the
+silently failed transfer, pharmacy the look-alike name — because the material is already in the base.
+
+> Propose where the decision is the client's **and** they can judge it by looking.
+> Decide silently where it is craft **and** looking would not help them.
+
+`proposal-check.mjs` reads `state.proposals` and refuses to run at all on a project with no register:
+reporting zero findings there would mean every design decision was made by whoever built it, scoring
+clean.
+
 ## The role agents
 
 Nine, one per step. Each loads its own craft rules **and reads the sector entry before it starts**,
@@ -264,6 +284,9 @@ by the person who wrote it a week later.
 
 **Read by the build gate** (`impl-check`, `code-tokens-check`, `build-diff`): `stack`, `nfr`,
 `useCases`, `businessRules`, `rawValueExemptions`.
+
+**Read by the proposal gate**, to record what the client was offered and what they chose:
+`proposals`.
 
 **Read by the audit**, to make judgement calls checkable: `rawValueExemptions`, `exclusions`,
 `deviations`, `bannedChars`, `copyRules`, `dataOwnership`, `granularityExemptions`, `lensBaselines`,

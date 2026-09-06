@@ -161,6 +161,12 @@ answer.** What makes it safe is the assumptions register and nothing else.
 /plugin install pica@pica
 ```
 
+**Upgrading from an earlier version, install rather than update.** `/plugin install pica@pica` pulls
+every package the bundle depends on, including ones that did not exist when you first installed.
+`/plugin marketplace update pica` followed by an update of the bundle alone leaves the new packages
+absent — and pica will then correctly report every check they own as `SKIPPED … NOT a pass`, which is
+honest and not what you wanted.
+
 Restart Claude Code. The workflow announces itself at the start of every session, including after a
 compaction, so you never have to remember to load it. Then just talk:
 
@@ -308,9 +314,12 @@ supported work the quietest gate. Four terms name two sectors each and the check
 of them, because their conventions are opposites.
 
 ```bash
-node packages/analyst/scripts/industry-check.mjs --list
-node packages/analyst/scripts/industry-check.mjs --show education
-node packages/analyst/scripts/industry-check.mjs --audit     # the base against itself
+# The base is queryable. This finds it wherever pica was installed from.
+IC=$(find ~/.claude/plugins -maxdepth 8 -path "*analyst/scripts/industry-check.mjs" | sort -V | tail -1)
+
+node "$IC" --list                 # the 28, and the 4 terms it refuses to guess at
+node "$IC" --show education       # everything it knows about one
+node "$IC" --audit                # the base against itself
 ```
 
 ## What is enforced, and how
@@ -344,7 +353,11 @@ and ends complete, not truncated.
 
 ## The rules
 
-Twenty-three modules, loaded per step rather than all at once.
+Twenty-three modules, loaded per step rather than all at once. **173 definition-of-done items
+across them**, each item either decided by a check or explicitly left to a human.
+
+<details>
+<summary><b>All twenty-three, and what each covers</b></summary>
 
 | Module | Package | Covers |
 |:--|:--|:--|
@@ -371,6 +384,8 @@ Twenty-three modules, loaded per step rather than all at once.
 | `figma-gates.md` | figma | The audit checklist, appearance baselines, diff tolerances, the deviations register |
 | `figma-rebuild.md` | figma | Rebuilding an existing file: the source as arbiter, positional parity, lens baselines |
 | `figma-mcp.md` | figma | Rate limits and call budget, whole-file reads, write discipline |
+
+</details>
 
 ## Philosophy
 

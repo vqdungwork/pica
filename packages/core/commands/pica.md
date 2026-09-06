@@ -183,6 +183,12 @@ aspirational. Four are filled now, two accumulate:
 - **`rawValueExemptions`** — starts empty, grows during the port when a value genuinely has no token.
 - **`deviations`** — starts empty, grows when the human approves Figma differing from the HTML.
 
+  **Ask this as S7 in `proposals.md`, in consequences rather than platforms.** *"Only on a phone, or on
+  a laptop too?"* is answerable by anyone; *"iOS native or React Native?"* is answerable by about four
+  per cent of clients and is the wrong question anyway — the platform follows from the answer. State
+  what each target buys: a native build is two release pipelines, one of which cannot be rolled back the
+  way the web can.
+
 A register with no entries is a valid state and means something: nothing has been excused yet.
 
 **Chrome is declared, never defaulted.** Each `chrome` entry carries a name, `required` (must be on
