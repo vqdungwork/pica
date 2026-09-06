@@ -1225,9 +1225,9 @@ mandatory.
 
 ## 0.3.0
 
-Third project of evidence, and the first that is **not mobile-only**: a desktop-shaped recruitment web
-application designed in HTML at two declared viewports and ported to Figma in full
-— 33 frames, 108 variables, 12 text styles, 37 component variants, two wired prototypes.
+**The first release that is not mobile-only.** Exercised on a desktop-shaped web application designed in
+HTML at two declared viewports and ported to Figma in full: 33 frames, 108 variables, 12 text styles,
+37 component variants, two wired prototypes.
 
 **35 findings.** Four contradicted the 0.3.0 design as originally reasoned. The most valuable ones were
 found by a human looking at a rendered frame after every automated check had returned zero.
