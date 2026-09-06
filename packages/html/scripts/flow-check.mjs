@@ -52,6 +52,15 @@ const ALLOW_NONE = process.argv.includes("--allow-none");
 const state = existsSync(STATE) ? JSON.parse(readFileSync(STATE, "utf8")) : {};
 const FLOWS = state.flows || [];
 
+/* A missing directory must report, not throw. An unhandled fs error prints a stack
+ * trace with no usage line, and the reader cannot tell a wrong path from a broken
+ * script. Every other check here exits 2 on a bad invocation; this one did not. */
+if (!existsSync(DIR)) {
+  console.error(`FAIL  no directory at "${DIR}".`);
+  console.error("usage: node flow-check.mjs --dir <html-dir> [--state .pica/state.json] [--allow-none]");
+  process.exit(2);
+}
+
 const files = readdirSync(DIR).filter((f) => f.endsWith(".html"));
 if (!files.length) {
   console.error(`flow-check: no .html files in ${DIR}`);
@@ -187,6 +196,10 @@ for (const [f, d] of interactive) {
 // 6. The review shell reaches every prototype. A prototype nobody can open from
 //    review.html is a prototype nobody reviews.
 const shell = [...doc].find(([f]) => f === "review.html");
+/* This check needs review.html and there is not always one. It used to print "ok 0" in
+ * that case, which is the pattern this repository keeps finding in itself: a check that
+ * could not run reporting a pass. It now says which happened. */
+const shellPresent = Boolean(shell);
 if (shell) {
   const tabbed = new Set(shell[1].iframes.map((s) => basename(s)));
   for (const [f] of interactive)
@@ -201,6 +214,19 @@ for (const fl of FLOWS) {
     add("flow-declared", STATE, `flow "${fl.app}" names entry ${fl.entry}, which is not in ${DIR}`);
   else if (fl.home && !doc.get(basename(fl.entry)).screens.has(fl.home))
     add("flow-declared", STATE, `flow "${fl.app}" names home "${fl.home}", which ${fl.entry} does not have`);
+}
+
+/* The other direction, which was missing. Checking only declared -> file means a project
+ * that declares NO flows passes this check while shipping interactive prototypes, so the
+ * rule "one interactive prototype per application" held only for people who had already
+ * chosen to follow it. A register that is optional is not a register. */
+const declaredEntries = new Set(FLOWS.map((fl) => basename(fl.entry || "")));
+for (const [f] of interactive) {
+  if (f === "review.html") continue;
+  if (declaredEntries.has(f)) continue;
+  add("flow-declared", f,
+    `is an interactive prototype that no entry in state.flows declares. ` +
+    `Undeclared, nothing can tell whether the set of applications is complete`);
 }
 
 /** The markup of one screen: from its data-scr to the start of the next one.
@@ -240,6 +266,10 @@ const CHECKS = ["dangling-target", "dangling-href", "nav-target", "unreachable",
 console.log("");
 for (const c of CHECKS) {
   const hits = by[c] || [];
+  if (c === "orphan-prototype" && !shellPresent) {
+    console.log(`  ----  ${c.padEnd(18)} not run: no review.html in ${DIR}. This is not a pass`);
+    continue;
+  }
   console.log(`  ${hits.length ? "FAIL" : "ok  "}  ${c.padEnd(18)} ${hits.length}`);
   for (const h of hits) console.log(`          ${h.where}: ${h.msg}`);
 }

@@ -41,9 +41,48 @@ if (!refPath || !statePath) {
 const ref = JSON.parse(fs.readFileSync(refPath, "utf8"));
 const state = JSON.parse(fs.readFileSync(statePath, "utf8"));
 
+/* ---- shape guard --------------------------------------------------------- *
+ * Feeding these scripts a state file with the right field names and the wrong types made
+ * six of them exit on an uncaught TypeError. They still failed closed, so no gate was let
+ * through, but the person running one got a stack trace instead of a sentence naming the
+ * field, and a tool that answers a bad input with a stack trace reads as a broken tool.
+ *
+ * Duplicated per script rather than imported: these run standalone from their own package
+ * after a single-package install, where no sibling package's path exists. */
+const shapeErrors = [];
+const expectArray = (key) => {
+  const v = state[key];
+  if (v === undefined || v === null) return [];
+  if (Array.isArray(v)) {
+    /* An array containing null is still the wrong shape: every consumer here reads
+     * properties off its entries, and `[null]` throws exactly where `"a string"` does. */
+    const holes = v.filter((x) => x === null || x === undefined).length;
+    if (holes) shapeErrors.push(`state.${key} has ${holes} null entr${holes === 1 ? "y" : "ies"}`);
+    return v;
+  }
+  shapeErrors.push(`state.${key} is ${typeof v}, and this reads it as an array`);
+  return [];
+};
+expectArray("viewports");
+expectArray("parityExemptions");
+expectArray("reflowNotes");
+if (shapeErrors.length) {
+  console.error("FAIL  .pica/state.json has the right keys with the wrong shapes:");
+  for (const e of shapeErrors) console.error(`      ${e}`);
+  console.error("      Nothing below this was checked, and that is not a pass.");
+  process.exit(2);
+}
+
 const VIEWPORTS = (state.viewports || []).map((v) => v.name);
 if (VIEWPORTS.length < 2) {
-  console.log(`${VIEWPORTS.length} viewport declared — parity needs two or more. Nothing to compare.`);
+  /* One viewport is a legitimate project and there is genuinely no parity to check. ZERO
+   * is a defect, and printing the same benign sentence for both made them look alike.
+   * verify-html refuses to run at all on zero, so the gate as a whole is correct; this
+   * line exists so a reader of THIS output is not told nothing is wrong. */
+  console.log(VIEWPORTS.length
+    ? "1 viewport declared. Parity needs two or more, so there is nothing to compare here."
+    : "0 viewports declared. That is not a project with nothing to compare, it is a project "
+      + "with no viewport declaration, and verify-html refuses to run on it. Fix that first.");
   process.exit(0);
 }
 
