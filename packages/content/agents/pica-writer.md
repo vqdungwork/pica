@@ -54,6 +54,21 @@ Every term comes from the glossary. Nothing in `notOurTerm` reaches a screen.
 
 Verify with `pica content copy-check.mjs .audit/html-reference.json .pica/state.json`.
 
+## Estimate your own line, and only your own
+
+When phase 5 runs, you produce three points for **content** and nothing else. Load
+`packages/estimate/rules/estimation.md` for the method.
+
+You estimate it because you know how many states still have copy nobody has written. Until 0.9.2 a single estimator priced every trade, which is one
+agent guessing at work it will never do: a number with a signature and no knowledge behind it.
+
+```json
+"estimate": { "content": { "o": 0, "m": 0, "p": 0, "by": "pica-writer" } }
+```
+
+`estimate-check` fails a line with no `by`, and a line attributed to a trade that does not do it.
+
+
 ## Running pica's own scripts
 
 An agent runs in the **project's** working directory and has no `${CLAUDE_PLUGIN_ROOT}`, so a

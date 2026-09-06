@@ -42,8 +42,34 @@ try {
   process.exit(2);
 }
 
-const est = state.estimate || {};
+const estRaw = state.estimate || {};
+
+/* ---- for a client, for yourself, or skipped -------------------------------- *
+ * Until 0.9.2 there was one mode and it was the strict one, so anyone sizing their own
+ * work had to invent a frozen scope and a deadline to satisfy a gate written for a number
+ * that leaves the building. They stopped estimating instead, which is the outcome the
+ * whole package exists to prevent.
+ *
+ * `for` is on the estimate rather than beside it, so a project cannot carry a mode that
+ * disagrees with the figures it labels. */
+const FOR = String(estRaw.for || "client").toLowerCase();
+const SELF = FOR === "self";
+const SKIPPED = FOR === "skipped";
+const est = Object.fromEntries(Object.entries(estRaw).filter(([k]) => !["for", "why"].includes(k)));
 const roles = Object.keys(est);
+
+/* ---- who is allowed to estimate what --------------------------------------- *
+ * The person who does the work estimates the work. One estimator pricing four trades
+ * they will not practise is a number with a signature and no knowledge behind it, and
+ * that is what this repository shipped until 0.9.2. */
+const TRADE = {
+  "pica-analyst":   /^(ba|analysis|analyst|requirements)$/i,
+  "pica-designer":  /^(design|ui|ux|uiux)$/i,
+  "pica-writer":    /^(content|copy|words|ux-writing)$/i,
+  "pica-architect": /^(arch|architecture|architect)$/i,
+  "pica-developer": /^(fe|be|frontend|backend|dev|development|mobile|api)$/i,
+  "pica-tester":    /^(qa|test|testing)$/i,
+};
 /* ---- void detection ------------------------------------------------------ *
  * A field that has been EMPTIED reads exactly like a field that was answered. An early
  * revision of industry-check was defeated end to end by writing "n/a" into every field it
@@ -79,6 +105,25 @@ const NAMED = 2;   // a source or a person, not a sentence. "PM", "BA" and "QA" 
 const findings = [];
 const fail = (check, where, detail) => findings.push({ check, where, detail });
 
+if (SKIPPED && !CLOSEOUT) {
+  /* A skipped estimate with a reason is a decision. A missing one is an oversight, and
+   * afterwards nobody can tell which happened, so the reason is the only thing checked. */
+  if (!said(estRaw.why, 12)) {
+    console.log('estimate: skipped\n');
+    console.log("FAIL  skipped-reasoned   1 finding(s)   (no reason recorded)");
+    console.log("\nFINDING  [skipped-reasoned] state.estimate.why");
+    console.log("         the estimate is marked skipped with no reason. A skip nobody explained is");
+    console.log("         indistinguishable from an estimate nobody remembered to produce");
+    process.exit(1);
+  }
+  console.log("estimate: skipped\n");
+  console.log(`pass  skipped-reasoned   0 finding(s)   ("${String(estRaw.why).slice(0, 60)}")`);
+  console.log("\nNOTE  nothing below ran, because there is nothing to price. That is a decision on");
+  console.log("      the record, not a clean estimate.");
+  console.log("\n0 finding(s). The estimate was deliberately skipped.");
+  process.exit(0);
+}
+
 if (!CLOSEOUT && !roles.length) {
   console.error("FAIL  state carries no estimate. Nothing to check, and zero findings would be a lie.");
   process.exit(2);
@@ -92,6 +137,9 @@ let pre = 0;
  * disagree nobody can tell which one the gate actually read. */
 const scopeFrozen = Boolean(state.scopeFrozen);
 const deadline = state.deadline;
+/* Sizing your own work commits nobody, so nothing has to be frozen first. The three
+ * points still apply: the spread is the part worth having. */
+if (!SELF) {
 if (!scopeFrozen) {
   pre++;
   fail("preconditions", "state.scopeFrozen",
@@ -101,6 +149,7 @@ if (!said(deadline, NAMED)) {
   pre++;
   fail("preconditions", "state.deadline",
     'no deadline (4.7). Headcount cannot be derived, so the price cannot be either. "Soon" is not a date');
+}
 }
 
 /* ---- 2. three points ---------------------------------------------------- */
@@ -125,6 +174,34 @@ for (const r of roles) {
 
 const pert = (v) => (v.o + 4 * v.m + v.p) / 6;
 const spread = (v) => (v.p - v.o) / (v.m || 1);
+
+/* ---- 2b. estimated by the doer -------------------------------------------- */
+let misattributed = 0;
+for (const r of roles) {
+  const by = String((est[r] || {}).by || "").trim().toLowerCase();
+  if (!by) {
+    misattributed++;
+    fail("estimated-by-doer", r,
+      "names no `by`. Someone estimated this line, nobody knows who, and when it is wrong nobody can " +
+      "say what they misjudged. The agent that does the work is the one that estimates it");
+    continue;
+  }
+  if (by === "human" || by.startsWith("pm") || /project manage/i.test(by)) continue;
+  const pattern = TRADE[by];
+  if (!pattern) {
+    misattributed++;
+    fail("estimated-by-doer", r,
+      `is attributed to "${by}", which is not an agent with a trade. Known: ${Object.keys(TRADE).join(", ")}, ` +
+      `or "human" for the lines this package does not price`);
+    continue;
+  }
+  if (!pattern.test(r)) {
+    misattributed++;
+    fail("estimated-by-doer", r,
+      `is estimated by ${by}, which does not do this work. A trade pricing a trade it will not practise ` +
+      "is a guess with a signature on it");
+  }
+}
 
 /* ---- 3. tier spread ----------------------------------------------------- *
  * A tier that changes nothing about the numbers was decorative. */
@@ -178,7 +255,7 @@ let unresolved = 0;
 const weeks = Number(state.durationWeeks || 0);
 const hoursPerWeek = Number(state.hoursPerWeek || 40);
 const headcount = {};
-if (!CLOSEOUT) {
+if (!CLOSEOUT && !SELF) {
   if (!weeks) {
     unresolved++;
     fail("headcount", "state.durationWeeks", "no duration, so effort cannot be turned into a team");
@@ -218,24 +295,26 @@ if (CLOSEOUT) {
 }
 
 /* ---- report ------------------------------------------------------------- */
+console.log(`estimate: for ${FOR}\n`);
 if (roles.length) {
-  console.log("role      O      M      P     PERT   headcount");
+  console.log("role      O      M      P     PERT   headcount   by");
   for (const r of roles) {
     const v = est[r];
     if (typeof v.o !== "number") { console.log(`${r.padEnd(8)} (malformed)`); continue; }
     console.log(`${r.padEnd(8)}${String(v.o).padStart(5)}${String(v.m).padStart(7)}${String(v.p).padStart(7)}` +
-      `${pert(v).toFixed(0).padStart(8)}${(headcount[r] ?? "").toString().padStart(11)}`);
+      `${pert(v).toFixed(0).padStart(8)}${(headcount[r] ?? "-").toString().padStart(11)}   ${v.by || "(nobody)"}`);
   }
   console.log("");
 }
 
 const table = [
-  ["preconditions", pre, scopeFrozen ? "scope frozen" : "scope NOT frozen"],
+  ["preconditions", pre, SELF ? "for yourself, so nothing has to be frozen" : (scopeFrozen ? "scope frozen" : "scope NOT frozen")],
   ["three-points", malformed, `${roles.length} roles`],
+  ["estimated-by-doer", misattributed, `${roles.length} lines`],
   ["tier-spread", inversions, `${byTier.complex.length} complex, ${byTier.standard.length} standard`
      + (tierInert ? " — NOT COMPARED, every package is one tier" : "")],
   ["risk-reflected", riskFlat, `${risks.length} risks recorded`],
-  ["headcount", unresolved, weeks ? `${weeks} weeks at ${hoursPerWeek}h` : "no duration"],
+  ["headcount", unresolved, SELF ? "not derived: there is no team" : (weeks ? `${weeks} weeks at ${hoursPerWeek}h` : "no duration")],
   ["effort-log", unexplained, CLOSEOUT ? `${(state.effortLog || []).length} entries` : "not checked, run with --closeout"],
 ];
 for (const [name, n, scope] of table)

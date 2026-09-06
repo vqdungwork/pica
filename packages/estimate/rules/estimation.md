@@ -4,7 +4,7 @@ Load this for steps 5.1, 5.2 and 8.4.
 
 ---
 
-## Nothing is estimated before scope and deadline are frozen
+## Nothing is estimated for a CLIENT before scope and deadline are frozen
 
 Two preconditions, both hard:
 
@@ -42,18 +42,71 @@ and it is why step 8.4 is not optional bookkeeping.
 
 ---
 
-## By role, always
+## The person who does the work estimates the work
 
-A total with no roles cannot be turned into a team, and a team is what the client is actually buying.
+Until 0.9.2 one role priced all of them. A single estimator produced three points for design, for the
+front end, for the back end and for testing, which is one person guessing at four trades they will not
+practise. The number had a signature on it and no knowledge behind it.
+
+**Each agent estimates its own line, and only its own.**
+
+| Line | Estimated by | Because |
+|:--|:--|:--|
+| analysis | `pica-analyst` | it knows how many use cases the delta actually produced |
+| design | `pica-designer` | it knows how many screens, at how many viewports, in how many states |
+| the words | `pica-writer` | it knows how many states have copy nobody has written yet |
+| architecture | `pica-architect` | it wrote the risk list, so it knows which figures the risks move |
+| front end and back end | `pica-developer` | it read the API contract and knows where the seams are |
+| testing | `pica-tester` | it knows how many end-to-end tests one use case really needs |
+| project management | **a human** | this package does not price it and will not pretend to |
+
+Record who produced each line:
 
 ```json
 "estimate": {
-  "uiux": { "o": 60,  "m": 90,  "p": 140 },
-  "fe":   { "o": 160, "m": 220, "p": 320 },
-  "be":   { "o": 400, "m": 560, "p": 800 },
-  "qa":   { "o": 80,  "m": 120, "p": 200 }
+  "design": { "o": 60, "m": 90, "p": 140, "by": "pica-designer" },
+  "fe":     { "o": 160, "m": 220, "p": 320, "by": "pica-developer" },
+  "be":     { "o": 400, "m": 560, "p": 800, "by": "pica-developer" },
+  "qa":     { "o": 80, "m": 120, "p": 200, "by": "pica-tester" }
 }
 ```
+
+`estimate-check` reads `by` and fails a line attributed to nobody, or to an agent whose trade the line
+is not. **A line with no attribution is the old failure in a new shape**: someone estimated it, nobody
+knows who, and when it is wrong nobody can say what they misjudged.
+
+There is no assembling agent. Adding the lines up, deriving headcount from the deadline and comparing
+tier spreads is arithmetic, and arithmetic does not need a trade.
+
+---
+
+## Estimating for a client and estimating for yourself are different jobs
+
+`estimate.for` says which one this is, and the gate changes with it.
+
+**`"client"`.** The number leaves the building and becomes a commitment. Scope must be frozen and the
+deadline fixed before a single figure exists, because an estimate produced before them prices a guess
+and the guess becomes the promise. Headcount is derived and the arithmetic is shown.
+
+**`"self"`.** You are sizing your own work to decide whether to start, or to sequence it. Nothing leaves
+the building, so nothing has to be frozen first. Three points still, because the spread is the part
+worth having: a single number tells you nothing about what could go wrong. Headcount is not derived,
+because there is no team to derive.
+
+**The estimate is skippable entirely.** Record it:
+
+```json
+"estimate": { "for": "skipped", "why": "a personal project with no deadline and nobody to price it for" }
+```
+
+A skipped estimate with a reason is a decision. A missing one is an oversight, and afterwards nobody can
+tell which happened.
+
+---
+
+## By role, always
+
+A total with no roles cannot be turned into a team, and a team is what the client is actually buying.
 
 Tier feeds the spread: a package marked `complex` at 2.12 must have a wider spread than any `standard`
 one. If it does not, the tier was decorative.
@@ -117,6 +170,8 @@ This package prices agreed scope and records what it actually cost. That is all.
 ## Definition of done
 
 - [ ] Scope frozen and deadline fixed before any estimate exists
+- [ ] `estimate.for` says whether this is for a client, for yourself, or skipped with a reason
+- [ ] Every line names the agent that produced it, and it is the agent whose trade the line is
 - [ ] Three points per role, not one number
 - [ ] PERT computed and shown alongside the raw three
 - [ ] Every `complex` package has a wider spread than every `standard` one

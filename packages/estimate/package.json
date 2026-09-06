@@ -11,9 +11,6 @@
     ],
     "scripts": [
       "estimate-check.mjs"
-    ],
-    "agents": [
-      "pica-estimator.md"
     ]
   },
   "requires": {

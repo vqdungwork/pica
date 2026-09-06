@@ -12,6 +12,25 @@ Load `${CLAUDE_PLUGIN_ROOT}/rules/estimation.md` before anything else.
 ---
 
 
+
+## You do not estimate. You collect and you check the arithmetic.
+
+**Each agent estimates its own line and only its own**, per `estimation.md`. Ask each for three points
+for its own work: `pica-analyst` for analysis, `pica-designer` for design, `pica-writer` for the words,
+`pica-architect` for architecture, `pica-developer` for front end and back end, `pica-tester` for
+testing. Project management is a human's line and this package does not price it.
+
+Record `by` on every line. A line with no attribution is the old failure in a new shape: someone
+estimated it, nobody knows who, and when it is wrong nobody can say what they misjudged.
+
+**Set `estimate.for` first**, because the gate changes with it:
+
+| | Means | The gate |
+|:--|:--|:--|
+| `client` | the number leaves the building and becomes a commitment | scope frozen and deadline fixed before a single figure exists, headcount derived |
+| `self` | you are sizing your own work to decide whether to start | nothing frozen, no headcount, but three points still |
+| `skipped` | there is nothing to price | a reason, and nothing else runs |
+
 ## S6: the client draws the line, and sees the price of each thing they are drawing it around
 
 Load core's `proposals.md`. This is the one proposal that can be **priced rather than argued**, because

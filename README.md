@@ -5,9 +5,9 @@
 **Describe the product you want. Get a design you can click, then a product you can ship.**
 <br>An expert team for Claude Code, with the checking built in.
 
-[![version](https://img.shields.io/badge/version-0.9.1-1f2328)](https://github.com/vqdungwork/pica/releases)
+[![version](https://img.shields.io/badge/version-0.9.2-1f2328)](https://github.com/vqdungwork/pica/releases)
 [![checks](https://img.shields.io/badge/checks-106%20fail--closed-1f2328)](#what-gets-checked)
-[![agents](https://img.shields.io/badge/specialists-9-1f2328)](#who-does-the-work)
+[![agents](https://img.shields.io/badge/specialists-8-1f2328)](#who-does-the-work)
 [![sectors](https://img.shields.io/badge/industries-28-1f2328)](#it-already-knows-your-industry)
 [![licence](https://img.shields.io/badge/licence-MIT-1f2328)](LICENSE)
 
@@ -49,7 +49,7 @@ All three are finished pieces of work, not truncated ones. Figma is optional and
 | **Designs it so you can click it** | Real screens at every size and every state, in a day rather than a fortnight, cheap to change while your mind is still changing |
 | **Checks it before you see it** | 106 automated checks: contrast, coverage, the words, the wiring. Nothing reaches you having only been looked at |
 | **Has it reviewed by others** | Three to five independent reviewers, none of them seeing each other's findings |
-| **Prices it honestly** | Effort per role with the arithmetic shown, and only once the scope is actually settled |
+| **Prices it, if you want** | Whoever does the work prices it, never one person guessing at four trades. Optional: for a client, for yourself, or skipped |
 | **Builds and tests it** | Working code, a test for everything the product promises, and a pipeline that will not release without them |
 | **Proves it back to you** | The finished product measured against the design you approved, by someone who did not build it |
 
@@ -69,42 +69,19 @@ a second. pica carries what each field already settled, so you are not paying to
 **For each one it knows** who can veto, which colours are already taken and why, how dense the screens
 should be, how the product should speak, and what the field treats as a defect regardless of the brief.
 
+**This is a floor, not a template.** The researcher still measures real products for *your* project, every
+time, and the design is argued from what it found. What the industry knowledge does is stop you paying to
+rediscover that amber means a dispensing warning, and stop you shipping something a pharmacist would
+reject on sight. Ten products in the same industry should share the conventions that field already
+settled and share nothing else, which is why the direction comes from measurement and only the
+constraints come from here.
+
 Red means overdrawn in a bank and clinical emergency in a hospital. Red, amber and green on a factory
 floor are inherited from site signage, so using them decoratively is a safety problem rather than a taste
 disagreement. Blue on a food menu reads as spoilage.
 
 **If your field is not one of the 28, pica says so and stops** rather than guessing. Four words that
 could mean two different industries are refused for the same reason.
-
----
-
-## The seven questions it asks you
-
-Most decisions are craft and pica makes them. Seven are yours.
-
-> Ask you where the decision is yours and you can judge it by looking.
-> Decide quietly where it is craft and looking would not help you.
-
-"Postgres or MySQL" hands you a risk you have no way to weigh. These seven you can answer by looking:
-
-| | It asks | So you decide |
-|:--:|:--|:--|
-| **1** | **How it should look.** Your busiest screen, built three ways, same content | which one is the product you wanted |
-| **2** | Light or dark, roomy or dense | how it feels to use where you actually use it |
-| **3** | **What happens at the worst moment** your industry has | whether the product punishes people or helps them recover |
-| **4** | The one word your product will be judged by | what that word promises your users |
-| **5** | What each person can see of the others | how much your team, or your customers, share |
-| **6** | What goes in the first release, each item priced | where you draw the line, knowing what each thing costs |
-| **7** | Where it needs to run | phone, laptop, or both, and what each one costs to fix when it breaks |
-
-**Question 1 changes the product more than anything else.** You get your busiest screen built three
-different ways, same content, and you point at one. Three seconds. Each version is argued from real
-products that were measured, not from three pictures that looked nice.
-
-**Question 3 is the one nobody thinks to ask.** Every industry has a moment it handles badly by default.
-In fitness it is the broken streak. In banking, the transfer that quietly failed. In education, being
-shown you are behind in front of other people. pica knows which one is yours, and asks how you want it
-handled.
 
 ---
 
@@ -120,7 +97,7 @@ thing* and it does all nine, pausing only there.
 | **2 · Analysis** | analyst | What happens today, what changes, the rules your business runs on, and a requirements document your team can actually read | `/pica-analyse` |
 | **3 · Design** | designer, writer, 3 to 5 reviewers | Every screen, every size, every state, and the words on them. **Measured, reviewed and looked at** before it reaches you | `/pica-wp` |
 | **4 · You approve** | **you** | The business flow **and** the design. Scope and deadline settled. **Nothing further runs until they are** | none |
-| **5 · Estimate** | estimator | Effort per role with the arithmetic shown, and a sensible order to build in | `/pica-estimate` |
+| **5 · Estimate** *(optional)* | each specialist, its own line | Whoever does the work prices it. For a client, for yourself, or skipped with a reason | `/pica-estimate` |
 | **6 · Architecture** | architect | How it is put together, every technology choice recorded with its downside, every performance promise written as a number | `/pica-architect` |
 | **7 · Build** | **developer**, tester, reviewer | **The code gets written.** Then tested. Then a release pipeline. Then the finished thing is measured back against the design you approved, **never by whoever built it** | `/pica-develop` |
 | **8 · Handover** | analyst | Proved against your **original brief**, not against a plan that drifted. Then the real hours are recorded so the next estimate is better | `/pica-close` |
@@ -130,7 +107,8 @@ Figma is wrong.
 
 ## Who does the work
 
-Nine specialists. Each has a trade of its own, and each reads up on your industry before it starts work.
+Eight specialists. Each has a trade of its own, each reads up on your industry before it starts work,
+and **each prices its own work** when you ask for an estimate.
 
 | Specialist | Does | Reads about your industry first |
 |:--|:--|:--|
@@ -140,7 +118,7 @@ Nine specialists. Each has a trade of its own, and each reads up on your industr
 | **designer** | every screen, every state, every size | which colours already mean something, how dense, what the field's products look like |
 | **writer** | the words on every screen, including the ones nobody writes | how your field speaks, and the phrasings it treats as a mistake |
 | **reviewer** | independent review, and **it cannot change anything** | what your field already knows counts as a defect |
-| **estimator** | effort per role, and the order to build in | the approvals and inspections that will land on your timeline |
+
 | **developer** | the code, and what happens when things go wrong | the conventions your field expects in a working product |
 | **tester** | the tests, and whether the product is fit to release | what your field considers a blocker rather than a niggle |
 
@@ -149,22 +127,9 @@ wrong, and quietly makes design decisions that were never theirs to make.
 
 ---
 
-## What gets checked
-
-A design that looks right is not the same as a design that is right. 106 checks run before anything
-reaches you, and the important part is what they do when they cannot do their job:
-
-```
-FAIL  captured 0 frames from 3 file(s).
-      One of these selectors matches nothing. Nothing was written: an empty
-      reference would pass every downstream check while measuring nothing.
-```
-
-**A check that reports success for work it did not do is worse than no check**, because its silence
-reads as a pass. Every one here refuses rather than pretends.
-
 <details>
-<summary><b>All 106, by the script that runs them</b></summary>
+<summary><b>All 106 checks, and what is enforced by a hook</b></summary>
+
 
 <br>Listed so the number can be recounted rather than trusted.
 
@@ -211,6 +176,22 @@ Four things are held by a hook because instructions decay: no Figma write for a 
 not approved, none while a review is running, none after delivery, and none before the Figma rules are
 loaded. Approvals live on disk, because a hook is a script and cannot know you said yes out loud.
 
+
+<br>
+
+
+<br>Built on the assumption that model judgement is unreliable.
+
+| Layer | Fires | Bypassable |
+|:--|:--|:--|
+| `SessionStart` hook | Always, including after compaction | **No** |
+| Commands | When you type them, deterministic after that | Yes, by not typing them |
+| `PreToolUse` hook | On every matching tool call | **No** |
+
+Four things are held by a hook because instructions decay: no Figma write for a package whose design is
+not approved, none while a review is running, none after delivery, and none before the Figma rules are
+loaded. Approvals live on disk, because a hook is a script and cannot know you said yes out loud.
+
 </details>
 
 ---
@@ -225,7 +206,7 @@ loaded. Approvals live on disk, because a hook is a script and cannot know you s
 | **19 check scripts** | Plus the capture harness, the status tool, and a harness that runs the in-Figma scripts outside Figma |
 | **106 checks** | Every one fails closed |
 | **28 sectors** | 264 names resolving to them, 4 deliberately refused as ambiguous |
-| **9 role agents** | One per step, each loading its own craft rules and the sector entry before it starts. The evaluator has **no write access**, because a reviewer that can fix cannot be trusted to report |
+| **8 specialists** | Each loads its own craft rules and the sector entry before it starts, and estimates its own line. The evaluator has **no write access**, because a reviewer that can fix cannot be trusted to report |
 | **2 hooks** | One loads the rules every session; one refuses a Figma write that has not earned it |
 
 <details>

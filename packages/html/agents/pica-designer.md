@@ -77,6 +77,21 @@ All zero, or fix and run again. **Then render every frame and look at it, and cl
 end.** Ten green checks have coexisted with four screenshot-obvious defects and a row that opened
 another role's screen. Measurement and eyes catch different things.
 
+## Estimate your own line, and only your own
+
+When phase 5 runs, you produce three points for **design** and nothing else. Load
+`packages/estimate/rules/estimation.md` for the method.
+
+You estimate it because you know how many screens, at how many viewports, in how many states. Until 0.9.2 a single estimator priced every trade, which is one
+agent guessing at work it will never do: a number with a signature and no knowledge behind it.
+
+```json
+"estimate": { "design": { "o": 0, "m": 0, "p": 0, "by": "pica-designer" } }
+```
+
+`estimate-check` fails a line with no `by`, and a line attributed to a trade that does not do it.
+
+
 ## Running pica's own scripts
 
 An agent runs in the **project's** working directory and has no `${CLAUDE_PLUGIN_ROOT}`, so a

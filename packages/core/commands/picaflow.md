@@ -71,7 +71,7 @@ coming out of the same template.
 | 3 · design | `pica-designer` | `html-prototype.md`, `html-gates.md`, `native-mobile.md` |
 | 3.5 · the words | `pica-writer` | `content.md` |
 | 3.8 · evaluation | `pica-evaluator` ×3–5, one lens each, **no write access** | `evaluation.md` |
-| 5 · estimate | `pica-estimator` | `estimation.md` |
+| 5 · estimate | **each agent, its own line** | `estimation.md` |
 | 6 · architecture | `pica-architect` | `architecture.md` |
 | 7 · build | `pica-developer` | `engineering.md`, `implementation.md` |
 | 7.8 · test | `pica-tester` | `testing.md` |
@@ -196,7 +196,7 @@ past it produces a demo that breaks in front of the client.
 |---|---|---|
 | **4.5** | **Offer S6 and S7**: every use case priced, and where it runs stated in consequences | `state.proposals` |
 | **4.6–4.7** | The human records the frozen scope and the deadline | `scopeFrozen`, `deadline` |
-| **5.1–5.2** | `pica-estimator`: three points per role, work order, arithmetic shown | `state.estimate`, `state.workPackages` |
+| **5.1–5.2** | **Each agent estimates its own line, and only its own.** Three points each, then the arithmetic. `estimate.for` says whether this is for a client, for yourself, or skipped with a reason | `state.estimate`, `state.workPackages` |
 | **6.1–6.4** | `pica-architect`: C4, ADRs, NFRs as numbers, **the API contract with its errors** | `state.nfr`, `state.adr`, `state.apiContract` |
 
 ```bash
@@ -207,7 +207,11 @@ run core      proposal-check.mjs   .pica/state.json --phase scope
 
 > ### ⏸ CONFIRM 2 — scope, deadline and the estimate
 >
-> **Nothing downstream runs until `scopeFrozen` and `deadline` are on disk.** They are written by a
+> **Only when the estimate is for a client.** `estimate.for: "self"` is sizing your own work and commits
+> nobody, so nothing has to be frozen first; `"skipped"` with a reason skips the phase entirely. Both are
+> recorded, because a skip nobody explained looks exactly like an estimate nobody remembered.
+>
+> For a client: **nothing downstream runs until `scopeFrozen` and `deadline` are on disk.** They are written by a
 > human recording that a client agreed, and by no command, which is the point.
 
 ### Phase 7 to 8 — to a released product

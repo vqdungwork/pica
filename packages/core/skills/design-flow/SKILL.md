@@ -193,7 +193,8 @@ clean.
 
 ## The role agents
 
-Nine, one per step. Each loads its own craft rules **and reads the sector entry before it starts**,
+Eight, and phase 5 has none: **each agent estimates its own line**, because a
+trade pricing work it will not do is a guess with a signature on it. Each loads its own craft rules **and reads the sector entry before it starts**,
 which is what keeps a clinician's screen and a warehouse handheld from coming out of the same template.
 
 | Agent | Package | Step |
@@ -204,7 +205,7 @@ which is what keeps a clinician's screen and a warehouse handheld from coming ou
 | `pica-designer` | html | 3 |
 | `pica-writer` | content | 3.5 |
 | `pica-evaluator` | designqa | 3.8 and 7.10, fanned out, **no write access** |
-| `pica-estimator` | estimate | 5 |
+
 | `pica-developer` | developer | 7.1–7.7 |
 | `pica-tester` | qa | 7.8 |
 

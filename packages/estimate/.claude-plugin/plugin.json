@@ -1,7 +1,7 @@
 {
   "name": "pica-estimate",
   "description": "pica estimate: three-point effort by role, a work order derived from the deadline, and the effort record that makes the next estimate better than this one.",
-  "version": "0.9.1",
+  "version": "0.9.2",
   "author": {
     "name": "Dung Vuong"
   },
@@ -19,8 +19,5 @@
     "pert",
     "resourcing",
     "effort"
-  ],
-  "agents": [
-    "./agents/pica-estimator.md"
   ]
 }

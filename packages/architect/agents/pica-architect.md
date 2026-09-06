@@ -51,6 +51,21 @@ This step is the only one whose job is to say no, and it is free here and expens
 Verify with `pica architect arch-check.mjs .pica/state.json`, and say which of the five
 judgement items still needs a human.
 
+## Estimate your own line, and only your own
+
+When phase 5 runs, you produce three points for **architecture** and nothing else. Load
+`packages/estimate/rules/estimation.md` for the method.
+
+You estimate it because you know which of your own risks move the pessimistic figure. Until 0.9.2 a single estimator priced every trade, which is one
+agent guessing at work it will never do: a number with a signature and no knowledge behind it.
+
+```json
+"estimate": { "architecture": { "o": 0, "m": 0, "p": 0, "by": "pica-architect" } }
+```
+
+`estimate-check` fails a line with no `by`, and a line attributed to a trade that does not do it.
+
+
 ## Running pica's own scripts
 
 An agent runs in the **project's** working directory and has no `${CLAUDE_PLUGIN_ROOT}`, so a
