@@ -74,6 +74,35 @@ a refresh showed was work package one of an application that was no longer the e
 human's report was that it still opened on the first application built rather than on the launcher. The
 tabs were accurate, and the ordering made an argument about the deliverable that was wrong.
 
+### The shell is the product, not a document about the product
+
+`review.html` **is** the demo. It is a tab bar and a viewport, and nothing above the tab bar except a
+title and one line of meta: what revision, what this is, what it does not do, and the viewports it was
+built at.
+
+The shape, which is the one to copy:
+
+```
+Title - design review        revised <date> - <what this is> - <the scope caveat> - <viewports>
+[ App one ] [ App two ] [ WP1 - name ] [ WP2 - name ] ... [ Design system ] [ Tokens ]
+<heading: the active tab, e.g. "Client app - interactive flow">
+<the thing itself, rendered in the page>
+```
+
+**Applications first, one tab each. Then one tab per work package. Then the design system, then the
+tokens.** That order is the argument: a reviewer sees a product, then the states behind it, then the
+system it was built from. Reversed, they see a spec and never reach the product.
+
+The failure this exists to prevent, and it has happened: a review page built as a **document** - delta
+table, decisions, assumptions - with the tabbed viewer embedded somewhere in the middle. Every fact on
+it was true and the client's reaction was that it was not the deliverable. **A reviewer opens a demo to
+use it.** Analysis belongs in a tab at the far end of the bar, or in `docs/`, never in front of the
+thing being reviewed.
+
+Two more, both learned the same way: a tab that navigates **away** from the shell is a tab a reviewer
+does not come back from, so every tab loads in place. And a tab bar that needs a scroll to reach the
+last tab hides whatever is last, so if the bar does not fit, the tabs are too verbose, not too many.
+
 ## Options decide. The interactive flow is the deliverable.
 
 A work package ships **both**: option boards, which settle a decision, and **one interactive prototype

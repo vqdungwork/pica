@@ -18,6 +18,7 @@
       "coverage-check.mjs",
       "flow-check.mjs",
       "parity-check.mjs",
+      "spacing-check.mjs",
       "verify-html.mjs"
     ],
     "agents": [
@@ -61,6 +62,10 @@
     {
       "run": "contrast-check.mjs",
       "passes": "0 findings"
+    },
+    {
+      "run": "spacing-check.mjs",
+      "passes": "content does not touch the frame edge, every screen at one viewport sits the same distance from it, and every gap between stacked siblings is on the declared spacing scale"
     }
   ],
   "definitionOfDone": [

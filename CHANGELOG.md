@@ -1,5 +1,63 @@
 # Changelog
 
+## 0.9.3
+
+### It measured overflow and it measured spacing literals, and between those two it never measured a gap
+
+Asked whether pica checked the distance between the content and the edge of the screen, the
+honest answer was no. It checked whether content overflowed the frame, and it checked
+whether a spacing LITERAL in source text was on the token scale. Neither is the thing a
+person reads as "tidy".
+
+**A screen with a 16px margin could sit beside one with 24px through every green gate in
+this repository.** Nobody sees it on one screen. Everybody sees it on two, and by then the
+kit is built.
+
+`spacing-check.mjs`, four checks: content does not touch the frame edge, every screen at
+one viewport sits the same distance from it, every gap between stacked siblings is on the
+declared scale, and the edge inset itself is on it. Rhythm is reported and never failed,
+because a heading sitting closer to its own paragraph than to the next section is good
+typography rather than a defect.
+
+A rendered gap is not the same fact as a source literal. `code-tokens-check` reads
+`padding: 24px` in a stylesheet; a flex container with `space-between` produces a gap no
+literal predicts, and that gap is what the user looks at.
+
+### Two things it needed that did not exist, and the first cut got both wrong
+
+**The capture recorded only CLASSED elements.** A table of 24 rows where 3 carry a class
+reported those 3 as adjacent siblings 280px apart, and the check called it a defect. It was
+the absence of the other 21. Measuring a gap needs EVERY sibling, so `layout` was appended
+to each frame: every block-level element, classed or not, in the same shape as `boxes`. A
+separate array rather than an extension of that one, because parity-check counts `boxes`.
+
+**And the "spacing scale" was every px token in the file**, which meant it contained
+`--control-h`, `--tap-min` and `--content-max`. It compared gaps against a list of control
+heights and reported **201 findings on 227 gaps**, which is exactly the false-positive flood
+this repository has a rule against and which the script's own docblock warned about. A
+token's NAME is the only place its role is recorded: a 40px spacing step and a 40px row
+height are identical as values.
+
+The narrowed version measures 32 gaps on the same project instead of 227, because 126 of
+the 160 boxes on one frame were spans and it had been measuring the leading between two
+words in a flex row.
+
+### What it found once it worked
+
+On a project that had passed every other gate: **the phone header padded 16px horizontally
+while the body padded 12px**, so the title sat indented further than the content beneath
+it. Invisible on one screen, and the check names it by comparing the two.
+
+`fullBleed` is the register for a component that reaches the edge on purpose, and excusing
+one excuses what is inside it. A table declared full-bleed still has rows and none of them
+carry the table's class, which the first version of that rule missed exactly as
+parity-check once missed it for `reflowNotes`.
+
+Five mutations, all caught: an off-scale inset, an off-scale gap, content flush to the
+edge, three screens disagreeing with the rest, and the register removed.
+
+  check scripts 19 -> 20 · checks 106 -> 110
+
 ## 0.9.1
 
 ### The flow decided almost everything, and a client cannot approve what they were never offered

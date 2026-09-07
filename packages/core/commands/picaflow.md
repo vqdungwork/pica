@@ -169,6 +169,7 @@ run() { pkg="$1"; sc="$2"; shift 2
 run html      capture-html-reference.mjs --dir html --out .audit
 run html      verify-html.mjs      .audit/html-reference.json .pica/state.json
 run html      contrast-check.mjs   .audit/html-reference.json .pica/state.json
+run html      spacing-check.mjs    .audit/html-reference.json .pica/state.json
 run html      coverage-check.mjs   .audit/html-reference.json .pica/state.json
 run html      parity-check.mjs     .audit/html-reference.json .pica/state.json
 run html      flow-check.mjs       --dir html --state .pica/state.json

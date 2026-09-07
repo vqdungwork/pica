@@ -1,7 +1,7 @@
 {
   "name": "pica-figma",
   "description": "pica figma: port an approved package or rebuild an existing Figma file, annotate it, and verify it by measurement.",
-  "version": "0.9.2",
+  "version": "0.9.3",
   "author": {
     "name": "Dung Vuong"
   },

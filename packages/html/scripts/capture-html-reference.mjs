@@ -355,6 +355,36 @@ for (const src of sources) {
           depth, parentIdx, el.tagName.toLowerCase()]);
       });
 
+      /* `layout` is EVERY block-level element, classed or not, in the same shape as
+       * `boxes`. It is a separate array rather than an extension of that one because
+       * `boxes` holds only classed elements by design, and parity-check counts them.
+       *
+       * Measuring the gap between two siblings needs ALL the siblings. With only the
+       * classed ones, a table of 24 rows where 3 carry a class reported those 3 as
+       * adjacent, 280px apart, and spacing-check called it a defect. It was the absence
+       * of the other 21. A check fed an incomplete sibling set does not measure spacing,
+       * it measures which elements happened to be styled. */
+      const LAYOUT = new Set(["div", "section", "article", "aside", "header", "footer",
+        "nav", "main", "form", "fieldset", "ul", "ol", "li", "table", "thead", "tbody",
+        "tr", "figure", "dl", "p", "h1", "h2", "h3", "h4", "h5", "h6", "blockquote", "hr"]);
+      const layout = [];
+      const lidx = new Map();
+      frame.querySelectorAll("*").forEach(el => {
+        if (!LAYOUT.has(el.tagName.toLowerCase())) return;
+        const r = el.getBoundingClientRect();
+        if (r.width < 1 || r.height < 1) return;
+        lidx.set(el, layout.length);
+        let par = el.parentElement, pi = -1, d = 0;
+        while (par && par !== frame) {
+          if (LAYOUT.has(par.tagName.toLowerCase())) { if (pi === -1 && lidx.has(par)) pi = lidx.get(par); d++; }
+          par = par.parentElement;
+        }
+        layout.push([(typeof el.className === "string" ? el.className : "").trim().slice(0, 44),
+          Math.round((r.x - fr.x) * 10) / 10, Math.round((r.y - fr.y) * 10) / 10,
+          Math.round(r.width * 10) / 10, Math.round(r.height * 10) / 10,
+          d, pi, el.tagName.toLowerCase()]);
+      });
+
       /* Controls are recorded separately from boxes, and separately for a reason: boxes
        * only holds CLASSED elements, and a control frequently has no class at all. The
        * data-ownership check exists to find an <input> inside a region the brief declared
@@ -438,7 +468,7 @@ for (const src of sources) {
         ? String(frame.dataset.state).trim() : "default";
       const hug = /(^|\s)hug(\s|$)/.test(frame.className || "");
       const sr = frame.querySelector(".scroll-region");
-      out.push({ idx: i, cap: cap ? cap.textContent.trim() : "frame" + i,
+      out.push({ idx: i, layout, cap: cap ? cap.textContent.trim() : "frame" + i,
         viewport: vp, hug, uc, state: st,
         w: Math.round(fr.width), h: Math.round(fr.height),
         contentH: sr ? sr.scrollHeight : null,

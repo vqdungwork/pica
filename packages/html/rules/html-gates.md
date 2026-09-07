@@ -3,6 +3,30 @@
 The gates the html package owns. Medium-independent review discipline is in core's
 `review-discipline.md`, which these assume.
 
+
+## The gaps, which nobody sees on one screen
+
+`spacing-check.mjs` measures what the eye reads as "tidy": how far the content sits from the frame edge,
+whether every screen at one viewport sits the same distance from it, and whether the gap between two
+stacked things is on the scale the project declared.
+
+**A screen with a 16px margin beside one with 24px passed every gate in this repository until 0.9.3.**
+Nobody sees it on one screen. Everybody sees it on two, and by then the kit has been built.
+
+Two things it needed that did not exist. The capture recorded only CLASSED elements in `boxes`, so a
+table of 24 rows where 3 carry a class reported those 3 as adjacent siblings 280px apart: measuring a
+gap needs EVERY sibling, which is why `layout` was added. And the "spacing scale" taken from every px
+token in the file contained `--control-h` and `--tap-min`, so it compared gaps against a list of control
+heights and reported 201 findings on 227 gaps. A token's NAME is the only place its role is recorded,
+because a 40px spacing step and a 40px row height are identical as values.
+
+**`fullBleed` is the register**, and excusing a component excuses what is inside it. A table declared
+full-bleed still has rows, and none of them carry the table's class.
+
+It cannot tell you a gap is the RIGHT size. 24px where the design wanted 32px is on the scale and wrong.
+
+---
+
 ## The measured HTML gate
 
 `scripts/verify-html.mjs <html-reference.json> <state.json>`. **Pass: 0 findings on all five checks.**
