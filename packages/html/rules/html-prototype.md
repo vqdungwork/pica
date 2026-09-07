@@ -103,6 +103,10 @@ Two more, both learned the same way: a tab that navigates **away** from the shel
 does not come back from, so every tab loads in place. And a tab bar that needs a scroll to reach the
 last tab hides whatever is last, so if the bar does not fit, the tabs are too verbose, not too many.
 
+**`shell-check.mjs` reads every rule in this section.** It was specified here from 0.3.0 and enforced by
+nothing until 0.9.4, which is why a shell could ship as a document with the viewer buried in the middle
+and score clean.
+
 ### The shell has a zoom control, and it has three settings
 
 A 1440-wide frame does not fit a 1440-wide laptop, so the reviewer with the smallest screen sees the

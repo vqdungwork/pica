@@ -5,7 +5,7 @@
 **Describe the product you want. Get a design you can click, then a product you can ship.**
 <br>An expert team for Claude Code, with the checking built in.
 
-[![version](https://img.shields.io/badge/version-0.9.4-1f2328)](https://github.com/vqdungwork/pica/releases)
+[![version](https://img.shields.io/badge/version-0.9.5-1f2328)](https://github.com/vqdungwork/pica/releases)
 [![checks](https://img.shields.io/badge/checks-116%20fail--closed-1f2328)](#what-gets-checked)
 [![agents](https://img.shields.io/badge/specialists-8-1f2328)](#who-does-the-work)
 [![sectors](https://img.shields.io/badge/industries-28-1f2328)](#it-already-knows-your-industry)
@@ -118,7 +118,6 @@ and **each prices its own work** when you ask for an estimate.
 | **designer** | every screen, every state, every size | which colours already mean something, how dense, what the field's products look like |
 | **writer** | the words on every screen, including the ones nobody writes | how your field speaks, and the phrasings it treats as a mistake |
 | **reviewer** | independent review, and **it cannot change anything** | what your field already knows counts as a defect |
-
 | **developer** | the code, and what happens when things go wrong | the conventions your field expects in a working product |
 | **tester** | the tests, and whether the product is fit to release | what your field considers a blocker rather than a niggle |
 
@@ -128,14 +127,14 @@ wrong, and quietly makes design decisions that were never theirs to make.
 ---
 
 <details>
-<summary><b>All 106 checks, and what is enforced by a hook</b></summary>
+<summary><b>All 116 checks, and what is enforced by a hook</b></summary>
 
 
 <br>Listed so the number can be recounted rather than trusted.
 
 | Script | | What each one is |
 |:--|:--:|:--|
-| `trace-check` | 7 | glossary closure, rule enforcement, use case trace, entity terms, AS-IS present, assumption radius, exclusions asked |
+| `trace-check` | 7 | no declared wrong term used, rule enforcement, use case trace, entity terms, AS-IS present, assumption radius, exclusions asked |
 | `domain-check` | 5 | all eight categories answered, sourced, verified, agent claims surfaced, affects |
 | `industry-check` | 7 | sector known, stakeholders, constraints, conventions, forbidden, style excluded, evidence |
 | `schema-check` | 6 | sample size, nine foundations, type roles, provenance, shipped not concept, tradition named |
@@ -158,8 +157,17 @@ wrong, and quietly makes design decisions that were never theirs to make.
 | `geometry-diff` | 1 | Figma position against the HTML reference |
 | | **116** | |
 
-Every one has been seen to fail on the defect it was written for. That is the only reason to trust a
-number, and each is recorded next to the failure that earned it in [`CHANGELOG.md`](CHANGELOG.md).
+Every one has been seen to fail on the defect it was written for, and you can watch it happen:
+
+```bash
+node scripts/mutate.mjs <your-project-dir>
+```
+
+It reintroduces the defect each check was written for and reports whether that check fires, whether
+anything else fires with it, and whether your project was clean before it started. **It refuses to run
+over a failing baseline**, because a check firing on an already-broken project proves nothing.
+
+Each check is also recorded next to the failure that earned it in [`CHANGELOG.md`](CHANGELOG.md).
 
 </details>
 

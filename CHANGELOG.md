@@ -1,5 +1,70 @@
 # Changelog
 
+## 0.9.5
+
+### The one claim that makes a check worth anything was unverifiable
+
+The README has said "every one has been seen to fail on the defect it was written for" for
+three releases. It was true and there was nothing to run: the suites lived in a scratch
+directory, were never committed, and the claim rested on somebody's word.
+
+`scripts/mutate.mjs` is that claim, executable. Thirty-eight mutations across every check
+that reads state, in both directions: the defect is caught, nothing unrelated co-fires, and
+**it refuses to run over a failing baseline**.
+
+That last part is not decoration. An interrupted earlier run left a mutated state on disk,
+the next run read it as its baseline, and 38 mutations reported as caught against a project
+carrying four real defects. A check firing on an already-broken project proves nothing about
+the check. It establishes the baseline first now, and stops with what is wrong.
+
+It runs against any pica project rather than a fixture committed here, because a fixture
+would be somebody's project and this repository ships the method and nothing else.
+`--fixture` generates a minimal generic one, and reports every mutation it had to skip for
+lack of material: a skipped mutation is not a passed one.
+
+### A check header claimed a guarantee its code never made
+
+`trace-check`'s first check has been documented as "every term used in a rule, use case or
+entity exists in the glossary" since 0.7.0. The code only ever flagged a word the glossary
+DECLARES is the wrong one, and an inline comment explains exactly why: flagging every unknown
+word would report the whole English language.
+
+**The code was right and the header oversold it.** Two versions of a mutation tested the
+header's guarantee, both silently caught nothing, and that is how it surfaced. Whoever read
+the header trusted something nobody had written, which is the same failure as a check
+reporting a pass it did not earn.
+
+### Found by running it, in the flow that had passed everything
+
+**Neither new check was wired into `/pica-wp`.** `spacing-check` and `shell-check` were
+reachable from `/picaflow` and from nothing anyone types by hand: the earlier wiring targeted
+a string that did not exist in that file, and nothing noticed because nothing checks that a
+check is reachable.
+
+**`html-prototype.md` did not name the check that enforces it.** Six releases of shell rules
+and no pointer to the script that now reads them.
+
+**A research line had no owner.** Estimation redistributed to the doer in 0.9.2 and the
+researcher was left out, so a project pricing research had nowhere to attribute it.
+
+**And the README's specialists table was rendering as running text.** Removing the estimator
+row left a blank line inside the table, which ends a table in markdown, so two of the eight
+rows showed as prose with visible pipe characters. Invisible in the source, obvious the moment
+the page is rendered and looked at.
+
+### Ten rounds, and what they ran
+
+  1  structure       25 scripts, every manifest, the hook, the banner, both validators
+  2  counts          every number in the README, the badge and the banner against the tree
+  3  fail-closed     34 bad-input probes, 0 fail-open, 0 false passes
+  4  integration     every new rule, check and register wired everywhere it belongs
+  5  mutation        38 caught, 0 missed, 0 skipped, restored clean afterwards
+  6  clean install   the whole chain from the layout a user actually gets
+  7  corpus          38 existing projects, no crash from any new script
+  8  end to end      22 gates green from the simulated install
+  9  the suite       committed, so the claim is reproducible
+ 10  rendered        the README built with GitHub's own CSS and read page by page
+
 ## 0.9.4
 
 ### The shell was specified in 0.3.0 and nothing ever read it

@@ -130,6 +130,8 @@ finding them after the port costs a rebuild.
 S=${CLAUDE_PLUGIN_ROOT}/scripts
 node $S/capture-html-reference.mjs --dir html --out .audit
 node $S/contrast-check.mjs .audit/html-reference.json .pica/state.json
+node $S/spacing-check.mjs  .audit/html-reference.json .pica/state.json
+node $S/shell-check.mjs    html/review.html .pica/state.json
 node $S/verify-html.mjs   .audit/html-reference.json .pica/state.json
 node $S/parity-check.mjs  .audit/html-reference.json .pica/state.json   # 2+ viewports only
 node $S/flow-check.mjs    --dir html --state .pica/state.json
@@ -162,6 +164,8 @@ Pass criteria, all of them, no partial credit:
 | `viewport-coverage` | 0 findings: every declared viewport produced frames |
 | parity nominal | 0 findings: every screen exists at every viewport, or a `parityExemptions` entry says why not |
 | parity structural | 0 findings: per-class element counts match across viewports, or `reflowNotes` covers the difference |
+| `spacing-check` | 0 findings. Content does not touch the frame edge, every screen at one viewport sits the same distance from it, and every gap between stacked siblings is on the spacing scale |
+| `shell-check` | 0 findings across its six. The shell says what it does NOT do, the interactive flow leads and is the default, all three zoom controls exist with fit-screen uncapped, no tab navigates away |
 | `flow-check` | 0 findings across its seven checks, **and** a non-zero screen and link count. No interactive prototype is a failure unless you pass `--allow-none` and say so at the gate |
 
 A non-zero count is a defect to fix, not a number to explain. The registers exist so that a real

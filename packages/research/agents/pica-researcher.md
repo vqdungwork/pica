@@ -51,6 +51,21 @@ proposes one has replaced measurement with taste, which is the failure the whole
 
 Verify with `pica research schema-check.mjs .pica/state.json` before reporting.
 
+## Estimate your own line, and only your own
+
+When phase 5 runs, you produce three points for **research** and nothing else. Load
+`packages/estimate/rules/estimation.md` for the method.
+
+You estimate it because you know how many products you had to measure and how many refused to load. On
+one project seven of ten returned a bot-block page, and the honest sample was three: that is a real cost
+and nobody else can see it in advance.
+
+```json
+"estimate": { "research": { "o": 0, "m": 0, "p": 0, "by": "pica-researcher" } }
+```
+
+`estimate-check` fails a line with no `by`, and a line attributed to a trade that does not do it.
+
 ## Running pica's own scripts
 
 An agent runs in the **project's** working directory and has no `${CLAUDE_PLUGIN_ROOT}`, so a

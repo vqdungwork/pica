@@ -8,8 +8,15 @@
  *
  * Six checks, each with a stated pass criterion:
  *
- *   1. GLOSSARY CLOSURE   every term used in a rule, use case or entity exists in the
- *                         glossary.  PASS: 0 unglossed terms.
+ *   1. GLOSSARY CLOSURE   no rule or use case uses a word the glossary DECLARES is the
+ *                         wrong one, and the glossary is not empty.  PASS: 0.
+ *
+ *                         This header said "every term used in a rule exists in the
+ *                         glossary" for six releases and the code never did that, because
+ *                         flagging every unknown word reports the whole English language.
+ *                         The code was right and the header oversold it, which is the same
+ *                         failure as a check reporting a pass it did not earn: whoever read
+ *                         the header trusted a guarantee nobody had written.
  *   2. RULE ENFORCEMENT   every business rule names something that enforces it.
  *                         PASS: 0 rules with nothing behind them.
  *   3. USE CASE TRACE     every use case traces to a rule or to the delta.

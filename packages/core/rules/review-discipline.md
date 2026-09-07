@@ -1,5 +1,10 @@
 # Review discipline
 
+> **Verifying a check by breaking it is `scripts/mutate.mjs` in this repository.** It reintroduces the
+> defect each check was written for and reports whether that check fires, whether anything else fires
+> with it, and whether the project was clean before it started. It refuses to run over a failing
+> baseline, because a check firing on an already-broken project proves nothing about the check.
+
 Medium-independent. These rules hold whether you are reviewing HTML, a Figma file, or
 anything else pica grows to cover. Package-specific gates live with their package:
 `html-gates.md` and `figma-gates.md`.

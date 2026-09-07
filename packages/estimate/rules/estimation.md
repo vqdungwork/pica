@@ -52,6 +52,7 @@ practise. The number had a signature on it and no knowledge behind it.
 
 | Line | Estimated by | Because |
 |:--|:--|:--|
+| research | `pica-researcher` | it knows how many products it had to measure, and how many refused to load |
 | analysis | `pica-analyst` | it knows how many use cases the delta actually produced |
 | design | `pica-designer` | it knows how many screens, at how many viewports, in how many states |
 | the words | `pica-writer` | it knows how many states have copy nobody has written yet |

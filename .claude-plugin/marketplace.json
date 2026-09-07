@@ -8,79 +8,79 @@
     {
       "name": "pica",
       "source": "./",
-      "version": "0.9.4",
+      "version": "0.9.5",
       "description": "From the brief to the shipped product. Analyse the domain and its sector, design in HTML at every viewport you declare, verify by measurement rather than opinion, then estimate, architect, build, test and release. Eight specialists, each pricing its own work,, 100 checks that fail closed, four gates enforced by hook."
     },
     {
       "name": "pica-core",
       "source": "./packages/core",
-      "version": "0.9.4",
+      "version": "0.9.5",
       "description": "pica core: intake, the contract, the state schema, and every approval gate."
     },
     {
       "name": "pica-research",
       "source": "./packages/research",
-      "version": "0.9.4",
+      "version": "0.9.5",
       "description": "pica research: audit the named sources and derive tokens with provenance. Measures shipped products across the nine foundations, records typography by role rather than by size, and refuses concept sites as evidence."
     },
     {
       "name": "pica-analyst",
       "source": "./packages/analyst",
-      "version": "0.9.4",
+      "version": "0.9.5",
       "description": "pica analyst: elicitation, AS-IS and TO-BE, business rules, the domain model, and a PRD a non-technical reader follows. Carries a 28-sector knowledge base: who the stakeholders are, which colours the sector has already spent and why, the design tradition it settled on, and what it treats as a defect regardless of the brief. Fails closed on a sector it does not cover."
     },
     {
       "name": "pica-html",
       "source": "./packages/html",
-      "version": "0.9.4",
+      "version": "0.9.5",
       "description": "pica html: build each work package at every declared viewport and measure it before approval."
     },
     {
       "name": "pica-architect",
       "source": "./packages/architect",
-      "version": "0.9.4",
+      "version": "0.9.5",
       "description": "pica architect: feasibility before anything is promised, C4 diagrams, architecture decision records, and non-functional requirements stated as numbers."
     },
     {
       "name": "pica-estimate",
       "source": "./packages/estimate",
-      "version": "0.9.4",
+      "version": "0.9.5",
       "description": "pica estimate: three-point effort by role, a work order derived from the deadline, and the effort record that makes the next estimate better than this one."
     },
     {
       "name": "pica-content",
       "source": "./packages/content",
-      "version": "0.9.4",
+      "version": "0.9.5",
       "description": "pica content: the words. Glossary-bound terms, every state written, length-realistic copy, and mock data that is not quietly wrong."
     },
     {
       "name": "pica-designqa",
       "source": "./packages/designqa",
-      "version": "0.9.4",
+      "version": "0.9.5",
       "description": "pica design QA: heuristic evaluation fanned out to independent evaluators, cognitive walkthrough, and the build-versus-design comparison nobody owns."
     },
     {
       "name": "pica-developer",
       "source": "./packages/developer",
       "description": "pica developer: build the approved design into working code. The API contract as a seam with its errors, four places state can live, every failure shaped so the copy reaches it, accessibility in code, and a performance budget with the condition it holds under.",
-      "version": "0.9.4"
+      "version": "0.9.5"
     },
     {
       "name": "pica-qa",
       "source": "./packages/qa",
       "description": "pica qa: the shape of the suite and who owns each layer, one end-to-end test per use case, every business rule asserted, a regression test that failed before it passed, and a release gate that reads severity rather than a count.",
-      "version": "0.9.4"
+      "version": "0.9.5"
     },
     {
       "name": "pica-impl",
       "source": "./packages/impl",
-      "version": "0.9.4",
+      "version": "0.9.5",
       "description": "pica implementation: the definition of done for building, reviewing, testing and releasing what was designed. Owns the standard, not the coding agent."
     },
     {
       "name": "pica-figma",
       "source": "./packages/figma",
-      "version": "0.9.4",
+      "version": "0.9.5",
       "description": "pica figma: port an approved package or rebuild an existing Figma file, annotate it, and verify it by measurement."
     }
   ]

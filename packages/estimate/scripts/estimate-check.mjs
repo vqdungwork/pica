@@ -63,6 +63,7 @@ const roles = Object.keys(est);
  * they will not practise is a number with a signature and no knowledge behind it, and
  * that is what this repository shipped until 0.9.2. */
 const TRADE = {
+  "pica-researcher": /^(research|precedent|measurement)$/i,
   "pica-analyst":   /^(ba|analysis|analyst|requirements)$/i,
   "pica-designer":  /^(design|ui|ux|uiux)$/i,
   "pica-writer":    /^(content|copy|words|ux-writing)$/i,
