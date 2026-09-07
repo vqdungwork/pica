@@ -173,6 +173,7 @@ run html      spacing-check.mjs    .audit/html-reference.json .pica/state.json
 run html      coverage-check.mjs   .audit/html-reference.json .pica/state.json
 run html      parity-check.mjs     .audit/html-reference.json .pica/state.json
 run html      flow-check.mjs       --dir html --state .pica/state.json
+run html      shell-check.mjs      html/review.html .pica/state.json
 run content   copy-check.mjs       .audit/html-reference.json .pica/state.json
 run analyst   trace-check.mjs      .pica/state.json
 run analyst   domain-check.mjs     .pica/state.json

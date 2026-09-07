@@ -1,5 +1,57 @@
 # Changelog
 
+## 0.9.4
+
+### The shell was specified in 0.3.0 and nothing ever read it
+
+`html-prototype.md` has described `review.html` for six releases: a tab bar, the interactive
+flow leading it, applications before boards before the system, one line of meta above it and
+nothing else. Every rule in there was earned by a review that went wrong, and all of them
+stayed enforceable only by somebody remembering.
+
+`shell-check.mjs` reads the shell as text, the way flow-check does and for the same reason:
+it has to work when the page is broken, and a shell that fails to render is exactly when you
+want to know why.
+
+Six checks. The shell says what this is **and what it does not do**, with a revision date and
+the viewports. The interactive flow is the first or second tab and the default. All three
+zoom controls exist. No tab navigates away. The groups run product, states, options, system.
+The frame inset is on the spacing scale.
+
+### Three things the rule never covered, added because a real shell needed them
+
+**The zoom control, and it has three settings.** A 1440-wide frame does not fit a 1440-wide
+laptop, so the reviewer with the smallest screen sees the product at 70% and never knows.
+Fit width for reading, fit screen for composition, and **100%, which is the one that has to
+be exact**: it is where a reviewer decides whether 14px is too small, and a shell quietly
+rendering at 92% makes that judgement about a size that does not exist.
+
+**Fit screen may exceed 100%.** Refusing to let it is the common mistake: a 375-wide phone
+frame on a 2560 display is legible at 180% and postage-stamp sized at 100%. The check fails
+a `Math.min` against 1.
+
+**Frames sit top-left, and the gap is a step on the spacing scale.** A 20px inset around a
+design built on an 8px scale is the first thing a designer notices and the last thing anyone
+writes down. Centring is the tempting mistake: composed with one frame, and with three each
+row centres independently so no two captions line up.
+
+And the tab bar carries groups when it needs them, in one order, with a proposed feature
+**labelled on the tab itself**. A tab that looks like the others and is not built is a promise
+the reviewer repeats to somebody else.
+
+### The check passed because of a CSS declaration
+
+Scoped to the whole document, the exact-size check matched `html,body{height:100%}` in the
+stylesheet and a sentence in a code comment. Removing the 100% button entirely still reported
+the control as present. It reads the controls now, not the file: a check passing because of a
+CSS rule is a check measuring the wrong thing.
+
+Eight mutations, all caught: the caveat removed, the date and viewports removed, no tab naming
+the flow, the flow demoted to fourth, the exact-size control removed, fit screen capped at 1,
+a tab linking away, and a 20px frame inset.
+
+  check scripts 20 -> 21 · checks 110 -> 116
+
 ## 0.9.3
 
 ### It measured overflow and it measured spacing literals, and between those two it never measured a gap

@@ -1,7 +1,7 @@
 {
   "name": "pica-impl",
   "description": "pica implementation: the definition of done for building, reviewing, testing and releasing what was designed. Owns the standard, not the coding agent.",
-  "version": "0.9.3",
+  "version": "0.9.4",
   "author": {
     "name": "Dung Vuong"
   },

@@ -5,8 +5,8 @@
 **Describe the product you want. Get a design you can click, then a product you can ship.**
 <br>An expert team for Claude Code, with the checking built in.
 
-[![version](https://img.shields.io/badge/version-0.9.3-1f2328)](https://github.com/vqdungwork/pica/releases)
-[![checks](https://img.shields.io/badge/checks-110%20fail--closed-1f2328)](#what-gets-checked)
+[![version](https://img.shields.io/badge/version-0.9.4-1f2328)](https://github.com/vqdungwork/pica/releases)
+[![checks](https://img.shields.io/badge/checks-116%20fail--closed-1f2328)](#what-gets-checked)
 [![agents](https://img.shields.io/badge/specialists-8-1f2328)](#who-does-the-work)
 [![sectors](https://img.shields.io/badge/industries-28-1f2328)](#it-already-knows-your-industry)
 [![licence](https://img.shields.io/badge/licence-MIT-1f2328)](LICENSE)
@@ -47,7 +47,7 @@ All three are finished pieces of work, not truncated ones. Figma is optional and
 | **Understands the work** | Turns your paragraph into requirements your team recognises: what happens today, what changes, the rules, and a document a non-technical reader can follow |
 | **Knows your industry** | 28 of them. Who can say no, which colours already mean something, what the field treats as a mistake no matter what you asked for |
 | **Designs it so you can click it** | Real screens at every size and every state, in a day rather than a fortnight, cheap to change while your mind is still changing |
-| **Checks it before you see it** | 110 automated checks: contrast, coverage, the words, the wiring. Nothing reaches you having only been looked at |
+| **Checks it before you see it** | 116 automated checks: contrast, coverage, the words, the wiring. Nothing reaches you having only been looked at |
 | **Has it reviewed by others** | Three to five independent reviewers, none of them seeing each other's findings |
 | **Prices it, if you want** | Whoever does the work prices it, never one person guessing at four trades. Optional: for a client, for yourself, or skipped |
 | **Builds and tests it** | Working code, a test for everything the product promises, and a pipeline that will not release without them |
@@ -141,6 +141,7 @@ wrong, and quietly makes design decisions that were never theirs to make.
 | `schema-check` | 6 | sample size, nine foundations, type roles, provenance, shipped not concept, tradition named |
 | `verify-html` | 7 | viewport tagged, overflow, tall-screen pair, viewport coverage, direction, data ownership, width media |
 | `contrast-check` | 4 |
+| `shell-check` | 6 | says what it is not, flow leads, three zoom controls, tabs load in place, group order, frame inset |
 | `spacing-check` | 4 | edge inset, insets agree across screens, gaps on the scale, edge inset on the scale | body contrast, large-text contrast, unresolved background, exemption still needed |
 | `coverage-check` | 5 | use case covered, screen traced, use case exists, flow reachable, target buildable |
 | `parity-check` | 2 | nominal and structural, where two or more viewports are declared |
@@ -155,7 +156,7 @@ wrong, and quietly makes design decisions that were never theirs to make.
 | `qa-check` | 7 | pyramid shape, use case covered end to end, rule asserted, regression traced, severity defined, test data, release gate |
 | `build-diff` | 5 | frame paired, control height, radius, hue budget, text position |
 | `geometry-diff` | 1 | Figma position against the HTML reference |
-| | **110** | |
+| | **116** | |
 
 Every one has been seen to fail on the defect it was written for. That is the only reason to trust a
 number, and each is recorded next to the failure that earned it in [`CHANGELOG.md`](CHANGELOG.md).
@@ -204,8 +205,8 @@ loaded. Approvals live on disk, because a hook is a script and cannot know you s
 | **13 plugins** | 12 packages plus a bundle, each declaring what it requires, produces, checks and considers done |
 | **16 commands** | Deterministic once typed |
 | **23 rule modules** | Loaded per step, never all at once. 173 definition-of-done items across them |
-| **20 check scripts** | Plus the capture harness, the status tool, and a harness that runs the in-Figma scripts outside Figma |
-| **110 checks** | Every one fails closed |
+| **21 check scripts** | Plus the capture harness, the status tool, and a harness that runs the in-Figma scripts outside Figma |
+| **116 checks** | Every one fails closed |
 | **28 sectors** | 264 names resolving to them, 4 deliberately refused as ambiguous |
 | **8 specialists** | Each loads its own craft rules and the sector entry before it starts, and estimates its own line. The evaluator has **no write access**, because a reviewer that can fix cannot be trusted to report |
 | **2 hooks** | One loads the rules every session; one refuses a Figma write that has not earned it |

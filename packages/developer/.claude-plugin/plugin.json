@@ -1,6 +1,6 @@
 {
   "name": "pica-developer",
-  "version": "0.9.3",
+  "version": "0.9.4",
   "description": "pica developer: build the approved design into working code. The API contract as a seam with its errors, four places state can live, every failure shaped so the copy reaches it, accessibility in code, and a performance budget with the condition it holds under.",
   "author": {
     "name": "Dung Vuong"

@@ -103,6 +103,68 @@ Two more, both learned the same way: a tab that navigates **away** from the shel
 does not come back from, so every tab loads in place. And a tab bar that needs a scroll to reach the
 last tab hides whatever is last, so if the bar does not fit, the tabs are too verbose, not too many.
 
+### The shell has a zoom control, and it has three settings
+
+A 1440-wide frame does not fit a 1440-wide laptop, so the reviewer with the smallest screen sees the
+product at 70% and never knows. Three settings, and the current one always visible:
+
+| | Does | For |
+|:--|:--|:--|
+| **Fit width** | scales so the frame's width fills the pane | reading a long page top to bottom |
+| **Fit screen** | scales so the whole frame is visible, **which may be above 100%** | judging composition and balance |
+| **100%** | one design pixel to one CSS pixel | judging type size, tap targets, and anything measured |
+
+**100% is the one that has to be exact.** It is where a reviewer decides whether 14px is too small, and a
+shell that quietly renders at 92% makes that judgement about a size that does not exist. Fit width and
+fit screen are conveniences; 100% is a measurement.
+
+**Fit screen may exceed 100%**, and refusing to let it is the common mistake: a 375-wide phone frame on a
+2560 display is legible at 180% and postage-stamp sized at 100%. Cap it somewhere sane rather than at
+one.
+
+State the scale in the control, not just the mode. *"Fit screen · 143%"* tells the reviewer what they
+are looking at; *"Fit screen"* alone does not.
+
+### Frames sit top-left, with the same gap as everything else
+
+Top-aligned, left-aligned, in reading order, and the gap between the frame and the pane edge is **a step
+on the spacing scale**, the same one the screens use. A shell with a 20px inset around a design built on
+an 8px scale is the first thing a designer notices and the last thing anyone writes down.
+
+Centring is the tempting mistake. It looks composed with one frame and falls apart with three, because
+each row centres independently and no two captions line up.
+
+### The tab bar carries groups when it needs them, and the groups are in one order
+
+Past a certain size a flat bar stops being navigable. Group it, and keep the order that makes the
+argument:
+
+```
+ROLE Employee   ROLE HR Manager   ROLE Admin        the product, one tab per audience
+FUTURE …                                            proposed, not built, and labelled so
+STATE BOARDS  wp1 … wp7                             the states behind the product
+OPTION BOARDS wp9 … wp15                            decisions that were settled
+Design system   Tokens                              the system it was built from
+```
+
+**Applications and roles first, then the states, then the settled options, then the system.** A reviewer
+sees a product, then what is behind it, then what it was built from. Reversed, they see a spec and never
+reach the product.
+
+**A proposed feature is labelled as proposed on the tab itself**, not in a footnote. A tab that looks
+like the others and is not built is a promise the reviewer will repeat to somebody else.
+
+### One line of meta, and it says what this is NOT
+
+Above the tab bar: the title, the revision date, what this is, **what it does not do**, and the viewports
+it was built at.
+
+The caveat is the load-bearing half. *"Sample data, no database, no live API"* and *"nothing is signed or
+transacted in the application, it records what happens outside it"* are the two sentences that stop a
+demo being mistaken for a product, and both were written after somebody made that mistake.
+
+---
+
 ## Options decide. The interactive flow is the deliverable.
 
 A work package ships **both**: option boards, which settle a decision, and **one interactive prototype

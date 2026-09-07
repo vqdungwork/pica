@@ -1,6 +1,6 @@
 {
   "name": "pica-qa",
-  "version": "0.9.3",
+  "version": "0.9.4",
   "description": "pica qa: the shape of the suite and who owns each layer, one end-to-end test per use case, every business rule asserted, a regression test that failed before it passed, and a release gate that reads severity rather than a count.",
   "author": {
     "name": "Dung Vuong"

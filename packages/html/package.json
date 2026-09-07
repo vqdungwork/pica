@@ -18,6 +18,7 @@
       "coverage-check.mjs",
       "flow-check.mjs",
       "parity-check.mjs",
+      "shell-check.mjs",
       "spacing-check.mjs",
       "verify-html.mjs"
     ],
@@ -66,6 +67,10 @@
     {
       "run": "spacing-check.mjs",
       "passes": "content does not touch the frame edge, every screen at one viewport sits the same distance from it, and every gap between stacked siblings is on the declared spacing scale"
+    },
+    {
+      "run": "shell-check.mjs",
+      "passes": "the shell says what it does not do, the interactive flow leads and is the default, all three zoom controls exist with fit-screen uncapped, no tab navigates away, the groups are in order, and the frame inset is on the spacing scale"
     }
   ],
   "definitionOfDone": [
