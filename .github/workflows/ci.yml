@@ -1,0 +1,57 @@
+# ci.yml — this repository submitting to its own rule.
+#
+# pica requires every project it validates to run its checks in a pipeline, and until now
+# ran its own two suites only when somebody remembered to. impl-check has asserted
+# `ci-pipeline` against other people's repositories since 0.8.0 while this one had no
+# workflow at all. That is the gap this closes.
+#
+# Two suites, and the second is the one that matters:
+#
+#   1. validate-packages   the manifests, the ownership map, the links resolve
+#   2. mutate --fixture    every check is seen to FAIL on the defect it was written for
+#
+# The README's claim — "every one has been seen to fail on the defect it was written for" —
+# is worth exactly as much as the last run of the mutation suite. Now that is every push.
+#
+# Both exit non-zero on findings, so a red run means a real defect and not a warning
+# somebody can wave through.
+
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      # No install step, and that is deliberate: both scripts import Node builtins only
+      # and the repository has no package.json. Adding a dependency here would need this
+      # comment deleted first, which is the point of it.
+
+      - name: validate packages
+        run: node scripts/validate-packages.mjs
+
+      - name: mutation suite
+        run: node scripts/mutate.mjs --fixture
+
+# Deliberately NOT run here: the mutation suite against examples/approvals.
+#
+# impl-check's branch-age reads the git branches of the ENCLOSING repository, and the
+# worked example is not its own repo — so pointed at examples/approvals it reports on
+# pica's own stale branches instead. It currently fails locally for that reason alone
+# (0.8.0, packaging-restructure, role-agents-and-the-build, v0.2.0) while a default
+# Actions checkout fetches one ref and would quietly pass.
+#
+# A suite whose result depends on which branches the runner happened to fetch proves
+# nothing. --fixture generates its own clean project and is the same everywhere. Fix
+# branch-age to scope to the project directory and this line can change.

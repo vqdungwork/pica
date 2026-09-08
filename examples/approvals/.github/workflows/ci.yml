@@ -1,0 +1,32 @@
+name: ci
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+  deploy-dev:
+    needs: verify
+    environment: dev
+    runs-on: ubuntu-latest
+    steps: [{ run: npm run deploy }]
+  deploy-staging:
+    needs: verify
+    environment: staging
+    runs-on: ubuntu-latest
+    steps: [{ run: npm run deploy }]
+  deploy-production:
+    needs: [verify, deploy-staging]
+    environment: production
+    runs-on: ubuntu-latest
+    steps:
+      - run: npm run deploy
+      - run: npm run test:smoke

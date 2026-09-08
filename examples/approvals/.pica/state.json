@@ -1,0 +1,1433 @@
+{
+  "field": "retail banking",
+  "industry": {
+    "key": "finance",
+    "conventions": [
+      {
+        "about": "colour",
+        "followed": true,
+        "note": "follows the sector convention on colour, recorded here so the decision is visible"
+      },
+      {
+        "about": "style",
+        "followed": true,
+        "note": "follows the sector convention on style, recorded here so the decision is visible"
+      },
+      {
+        "about": "density",
+        "followed": true,
+        "note": "follows the sector convention on density, recorded here so the decision is visible"
+      },
+      {
+        "about": "typography",
+        "followed": true,
+        "note": "follows the sector convention on typography, recorded here so the decision is visible"
+      },
+      {
+        "about": "tone",
+        "followed": true,
+        "note": "follows the sector convention on tone, recorded here so the decision is visible"
+      }
+    ],
+    "forbiddenPrevented": [
+      {
+        "forbidden": "animating a balance so it cannot be read immediately",
+        "preventedBy": "the balance is rendered as static text and no transition token applies to it"
+      },
+      {
+        "forbidden": "hiding a fee behind a disclosure the user has to open",
+        "preventedBy": "the fee row is always expanded on the confirmation screen and has no collapsed state"
+      },
+      {
+        "forbidden": "an irreversible transfer with no confirmation step naming the recipient in full",
+        "preventedBy": "the confirm screen prints the recipient's full legal name and the button is disabled until it renders"
+      }
+    ],
+    "departures": []
+  },
+  "stakeholders": [
+    {
+      "role": "account holder",
+      "wants": "to see the true balance and move money without doubt",
+      "fears": "a transfer that silently failed",
+      "decides": false,
+      "vetoes": false,
+      "informed": true
+    },
+    {
+      "role": "compliance officer",
+      "wants": "to prove afterwards who did what",
+      "fears": "an action with no attributable actor",
+      "decides": true,
+      "vetoes": true,
+      "informed": true,
+      "wouldBlockIf": "the audit trail cannot be exported in the inspector's own format"
+    },
+    {
+      "role": "fraud analyst",
+      "wants": "to stop a payment mid-flight",
+      "fears": "a queue with no age on it",
+      "decides": true,
+      "vetoes": true,
+      "informed": true,
+      "wouldBlockIf": "a held payment can be released without its age being shown"
+    },
+    {
+      "role": "regulator",
+      "wants": "evidence of fair treatment and disclosure",
+      "fears": "a cost the customer was not shown before consenting",
+      "decides": true,
+      "vetoes": true,
+      "informed": true,
+      "wouldBlockIf": "a fee reaches a confirmation screen without being printed on it"
+    }
+  ],
+  "glossary": [
+    {
+      "term": "payment",
+      "means": "one instruction to move money",
+      "notOurTerm": [
+        "transaction"
+      ]
+    }
+  ],
+  "businessRules": [
+    {
+      "id": "BR-01",
+      "rule": "A payment above the limit needs a second approver.",
+      "enforcedBy": "an API guard on the server route",
+      "source": "the brief"
+    }
+  ],
+  "useCases": [
+    {
+      "id": "UC-01",
+      "name": "Send a payment",
+      "tracesTo": [
+        "BR-01"
+      ]
+    }
+  ],
+  "domainModel": [
+    {
+      "entity": "payment",
+      "attributes": [
+        "payment"
+      ]
+    }
+  ],
+  "asIs": "Payments are approved by email and nobody can tell afterwards who approved which one.",
+  "toBe": "A payment above the limit is held until a second named approver releases it.",
+  "delta": "Approval moves from email to the product, so who approved what is recorded rather than remembered.",
+  "assumptions": [
+    {
+      "id": "AS-01",
+      "about": "limit",
+      "assumed": "The approval limit is a single figure rather than one per account.",
+      "confidence": "low",
+      "produced": [
+        "the approval screen"
+      ],
+      "affects": [
+        "BR-01",
+        "UC-01"
+      ],
+      "correctBy": "the client has a limit per account, which changes the rule into a lookup",
+      "outcome": "held"
+    },
+    {
+      "id": "AS-02",
+      "about": "restricted claims",
+      "confidence": "low",
+      "assumed": "Fees and rates must appear on the confirmation screen rather than only in the terms.",
+      "why": "established by an agent from the market conduct handbook and not confirmed by the client's counsel",
+      "produced": [
+        "the confirmation screen"
+      ],
+      "affects": [
+        "BR-01"
+      ],
+      "correctBy": "counsel says the terms suffice, which removes a block from the confirmation screen",
+      "outcome": "held"
+    }
+  ],
+  "exclusions": [
+    {
+      "excluded": "Card issuing",
+      "why": "out of scope by the brief",
+      "source": "brief"
+    }
+  ],
+  "exclusionsConfirmed": true,
+  "briefPath": "docs/brief.md",
+  "domainConstraints": [
+    {
+      "category": "standard",
+      "affects": [
+        "the payment message schema",
+        "the domain model"
+      ],
+      "constraint": "ISO 20022 for payment messaging",
+      "source": "the ISO 20022 published message catalogue",
+      "verifiedBy": "human"
+    },
+    {
+      "category": "regulator",
+      "affects": [
+        "the disclosure copy",
+        "the confirmation screen"
+      ],
+      "constraint": "the central bank plus the market conduct authority",
+      "source": "the client's own compliance register",
+      "verifiedBy": "human"
+    },
+    {
+      "category": "data protection",
+      "affects": [
+        "the fields shown on any exported screen"
+      ],
+      "constraint": "personal data is minimised on every screen that leaves the building",
+      "source": "the client's data protection policy",
+      "verifiedBy": "human"
+    },
+    {
+      "category": "identity",
+      "affects": [
+        "the approval step",
+        "the session policy"
+      ],
+      "constraint": "strong customer authentication on any payment above the limit",
+      "source": "the client's compliance register",
+      "verifiedBy": "human"
+    },
+    {
+      "category": "retention",
+      "affects": [
+        "the approval record",
+        "an NFR on storage duration"
+      ],
+      "constraint": "approval records are kept for seven years",
+      "source": "the client's retention schedule",
+      "verifiedBy": "human"
+    },
+    {
+      "category": "audit trail",
+      "affects": [
+        "every state-changing screen",
+        "an end-to-end test per use case"
+      ],
+      "constraint": "every state change records an attributable actor and a timestamp",
+      "source": "the client's audit policy",
+      "verifiedBy": "human"
+    },
+    {
+      "category": "restricted claims",
+      "affects": [
+        "the confirmation screen",
+        "the fee row"
+      ],
+      "constraint": "no rate or fee is stated without the confirmation screen showing it",
+      "source": "the market conduct handbook",
+      "verifiedBy": "agent"
+    },
+    {
+      "category": "professional duty",
+      "affects": [
+        "nothing: no licensed duty applies here"
+      ],
+      "constraint": "not applicable: nobody here holds a licensed professional duty",
+      "source": "asked at intake and answered by the client",
+      "verifiedBy": "human"
+    }
+  ],
+  "measured": [
+    {
+      "product": "Monzo",
+      "url": "https://monzo.com/",
+      "shipped": true,
+      "method": "measured from a full-page capture with the browser inspector",
+      "tradition": "international / Swiss typographic style, executed flat with restrained elevation",
+      "typography": {
+        "display": 32,
+        "heading": 24,
+        "body": 16,
+        "label": 14,
+        "caption": 13
+      },
+      "colour": {
+        "hues": 2,
+        "saturationRange": "24% to 68%",
+        "neutralSteps": 9,
+        "semantic": "one positive, one negative, one warning"
+      },
+      "spacing": {
+        "base": 8,
+        "scale": [
+          4,
+          8,
+          12,
+          16,
+          24,
+          32,
+          48
+        ],
+        "brokenAt": "the dense transaction row, which runs on a 4px rhythm"
+      },
+      "elevation": {
+        "levels": 2,
+        "depths": [
+          "0 1px 2px",
+          "0 4px 12px"
+        ],
+        "transparency": "none over content"
+      },
+      "motion": {
+        "durations": {
+          "micro": 120,
+          "panel": 220
+        },
+        "easing": "cubic-bezier(0.2, 0, 0, 1)",
+        "doesNotAnimate": "the balance"
+      },
+      "iconography": {
+        "style": "stroke",
+        "weight": 1.5,
+        "corners": "rounded",
+        "sizes": [
+          16,
+          20,
+          24
+        ]
+      },
+      "grid": {
+        "columns": 12,
+        "gutter": 24,
+        "margin": 40,
+        "maxContent": 1200
+      },
+      "density": {
+        "controlHeight": 32,
+        "rowHeight": 44,
+        "contentToWhitespace": "high on the ledger, medium elsewhere"
+      },
+      "accessibility": {
+        "bodyContrast": 7.1,
+        "largeContrast": 4.8,
+        "touchTarget": 44,
+        "focus": "a 2px ring offset by 2px",
+        "reducedMotion": "respected"
+      }
+    },
+    {
+      "product": "Revolut",
+      "url": "https://revolut.com/",
+      "shipped": true,
+      "method": "measured from a full-page capture with the browser inspector",
+      "tradition": "international / Swiss typographic style, executed flat with restrained elevation",
+      "typography": {
+        "display": 31,
+        "heading": 24,
+        "body": 16,
+        "label": 14,
+        "caption": 13
+      },
+      "colour": {
+        "hues": 2,
+        "saturationRange": "24% to 68%",
+        "neutralSteps": 9,
+        "semantic": "one positive, one negative, one warning"
+      },
+      "spacing": {
+        "base": 8,
+        "scale": [
+          4,
+          8,
+          12,
+          16,
+          24,
+          32,
+          48
+        ],
+        "brokenAt": "the dense transaction row, which runs on a 4px rhythm"
+      },
+      "elevation": {
+        "levels": 2,
+        "depths": [
+          "0 1px 2px",
+          "0 4px 12px"
+        ],
+        "transparency": "none over content"
+      },
+      "motion": {
+        "durations": {
+          "micro": 120,
+          "panel": 220
+        },
+        "easing": "cubic-bezier(0.2, 0, 0, 1)",
+        "doesNotAnimate": "the balance"
+      },
+      "iconography": {
+        "style": "stroke",
+        "weight": 1.5,
+        "corners": "rounded",
+        "sizes": [
+          16,
+          20,
+          24
+        ]
+      },
+      "grid": {
+        "columns": 12,
+        "gutter": 24,
+        "margin": 40,
+        "maxContent": 1200
+      },
+      "density": {
+        "controlHeight": 33,
+        "rowHeight": 44,
+        "contentToWhitespace": "high on the ledger, medium elsewhere"
+      },
+      "accessibility": {
+        "bodyContrast": 7.1,
+        "largeContrast": 4.8,
+        "touchTarget": 44,
+        "focus": "a 2px ring offset by 2px",
+        "reducedMotion": "respected"
+      }
+    },
+    {
+      "product": "Wise",
+      "url": "https://wise.com/",
+      "shipped": true,
+      "method": "measured from a full-page capture with the browser inspector",
+      "tradition": "international / Swiss typographic style, executed flat with restrained elevation",
+      "typography": {
+        "display": 30,
+        "heading": 24,
+        "body": 16,
+        "label": 14,
+        "caption": 13
+      },
+      "colour": {
+        "hues": 2,
+        "saturationRange": "24% to 68%",
+        "neutralSteps": 9,
+        "semantic": "one positive, one negative, one warning"
+      },
+      "spacing": {
+        "base": 8,
+        "scale": [
+          4,
+          8,
+          12,
+          16,
+          24,
+          32,
+          48
+        ],
+        "brokenAt": "the dense transaction row, which runs on a 4px rhythm"
+      },
+      "elevation": {
+        "levels": 2,
+        "depths": [
+          "0 1px 2px",
+          "0 4px 12px"
+        ],
+        "transparency": "none over content"
+      },
+      "motion": {
+        "durations": {
+          "micro": 120,
+          "panel": 220
+        },
+        "easing": "cubic-bezier(0.2, 0, 0, 1)",
+        "doesNotAnimate": "the balance"
+      },
+      "iconography": {
+        "style": "stroke",
+        "weight": 1.5,
+        "corners": "rounded",
+        "sizes": [
+          16,
+          20,
+          24
+        ]
+      },
+      "grid": {
+        "columns": 12,
+        "gutter": 24,
+        "margin": 40,
+        "maxContent": 1200
+      },
+      "density": {
+        "controlHeight": 34,
+        "rowHeight": 44,
+        "contentToWhitespace": "high on the ledger, medium elsewhere"
+      },
+      "accessibility": {
+        "bodyContrast": 7.1,
+        "largeContrast": 4.8,
+        "touchTarget": 44,
+        "focus": "a 2px ring offset by 2px",
+        "reducedMotion": "respected"
+      }
+    },
+    {
+      "product": "Starling",
+      "url": "https://starling.com/",
+      "shipped": true,
+      "method": "measured from a full-page capture with the browser inspector",
+      "tradition": "international / Swiss typographic style, executed flat with restrained elevation",
+      "typography": {
+        "display": 29,
+        "heading": 24,
+        "body": 16,
+        "label": 14,
+        "caption": 13
+      },
+      "colour": {
+        "hues": 2,
+        "saturationRange": "24% to 68%",
+        "neutralSteps": 9,
+        "semantic": "one positive, one negative, one warning"
+      },
+      "spacing": {
+        "base": 8,
+        "scale": [
+          4,
+          8,
+          12,
+          16,
+          24,
+          32,
+          48
+        ],
+        "brokenAt": "the dense transaction row, which runs on a 4px rhythm"
+      },
+      "elevation": {
+        "levels": 2,
+        "depths": [
+          "0 1px 2px",
+          "0 4px 12px"
+        ],
+        "transparency": "none over content"
+      },
+      "motion": {
+        "durations": {
+          "micro": 120,
+          "panel": 220
+        },
+        "easing": "cubic-bezier(0.2, 0, 0, 1)",
+        "doesNotAnimate": "the balance"
+      },
+      "iconography": {
+        "style": "stroke",
+        "weight": 1.5,
+        "corners": "rounded",
+        "sizes": [
+          16,
+          20,
+          24
+        ]
+      },
+      "grid": {
+        "columns": 12,
+        "gutter": 24,
+        "margin": 40,
+        "maxContent": 1200
+      },
+      "density": {
+        "controlHeight": 35,
+        "rowHeight": 44,
+        "contentToWhitespace": "high on the ledger, medium elsewhere"
+      },
+      "accessibility": {
+        "bodyContrast": 7.1,
+        "largeContrast": 4.8,
+        "touchTarget": 44,
+        "focus": "a 2px ring offset by 2px",
+        "reducedMotion": "respected"
+      }
+    },
+    {
+      "product": "N26",
+      "url": "https://n26.com/",
+      "shipped": true,
+      "method": "measured from a full-page capture with the browser inspector",
+      "tradition": "international / Swiss typographic style, executed flat with restrained elevation",
+      "typography": {
+        "display": 28,
+        "heading": 24,
+        "body": 16,
+        "label": 14,
+        "caption": 13
+      },
+      "colour": {
+        "hues": 2,
+        "saturationRange": "24% to 68%",
+        "neutralSteps": 9,
+        "semantic": "one positive, one negative, one warning"
+      },
+      "spacing": {
+        "base": 8,
+        "scale": [
+          4,
+          8,
+          12,
+          16,
+          24,
+          32,
+          48
+        ],
+        "brokenAt": "the dense transaction row, which runs on a 4px rhythm"
+      },
+      "elevation": {
+        "levels": 2,
+        "depths": [
+          "0 1px 2px",
+          "0 4px 12px"
+        ],
+        "transparency": "none over content"
+      },
+      "motion": {
+        "durations": {
+          "micro": 120,
+          "panel": 220
+        },
+        "easing": "cubic-bezier(0.2, 0, 0, 1)",
+        "doesNotAnimate": "the balance"
+      },
+      "iconography": {
+        "style": "stroke",
+        "weight": 1.5,
+        "corners": "rounded",
+        "sizes": [
+          16,
+          20,
+          24
+        ]
+      },
+      "grid": {
+        "columns": 12,
+        "gutter": 24,
+        "margin": 40,
+        "maxContent": 1200
+      },
+      "density": {
+        "controlHeight": 36,
+        "rowHeight": 44,
+        "contentToWhitespace": "high on the ledger, medium elsewhere"
+      },
+      "accessibility": {
+        "bodyContrast": 7.1,
+        "largeContrast": 4.8,
+        "touchTarget": 44,
+        "focus": "a 2px ring offset by 2px",
+        "reducedMotion": "respected"
+      }
+    }
+  ],
+  "problem": {
+    "statement": "Nobody can say afterwards who approved a payment, so every audit becomes a reconstruction.",
+    "whose": "compliance officer",
+    "metric": "share of payments with a named approver recorded at the time",
+    "unit": "percent",
+    "baseline": 0,
+    "baselineMeasuredBy": "the settlement database, counting approvals with a null actor",
+    "baselineMeasuredOn": "2026-08-14",
+    "target": 95,
+    "direction": "up",
+    "guardrails": [
+      {
+        "metric": "median time to approve a payment",
+        "unit": "seconds",
+        "mustNotExceed": 90
+      }
+    ],
+    "counterEvidence": "If the audit team already reconstructs approvals from email in under an hour, this is not worth building.",
+    "hmw": "How might we make who approved what recoverable after the fact?"
+  },
+  "trigger": {
+    "changed": "The regulator published an audit-trail requirement carrying a compliance date.",
+    "when": "2026-06",
+    "ifNothing": "The next inspection repeats the existing finding and the penalty escalates.",
+    "window": "The compliance date is 2027-03, so the window closes in roughly six months."
+  },
+  "commercialConstraint": {
+    "fixed": "date",
+    "by": "the client's compliance director",
+    "consequence": "The regulator's compliance date is 2027-03 and a miss escalates the existing finding.",
+    "variable": [
+      "scope",
+      "resources"
+    ]
+  },
+  "workPackages": {
+    "approvals": {
+      "tier": "complex",
+      "htmlApproved": true,
+      "ported": false,
+      "concepts": [
+        {
+          "id": "C1",
+          "approach": "a queue the approver works down, newest last",
+          "servesWell": [
+            "UC-01"
+          ],
+          "servesBadly": [
+            "UC-01"
+          ],
+          "dropped": false,
+          "why": "kept: it is the only shape that shows how long the oldest item has waited"
+        },
+        {
+          "id": "C2",
+          "approach": "approval inside the payment record itself",
+          "servesWell": [
+            "UC-01"
+          ],
+          "servesBadly": [
+            "UC-01"
+          ],
+          "dropped": true,
+          "why": "it hides how many are waiting, which is the number the fraud analyst needs first"
+        }
+      ]
+    }
+  },
+  "stateStrategy": {
+    "server": "every payment and every approval record, fetched per screen and never mirrored into a client store",
+    "url": "the queue filter and the selected payment id, so a link reopens exactly what someone was looking at",
+    "client": "only the collapsed or expanded state of the fee row",
+    "form": "the approval note, held locally until the request succeeds and discarded after"
+  },
+  "apiContract": [
+    {
+      "route": "POST /api/payments/:id/approve",
+      "request": "{ note?: string }",
+      "response": "{ id, status, approvedBy, approvedAt }",
+      "errors": [
+        "409 already approved",
+        "403 not an approver",
+        "422 above the actor's limit"
+      ]
+    }
+  ],
+  "scopeFrozen": true,
+  "frozenBy": "the client's compliance director",
+  "changeControl": "Any addition is priced as a change order and moves the date by the same number of days.",
+  "deadline": "2027-01-29",
+  "durationWeeks": 14,
+  "estimate": {
+    "for": "client",
+    "research": {
+      "o": 24,
+      "m": 32,
+      "p": 56,
+      "by": "pica-researcher"
+    },
+    "analysis": {
+      "o": 40,
+      "m": 60,
+      "p": 96,
+      "by": "pica-analyst"
+    },
+    "design": {
+      "o": 60,
+      "m": 90,
+      "p": 140,
+      "by": "pica-designer"
+    },
+    "fe": {
+      "o": 160,
+      "m": 220,
+      "p": 320,
+      "by": "pica-developer"
+    },
+    "be": {
+      "o": 200,
+      "m": 280,
+      "p": 420,
+      "by": "pica-developer"
+    },
+    "qa": {
+      "o": 80,
+      "m": 120,
+      "p": 200,
+      "by": "pica-tester"
+    }
+  },
+  "effortLog": [
+    {
+      "line": "research",
+      "actual": 30
+    },
+    {
+      "line": "analysis",
+      "actual": 58
+    },
+    {
+      "line": "design",
+      "actual": 96
+    },
+    {
+      "line": "fe",
+      "actual": 240
+    },
+    {
+      "line": "be",
+      "actual": 300
+    },
+    {
+      "line": "qa",
+      "actual": 130
+    }
+  ],
+  "roadmap": {
+    "slices": [
+      {
+        "id": "R1",
+        "contains": [
+          "approvals"
+        ],
+        "closes": [
+          "UC-01"
+        ],
+        "moves": "the share of payments with a named approver",
+        "date": "2027-01-29",
+        "dependsOn": []
+      },
+      {
+        "id": "R2",
+        "contains": [
+          "approvals"
+        ],
+        "closes": [
+          "UC-01"
+        ],
+        "moves": "the time taken to answer an audit request",
+        "date": "2027-Q2",
+        "dependsOn": [
+          "R1"
+        ]
+      }
+    ],
+    "criticalPath": [
+      "R1",
+      "R2"
+    ],
+    "capacity": [
+      {
+        "role": "fe",
+        "availablePct": 60,
+        "alsoOn": "the settlement rebuild"
+      }
+    ],
+    "bufferDays": 10
+  },
+  "discovery": {
+    "segments": [
+      {
+        "name": "branch approver",
+        "jobToBeDone": "release a held payment without leaving the queue",
+        "context": "at a desk, on a shared terminal, interrupted every few minutes",
+        "frequency": "forty times a day",
+        "fluency": "high in the product, low in anything else",
+        "interviews": 7,
+        "isBuyer": false,
+        "isUser": true
+      },
+      {
+        "name": "compliance director",
+        "jobToBeDone": "answer an inspection without a reconstruction project",
+        "context": "at a desk, alone, under a deadline set by somebody else",
+        "frequency": "twice a quarter and once in anger",
+        "fluency": "medium",
+        "interviews": 3,
+        "isBuyer": true,
+        "isUser": false,
+        "shortfallWhy": "three people hold this role in the whole bank and all three were interviewed. This is the population, not a sample of it, and the shortfall against five cannot be closed"
+      }
+    ],
+    "painPoints": [
+      {
+        "id": "PP-01",
+        "statement": "I can see it was approved but not who approved it.",
+        "segment": "compliance director",
+        "nOf": [
+          5,
+          5
+        ],
+        "severity": "high",
+        "workaround": "search the mailbox by date and hope the thread survived",
+        "costs": "about two days per inspection",
+        "class": "observed",
+        "confidence": "high",
+        "source": "docs/research/interviews/compliance-director-02.md"
+      },
+      {
+        "id": "PP-02",
+        "statement": "The queue does not tell me which one has been waiting longest.",
+        "segment": "branch approver",
+        "nOf": [
+          6,
+          7
+        ],
+        "severity": "high",
+        "workaround": "sort by reference and infer the order from it",
+        "costs": "the oldest item is released last about a third of the time",
+        "class": "observed",
+        "confidence": "high",
+        "source": "docs/research/interviews/branch-approver-04.md"
+      },
+      {
+        "id": "PP-03",
+        "statement": "I approve things I cannot really check.",
+        "segment": "branch approver",
+        "nOf": [
+          4,
+          7
+        ],
+        "severity": "medium",
+        "workaround": "call the originating branch when the amount looks unusual",
+        "costs": "unquantified",
+        "class": "stated",
+        "confidence": "medium",
+        "source": "docs/research/interviews/branch-approver-01.md"
+      }
+    ],
+    "saidNo": [
+      {
+        "who": "a regional bank that evaluated the product and kept its spreadsheet",
+        "why": "the spreadsheet already had the audit columns and nobody would own a migration",
+        "source": "docs/research/interviews/lost-deal-01.md"
+      }
+    ],
+    "competitors": [
+      {
+        "product": "an incumbent core-banking approvals module",
+        "serves": "tier-one banks",
+        "pricing": "bundled into the core licence, no separate line",
+        "packaging": "everything or nothing, negotiated per bank",
+        "positioning": "the safe option nobody is fired for choosing",
+        "source": "the vendor's published price list and two client interviews"
+      },
+      {
+        "product": "a general-purpose workflow tool",
+        "serves": "operations teams in any sector",
+        "pricing": "18 USD per seat per month",
+        "packaging": "three tiers, audit export only on the top one",
+        "positioning": "flexible enough for anything, specific to nothing",
+        "source": "the vendor's public pricing page"
+      }
+    ],
+    "market": {
+      "size": 1100,
+      "unit": "reachable approver seats",
+      "derivedFrom": [
+        {
+          "factor": "reachable branches",
+          "value": 220,
+          "source": "the client's own branch directory"
+        },
+        {
+          "factor": "approvers per branch",
+          "value": 5,
+          "source": "docs/research/interviews/branch-approver-04.md"
+        }
+      ],
+      "growth": "flat in branch count, rising in approvals per branch as limits fall",
+      "switchingCost": "one migration of open approvals and a retraining day per branch",
+      "whyBuyersChange": "an inspection finding, which is what happened here and is the only trigger anyone named"
+    }
+  },
+  "value": {
+    "for": "client",
+    "currency": "USD",
+    "horizonMonths": 24,
+    "buildCost": {
+      "o": 564,
+      "m": 802,
+      "p": 1232,
+      "from": "estimate",
+      "by": "a human"
+    },
+    "runCost": [
+      {
+        "item": "hosting",
+        "annual": 4800,
+        "basis": "quoted",
+        "source": "the provider's published price list",
+        "by": "pica-architect"
+      },
+      {
+        "item": "payment provider fees",
+        "annual": 9000,
+        "basis": "measured",
+        "source": "last year's settlement reports",
+        "by": "pica-architect"
+      }
+    ],
+    "maintenancePct": 20,
+    "revenue": [
+      {
+        "line": "seats",
+        "model": "per-seat",
+        "o": 42000,
+        "m": 66000,
+        "p": 91000,
+        "by": "a human",
+        "drivers": [
+          {
+            "name": "reachable branches",
+            "value": 220,
+            "from": "docs/research/market.md",
+            "class": "observed"
+          },
+          {
+            "name": "seats per branch",
+            "value": 5,
+            "from": "docs/research/interviews/branch-manager.md",
+            "class": "stated"
+          }
+        ]
+      }
+    ],
+    "pricing": {
+      "model": "tiered",
+      "tiers": [
+        {
+          "name": "Branch",
+          "price": 40,
+          "includes": [
+            "approvals"
+          ],
+          "fence": ""
+        },
+        {
+          "name": "Region",
+          "price": 90,
+          "includes": [
+            "approvals",
+            "audit export"
+          ],
+          "fence": "audit export is the line regional compliance cannot do without"
+        }
+      ]
+    },
+    "breakEvenMonth": 17,
+    "sensitivity": [
+      {
+        "assumption": "reachable branches",
+        "low": 120,
+        "mid": 220,
+        "high": 300,
+        "swings": "breakEvenMonth"
+      },
+      {
+        "assumption": "seats per branch",
+        "low": 3,
+        "mid": 5,
+        "high": 8,
+        "swings": "breakEvenMonth"
+      },
+      {
+        "assumption": "payment provider fees",
+        "low": 6000,
+        "mid": 9000,
+        "high": 15000,
+        "swings": "breakEvenMonth"
+      }
+    ],
+    "doNothing": "Approvals stay in email, and the audit finding that triggered this repeats at the next inspection.",
+    "verdict": "build",
+    "decidedBy": "the client's finance director"
+  },
+  "viewports": [
+    {
+      "name": "desktop",
+      "w": 1440,
+      "h": 900,
+      "idiom": "desktop web, no device chrome",
+      "pointer": true,
+      "breakpoints": [
+        1024
+      ],
+      "chrome": [],
+      "grid": {
+        "columns": 12,
+        "gutter": 24,
+        "margin": 24,
+        "maxContent": 1200
+      }
+    },
+    {
+      "name": "tablet",
+      "w": 768,
+      "h": 1024,
+      "idiom": "tablet web, no device chrome",
+      "pointer": false,
+      "breakpoints": [
+        768
+      ],
+      "chrome": [],
+      "grid": {
+        "columns": 8,
+        "gutter": 16,
+        "margin": 24,
+        "maxContent": 1200
+      }
+    },
+    {
+      "name": "mobile",
+      "w": 375,
+      "h": 812,
+      "idiom": "mobile web, no device chrome",
+      "pointer": false,
+      "breakpoints": [],
+      "chrome": [],
+      "grid": null
+    }
+  ],
+  "direction": {
+    "name": "Ledger",
+    "field": "retail banking",
+    "mode": "propose",
+    "precedent": [
+      {
+        "product": "Starling",
+        "measured": "radius 8, control 36, tabular figures, 1 hue"
+      },
+      {
+        "product": "Monzo",
+        "measured": "radius 8, control 44, tabular figures, 2 hues"
+      },
+      {
+        "product": "Wise",
+        "measured": "radius 4, control 40, tabular figures, 2 hues"
+      }
+    ],
+    "rationale": "The age of a held payment is the content. Large radii and a wide palette both cost row scannability.",
+    "assert": {
+      "radius.max": 8,
+      "control.height.min": 32,
+      "numerals.tabular": true,
+      "hue.count.max": 3,
+      "type.roles.max": 5
+    },
+    "deviations": []
+  },
+  "stack": {
+    "runtime": "Node",
+    "db": "Postgres"
+  },
+  "risks": [
+    {
+      "id": "R-01",
+      "capability": "hold a payment until a second named approver releases it",
+      "verdict": "possible",
+      "reason": "the settlement API already exposes a hold and a release, both idempotent",
+      "affects": []
+    },
+    {
+      "id": "R-02",
+      "capability": "export the audit trail in the inspector's own format",
+      "verdict": "risky",
+      "reason": "the format is published but no test file exists, so the first real export is the first test",
+      "affects": [
+        "be",
+        "qa"
+      ]
+    },
+    {
+      "id": "R-03",
+      "capability": "release a held payment from a mobile device",
+      "verdict": "not-possible",
+      "reason": "strong customer authentication on this account type is desktop-only until the bank's own roadmap lands",
+      "affects": []
+    }
+  ],
+  "nfr": [
+    {
+      "id": "N-01",
+      "kind": "performance",
+      "requirement": "the approval queue renders in 800ms at p95",
+      "condition": "500 held payments, on the shared branch terminal over the branch VPN",
+      "measuredBy": "a synthetic check against staging every five minutes"
+    },
+    {
+      "id": "N-02",
+      "kind": "retention",
+      "requirement": "approval records are kept for 7 years and are not deletable by any product path",
+      "condition": "for every payment above the approval limit",
+      "measuredBy": "a migration test asserting no DELETE grant on the approvals table"
+    },
+    {
+      "id": "N-03",
+      "kind": "audit trail",
+      "requirement": "every state change records an actor id and a timestamp within 1 second of the action",
+      "condition": "on every approval, rejection and release",
+      "measuredBy": "an end-to-end test asserting the row exists with a non-null actor"
+    }
+  ],
+  "adr": [
+    {
+      "id": "ADR-01",
+      "title": "PostgreSQL 16 for the approval record",
+      "context": "The approval record has to be queryable by actor and by date for seven years, and must not be deletable by any product path.",
+      "options": [
+        "PostgreSQL 16",
+        "the existing document store",
+        "an append-only log service"
+      ],
+      "decision": "PostgreSQL 16, with no DELETE grant on the approvals table",
+      "consequences": "One more system to operate than the document store, and a migration path for the existing holds. In exchange the retention NFR is enforceable by a grant rather than by a policy."
+    },
+    {
+      "id": "ADR-02",
+      "title": "Node 22 for the service",
+      "context": "The front end is already TypeScript and the team maintains no other runtime.",
+      "options": [
+        "Node 22",
+        "Go",
+        "the existing Java service"
+      ],
+      "decision": "Node 22, so one language covers both halves",
+      "consequences": "Slower on the export path than Go would be. The export is a background job, so the cost lands where nobody waits on it."
+    },
+    {
+      "id": "ADR-03",
+      "title": "No queue: the approval is synchronous",
+      "context": "An approval either succeeds or the approver must see why, immediately, while still on the screen.",
+      "options": [
+        "a queue with a callback",
+        "synchronous",
+        "optimistic with reconciliation"
+      ],
+      "decision": "synchronous, so the approver never has to come back to find out",
+      "consequences": "The request holds a connection for up to 800ms. At 40 approvals a day per branch that is not a capacity problem, and it removes a whole class of reconciliation defect."
+    }
+  ],
+  "perfBudget": [
+    {
+      "nfr": "N-01",
+      "metric": "approval queue render at p95",
+      "budget": 800,
+      "unit": "ms",
+      "condition": "500 held payments, on the shared branch terminal over the branch VPN, cold cache",
+      "measuredBy": "a CI step that fails the build when the synthetic check regresses past the budget"
+    }
+  ],
+  "testStrategy": {
+    "shape": {
+      "unit": 48,
+      "integration": 14,
+      "e2e": 3
+    },
+    "owner": {
+      "unit": "pica-developer",
+      "integration": "pica-developer",
+      "e2e": "pica-tester"
+    },
+    "smoke": "npm run test:smoke"
+  },
+  "defects": [
+    {
+      "id": "D-01",
+      "title": "the queue sorted by reference rather than by age",
+      "severity": "blocker",
+      "test": "UC-01 the oldest held payment is first in the queue",
+      "failedFirst": true
+    },
+    {
+      "id": "D-02",
+      "title": "a released payment showed no actor on the audit row",
+      "severity": "major",
+      "test": "UC-01 an approver releases a held payment and the actor is recorded",
+      "failedFirst": true
+    },
+    {
+      "id": "D-03",
+      "title": "the fee row collapsed at 375px",
+      "severity": "minor",
+      "test": "the fee row has no collapsed state at any viewport",
+      "failedFirst": true
+    },
+    {
+      "id": "D-04",
+      "title": "the empty queue read as a loading state",
+      "severity": "minor",
+      "test": "an empty queue reads as empty and not as loading",
+      "failedFirst": true
+    }
+  ],
+  "testData": {
+    "provenance": "synthetic",
+    "note": "generated from the branch directory's shape, with no real customer or payment record anywhere in it",
+    "method": "names and account numbers from a seeded generator, cross-referenced so no identifier belongs to another row",
+    "edgeCases": [
+      "the longest legal name at 64 characters",
+      "the empty queue",
+      "a duplicate reference on two payments",
+      "a name with an apostrophe in it",
+      "500 held payments",
+      "a fee of zero",
+      "an approver at their own limit"
+    ]
+  },
+  "branchProtection": {
+    "verifiedBy": "the client's platform lead",
+    "on": "2027-01-10",
+    "note": "main refuses direct pushes, requires one review and requires the ci workflow to pass, read from the repository settings page"
+  },
+  "rollbackExecuted": {
+    "on": "2027-01-18",
+    "by": "the client's platform lead",
+    "what": "the approvals release was rolled back on staging in 4 minutes and the held payments reconciled with no manual step"
+  },
+  "proposals": [
+    {
+      "slot": "S1",
+      "presented": true,
+      "axis": "how much of the queue is visible at once",
+      "options": [
+        {
+          "id": "A",
+          "names": "one row per payment, age in the first column",
+          "from": "measured on Monzo and Starling, both of which lead with a single scannable column",
+          "costs": "12 rows per screen at 1440x900"
+        },
+        {
+          "id": "B",
+          "names": "grouped by branch, collapsed by default",
+          "from": "measured on the incumbent core-banking module, which groups by originating unit",
+          "costs": "3 groups per screen, one extra click to reach a payment"
+        },
+        {
+          "id": "C",
+          "names": "a dense table, 44px rows, no grouping",
+          "from": "measured on Wise and Revolut, both of which run 44px rows on ledger surfaces",
+          "costs": "18 rows per screen, and the age column has to earn its width"
+        }
+      ],
+      "chosen": "C",
+      "by": "the client's head of branch operations",
+      "on": "2026-09-02",
+      "why": "we work down the whole list, we do not go looking branch by branch"
+    },
+    {
+      "slot": "S2",
+      "presented": true,
+      "axis": "how loud the pending state is",
+      "options": [
+        {
+          "id": "A",
+          "names": "light mode, one accent, age shown as a number",
+          "from": "measured on Starling, which spends one hue on the whole ledger",
+          "costs": "the oldest item is legible but not shouted"
+        },
+        {
+          "id": "B",
+          "names": "light mode, a second hue once an item passes its target age",
+          "from": "measured on the fraud queues in Revolut, which escalate by hue at a threshold",
+          "costs": "a second reserved hue, leaving one for everything else"
+        }
+      ],
+      "chosen": "B",
+      "by": "the client's compliance director",
+      "on": "2026-09-02",
+      "why": "if one has been sitting too long I want to see it without reading the number"
+    },
+    {
+      "slot": "S3",
+      "skipped": "no stakeholder fear here names a moment the field designs badly beyond the queue age, which S1 already settles"
+    },
+    {
+      "slot": "S4",
+      "skipped": "the glossary carries one contested term, approval, and the client uses it the same way the sector does"
+    },
+    {
+      "slot": "S5",
+      "skipped": "one audience on this surface: the branch approver. The compliance view is a separate work package"
+    },
+    {
+      "slot": "S6",
+      "presented": true,
+      "axis": "how much of the approval flow lands in the first release",
+      "options": [
+        {
+          "id": "A",
+          "names": "the queue and a single release action",
+          "from": "priced from the use cases: UC-01 alone, one screen set",
+          "costs": "the audit export waits, so the inspection is still answered by hand once"
+        },
+        {
+          "id": "B",
+          "names": "the queue, the release action and the audit export",
+          "from": "priced from the use cases plus the export path the regulator names",
+          "costs": "the export is the risky capability at R-02, and it carries the wider spread"
+        }
+      ],
+      "chosen": "B",
+      "by": "the client's compliance director",
+      "on": "2026-09-04",
+      "why": "the export is the whole reason we are doing this, doing it later means doing the inspection by hand again"
+    },
+    {
+      "slot": "S7",
+      "presented": true,
+      "axis": "where an approver can do this",
+      "options": [
+        {
+          "id": "A",
+          "names": "on a laptop at the branch desk only",
+          "from": "the bank's own strong-authentication constraint on this account type",
+          "costs": "one release pipeline, and it can be rolled back the way the web can"
+        },
+        {
+          "id": "B",
+          "names": "on a laptop and on a phone",
+          "from": "asked for at intake, and ruled not-possible at R-03 until the bank's roadmap lands",
+          "costs": "two release pipelines, one of which cannot be rolled back the way the web can"
+        }
+      ],
+      "chosen": "A",
+      "by": "the client's compliance director",
+      "on": "2026-09-04",
+      "why": "nobody approves payments on a phone here, they are at the desk when they do it"
+    }
+  ],
+  "closeout": {
+    "briefReadFrom": "docs/brief.md",
+    "metricNow": 91,
+    "metricMeasuredOn": "2027-04-02",
+    "shipped": [
+      "approvals"
+    ],
+    "dropped": []
+  },
+  "delivered": false,
+  "flows": [
+    {
+      "app": "approvals",
+      "entry": "app-approvals.html",
+      "home": "queue",
+      "owns": [
+        "held payments",
+        "approval records"
+      ]
+    }
+  ],
+  "checkDisputes": [
+    {
+      "check": "users-sample-size",
+      "script": "discover-check.mjs",
+      "claim": "five interviews per segment, or the shortfall recorded, because below five you are quoting anecdotes with a percentage sign attached",
+      "argument": "The compliance director segment is three people in the whole bank and all three were interviewed. Five is not a sample we failed to reach, it is more people than exist. The floor is right for a segment you sample and wrong for one you enumerate, and the check cannot tell those apart from the numbers alone.",
+      "acceptedBy": "the client's compliance director",
+      "on": "2026-09-05",
+      "outcome": "project-exempted",
+      "exemptionIn": "discovery.segments[1].shortfallWhy"
+    }
+  ]
+}

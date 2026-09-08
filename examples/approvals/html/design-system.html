@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Approvals design system</title>
+<link rel="stylesheet" href="shared.css">
+<style>
+body{background:#f4f5f3;padding:var(--s-5)}
+.doc{max-width:900px;margin:0 auto}
+h1{font-size:24px;margin:0 0 var(--s-2)}
+h2{font-size:18px;margin:var(--s-5) 0 var(--s-3);padding-top:var(--s-4);border-top:1px solid var(--rule)}
+h3{font-size:14px;font-weight:600;margin:var(--s-4) 0 var(--s-2);color:#3d4a45}
+.note{font-size:14px;color:#3d4a45;max-width:70ch;margin:0 0 var(--s-4)}
+.demo{background:#fff;border:1px solid var(--rule);border-radius:var(--r);padding:var(--s-4);margin-bottom:var(--s-3)}
+.swatches{display:flex;flex-wrap:wrap;gap:var(--s-3)}
+.sw{width:120px;font-size:12px}
+.sw i{display:block;height:56px;border:1px solid var(--rule);border-radius:var(--r);margin-bottom:var(--s-1)}
+.steps{display:flex;align-items:flex-end;gap:var(--s-3)}
+.steps div{font-size:12px;text-align:center}
+.steps i{display:block;background:var(--accent);border-radius:2px;margin-bottom:var(--s-1)}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{text-align:left;padding:var(--s-2) var(--s-3) var(--s-2) 0;border-bottom:1px solid var(--rule);vertical-align:top}
+th{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:#3d4a45;font-weight:600}
+code{font:13px/1.4 ui-monospace,Menlo,monospace;background:#eceee9;padding:1px 5px;border-radius:3px}
+</style>
+</head>
+<body>
+<div class="doc">
+
+<h1>Approvals: the design system</h1>
+<p class="note">
+  Revised 2027-01-22. Built at 1440 x 900, 768 x 1024 and 375 x 812. Sample data, no database, no
+  live API. <strong>Every token and every component with all its variants and states</strong>, which
+  is what pica's step 3 asks for: the kit is built before any screen, so a screen cannot introduce a
+  value the system does not have.
+</p>
+<p class="note">
+  Every value here comes from <code>shared.css</code>, the same stylesheet the boards and the
+  interactive flow load. There is no second copy, so this page cannot document something the screens
+  do not use.
+</p>
+
+<h2>Tokens</h2>
+
+<h3>Spacing, a 4px base</h3>
+<p class="note"><code>code-tokens-check</code> and <code>spacing-check</code> both read this scale.
+  A gap that is not on it is a finding, and the empty-state board sits at <code>--s-5</code> like
+  every other screen because <code>edge-scale</code> compares them.</p>
+<div class="demo steps">
+  <div><i style="width:4px;height:4px"></i>--s-1<br>4px</div>
+  <div><i style="width:8px;height:8px"></i>--s-2<br>8px</div>
+  <div><i style="width:12px;height:12px"></i>--s-3<br>12px</div>
+  <div><i style="width:16px;height:16px"></i>--s-4<br>16px</div>
+  <div><i style="width:24px;height:24px"></i>--s-5<br>24px</div>
+</div>
+
+<h3>Colour, two hues</h3>
+<p class="note">The direction asserts <code>hue.count.max: 3</code> and this spends two: one ink,
+  one accent, on a white ground. <code>contrast-check</code> computes every pairing; body text runs
+  at 7:1 or better because a ledger is read all day.</p>
+<div class="demo swatches">
+  <div class="sw"><i style="background:#141816"></i>--ink<br>#141816</div>
+  <div class="sw"><i style="background:#ffffff"></i>--ground<br>#ffffff</div>
+  <div class="sw"><i style="background:#12433d"></i>--accent<br>#12433d</div>
+  <div class="sw"><i style="background:#d7dcd8"></i>--rule<br>#d7dcd8</div>
+  <div class="sw"><i style="background:#3d4a45"></i>caption ink<br>#3d4a45</div>
+</div>
+
+<h3>Type, by role</h3>
+<p class="note">Roles, never bare sizes: 16px is body here and a caption somewhere else, so a list
+  of numbers characterises nothing. <code>numerals.tabular</code> is asserted, because the age
+  column is the content and proportional figures do not line up.</p>
+<div class="demo">
+  <table>
+    <tr><th>Role</th><th>Size</th><th>Weight</th><th>Used for</th></tr>
+    <tr><td>heading</td><td>24px / 1.2</td><td>600</td><td>the screen title</td></tr>
+    <tr><td>body</td><td>16px / 1.5</td><td>400</td><td>a payee, an amount, the age in hours</td></tr>
+    <tr><td>label</td><td>14px / 1.5</td><td>400</td><td>a control, a key in a pair</td></tr>
+    <tr><td>caption</td><td>13px / 1.5</td><td>400</td><td>the line under a list that explains the order</td></tr>
+  </table>
+</div>
+
+<h3>Radius and elevation</h3>
+<p class="note"><code>radius.max: 8</code> is asserted and <code>--r</code> is 8px, one value.
+  There is no elevation: a ledger is flat, and every shadow is a hue spent on decoration.</p>
+<div class="demo"><span style="display:inline-block;width:96px;height:40px;border:1px solid var(--rule);border-radius:var(--r)"></span> <code>--r: 8px</code></div>
+
+<h2>Components, with every variant and state</h2>
+
+<h3>Button</h3>
+<div class="demo" style="display:flex;gap:var(--s-3);flex-wrap:wrap;align-items:center">
+  <button type="button">Release</button>
+  <button type="button" disabled style="opacity:.45">Release</button>
+  <span class="bar" style="border:0;padding:0"><button type="button">Back</button></span>
+</div>
+<p class="note">Primary at 40px, secondary in a bar at 32px. <code>control.height.min: 32</code> is
+  asserted, so neither can shrink below it: 24px controls on a screen somebody works in all day is
+  what the assertion exists to prevent.</p>
+
+<h3>Row, the unit the whole product is made of</h3>
+<div class="demo">
+  <div class="row"><span class="age">31</span><span class="name">Ridgeway Metals Ltd</span><button type="button">Release</button></div>
+  <div class="row"><span class="age">4</span><span class="name">Ash Lane Dairy</span><button type="button">Release</button></div>
+  <div class="row"><span class="age">2</span><span class="name">A payee with a very long registered legal name indeed, Limited</span><button type="button">Release</button></div>
+</div>
+<p class="note"><strong>The third row is the state that matters.</strong> A 64-character legal name
+  is in the test data by name, and the name cell wraps rather than truncating, because a truncated
+  payee on an irreversible transfer is the sector's own defect and no ellipsis rule exists in this
+  token set to cause it.</p>
+
+<h3>Key and value pair</h3>
+<div class="demo">
+  <dl style="margin:0">
+    <div class="kv"><dt>Amount</dt><dd>48,200.00 GBP</dd></div>
+    <div class="kv"><dt>Fee</dt><dd>12.50 GBP</dd></div>
+    <div class="kv"><dt>Fee</dt><dd>0.00 GBP</dd></div>
+  </dl>
+</div>
+<p class="note">A fee of zero renders as <code>0.00</code> and never as blank or absent. The sector
+  forbids hiding a fee behind a disclosure, so the row has no collapsed state at any viewport and a
+  unit test asserts it.</p>
+
+<h3>Tab bar</h3>
+<div class="demo">
+  <nav class="tabbar" style="border-top:0">
+    <button type="button" aria-current="page">Queue</button>
+    <button type="button">Audit</button>
+  </nav>
+</div>
+<p class="note">The current tab is the one that <strong>owns</strong> the visible screen, not the one
+  last touched. Inside a task the bar is hidden entirely, because a task is not a place.</p>
+
+<h3>Caption and the empty state</h3>
+<div class="demo">
+  <p class="cap" style="margin:0 0 var(--s-3)">Oldest first. Age in hours.</p>
+  <p class="cap" style="margin:0">Nothing is waiting. Held payments appear here.</p>
+</div>
+<p class="note">The empty state <strong>says what would appear</strong> and does not read as
+  loading. That was a recorded defect, <code>D-04</code>, with a test that failed first.</p>
+
+<h2>What nothing here checks</h2>
+<p class="note">
+  <strong>No check reads this file.</strong> <code>pica.md</code> has asked for it since step 3 and
+  <code>html-prototype.md</code> names it, and the only script that mentions it is the capture
+  producer, which <em>excludes</em> it. So this page is a rule with no executable behind it, which is
+  the class of gap this project keeps finding in itself, and it is recorded here rather than left for
+  somebody to notice.
+</p>
+<p class="note">
+  What would close it: a check that every token in <code>tokens/tokens.json</code> appears on this
+  page, and that every class used by a screen appears here with at least one variant. Until that
+  exists, a component can enter the product without ever being documented, and nothing will say so.
+</p>
+
+</div>
+</body>
+</html>

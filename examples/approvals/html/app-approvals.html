@@ -1,0 +1,107 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Approvals</title><link rel="stylesheet" href="shared.css"></head><body>
+  <div class="frame-wrap"><div class="frame-cap">approvals · desktop</div>
+    <div class="frame" data-viewport="desktop" data-uc="UC-01" style="width:1440px">
+        <nav class="tabbar" data-navbar>
+          <button type="button" data-tab="queue">Queue</button>
+          <button type="button" data-tab="audit">Audit</button>
+        </nav>
+
+        <section class="scr" data-scr="queue" data-title="the queue">
+          <h1>Held payments</h1>
+          <div class="row" data-go="payment"><span class="age">31</span><span class="name">Ridgeway Metals Ltd</span><button type="button">Release</button></div>
+          <div class="row" data-go="payment"><span class="age">18</span><span class="name">Calder Freight</span><button type="button">Release</button></div>
+          <div class="row" data-go="payment"><span class="age">4</span><span class="name">Ash Lane Dairy</span><button type="button">Release</button></div>
+          <p class="cap">Oldest first. Age in hours.</p>
+        </section>
+
+        <section class="scr" data-scr="payment" data-title="the payment" data-owner="queue" data-flow hidden>
+          <div class="bar"><button type="button" data-popback>Back</button><span class="cap">Ridgeway Metals Ltd</span></div>
+          <h1>Release this payment</h1>
+          <dl><div class="kv"><dt>Amount</dt><dd>48,200.00 GBP</dd></div>
+          <div class="kv"><dt>Held for</dt><dd>31 hours</dd></div>
+          <div class="kv"><dt>Recipient</dt><dd>Ridgeway Metals Limited</dd></div>
+          <div class="kv"><dt>Fee</dt><dd>12.50 GBP</dd></div></dl>
+          <p class="cap">The fee is shown here because the confirmation screen must print it.</p>
+          <button type="button" data-go="audit">Release and record</button>
+        </section>
+
+        <section class="scr" data-scr="audit" data-title="the audit trail" hidden>
+          <h1>Audit trail</h1>
+          <div class="row"><span class="age">now</span><span class="name">Released by A. Okonjo</span></div>
+          <div class="row"><span class="age">2h</span><span class="name">Held by the limit rule</span></div>
+          <p class="cap">Every state change records an actor and a time.</p>
+        </section>
+    </div></div>
+
+  <div class="frame-wrap"><div class="frame-cap">approvals · tablet</div>
+    <div class="frame" data-viewport="tablet" data-uc="UC-01" style="width:768px">
+        <nav class="tabbar" data-navbar>
+          <button type="button" data-tab="queue">Queue</button>
+          <button type="button" data-tab="audit">Audit</button>
+        </nav>
+
+        <section class="scr" data-scr="queue" data-title="the queue">
+          <h1>Held payments</h1>
+          <div class="row" data-go="payment"><span class="age">31</span><span class="name">Ridgeway Metals Ltd</span><button type="button">Release</button></div>
+          <div class="row" data-go="payment"><span class="age">18</span><span class="name">Calder Freight</span><button type="button">Release</button></div>
+          <div class="row" data-go="payment"><span class="age">4</span><span class="name">Ash Lane Dairy</span><button type="button">Release</button></div>
+          <p class="cap">Oldest first. Age in hours.</p>
+        </section>
+
+        <section class="scr" data-scr="payment" data-title="the payment" data-owner="queue" data-flow hidden>
+          <div class="bar"><button type="button" data-popback>Back</button><span class="cap">Ridgeway Metals Ltd</span></div>
+          <h1>Release this payment</h1>
+          <dl><div class="kv"><dt>Amount</dt><dd>48,200.00 GBP</dd></div>
+          <div class="kv"><dt>Held for</dt><dd>31 hours</dd></div>
+          <div class="kv"><dt>Recipient</dt><dd>Ridgeway Metals Limited</dd></div>
+          <div class="kv"><dt>Fee</dt><dd>12.50 GBP</dd></div></dl>
+          <p class="cap">The fee is shown here because the confirmation screen must print it.</p>
+          <button type="button" data-go="audit">Release and record</button>
+        </section>
+
+        <section class="scr" data-scr="audit" data-title="the audit trail" hidden>
+          <h1>Audit trail</h1>
+          <div class="row"><span class="age">now</span><span class="name">Released by A. Okonjo</span></div>
+          <div class="row"><span class="age">2h</span><span class="name">Held by the limit rule</span></div>
+          <p class="cap">Every state change records an actor and a time.</p>
+        </section>
+    </div></div>
+
+  <div class="frame-wrap"><div class="frame-cap">approvals · mobile</div>
+    <div class="frame" data-viewport="mobile" data-uc="UC-01" style="width:375px">
+        <nav class="tabbar" data-navbar>
+          <button type="button" data-tab="queue">Queue</button>
+          <button type="button" data-tab="audit">Audit</button>
+        </nav>
+
+        <section class="scr" data-scr="queue" data-title="the queue">
+          <h1>Held payments</h1>
+          <div class="row" data-go="payment"><span class="age">31</span><span class="name">Ridgeway Metals Ltd</span><button type="button">Release</button></div>
+          <div class="row" data-go="payment"><span class="age">18</span><span class="name">Calder Freight</span><button type="button">Release</button></div>
+          <div class="row" data-go="payment"><span class="age">4</span><span class="name">Ash Lane Dairy</span><button type="button">Release</button></div>
+          <p class="cap">Oldest first. Age in hours.</p>
+        </section>
+
+        <section class="scr" data-scr="payment" data-title="the payment" data-owner="queue" data-flow hidden>
+          <div class="bar"><button type="button" data-popback>Back</button><span class="cap">Ridgeway Metals Ltd</span></div>
+          <h1>Release this payment</h1>
+          <dl><div class="kv"><dt>Amount</dt><dd>48,200.00 GBP</dd></div>
+          <div class="kv"><dt>Held for</dt><dd>31 hours</dd></div>
+          <div class="kv"><dt>Recipient</dt><dd>Ridgeway Metals Limited</dd></div>
+          <div class="kv"><dt>Fee</dt><dd>12.50 GBP</dd></div></dl>
+          <p class="cap">The fee is shown here because the confirmation screen must print it.</p>
+          <button type="button" data-go="audit">Release and record</button>
+        </section>
+
+        <section class="scr" data-scr="audit" data-title="the audit trail" hidden>
+          <h1>Audit trail</h1>
+          <div class="row"><span class="age">now</span><span class="name">Released by A. Okonjo</span></div>
+          <div class="row"><span class="age">2h</span><span class="name">Held by the limit rule</span></div>
+          <p class="cap">Every state change records an actor and a time.</p>
+        </section>
+    </div></div>
+
+<script src="proto.js" data-nav='[{"id":"queue"},{"id":"audit"}]' data-home="queue"></script>
+</body></html>

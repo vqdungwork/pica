@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Approvals review</title>
+<style>
+:root{--s-1:4px;--s-2:8px;--s-3:12px;--s-4:16px;--s-5:24px;
+--ink:#141816;--ground:#f4f5f3;--pane:#ffffff;--rule:#d7dcd8;--accent:#12433d;--r:8px}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--ground);color:var(--ink);
+font:15px/1.5 -apple-system,system-ui,sans-serif;display:flex;flex-direction:column}
+header{padding:var(--s-5);border-bottom:1px solid var(--rule);background:var(--pane)}
+h1{font-size:20px;margin:0 0 var(--s-2)}
+.meta{margin:0;font-size:14px;color:#3d4a45;max-width:78ch}
+.meta strong{color:var(--ink)}
+[role=tablist]{display:flex;gap:var(--s-2);padding:var(--s-3) var(--s-5) 0;
+border-bottom:1px solid var(--rule);background:var(--pane);flex-wrap:wrap}
+[role=tab]{height:36px;padding:0 var(--s-4);border:1px solid var(--rule);border-bottom:0;
+border-radius:var(--r) var(--r) 0 0;background:transparent;color:var(--ink);font:inherit;cursor:pointer}
+[role=tab][aria-selected=true]{background:var(--accent);color:#ffffff;border-color:var(--accent)}
+.bar{display:flex;gap:var(--s-2);align-items:center;padding:var(--s-3) var(--s-5);
+border-bottom:1px solid var(--rule);background:var(--pane)}
+.bar button{height:32px;padding:0 var(--s-3);border:1px solid var(--rule);border-radius:var(--r);
+background:transparent;color:var(--ink);font:inherit;cursor:pointer}
+.bar button[aria-pressed=true]{background:var(--accent);color:#ffffff;border-color:var(--accent)}
+.bar .grp{margin-left:auto;font-size:13px;color:#3d4a45}
+/* The pane inset is 24px, which is --s-5. shell-check reads it, because a frame sitting
+   17px from the pane edge is the same defect as a gap off the scale anywhere else. */
+.pane{flex:1;overflow:auto;padding:var(--s-5)}
+.pane iframe{width:100%;height:calc(100vh - 260px);border:1px solid var(--rule);
+border-radius:var(--r);background:var(--pane);display:block;transform-origin:0 0}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Approvals: held payments and the audit trail</h1>
+  <p class="meta">
+    Revised 2027-01-22. Built at <strong>1440 x 900</strong>, <strong>768 x 1024</strong> and
+    <strong>375 x 812</strong>.
+    <br>
+    <strong>What this is not.</strong> It is a prototype with sample data, no database and no live
+    API. Nothing is signed, transacted or sent. The figures are synthetic and no real customer or
+    payment appears anywhere in it. Releasing a payment here records nothing.
+  </p>
+</header>
+
+<div role="tablist" aria-label="Review">
+  <button role="tab" id="t-flow" aria-selected="true" aria-controls="p-flow" data-tab="p-flow">
+    Approvals · interactive flow
+  </button>
+  <button role="tab" id="t-states" aria-selected="false" aria-controls="p-states" data-tab="p-states">
+    Approvals · every state
+  </button>
+  <button role="tab" id="t-system" aria-selected="false" aria-controls="p-system" data-tab="p-system">
+    Design system
+  </button>
+</div>
+
+<div class="bar">
+  <button type="button" data-zoom="width" aria-pressed="false">Fit width</button>
+  <button type="button" data-zoom="screen" aria-pressed="false">Fit screen</button>
+  <button type="button" data-zoom="one" aria-pressed="true">100%</button>
+  <span class="grp">Applications first, then states, then the system. The flow leads because it is the deliverable.</span>
+</div>
+
+<div class="pane">
+  <div id="p-flow" role="tabpanel" aria-labelledby="t-flow">
+    <iframe title="Approvals, interactive" data-src="app-approvals.html" src="app-approvals.html"></iframe>
+  </div>
+  <div id="p-states" role="tabpanel" aria-labelledby="t-states" hidden>
+    <iframe title="Held payments, with rows" data-src="approvals.html"></iframe>
+    <iframe title="Held payments, empty" data-src="approvals-empty.html"></iframe>
+  </div>
+  <div id="p-system" role="tabpanel" aria-labelledby="t-system" hidden>
+    <iframe title="Every token and component" data-src="design-system.html"></iframe>
+  </div>
+</div>
+
+<script>
+/* Tabs load IN PLACE. A tab that navigates away from the shell is a tab a reviewer does
+   not come back from, so every panel is an iframe in this document and nothing is an
+   href. The frames load lazily, because a shell that fetches every screen at once is a
+   shell nobody waits for. */
+const panels = [...document.querySelectorAll("[role=tabpanel]")];
+const tabs = [...document.querySelectorAll("[role=tab]")];
+function show(id) {
+  for (const p of panels) p.hidden = p.id !== id;
+  for (const t of tabs) t.setAttribute("aria-selected", String(t.dataset.tab === id));
+  for (const f of document.querySelectorAll(`#${id} iframe[data-src]:not([src])`))
+    f.src = f.dataset.src;
+}
+for (const t of tabs) t.addEventListener("click", () => show(t.dataset.tab));
+
+/* Fit screen is NOT capped at 100%. A 1440-wide frame does not fit a 1440-wide laptop,
+   so capping the scale at 1 shows the reviewer with the smallest screen a product at 70%
+   without ever telling them. */
+const buttons = [...document.querySelectorAll("[data-zoom]")];
+function zoom(mode) {
+  const pane = document.querySelector(".pane");
+  const avail = pane.clientWidth - 48;
+  for (const f of document.querySelectorAll(".pane iframe")) {
+    const w = f.contentWindow?.document?.documentElement?.scrollWidth || 1440;
+    const scale = mode === "one" ? 1
+      : mode === "width" ? avail / w
+      : Math.min(avail / w, (pane.clientHeight - 48) / (f.clientHeight || 1));
+    f.style.transform = `scale(${scale})`;
+    f.style.width = mode === "one" ? "100%" : `${w}px`;
+  }
+  for (const b of buttons) b.setAttribute("aria-pressed", String(b.dataset.zoom === mode));
+}
+for (const b of buttons) b.addEventListener("click", () => zoom(b.dataset.zoom));
+</script>
+</body>
+</html>

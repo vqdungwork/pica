@@ -29,6 +29,11 @@
 !/LICENSE
 !/.gitignore
 
+# ---- the pipeline ----
+# The allowlist ignored .github/ until 1.2.3, so the first ci.yml written here was
+# silently not staged. It is the pipeline itself: nothing under it is working material.
+!/.github/
+
 # ---- README artwork, authored here and containing no project content ----
 # SVG only, deliberately: it is text, so it diffs and reviews like source. Raster
 # formats stay ignored below precisely because a screenshot is the easiest way to
@@ -57,3 +62,27 @@ node_modules/
 *.jpeg
 *.sketch
 *.fig
+
+# ---- the worked example: the mutation suite's fixture ----
+# Added on purpose, per the rule at the top of this file.
+#
+# scripts/mutate.mjs copies its fixture from examples/approvals. While that directory was
+# ignored the suite ran on exactly one machine: a fresh clone got "examples/approvals is
+# missing, and it is the fixture", so pica's central claim — every check has been seen to
+# fail on the defect it was written for — was unverifiable by anyone else, CI included.
+#
+# This is method, not working material: a synthetic retail-bank approval surface authored
+# here as the worked example the README points at. It carries no client brief and no real
+# identifiers.
+#
+# The exceptions below are deliberately narrow, and must come AFTER belt-and-braces
+# because the later rule wins. Exactly one hole is opened: .pica/state.json, which the
+# checks read and without which the fixture is inert. .audit/ and every screenshot rule
+# are left exactly as they were — the suite was measured at 89 caught · 0 missed with no
+# .audit directory present at all, so publishing a captured screen is never the price of
+# a working mutation suite.
+!/examples/
+/examples/*
+!/examples/approvals/
+!/examples/approvals/**
+!/examples/approvals/.pica/
