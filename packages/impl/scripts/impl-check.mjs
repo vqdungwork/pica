@@ -59,9 +59,33 @@ const sh = (cmd) => {
   catch { return null; }
 };
 
+/* git discovers a repository by walking UP from cwd, so `rev-parse --git-dir` succeeds
+ * from any subdirectory of any repository. Testing reachability therefore admits a
+ * directory that is not a repository at all and silently reports on whichever one
+ * encloses it — every git call below inherits cwd: repoDir, so branch age, branch
+ * protection (which resolves owner/repo from the WRONG remote and queries it over the
+ * network) and both git ls-files scans were all answering about the wrong project.
+ *
+ * The secrets scan is the one that made this urgent rather than merely wrong: pointed at
+ * an uncommitted directory, `git ls-files` returned nothing and the check reported
+ * "0 tracked files" as a pass. A credential scan that scans nothing and passes is the
+ * fail-open this file's own header forbids.
+ *
+ * Identity, not reachability: repoDir must BE the root. */
 if (!sh("git rev-parse --git-dir")) {
   console.error(`FAIL  ${repoDir} is not a git repository. Nothing here can be checked, and that is not a pass.`);
   process.exit(2);
+}
+{
+  const top = sh("git rev-parse --show-toplevel");
+  const real = (p) => { try { return fs.realpathSync(p); } catch { return path.resolve(p); } };
+  if (!top || real(top) !== real(repoDir)) {
+    console.error(`FAIL  ${repoDir} is not the root of a git repository — it sits inside ${top}.`);
+    console.error(`      Every git-backed check here would report on that repository instead of this`);
+    console.error(`      directory: branch age, branch protection, and the secrets scan. Point this at`);
+    console.error(`      the repository root, or give the directory a repository of its own.`);
+    process.exit(2);
+  }
 }
 
 const findings = [];

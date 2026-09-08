@@ -1,5 +1,52 @@
 # Changelog
 
+## 1.2.3
+
+### A pipeline of its own, and the check that was reading the wrong repository
+
+`impl-check` has asserted `ci-pipeline` against other people's repositories since 0.8.0 while this
+one had no workflow at all. `.github/workflows/ci.yml` now runs `validate-packages`, `scope-test` and
+the mutation suite on every push and pull request.
+
+The suite could not have run there anyway. It copies its fixture from `examples/approvals`, and the
+allowlist never admitted that directory, so a fresh clone got "examples/approvals is missing, and it
+is the fixture". The claim that every check has been seen to fail on the defect it was written for
+held only where the working copy happened to be. The example is published now: 21 files, one hole
+opened for `.pica/state.json`, `.audit/` and every screenshot rule untouched.
+
+Two failures the pipeline found on itself, in its first two runs:
+
+**It went green having proved 85 of 89.** `mutate.mjs` produces the fixture's capture with
+playwright, which is installed on the machine this was written on and absent from a runner. Four
+capture-reading mutations reported SKIPPED and the suite exited 0 regardless — a green tick over four
+unproven checks, which is the failure the pipeline exists to end. Chromium is installed now, and a
+skipped mutation fails the build.
+
+**`.github/` was itself ignored**, so the first `ci.yml` written was silently not staged. Allowlisted
+on purpose, per the rule at the top of that file.
+
+### A check must report on the project it was pointed at
+
+git discovers a repository by walking **up** from the working directory, so `rev-parse --git-dir`
+succeeds from any subdirectory of any repository. `impl-check` tested reachability and therefore
+accepted a directory that was not a repository at all, then answered about whichever one enclosed it.
+Every git call inherited that directory: branch age, branch protection — which resolved `owner/repo`
+from the wrong remote and queried it over the network — and both `git ls-files` scans.
+
+The credential scan is why this was urgent rather than merely wrong. Pointed at an uncommitted
+directory, `git ls-files` returned nothing and `secrets` reported **"0 tracked files"** as a pass. A
+scan that scans nothing and passes is the fail-open this file's own header forbids, and it had been
+reported as a pass in every run against the worked example.
+
+The README had rationalised the visible half: `impl-check` "reads *this* repository's git instead and
+reports it not ready to release, which it is". It was right about pica by accident, having measured
+something else.
+
+Identity, not reachability: the directory must **be** the repository root, and is refused with a
+message naming the repository it sits inside. `scripts/scope-test.mjs` asserts the property in both
+directions — a non-root directory refused, a genuine root untouched — and was watched failing against
+the pre-fix code in the same topology before it was believed.
+
 ## 1.2.2
 
 ### The counts were wrong in every place nobody recounted

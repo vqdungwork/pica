@@ -5,7 +5,7 @@
 **Describe the product you want. Get a design you can click, then a product you can ship.**
 <br>An expert team for Claude Code, with the checking built in.
 
-[![version](https://img.shields.io/badge/version-1.2.2-1f2328)](https://github.com/vqdungwork/pica/releases)
+[![version](https://img.shields.io/badge/version-1.2.3-1f2328)](https://github.com/vqdungwork/pica/releases)
 [![checks](https://img.shields.io/badge/checks-154%20fail--closed-1f2328)](#what-gets-checked)
 [![agents](https://img.shields.io/badge/specialists-10-1f2328)](#who-does-the-work)
 [![sectors](https://img.shields.io/badge/industries-28-1f2328)](#it-already-knows-your-industry)
@@ -202,9 +202,13 @@ over a failing baseline**, because a check firing on an already-broken project p
 
 `--fixture` builds the worked example into a temp directory with the two things it cannot carry in
 this repository — a git repository of its own and a fresh capture — which is why that is the
-invocation that self-tests pica. Pointed at `examples/approvals` in place, `impl-check` reads *this*
-repository's git instead and reports it not ready to release, which it is: pica has no CI pipeline of
-its own.
+invocation that self-tests pica. Pointed at `examples/approvals` in place, `impl-check` now **refuses**:
+the directory is not the root of a git repository, and until 1.2.3 it answered about pica's instead.
+
+That earlier behaviour was documented here as if it were sound — it reported pica "not ready to
+release, which it is: pica has no CI pipeline of its own". Both halves have gone. pica has a pipeline
+now, and the reading was right by accident: it had measured a different repository. `scripts/scope-test.mjs`
+holds the property in place, and runs on every push.
 
 Each check is also recorded next to the failure that earned it in [`CHANGELOG.md`](CHANGELOG.md).
 
