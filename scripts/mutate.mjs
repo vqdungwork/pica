@@ -207,6 +207,35 @@ function makeFixture() {
       capacity: [{ role: "fe", availablePct: 60, alsoOn: "the settlement rebuild" }],
       bufferDays: 10,
     },
+    value: {
+      for: "client", currency: "USD", horizonMonths: 24,
+      buildCost: { o: 564, m: 802, p: 1232, from: "estimate", by: "a human" },
+      runCost: [
+        { item: "hosting", annual: 4800, basis: "quoted", source: "the provider's published price list", by: "pica-architect" },
+        { item: "payment provider fees", annual: 9000, basis: "measured", source: "last year's settlement reports", by: "pica-architect" },
+      ],
+      maintenancePct: 20,
+      revenue: [
+        { line: "seats", model: "per-seat", o: 42000, m: 66000, p: 91000, by: "a human",
+          drivers: [
+            { name: "reachable branches", value: 220, from: "docs/research/market.md", class: "observed" },
+            { name: "seats per branch", value: 5, from: "docs/research/interviews/branch-manager.md", class: "stated" },
+          ] },
+      ],
+      pricing: { model: "tiered", tiers: [
+        { name: "Branch", price: 40, includes: ["approvals"], fence: "" },
+        { name: "Region", price: 90, includes: ["approvals", "audit export"],
+          fence: "audit export is the line regional compliance cannot do without" },
+      ] },
+      breakEvenMonth: 17,
+      sensitivity: [
+        { assumption: "reachable branches", low: 120, mid: 220, high: 300, swings: "breakEvenMonth" },
+        { assumption: "seats per branch", low: 3, mid: 5, high: 8, swings: "breakEvenMonth" },
+        { assumption: "payment provider fees", low: 6000, mid: 9000, high: 15000, swings: "breakEvenMonth" },
+      ],
+      doNothing: "Approvals stay in email, and the audit finding that triggered this repeats at the next inspection.",
+      verdict: "build", decidedBy: "the client's finance director",
+    },
     closeout: {
       briefReadFrom: "docs/brief.md",
       metricNow: 91, metricMeasuredOn: "2027-04-02",
@@ -309,6 +338,24 @@ const M = [
   ["preconditions",    "estimate/scripts/estimate-check.mjs", [S], "estimate", (s) => { delete s.scopeFrozen; s.estimate.for = "client"; }],
   ["estimated-by-doer","estimate/scripts/estimate-check.mjs", [S], "estimate", (s) => { for (const v of Object.values(s.estimate)) if (v && v.o !== undefined) delete v.by; }],
   ["three-points",     "estimate/scripts/estimate-check.mjs", [S], "estimate", (s) => { const k = Object.keys(s.estimate).find((x) => s.estimate[x] && s.estimate[x].o !== undefined); s.estimate[k] = { o: 1, m: 1, p: 1, by: s.estimate[k].by }; }],
+  // value-check
+  ["value-declared",       "model/scripts/value-check.mjs", [S], "value", (s) => delete s.value.for],
+  ["value-attribution",    "model/scripts/value-check.mjs", [S], "value", (s) => delete s.value.revenue[0].by],
+  ["run-cost",             "model/scripts/value-check.mjs", [S], "value", (s) => delete s.value.runCost[0].basis],
+  ["run-cost",             "model/scripts/value-check.mjs", [S], "value", (s) => delete s.value.maintenancePct],
+  ["value-horizon",        "model/scripts/value-check.mjs", [S], "value", (s) => s.value.horizonMonths = 12],
+  ["value-trigger",        "model/scripts/value-check.mjs", [S], "trigger", (s) => delete s.trigger.changed],
+  ["revenue-three-points", "model/scripts/value-check.mjs", [S], "value", (s) => { const r = s.value.revenue[0]; r.o = r.m = r.p = 66000; }],
+  ["revenue-three-points", "model/scripts/value-check.mjs", [S], "value", (s) => { s.value.revenue[0].o = 120000; }],
+  /* Strip the PROVENANCE from a driver rather than deleting the driver. Deleting it also
+   * orphaned the sensitivity entry naming it, so one missing driver reported as two
+   * findings and sent the reader in two directions. An unsourced driver is the defect
+   * this check is actually written for. */
+  ["bottom-up",            "model/scripts/value-check.mjs", [S], "value", (s) => delete s.value.revenue[0].drivers[1].from],
+  ["tier-fence",           "model/scripts/value-check.mjs", [S], "value", (s) => { s.value.pricing.tiers[1].fence = ""; }],
+  ["sensitivity",          "model/scripts/value-check.mjs", [S], "value", (s) => { s.value.sensitivity[0].assumption = "the phase of the moon"; }],
+  ["do-nothing",           "model/scripts/value-check.mjs", [S], "value", (s) => delete s.value.doNothing],
+  ["value-verdict",        "model/scripts/value-check.mjs", [S, "--gate"], "value", (s) => delete s.value.verdict],
   // proposal-check
   ["slot-addressed",   "core/scripts/proposal-check.mjs", [S], "proposals", (s) => s.proposals = s.proposals.filter((p) => p.slot !== "S1")],
   ["axis-named",       "core/scripts/proposal-check.mjs", [S], "proposals", (s) => delete s.proposals.find((p) => p.presented)?.axis],

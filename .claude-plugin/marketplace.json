@@ -48,6 +48,12 @@
       "description": "pica estimate: three-point effort by role, a work order derived from the deadline, and the effort record that makes the next estimate better than this one."
     },
     {
+      "name": "pica-model",
+      "source": "./packages/model",
+      "version": "0.9.5",
+      "description": "pica model: cost to build, cost to run, plausible return, and the price fence."
+    },
+    {
       "name": "pica-content",
       "source": "./packages/content",
       "version": "0.9.5",
