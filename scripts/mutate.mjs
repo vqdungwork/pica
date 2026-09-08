@@ -356,6 +356,14 @@ const M = [
   ["sensitivity",          "model/scripts/value-check.mjs", [S], "value", (s) => { s.value.sensitivity[0].assumption = "the phase of the moon"; }],
   ["do-nothing",           "model/scripts/value-check.mjs", [S], "value", (s) => delete s.value.doNothing],
   ["value-verdict",        "model/scripts/value-check.mjs", [S, "--gate"], "value", (s) => delete s.value.verdict],
+  // concept-check  (state only: divergence happens before any screen exists)
+  ["concepts-diverged", "html/scripts/concept-check.mjs", [S], "workPackages", (s) => { s.workPackages.approvals.concepts = s.workPackages.approvals.concepts.slice(0, 1); }],
+  ["concepts-diverged", "html/scripts/concept-check.mjs", [S], "workPackages", (s) => { for (const c of s.workPackages.approvals.concepts) c.servesBadly = []; }],
+  ["concepts-diverged", "html/scripts/concept-check.mjs", [S], "workPackages", (s) => { for (const c of s.workPackages.approvals.concepts) c.dropped = false; }],
+  // roadmap, inside estimate-check
+  ["slice-releasable", "estimate/scripts/estimate-check.mjs", [S], "roadmap", (s) => { s.roadmap.slices[0].closes = []; }],
+  ["critical-path",    "estimate/scripts/estimate-check.mjs", [S], "roadmap", (s) => { s.roadmap.criticalPath = ["R1", "R9"]; }],
+  ["buffer-stated",    "estimate/scripts/estimate-check.mjs", [S], "roadmap", (s) => delete s.roadmap.bufferDays],
   // proposal-check
   ["slot-addressed",   "core/scripts/proposal-check.mjs", [S], "proposals", (s) => s.proposals = s.proposals.filter((p) => p.slot !== "S1")],
   ["axis-named",       "core/scripts/proposal-check.mjs", [S], "proposals", (s) => delete s.proposals.find((p) => p.presented)?.axis],

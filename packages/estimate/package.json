@@ -26,7 +26,8 @@
       "estimate",
       "workPackages",
       "durationWeeks",
-      "effortLog"
+      "effortLog",
+      "roadmap"
     ],
     "artifacts": []
   },
