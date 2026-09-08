@@ -38,8 +38,19 @@ if (!refPath || !statePath) {
   process.exit(2);
 }
 
-const ref = JSON.parse(fs.readFileSync(refPath, "utf8"));
-const state = JSON.parse(fs.readFileSync(statePath, "utf8"));
+let ref, state;
+try {
+  ref = JSON.parse(fs.readFileSync(refPath, "utf8"));
+  state = JSON.parse(fs.readFileSync(statePath, "utf8"));
+} catch (e) {
+  /* Guarded like contrast-check, coverage-check and spacing-check, which all read the
+   * same two inputs and all say so when they cannot. These two threw an unguarded ENOENT
+   * instead, so inside picaflow a missing capture arrived as a stack trace rather than as
+   * a named absence. A check that cannot run is not a pass, and a crash does not say
+   * which of the two it is. */
+  console.error(`FAIL  could not read or parse an input (${e.message}).`);
+  process.exit(2);
+}
 
 /* ---- shape guard --------------------------------------------------------- *
  * Feeding these scripts a state file with the right field names and the wrong types made

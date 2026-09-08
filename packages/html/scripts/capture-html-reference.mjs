@@ -57,11 +57,14 @@ async function loadChromium() {
       return (mod.chromium || mod.default?.chromium);
     } catch {}
   }
+  /* Exit 2: a missing TOOL is "could not run", not "ran and found defects". Intake 1b
+   * asks what needs a tool that is not installed precisely so this arrives as a stated
+   * limitation rather than as a failure nobody can act on. */
   console.error(
-    "playwright not found.\n" +
+    "FAIL  playwright not found, so nothing was captured and that is not a pass.\n" +
     "  Pass --playwright /path/to/node_modules/playwright, or run:\n" +
     "    npm i -D playwright && npx playwright install chrome");
-  process.exit(1);
+  process.exit(2);
 }
 const chromium = await loadChromium();
 
@@ -93,9 +96,21 @@ const LIVE = URLS.length > 0;
 
 let files = [];
 if (!LIVE) {
+  /* Guarded: a directory that does not exist threw an unguarded ENOENT, so a project
+   * with nothing built yet crashed here instead of saying so. */
+  if (!fs.existsSync(DIR)) {
+    console.error(`FAIL  ${DIR} does not exist, so there is nothing to capture and that is not a pass.`);
+    process.exit(2);
+  }
   files = fs.readdirSync(DIR)
     .filter(f => f.endsWith(".html") && !/review|index|design-system/i.test(f));
-  if (!files.length) { console.error("no html files in " + DIR); process.exit(1); }
+  /* Exit 2, not 1. Inside picaflow, 1 means "ran and found defects" and 2 means "could
+   * not run". An empty directory is the second, and reporting it as the first made a
+   * project with nothing built yet look like a project with failures. */
+  if (!files.length) {
+    console.error(`FAIL  no html files in ${DIR}. Nothing to capture, and that is not a pass.`);
+    process.exit(2);
+  }
 }
 
 const browser = await chromium.launch({ channel: "chrome" });

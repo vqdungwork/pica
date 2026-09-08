@@ -255,7 +255,12 @@ run html      code-tokens-check.mjs src tokens/tokens.json .pica/state.json
 run qa        qa-check.mjs          . .pica/state.json
 run impl      impl-check.mjs        . .pica/state.json
 run estimate  estimate-check.mjs    .pica/state.json --closeout
+run core      close-check.mjs       .pica/state.json
 ```
+
+`close-check` is the one that compares rather than trusts: it fails when `closeout.briefReadFrom`
+is anything other than `briefPath`, because a closeout that reads the contract grades the work
+against a document the work already renegotiated, and that always passes.
 
 **7.10 is not run by whoever built it.** The builder does not grade their own build: someone who knows
 why a value was chosen will find the reason it is acceptable.
