@@ -104,6 +104,8 @@ const PHASES = ["intake", "discover", "research", "value", "analyse", "design",
 /* ---- collect the checks the packages declare ---------------------------- */
 const checks = [];
 const missingPackages = [];
+const unplaced = [];
+const elsewhere = [];
 for (const entry of fs.readdirSync(PKG)) {
   const manifest = path.join(PKG, entry, "package.json");
   let dir = path.join(PKG, entry);
@@ -118,7 +120,13 @@ for (const entry of fs.readdirSync(PKG)) {
   let j;
   try { j = JSON.parse(fs.readFileSync(path.join(dir, "package.json"), "utf8")); } catch { continue; }
   for (const c of j.checks || []) {
-    if (!c.args || !c.phase) continue;
+    /* A declared check this cannot place is NAMED, never skipped in silence. Two of
+     * pica's own checks are pasted into a use_figma call and run in Figma's plugin
+     * runtime, so node cannot invoke them; three more had no args at all and this file
+     * quietly ignored them, which is the same fail-open shape that made it report three
+     * checks of twenty-seven. */
+    if (c.runsIn && c.runsIn !== "node") { elsewhere.push(`${j.name}/${c.run} runs in ${c.runsIn}`); continue; }
+    if (!c.args || !c.phase) { unplaced.push(`${j.name}/${c.run}`); continue; }
     const script = path.join(dir, "scripts", c.run);
     if (!fs.existsSync(script)) { missingPackages.push(`${j.name}/${c.run}`); continue; }
     checks.push({ pkg: j.name, run: c.run, script, args: c.args, phase: c.phase,
@@ -224,10 +232,13 @@ for (const phase of PHASES) {
   console.log("");
 }
 
-if (missingPackages.length) {
-  console.log("NOT RUN, because the package does not ship the script here:");
-  for (const m of missingPackages) console.log(`  ${m}`);
-  console.log("  A check that cannot run is not a pass, and this is the shape that absence takes.\n");
+if (missingPackages.length || unplaced.length || elsewhere.length) {
+  console.log("NOT RUN BY THIS COMMAND, and named rather than left silent:");
+  for (const m of missingPackages) console.log(`  ${m}  the package does not ship the script here`);
+  for (const m of unplaced) console.log(`  ${m}  declared with no args or phase, so nothing could place it`);
+  for (const m of elsewhere) console.log(`  ${m}`);
+  console.log("  A check that cannot run is not a pass. The ones above are not counted in either");
+  console.log("  direction, and a runner that hid them would be reporting a fraction as a whole.\n");
 }
 
 if (ADOPT && abstained.length) {

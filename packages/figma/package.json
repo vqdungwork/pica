@@ -47,16 +47,24 @@
   "checks": [
     {
       "run": "geometry-diff.mjs",
-      "passes": "0 findings above tolerance AND more than 0 text runs compared"
+      "passes": "0 findings above tolerance AND more than 0 text runs compared",
+      "args": "<ref> .audit/figma-dump.json <state>",
+      "phase": "design",
+      "needs": [
+        "@.audit/html-reference.json",
+        "@.audit/figma-dump.json"
+      ]
     },
     {
       "run": "figma-audit.js",
-      "passes": "every count returns 0"
+      "passes": "every count returns 0",
+      "runsIn": "figma"
     },
     {
       "run": "source-parity.js",
       "passes": "contamination 0, 0 missing and 0 extra strings per screen except registered deviations, and more than 0 screens compared",
-      "when": "rebuild of an existing Figma file, in place of geometry-diff.mjs"
+      "when": "rebuild of an existing Figma file, in place of geometry-diff.mjs",
+      "runsIn": "figma"
     }
   ],
   "definitionOfDone": [
