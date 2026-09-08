@@ -25,7 +25,8 @@
   },
   "produces": {
     "state": [
-      "discovery"
+      "discovery",
+      "stakeholders"
     ],
     "artifacts": [
       "docs/research/pain-points.md",

@@ -334,11 +334,15 @@ for (const [i, s] of slices.entries()) {
     fail("slice-releasable", where,
       "closes no use case. A slice that ships nothing a person can use is a task pretending to be a slice.");
   }
-  for (const uc of closes)
-    if (!ucIdsRm.has(uc)) {
-      notReleasable++;
-      fail("slice-releasable", where, `closes ${uc}, which is not a use case. It looks traced and is not.`);
-    }
+  /* Only when a use-case register exists. A roadmap can be sequenced on a project whose
+   * use cases live in a document rather than in state, and checking anyway fired on every
+   * slice. An unverifiable trace and a wrong trace must not look alike. */
+  if (ucIdsRm.size)
+    for (const uc of closes)
+      if (!ucIdsRm.has(uc)) {
+        notReleasable++;
+        fail("slice-releasable", where, `closes ${uc}, which is not a use case. It looks traced and is not.`);
+      }
   if (!said(s.moves, 10)) {
     notReleasable++;
     fail("slice-releasable", where, "names no metric it moves, so shipping it cannot be judged.");

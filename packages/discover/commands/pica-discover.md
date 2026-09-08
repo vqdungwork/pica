@@ -50,7 +50,12 @@ reachable, write `saidNoWhyNone`.
 
 ## 0.9.4 Stakeholders and their vetoes
 
-Role, `wants`, `fears`, `decides`, `vetoes`, and for every veto holder, `wouldBlockIf`.
+**Write into `state.stakeholders`, the register the analyst uses at 2.1.** Do not open a second
+list under `discovery`: `industry-check` resolves the sector's deciding roles against that
+register, and a second copy drifts from it while being the one nothing else reads.
+
+Enrich each entry with `wants`, `fears`, `decides`, `vetoes`, and for every veto holder,
+`wouldBlockIf`.
 
 ## 0.9.5 Competitors: pricing and packaging
 
@@ -67,7 +72,7 @@ trigger that makes a buyer change.
 
 ## Write to state and to disk
 
-`state.discovery`, plus `docs/research/pain-points.md`, `stakeholders.md`, `competitors.md` and
+`state.discovery` and `state.stakeholders`, plus `docs/research/pain-points.md`, `stakeholders.md`, `competitors.md` and
 `market.md`. **The state keys are what gets checked; the files are what get read.**
 
 Those files are also where `/pica-model` points its revenue drivers, so a driver's `from` should

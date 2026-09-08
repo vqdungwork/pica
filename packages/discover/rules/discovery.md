@@ -25,6 +25,10 @@ That was honest, and it was still a hole. This package is the hole closed.
 | **Buyers** | a budget and a different pain | `isBuyer` |
 | **Stakeholders** | a veto | `fears` |
 
+Stakeholders live in **`state.stakeholders`**, the register written at 2.1 and read by
+`industry-check`. Discovery enriches it rather than shadowing it: a second copy under
+`discovery` would drift, and the copy is always the one nothing else reads.
+
 Merging them is how a well-researched product gets blocked in week nine by somebody nobody
 interviewed. In B2B the buyer and the user are different people; research one and you build a
 product that either nobody chooses or nobody uses, and which of the two failed is invisible

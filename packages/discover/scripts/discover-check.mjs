@@ -68,7 +68,11 @@ if (!Object.keys(d).length) {
 const segments = Array.isArray(d.segments) ? d.segments : [];
 const pains = Array.isArray(d.painPoints) ? d.painPoints : [];
 const saidNo = Array.isArray(d.saidNo) ? d.saidNo : [];
-const holders = Array.isArray(d.stakeholders) ? d.stakeholders : [];
+/* The stakeholder register is state.stakeholders, written at 2.1 and read by
+ * industry-check, which resolves the sector's deciding roles against it. Holding a
+ * second copy under discovery would drift from it, and the copy is the one nothing
+ * else reads. This ENRICHES that register with wants, fears and wouldBlockIf. */
+const holders = Array.isArray(state.stakeholders) ? state.stakeholders : [];
 const comps = Array.isArray(d.competitors) ? d.competitors : [];
 const market = d.market || {};
 
@@ -194,10 +198,10 @@ for (const [i, s] of saidNo.entries()) {
 let holderBad = 0;
 if (!holders.length) {
   holderBad++;
-  fail("stakeholder-fears", "discovery.stakeholders", "empty. Users have pain; stakeholders have a veto, and they are not the same list.");
+  fail("stakeholder-fears", "state.stakeholders", "empty. Users have pain; stakeholders have a veto, and they are not the same list.");
 }
 for (const [i, s] of holders.entries()) {
-  const where = `discovery.stakeholders[${i}] (${s.role || "unnamed"})`;
+  const where = `stakeholders[${i}] (${s.role || "unnamed"})`;
   if (!said(s.wants, 10)) { holderBad++; fail("stakeholder-fears", where, "no `wants`."); }
   if (!said(s.fears, 10)) {
     holderBad++;

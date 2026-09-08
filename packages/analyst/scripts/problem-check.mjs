@@ -216,25 +216,30 @@ for (const [k, why] of [
  * it. It checks it was recorded and attributed, which is all a script can know and is
  * exactly what was missing: nothing in this repository read the commercial constraint.
  *
+ * Named commercialConstraint rather than constraint: the repository already carries
+ * domainConstraints and constraintsNotApplicable, and giving the fourth concept the
+ * barest of the four names is how a reader resolves the wrong one. It is also intake
+ * input 3's own wording.
+ *
  * All three fixed is the condition under which projects fail. It is not rejected here,
  * because sometimes it is the truth. It is reported, so that it cannot go unsaid. */
 const AXES = ["scope", "date", "resources"];
 let conBad = 0;
-const con = state.constraint || {};
+const con = state.commercialConstraint || {};
 const fixed = String(con.fixed || "").toLowerCase();
 if (!AXES.includes(fixed) && fixed !== "all") {
   conBad++;
-  fail("constraint-declared", "constraint.fixed",
+  fail("constraint-declared", "commercialConstraint.fixed",
     `"${con.fixed ?? "absent"}" is not one of scope, date, resources, all. One of the three is fixed by the outside world and the job is knowing which.`);
 }
 if (!said(con.by, 4)) {
   conBad++;
-  fail("constraint-declared", "constraint.by",
+  fail("constraint-declared", "commercialConstraint.by",
     "nobody named. A constraint with no name against it is a rumour, and it will be renegotiated by whoever remembers it differently.");
 }
 if (!said(con.consequence, 15)) {
   conBad++;
-  fail("constraint-declared", "constraint.consequence",
+  fail("constraint-declared", "commercialConstraint.consequence",
     "absent. A date with no consequence is not a date, and a fixed scope with no consequence is a preference.");
 }
 const allFixed = fixed === "all";

@@ -33,8 +33,20 @@ For the rest, refuse. List what is missing rather than filling gaps with assumpt
 | Environment | Fonts installed, tools live, and **what only the human can do** |
 | Figma declaration | Is Figma a deliverable, yes or no. **Ask it now because it is free; it does not bind until the contract** |
 | Field and use | The field named **narrowly**, who uses it and how often, and the conditions of use: desk, outdoors, one-handed, gloved, shared device |
+| The trigger | What changed, when, what happens if nobody acts, and when the window closes |
 
-Ask for all six in one message. Do not interrogate one at a time.
+Ask for all seven in one message. Do not interrogate one at a time.
+
+The trigger is the cheapest of the seven and the one most often absent. If nothing changed, the
+product is being built because it can be, which is the commonest root cause of a product nobody
+wanted. It is also what makes a break-even month mean anything: a figure with no window against it
+cannot be prioritised against anything else.
+
+And **write down which of scope, date and resources is actually fixed**, and who fixed it. The
+deadline is almost never something you derive: it arrives from a funding round, a trade show, a
+regulatory date or a competitor. If all three are claimed fixed, record that as the top project
+risk and get it acknowledged, because it is the precise condition under which projects fail and it
+is nearly always survivable said early and fatal said late.
 
 **Write the brief to `docs/brief.md` the moment it arrives, verbatim.** Not after the contract, not at
 the end of intake — the moment it arrives, before you have had a chance to tidy it. It is a reference,
@@ -114,6 +126,8 @@ Write `.pica/state.json`:
       "pointer": false, "breakpoints": [],     "chrome": [ ... ], "grid": null }
   ],
   "briefPath": "docs/brief.md",
+  "trigger": { "changed": "", "when": "", "ifNothing": "", "window": "" },
+  "commercialConstraint": { "fixed": "", "by": "", "consequence": "", "variable": [] },
   "field": "",
   "measured": [],
   "targets": [
@@ -172,6 +186,14 @@ aspirational. Four are filled now, two accumulate:
   single-design question and lets the target decide only what gets built. `coverage-check` fails a
   target that names a viewport the design never produced, so "we cannot build iOS, nobody drew tablet"
   is found in Phase 3 rather than in Phase 7.
+- **`trigger`** what changed in the world, when, and the window it opens. `problem-check` reads it,
+  and `value-check` reads it again for a client case. Collected at 1a because it costs one question
+  and because a business case with no trigger is a solution hunting a problem.
+- **`commercialConstraint`** which of `scope`, `date` or `resources` is fixed by the outside world,
+  **who fixed it**, and what happens if it is missed. Named at length rather than `constraint`
+  because this project already carries `domainConstraints` and `constraintsNotApplicable`, and the
+  barest of four similar names is the one a reader resolves wrongly. For nine versions the
+  commercial constraint was collected here and read by nothing.
 - **`briefPath`** — where the verbatim brief was written at 1a. Step 9 reads it and is forbidden from
   substituting the contract, so this is the one path that must survive the whole project. A rule that
   says "write it down" with nothing naming where is a preference; this is the name.
@@ -213,8 +235,8 @@ Open three artefacts that run for the life of the project, and say they exist:
 Present the contract, the exclusions, the costed options and the tiers. **Stop. Wait for approval of
 all four.** Do not begin research.
 
-**Refuse to pass this gate while `exclusionsConfirmed` is false, or while `docs/brief.md` does not
-exist.** Both are one question and one file, and both are unrecoverable later: the brief because the
+**Refuse to pass this gate while `exclusionsConfirmed` is false, while `docs/brief.md` does not
+exist, or while `commercialConstraint.fixed` names none of scope, date or resources.** Both are one question and one file, and both are unrecoverable later: the brief because the
 session that carried it will be gone, the ask because nobody remembers whether it happened.
 
 ---

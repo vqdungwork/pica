@@ -60,6 +60,38 @@ one, re-run the other.**
 
 ## One tabbed review page, always
 
+## Concepts before screens, on a complex package
+
+A complex package widens before it narrows. Two or three approaches, **different in approach and
+not in styling**, each naming the use cases it serves well and the ones it serves badly, then one
+kept and the rest dropped with a reason.
+
+Rough is correct here. Enough fidelity to judge the idea, not enough to fall in love with it: the
+cost of going straight to one polished prototype is not the drawing, it is that **the polish makes
+the first idea hard to abandon.** Nobody drops a screen that looks finished.
+
+```json
+"workPackages": { "<name>": { "tier": "complex", "concepts": [
+  { "id": "C1", "approach": "", "servesWell": ["UC-01"], "servesBadly": ["UC-02"],
+    "dropped": false, "why": "kept: ..." },
+  { "id": "C2", "approach": "", "servesWell": [], "servesBadly": ["UC-01"],
+    "dropped": true,  "why": "..." }
+] } }
+```
+
+`concept-check` reads it and requires two or more with **exactly one kept**, because diverging is
+only half of it and the convergence is the decision. It runs on the **complex tier only**: a
+standard package has a precedent in the product, and requiring divergence everywhere would make
+the rule ignorable, which is worse than not having it.
+
+**A concept with nothing in `servesBadly` has not been examined.** Every real approach is worse at
+something, and a set in which all of them are perfect is one idea described three times.
+
+Three colourways of one layout is **one** concept. The axis has to be the approach.
+
+It reads state only, deliberately: divergence happens before any screen exists, so a check that
+needed the capture could only ever report on a decision already made.
+
 Never hand over a folder of separate HTML files. Build `review.html`: a tab bar plus lazily-loaded
 iframes, one tab per work package, and add a tab as each package lands.
 

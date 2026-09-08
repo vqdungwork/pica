@@ -90,12 +90,18 @@ for (const [name, w] of complex) {
       fail("concepts-diverged", where,
         "nothing in `servesBadly`. Every real approach is worse at something, and a set in which all of them are perfect is one idea described three times.");
     }
-    for (const uc of badly)
-      if (ucIds.has(uc) === false) {
-        conceptsBad++;
-        fail("concepts-diverged", where,
-          `servesBadly names ${uc}, which is not a use case. It looks traced and is not.`);
-      }
+    /* Only when a use-case register exists. Concepts are recorded at 3.0a, and on a
+     * project where the analyst has not run yet there are no use cases to resolve
+     * against: checking anyway fired on every entry, which made the check useless in
+     * exactly the phase it belongs to. An unverifiable trace and a wrong trace must not
+     * look alike, so the absence is a NOTE rather than a finding. */
+    if (ucIds.size)
+      for (const uc of badly)
+        if (!ucIds.has(uc)) {
+          conceptsBad++;
+          fail("concepts-diverged", where,
+            `servesBadly names ${uc}, which is not a use case. It looks traced and is not.`);
+        }
 
     if (c.dropped && !said(c.why, 12)) {
       conceptsBad++;
@@ -109,6 +115,13 @@ const scope = complex.length
   ? `${complex.length} complex package(s) of ${wps.length}`
   : (wps.length ? "no complex packages, nothing to diverge" : "no work packages yet");
 console.log(`${conceptsBad ? "FAIL" : "pass"}  concepts-diverged ${String(conceptsBad).padStart(3)} finding(s)   (${scope})`);
+
+if (!ucIds.size && complex.length) {
+  console.log("");
+  console.log("NOTE  the project carries no use cases yet, so what each concept serves well or badly was");
+  console.log("      not resolved against anything. That is the normal state at 3.0a and it is not a pass");
+  console.log("      earned by tracing: run this again after the analyst has written them.");
+}
 
 if (!complex.length && wps.length) {
   console.log("");
