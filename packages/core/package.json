@@ -80,6 +80,19 @@
     {
       "type": "gate",
       "grants": "htmlApproved:<wp>"
+    },
+    {
+      "type": "check",
+      "run": "close-check.mjs",
+      "passes": "0 findings"
+    },
+    {
+      "type": "human",
+      "says": "read the original brief cold and did not substitute the contract"
+    },
+    {
+      "type": "gate",
+      "grants": "delivered"
     }
   ]
 }

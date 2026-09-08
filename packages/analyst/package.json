@@ -96,6 +96,56 @@
     {
       "type": "gate",
       "grants": "analysisApproved"
+    },
+    {
+      "type": "check",
+      "run": "problem-check.mjs",
+      "passes": "0 findings on trigger-complete"
+    },
+    {
+      "type": "human",
+      "says": "says what changed and when the window closes"
+    },
+    {
+      "type": "gate",
+      "grants": "triggerRecorded"
+    },
+    {
+      "type": "human",
+      "says": "the decider said the number out loud, and the baseline exists in a system that already runs"
+    },
+    {
+      "type": "gate",
+      "grants": "problemAgreed"
+    },
+    {
+      "type": "human",
+      "says": "names which of scope, date and resources is fixed, and who fixed it"
+    },
+    {
+      "type": "gate",
+      "grants": "constraintFixed"
+    },
+    {
+      "type": "human",
+      "says": "confirms the tiers, because the client knows which are harder than they look"
+    },
+    {
+      "type": "gate",
+      "grants": "scopeCandidate"
+    },
+    {
+      "type": "check",
+      "run": "problem-check.mjs --freeze",
+      "passes": "0 findings on freeze-attributed"
+    },
+    {
+      "type": "human",
+      "says": "the decider approved the package they clicked, and change control is agreed in writing"
+    },
+    {
+      "type": "gate",
+      "grants": "scopeFrozen"
     }
   ]
 }

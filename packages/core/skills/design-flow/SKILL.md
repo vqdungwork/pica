@@ -193,7 +193,7 @@ clean.
 
 ## The role agents
 
-Eight, and phase 5 has none: **each agent estimates its own line**, because a
+Ten, and phase 5 has no assembling agent: **each agent estimates its own line**, because a
 trade pricing work it will not do is a guess with a signature on it. Each loads its own craft rules **and reads the sector entry before it starts**,
 which is what keeps a clinician's screen and a warehouse handheld from coming out of the same template.
 

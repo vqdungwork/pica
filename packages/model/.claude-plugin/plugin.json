@@ -1,7 +1,7 @@
 {
   "name": "pica-model",
   "description": "pica model: what it costs to build, what it costs to run for two years, what it plausibly returns, and the price fence that stops every buyer picking the cheapest tier.",
-  "version": "0.9.5",
+  "version": "1.0.0",
   "author": {
     "name": "Dung Vuong"
   },

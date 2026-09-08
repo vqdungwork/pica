@@ -34,8 +34,8 @@ These eight rules hold for the whole session. They are not suggestions and they 
    decision; the flow is what the human uses, and it is where the defects nothing can measure live. One
    prototype per application, linked to each other for real.
 
-**`/picaflow <brief>` runs the whole chain**, stopping only at the three points where a person has to
-decide: the design, the scope and deadline, and the finished product. Everything it cannot derive in
+**`/picaflow <brief>` runs the whole chain**, stopping only at the four points where a person has to
+decide: whether it is worth building, the design, the scope and deadline, and the finished product. Everything it cannot derive in
 between becomes a labelled assumption the client corrects, because reacting to a built thing is far
 cheaper than specifying one.
 
@@ -49,8 +49,10 @@ Or run the steps yourself:
 | | |
 |---|---|
 | `/pica` | intake, the contract, exclusions |
+| `/pica-discover` | who uses it and what hurts, who can veto it, what the field charges |
 | `/pica-analyse` | glossary, AS-IS, TO-BE, business rules, domain model, PRD |
 | `/pica-architect` | feasibility before anything is promised, then C4 and ADRs |
+| `/pica-model` | cost to build, cost to run, plausible return, and the price fence |
 | `/pica-wp <name>` | one work package in HTML at every viewport, measured |
 | `/pica-copy` | the words, every state, bound to the glossary |
 | `/pica-evaluate` | 3 to 5 independent evaluators, walkthrough, build vs design |
