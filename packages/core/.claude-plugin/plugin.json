@@ -1,7 +1,7 @@
 {
   "name": "pica-core",
   "description": "pica core: intake, the contract, the state schema, and every approval gate.",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": {
     "name": "Dung Vuong"
   },
