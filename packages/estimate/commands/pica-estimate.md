@@ -136,3 +136,30 @@ node ${CLAUDE_PLUGIN_ROOT}/scripts/estimate-check.mjs .pica/state.json --closeou
 
 Zero findings, or fix. An estimate is the one artefact here that becomes a contractual number the moment
 it leaves the building.
+
+## The roadmap, which is sequenced scope and therefore comes last
+
+Slices, not features. Each one **releasable on its own** and each one **moving the metric from
+1.2**, or it is a task with a date on it.
+
+Per slice: what it contains, which use cases it closes, which metric it moves, its date, and what
+it depends on. Then **name the critical path**, because every roadmap has one and a roadmap that
+does not say which chain it is will slip along that chain quietly.
+
+**Slice 1 takes the fixed date. Later slices take quarters, and the document says so in words**, so
+a reader cannot mistake a placeholder for a commitment. Dates are read as promises no matter how
+they are labelled, so only date what has been estimated.
+
+**State the buffer as buffer.** Zero is a valid answer. Buffer folded into the line items is spent
+without anyone deciding to spend it, and afterwards nobody can find where it went.
+
+```json
+"roadmap": {
+  "slices": [ { "id": "R1", "contains": [], "closes": ["UC-01"], "moves": "", "date": "", "dependsOn": [] } ],
+  "criticalPath": ["R1"],
+  "capacity": [ { "role": "fe", "availablePct": 60, "alsoOn": "" } ],
+  "bufferDays": 0
+}
+```
+
+`estimate-check` reads it: `slice-releasable`, `critical-path` and `buffer-stated`.

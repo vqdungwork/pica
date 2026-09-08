@@ -1,0 +1,59 @@
+{
+  "name": "discover",
+  "status": "stable",
+  "description": "User research with provenance: segments defined by a job and a context of use, pain points carrying a frequency and an evidence class, the people who can veto it and what they fear, competitor pricing, and a market size derived from sourced factors.",
+  "owns": {
+    "commands": [
+      "pica-discover.md"
+    ],
+    "rules": [
+      "discovery.md"
+    ],
+    "agents": [
+      "pica-discoverer.md"
+    ],
+    "scripts": [
+      "discover-check.mjs"
+    ]
+  },
+  "requires": {
+    "state": [
+      "field"
+    ],
+    "artifacts": [],
+    "gates": []
+  },
+  "produces": {
+    "state": [
+      "discovery",
+      "stakeholders"
+    ],
+    "artifacts": [
+      "docs/research/pain-points.md",
+      "docs/research/stakeholders.md",
+      "docs/research/competitors.md",
+      "docs/research/market.md"
+    ]
+  },
+  "checks": [
+    {
+      "run": "discover-check.mjs",
+      "passes": "0 findings"
+    }
+  ],
+  "definitionOfDone": [
+    {
+      "type": "check",
+      "run": "discover-check.mjs",
+      "passes": "0 findings"
+    },
+    {
+      "type": "human",
+      "says": "the top three pain points carry a frequency count and a source each, and somebody who said no was interviewed"
+    },
+    {
+      "type": "gate",
+      "grants": "researchComplete"
+    }
+  ]
+}

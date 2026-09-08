@@ -93,27 +93,31 @@ thing* and it does all nine, pausing only there.
 | Step | Who | What happens | Command |
 |:--|:--|:--|:--|
 | **0 · Intake** | you | Your brief, kept word for word. What is in scope, what is out, which screen sizes it has to work on | `/pica` |
-| **1 · Research** | 3 to 5 researchers, then an architect | Real products in your field, measured rather than admired. Then someone says what **cannot** be built, while saying it is still free | `/pica-architect` |
-| **2 · Analysis** | analyst | What happens today, what changes, the rules your business runs on, and a requirements document your team can actually read | `/pica-analyse` |
-| **3 · Design** | designer, writer, 3 to 5 reviewers | Every screen, every size, every state, and the words on them. **Measured, reviewed and looked at** before it reaches you | `/pica-wp` |
-| **4 · You approve** | **you** | The business flow **and** the design. Scope and deadline settled. **Nothing further runs until they are** | none |
-| **5 · Estimate** *(optional)* | each specialist, its own line | Whoever does the work prices it. For a client, for yourself, or skipped with a reason | `/pica-estimate` |
-| **6 · Architecture** | architect | How it is put together, every technology choice recorded with its downside, every performance promise written as a number | `/pica-architect` |
-| **7 · Build** | **developer**, tester, reviewer | **The code gets written.** Then tested. Then a release pipeline. Then the finished thing is measured back against the design you approved, **never by whoever built it** | `/pica-develop` |
-| **8 · Handover** | analyst | Proved against your **original brief**, not against a plan that drifted. Then the real hours are recorded so the next estimate is better | `/pica-close` |
+| **1 · Discovery** | 3 to 5 researchers, one per group of users | Who uses it and **what actually hurts**, counted rather than assumed. Who can stop the project, and what they are afraid of. What your competitors charge | `/pica-discover` |
+| **2 · Research** | 3 to 5 researchers, then an architect | Real products in your field, measured rather than admired. Then someone says what **cannot** be built, while saying it is still free | `/pica-architect` |
+| **3 · Is it worth it** | a modeller, then **you** | What it costs to build, what it costs to **run for two years**, and what it plausibly earns. **The last point where stopping is cheap** | `/pica-model` |
+| **4 · Analysis** | analyst | What happens today, what changes, the rules your business runs on, and a requirements document your team can actually read | `/pica-analyse` |
+| **5 · Design** | designer, writer, 3 to 5 reviewers | Every screen, every size, every state, and the words on them. **Measured, reviewed and looked at** before it reaches you | `/pica-wp` |
+| **6 · You approve** | **you** | The business flow **and** the design. Scope and deadline settled. **Nothing further runs until they are** | none |
+| **7 · Estimate** *(optional)* | each specialist, its own line | Whoever does the work prices it. For a client, for yourself, or skipped with a reason | `/pica-estimate` |
+| **8 · Architecture** | architect | How it is put together, every technology choice recorded with its downside, every performance promise written as a number | `/pica-architect` |
+| **9 · Build** | **developer**, tester, reviewer | **The code gets written.** Then tested. Then a release pipeline. Then the finished thing is measured back against the design you approved, **never by whoever built it** | `/pica-develop` |
+| **10 · Handover** | analyst | Proved against your **original brief**, not against a plan that drifted. Then the real hours are recorded so the next estimate is better | `/pica-close` |
 
 Figma is optional and sits beside step 7, never in front of it. Where Figma and the design disagree,
 Figma is wrong.
 
 ## Who does the work
 
-Eight specialists. Each has a trade of its own, each reads up on your industry before it starts work,
+Ten specialists. Each has a trade of its own, each reads up on your industry before it starts work,
 and **each prices its own work** when you ask for an estimate.
 
 | Specialist | Does | Reads about your industry first |
 |:--|:--|:--|
+| **discoverer** | interviews one group of users and counts what hurts, finds who can stop the project | which people your field always has, and what each of them is afraid of |
 | **researcher** | measures real products in your field, nine things about each | which products are worth copying here, and which will mislead you |
 | **analyst** | what happens today, what changes, the rules, the requirements document | who can say no, and what your field requires whatever your brief says |
+| **modeller** | what it costs to build, what it costs to run for two years, what it earns | what your field charges, and how it packages what it sells |
 | **architect** | what can and cannot be built, how it fits together, every promise as a number | the obligations your field carries that nobody thought to mention |
 | **designer** | every screen, every state, every size | which colours already mean something, how dense, what the field's products look like |
 | **writer** | the words on every screen, including the ones nobody writes | how your field speaks, and the phrasings it treats as a mistake |

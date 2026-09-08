@@ -70,6 +70,8 @@ const TRADE = {
   "pica-architect": /^(arch|architecture|architect)$/i,
   "pica-developer": /^(fe|be|frontend|backend|dev|development|mobile|api)$/i,
   "pica-tester":    /^(qa|test|testing)$/i,
+  "pica-modeller":  /^(value|pricing|business-case)$/i,
+  "pica-discoverer":/^(discovery|research-users|interviews)$/i,
 };
 /* ---- void detection ------------------------------------------------------ *
  * A field that has been EMPTIED reads exactly like a field that was answered. An early
@@ -308,6 +310,72 @@ if (roles.length) {
   console.log("");
 }
 
+/* ---- the roadmap --------------------------------------------------------- *
+ * A roadmap is sequenced scope, so it cannot exist before the scope is frozen and it
+ * cannot carry a date before the work is estimated. That is why it lives here and not in
+ * intake, where every version of this document put it first and produced a list of dates
+ * attached to work nobody had sized: a wish list with a calendar on it, read by everyone
+ * as a commitment.
+ *
+ * The three checks are the three ways it goes wrong: a slice that cannot ship, a critical
+ * path naming work that does not exist, and buffer hidden inside the line items so it
+ * gets spent without anyone deciding to spend it. */
+const rm = state.roadmap || {};
+const slices = Array.isArray(rm.slices) ? rm.slices : [];
+const sliceIds = new Set(slices.map((s) => s.id));
+const ucIdsRm = new Set((state.useCases || []).map((u) => u.id));
+
+let notReleasable = 0;
+for (const [i, s] of slices.entries()) {
+  const where = `roadmap.slices[${i}] (${s.id || "unnamed"})`;
+  const closes = Array.isArray(s.closes) ? s.closes : [];
+  if (!closes.length) {
+    notReleasable++;
+    fail("slice-releasable", where,
+      "closes no use case. A slice that ships nothing a person can use is a task pretending to be a slice.");
+  }
+  /* Only when a use-case register exists. A roadmap can be sequenced on a project whose
+   * use cases live in a document rather than in state, and checking anyway fired on every
+   * slice. An unverifiable trace and a wrong trace must not look alike. */
+  if (ucIdsRm.size)
+    for (const uc of closes)
+      if (!ucIdsRm.has(uc)) {
+        notReleasable++;
+        fail("slice-releasable", where, `closes ${uc}, which is not a use case. It looks traced and is not.`);
+      }
+  if (!said(s.moves, 10)) {
+    notReleasable++;
+    fail("slice-releasable", where, "names no metric it moves, so shipping it cannot be judged.");
+  }
+  for (const d of Array.isArray(s.dependsOn) ? s.dependsOn : [])
+    if (!sliceIds.has(d)) {
+      notReleasable++;
+      fail("slice-releasable", where, `depends on ${d}, which is not a slice in this roadmap.`);
+    }
+}
+
+let pathBad = 0;
+if (slices.length) {
+  const cp = Array.isArray(rm.criticalPath) ? rm.criticalPath : [];
+  if (!cp.length) {
+    pathBad++;
+    fail("critical-path", "roadmap.criticalPath",
+      "not named. Every roadmap has one, and a roadmap that does not say which chain it is will slip along that chain quietly.");
+  }
+  for (const id of cp)
+    if (!sliceIds.has(id)) {
+      pathBad++;
+      fail("critical-path", "roadmap.criticalPath", `names ${id}, which is not a slice in this roadmap.`);
+    }
+}
+
+let bufferBad = 0;
+if (slices.length && !Number.isFinite(Number(rm.bufferDays))) {
+  bufferBad++;
+  fail("buffer-stated", "roadmap.bufferDays",
+    "not stated. Buffer folded into the line items is spent without anyone deciding to spend it, and zero is a valid answer that means something.");
+}
+
 const table = [
   ["preconditions", pre, SELF ? "for yourself, so nothing has to be frozen" : (scopeFrozen ? "scope frozen" : "scope NOT frozen")],
   ["three-points", malformed, `${roles.length} roles`],
@@ -317,6 +385,9 @@ const table = [
   ["risk-reflected", riskFlat, `${risks.length} risks recorded`],
   ["headcount", unresolved, SELF ? "not derived: there is no team" : (weeks ? `${weeks} weeks at ${hoursPerWeek}h` : "no duration")],
   ["effort-log", unexplained, CLOSEOUT ? `${(state.effortLog || []).length} entries` : "not checked, run with --closeout"],
+  ["slice-releasable", notReleasable, slices.length ? `${slices.length} slices` : "no roadmap yet, not checked"],
+  ["critical-path", pathBad, slices.length ? `${(rm.criticalPath || []).length} on the path` : "not checked"],
+  ["buffer-stated", bufferBad, Number.isFinite(Number(rm.bufferDays)) ? `${rm.bufferDays} days` : "unstated"],
 ];
 for (const [name, n, scope] of table)
   console.log(`${n ? "FAIL" : "pass"}  ${name.padEnd(15)} ${String(n).padStart(3)} finding(s)   (${scope})`);

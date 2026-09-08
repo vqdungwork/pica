@@ -26,7 +26,8 @@
       "estimate",
       "workPackages",
       "durationWeeks",
-      "effortLog"
+      "effortLog",
+      "roadmap"
     ],
     "artifacts": []
   },
@@ -49,6 +50,19 @@
     {
       "type": "gate",
       "grants": "estimateSent"
+    },
+    {
+      "type": "check",
+      "run": "estimate-check.mjs",
+      "passes": "0 findings on slice-releasable, critical-path and buffer-stated"
+    },
+    {
+      "type": "human",
+      "says": "slice 1 carries the fixed date and later slices carry quarters, said in words"
+    },
+    {
+      "type": "gate",
+      "grants": "roadmapAgreed"
     }
   ]
 }

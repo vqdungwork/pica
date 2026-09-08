@@ -20,7 +20,8 @@
       "parity-check.mjs",
       "shell-check.mjs",
       "spacing-check.mjs",
-      "verify-html.mjs"
+      "verify-html.mjs",
+      "concept-check.mjs"
     ],
     "agents": [
       "pica-designer.md"
@@ -71,6 +72,10 @@
     {
       "run": "shell-check.mjs",
       "passes": "the shell says what it does not do, the interactive flow leads and is the default, all three zoom controls exist with fit-screen uncapped, no tab navigates away, the groups are in order, and the frame inset is on the spacing scale"
+    },
+    {
+      "run": "concept-check.mjs",
+      "passes": "0 findings"
     }
   ],
   "definitionOfDone": [
@@ -100,6 +105,19 @@
     {
       "type": "human",
       "says": "the client approved this package's HTML; core records htmlApproved:<wp>. This package requests that gate and does not grant it"
+    },
+    {
+      "type": "check",
+      "run": "concept-check.mjs",
+      "passes": "0 findings"
+    },
+    {
+      "type": "human",
+      "says": "two or more concepts were compared on every complex package, and each named what it serves badly"
+    },
+    {
+      "type": "gate",
+      "grants": "conceptsDiverged"
     }
   ]
 }
