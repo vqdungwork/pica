@@ -51,17 +51,38 @@ const JSON_OUT = flag("--json");
  * segments: the same reason pica-status does it this way. State belongs to the project,
  * packages belong to pica, and on a real project those are different trees. */
 const here = path.dirname(fileURLToPath(import.meta.url));
+
+/* Two layouts, and only one of them is the one users have.
+ *
+ * In the repository a package is packages/core, so the siblings are packages/.
+ * Installed, a package is pica-core/<version>, so the siblings are one level ABOVE the
+ * versioned parent. An earlier version of this walk stopped at the versioned parent and
+ * found three checks instead of twenty-seven: it read only core's own manifest and
+ * reported a clean run over a project it had barely looked at, which is the worst
+ * possible failure for this file. */
+let pkgRoot = null;
+for (let d = here, i = 0; i < 4; i++, d = path.dirname(d))
+  if (fs.existsSync(path.join(d, "package.json"))) { pkgRoot = d; break; }
 let PKG = null;
-for (let d = here, i = 0; i < 6; i++, d = path.dirname(d)) {
-  const c = path.join(d, "packages");
-  if (fs.existsSync(path.join(c, "core", "package.json"))) { PKG = c; break; }
-  if (path.basename(d) === "scripts" && fs.existsSync(path.join(path.dirname(d), "package.json"))) {
-    /* Installed layout: each package is its own tree, so the siblings are one level up
-     * from the package directory rather than inside a packages/ folder. */
-    const sib = path.dirname(path.dirname(d));
-    if (fs.existsSync(sib)) { PKG = sib; }
-  }
+if (pkgRoot) {
+  const parent = path.dirname(pkgRoot);
+  PKG = path.basename(parent) === "packages" ? parent : path.dirname(parent);
 }
+/* Whichever layout it is, it has to contain more than one pica package, or the walk
+ * landed somewhere that merely looks right. */
+const looksRight = (root) => {
+  if (!root || !fs.existsSync(root)) return false;
+  let n = 0;
+  for (const e of fs.readdirSync(root)) {
+    const dir = path.join(root, e);
+    if (!fs.statSync(dir).isDirectory()) continue;
+    if (fs.existsSync(path.join(dir, "package.json"))) { n++; continue; }
+    if (fs.readdirSync(dir).some((v) => fs.existsSync(path.join(dir, v, "package.json")))) n++;
+  }
+  return n >= 2;
+};
+if (!looksRight(PKG)) PKG = null;
+
 if (!PKG) {
   console.error("FAIL  could not locate pica's packages from " + here + ".");
   console.error("      Nothing was verified, and that is not a pass.");

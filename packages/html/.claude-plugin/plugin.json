@@ -1,7 +1,7 @@
 {
   "name": "pica-html",
   "description": "pica html: build each work package at every declared viewport and measure it before approval.",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "author": {
     "name": "Dung Vuong"
   },
