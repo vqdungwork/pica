@@ -361,6 +361,17 @@ const M = [
   ["axis-named",       "core/scripts/proposal-check.mjs", [S], "proposals", (s) => delete s.proposals.find((p) => p.presented)?.axis],
   ["provenance",       "core/scripts/proposal-check.mjs", [S], "proposals", (s) => delete s.proposals.find((p) => p.presented)?.options[0].from],
   ["choice-recorded",  "core/scripts/proposal-check.mjs", [S], "proposals", (s) => delete s.proposals.find((p) => p.presented)?.by],
+  // close-check
+  ["brief-cold",         "core/scripts/close-check.mjs", [S], "closeout", (s) => s.closeout.briefReadFrom = "docs/contract.md"],
+  ["nothing-excluded",   "core/scripts/close-check.mjs", [S], "closeout", (s) => s.closeout.shipped.push("Card issuing")],
+  ["metric-compared",    "core/scripts/close-check.mjs", [S], "closeout", (s) => delete s.closeout.metricNow],
+  ["committed-shipped",  "core/scripts/close-check.mjs", [S], "closeout", (s) => { s.closeout.shipped = []; }],
+  ["assumption-outcome", "core/scripts/close-check.mjs", [S], "assumptions", (s) => delete s.assumptions[0].outcome],
+  /* Wrong WITHOUT a cost, not merely wrong. What it cost is the whole value of having
+   * written the assumption down, and it is the first thing dropped in a hurried closeout. */
+  ["assumption-outcome", "core/scripts/close-check.mjs", [S], "assumptions", (s) => { s.assumptions[0].outcome = "wrong"; }],
+  ["effort-logged",      "core/scripts/close-check.mjs", [S], "effortLog", (s) => { s.effortLog = s.effortLog.slice(1); }],
+  ["delivered-frozen",   "core/scripts/close-check.mjs", [S], "closeout", (s) => { s.delivered = true; s.workPackages.approvals.htmlApproved = false; }],
   // dev-check
   ["api-contract",     "developer/scripts/dev-check.mjs", ["src", S], "apiContract", (s) => delete s.apiContract[0].errors],
   ["state-strategy",   "developer/scripts/dev-check.mjs", ["src", S], "stateStrategy", (s) => delete s.stateStrategy.url],

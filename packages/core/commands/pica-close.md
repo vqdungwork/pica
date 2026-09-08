@@ -27,6 +27,21 @@ Read `docs/exclusions.md` again too, and **check nothing excluded was built** â€
 recalling. Copy `exclusions` from `.pica/state.json` into the audit's `EXCLUSIONS` config and let it match
 frame names for you. Prose is what the client reads; the register is what gets checked.
 
+```bash
+node ${CLAUDE_PLUGIN_ROOT}/scripts/close-check.mjs .pica/state.json
+```
+
+**This is the thing that compares.** From 0.3.0 to 0.9.5 this command asked for the comparison and
+shipped nothing that performed it, so the exclusions register was checked by whoever remembered to.
+Seven checks now do it: which file the brief was read from, the exclusions against what shipped, the
+metric against its baseline, every committed package shipped or dropped with a reason, every
+assumption resolved as held or wrong, the effort logged per estimated line, and nothing modified
+after delivery.
+
+The first is the one that matters most. `brief-cold` fails when `closeout.briefReadFrom` is anything
+other than `briefPath`, because a closeout that reads the contract is grading the work against a
+document the work already renegotiated, and that always passes.
+
 If a match comes back, it is one of two things and you have to say which: the brief was misread, or the
 scope genuinely changed and nobody updated the exclusions. The second is fine. The first is a finding.
 

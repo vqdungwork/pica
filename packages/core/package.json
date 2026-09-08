@@ -16,7 +16,8 @@
     ],
     "scripts": [
       "pica-status.mjs",
-      "proposal-check.mjs"
+      "proposal-check.mjs",
+      "close-check.mjs"
     ],
     "hooks": [
       "dispatcher.md",
@@ -53,6 +54,10 @@
     {
       "run": "proposal-check.mjs",
       "passes": "every universal slot is presented or skipped with a reason, every option names its provenance, and every choice records who, when and their own words"
+    },
+    {
+      "run": "close-check.mjs",
+      "passes": "0 findings"
     }
   ],
   "definitionOfDone": [
