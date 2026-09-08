@@ -14,7 +14,8 @@
     "scripts": [
       "domain-check.mjs",
       "industry-check.mjs",
-      "trace-check.mjs"
+      "trace-check.mjs",
+      "problem-check.mjs"
     ],
     "agents": [
       "pica-analyst.md"
@@ -41,7 +42,10 @@
       "toBe",
       "delta",
       "stakeholders",
-      "exclusionsConfirmed"
+      "exclusionsConfirmed",
+      "problem",
+      "trigger",
+      "constraint"
     ],
     "artifacts": [
       "docs/contract.md"
@@ -58,6 +62,10 @@
     },
     {
       "run": "industry-check.mjs",
+      "passes": "0 findings"
+    },
+    {
+      "run": "problem-check.mjs",
       "passes": "0 findings"
     }
   ],

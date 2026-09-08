@@ -282,6 +282,21 @@ const M = [
   // domain-check
   ["all-categories",   "analyst/scripts/domain-check.mjs", [S], "domainConstraints", (s) => s.domainConstraints = (s.domainConstraints || []).slice(1)],
   ["sourced",          "analyst/scripts/domain-check.mjs", [S], "domainConstraints", (s) => s.domainConstraints[0].source = "n/a"],
+  // problem-check
+  /* Two mutations on `metric`, deliberately: absent and VOID are different defects, and
+   * the second is the one that defeated an earlier revision of industry-check end to end
+   * by writing "n/a" into every field it required. */
+  ["metric",              "analyst/scripts/problem-check.mjs", [S], "problem", (s) => delete s.problem.metric],
+  ["metric",              "analyst/scripts/problem-check.mjs", [S], "problem", (s) => s.problem.metric = "n/a"],
+  ["target",              "analyst/scripts/problem-check.mjs", [S], "problem", (s) => s.problem.target = s.problem.baseline],
+  ["baseline",            "analyst/scripts/problem-check.mjs", [S], "problem", (s) => delete s.problem.baselineMeasuredBy],
+  ["guardrail",           "analyst/scripts/problem-check.mjs", [S], "problem", (s) => s.problem.guardrails = []],
+  ["counter-evidence",    "analyst/scripts/problem-check.mjs", [S], "problem", (s) => s.problem.counterEvidence = "n/a"],
+  ["hmw-generative",      "analyst/scripts/problem-check.mjs", [S], "problem", (s) => s.problem.hmw = "How might we build an approvals dashboard?"],
+  ["trigger-complete",    "analyst/scripts/problem-check.mjs", [S], "trigger", (s) => delete s.trigger.window],
+  ["constraint-declared", "analyst/scripts/problem-check.mjs", [S], "constraint", (s) => delete s.constraint.by],
+  ["tier-declared",       "analyst/scripts/problem-check.mjs", [S], "workPackages", (s) => delete s.workPackages.approvals.tier],
+  ["freeze-attributed",   "analyst/scripts/problem-check.mjs", [S, "--freeze"], "workPackages", (s) => delete s.frozenBy],
   // schema-check
   ["sample-size",      "research/scripts/schema-check.mjs", [S], "measured", (s) => s.measured = s.measured.slice(0, 2)],
   ["provenance",       "research/scripts/schema-check.mjs", [S], "measured", (s) => delete s.measured[0].method],

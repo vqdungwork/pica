@@ -44,6 +44,21 @@ Two lists: what the brief states, and what it leaves open. The second list is th
 What problem, for whom, why now, and **what number would move if this worked**. That number is read
 again at 8.5, so it has to be something the client can actually measure.
 
+Write it to `state.problem` as fields rather than prose, because `problem-check` reads them and
+prose is not readable: `metric`, `unit`, `baseline`, `baselineMeasuredBy`, `baselineMeasuredOn`,
+`target`, `direction`, one or more `guardrails` with a threshold each, and `counterEvidence`.
+
+**Take the baseline now.** It is the one figure that cannot be recovered later: after launch there
+is no way back to what the number was before, and a project without one argues about whether it
+worked using the same data either way.
+
+Then write the **question**, to `state.problem.hmw`. It is a different object from the number and
+both are needed: the metric is what 8.5 judges, the question is what 3.1 diverges against. Phrase
+it as an outcome, never as a thing to build. "How might we make who approved what recoverable after
+the fact?" opens a solution space. "How might we build an approvals dashboard?" has already
+answered itself, and three concepts run against it come back as three versions of one idea.
+`problem-check` rejects a question naming a screen, an app, a report or a dashboard.
+
 ## 1.3 Narrow the field
 
 A name with real products behind it. "Retail banking dashboard", not "fintech". The Researcher cannot
@@ -214,6 +229,7 @@ two are the blast radius: without them, correcting one assumption rebuilds every
 ## Verify before handing back
 
 ```bash
+node ${CLAUDE_PLUGIN_ROOT}/scripts/problem-check.mjs .pica/state.json
 node ${CLAUDE_PLUGIN_ROOT}/scripts/trace-check.mjs  .pica/state.json
 node ${CLAUDE_PLUGIN_ROOT}/scripts/domain-check.mjs   .pica/state.json
 node ${CLAUDE_PLUGIN_ROOT}/scripts/industry-check.mjs .pica/state.json
