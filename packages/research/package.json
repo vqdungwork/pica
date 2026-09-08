@@ -31,7 +31,17 @@
       "tokens/tokens.css"
     ]
   },
-  "checks": [],
+  "checks": [
+    {
+      "run": "schema-check.mjs",
+      "passes": "0 findings",
+      "args": "<state>",
+      "phase": "research",
+      "needs": [
+        "measured"
+      ]
+    }
+  ],
   "definitionOfDone": [
     {
       "type": "artifact",

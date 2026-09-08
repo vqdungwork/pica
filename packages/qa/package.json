@@ -37,7 +37,12 @@
   "checks": [
     {
       "run": "qa-check.mjs",
-      "passes": "0 findings"
+      "passes": "0 findings",
+      "args": "<repo> <state>",
+      "phase": "build",
+      "needs": [
+        "@tests|@test|@e2e"
+      ]
     }
   ],
   "definitionOfDone": [

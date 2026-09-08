@@ -54,19 +54,40 @@
   "checks": [
     {
       "run": "trace-check.mjs",
-      "passes": "0 findings"
+      "passes": "0 findings",
+      "args": "<state>",
+      "phase": "analyse",
+      "needs": [
+        "useCases",
+        "businessRules"
+      ]
     },
     {
       "run": "domain-check.mjs",
-      "passes": "0 findings"
+      "passes": "0 findings",
+      "args": "<state>",
+      "phase": "analyse",
+      "needs": [
+        "domainConstraints"
+      ]
     },
     {
       "run": "industry-check.mjs",
-      "passes": "0 findings"
+      "passes": "0 findings",
+      "args": "<state>",
+      "phase": "analyse",
+      "needs": [
+        "field"
+      ]
     },
     {
       "run": "problem-check.mjs",
-      "passes": "0 findings"
+      "passes": "0 findings",
+      "args": "<state>",
+      "phase": "analyse",
+      "needs": [
+        "problem|trigger|commercialConstraint"
+      ]
     }
   ],
   "definitionOfDone": [

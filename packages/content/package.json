@@ -34,7 +34,12 @@
   "checks": [
     {
       "run": "copy-check.mjs",
-      "passes": "0 findings"
+      "passes": "0 findings",
+      "args": "<ref> <state>",
+      "phase": "design",
+      "needs": [
+        "@.audit/html-reference.json"
+      ]
     }
   ],
   "definitionOfDone": [

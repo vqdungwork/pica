@@ -33,7 +33,12 @@
   "checks": [
     {
       "run": "impl-check.mjs",
-      "passes": "0 findings"
+      "passes": "0 findings",
+      "args": "<repo> <state>",
+      "phase": "build",
+      "needs": [
+        "@.git"
+      ]
     }
   ],
   "definitionOfDone": [

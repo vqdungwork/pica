@@ -6,6 +6,7 @@
     "commands": [
       "pica-close.md",
       "pica-feedback.md",
+      "pica-verify.md",
       "pica.md",
       "picaflow.md"
     ],
@@ -15,9 +16,10 @@
       "review-discipline.md"
     ],
     "scripts": [
+      "close-check.mjs",
       "pica-status.mjs",
-      "proposal-check.mjs",
-      "close-check.mjs"
+      "pica-verify.mjs",
+      "proposal-check.mjs"
     ],
     "hooks": [
       "dispatcher.md",
@@ -53,11 +55,30 @@
   "checks": [
     {
       "run": "proposal-check.mjs",
-      "passes": "every universal slot is presented or skipped with a reason, every option names its provenance, and every choice records who, when and their own words"
+      "passes": "every universal slot is presented or skipped with a reason, every option names its provenance, and every choice records who, when and their own words",
+      "args": "<state> --phase design",
+      "phase": "design",
+      "needs": [
+        "proposals"
+      ]
     },
     {
       "run": "close-check.mjs",
-      "passes": "0 findings"
+      "passes": "0 findings",
+      "args": "<state>",
+      "phase": "close",
+      "needs": [
+        "closeout"
+      ]
+    },
+    {
+      "run": "proposal-check.mjs",
+      "passes": "S6 and S7 presented, priced per use case and stated in consequences",
+      "args": "<state> --phase scope",
+      "phase": "scope",
+      "needs": [
+        "proposals"
+      ]
     }
   ],
   "definitionOfDone": [

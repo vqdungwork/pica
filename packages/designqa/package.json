@@ -34,7 +34,13 @@
   "checks": [
     {
       "run": "build-diff.mjs",
-      "passes": "0 findings, at 7.10 only"
+      "passes": "0 findings, at 7.10 only",
+      "args": "<ref> <state>",
+      "phase": "build",
+      "needs": [
+        "@.audit/html-reference.json",
+        "@.audit/build-reference.json"
+      ]
     }
   ],
   "definitionOfDone": [

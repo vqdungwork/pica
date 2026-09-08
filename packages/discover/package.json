@@ -38,7 +38,12 @@
   "checks": [
     {
       "run": "discover-check.mjs",
-      "passes": "0 findings"
+      "passes": "0 findings",
+      "args": "<state>",
+      "phase": "discover",
+      "needs": [
+        "discovery"
+      ]
     }
   ],
   "definitionOfDone": [

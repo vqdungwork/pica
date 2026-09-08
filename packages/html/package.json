@@ -51,31 +51,88 @@
   "checks": [
     {
       "run": "verify-html.mjs",
-      "passes": "0 findings across viewport-tagged, overflow, tall-screen-pair, viewport-coverage"
+      "passes": "0 findings across viewport-tagged, overflow, tall-screen-pair, viewport-coverage",
+      "args": "<ref> <state>",
+      "phase": "design",
+      "needs": [
+        "@.audit/html-reference.json",
+        "viewports"
+      ]
     },
     {
       "run": "parity-check.mjs",
-      "passes": "0 findings, nominal and structural"
-    },
-    {
-      "run": "flow-check.mjs",
-      "passes": "0 findings, or --allow-none for a boards-only package"
+      "passes": "0 findings, nominal and structural",
+      "args": "<ref> <state>",
+      "phase": "design",
+      "needs": [
+        "@.audit/html-reference.json"
+      ]
     },
     {
       "run": "contrast-check.mjs",
-      "passes": "0 findings"
+      "passes": "0 findings",
+      "args": "<ref> <state>",
+      "phase": "design",
+      "needs": [
+        "@.audit/html-reference.json"
+      ]
     },
     {
       "run": "spacing-check.mjs",
-      "passes": "content does not touch the frame edge, every screen at one viewport sits the same distance from it, and every gap between stacked siblings is on the declared spacing scale"
+      "passes": "content does not touch the frame edge, every screen at one viewport sits the same distance from it, and every gap between stacked siblings is on the declared spacing scale",
+      "args": "<ref> <state>",
+      "phase": "design",
+      "needs": [
+        "@.audit/html-reference.json"
+      ]
+    },
+    {
+      "run": "coverage-check.mjs",
+      "passes": "0 findings",
+      "args": "<ref> <state>",
+      "phase": "design",
+      "needs": [
+        "@.audit/html-reference.json",
+        "useCases"
+      ]
+    },
+    {
+      "run": "flow-check.mjs",
+      "passes": "0 findings, or --allow-none for a boards-only package",
+      "args": "--dir html --state <state>",
+      "phase": "design",
+      "needs": [
+        "@html",
+        "flows"
+      ]
     },
     {
       "run": "shell-check.mjs",
-      "passes": "the shell says what it does not do, the interactive flow leads and is the default, all three zoom controls exist with fit-screen uncapped, no tab navigates away, the groups are in order, and the frame inset is on the spacing scale"
+      "passes": "the shell says what it does not do, the interactive flow leads and is the default, all three zoom controls exist with fit-screen uncapped, no tab navigates away, the groups are in order, and the frame inset is on the spacing scale",
+      "args": "<review> <state>",
+      "phase": "design",
+      "needs": [
+        "@html/review.html"
+      ]
     },
     {
       "run": "concept-check.mjs",
-      "passes": "0 findings"
+      "passes": "0 findings",
+      "args": "<state>",
+      "phase": "design",
+      "needs": [
+        "workPackages"
+      ]
+    },
+    {
+      "run": "code-tokens-check.mjs",
+      "passes": "0 findings",
+      "args": "<src> <tokens> <state>",
+      "phase": "build",
+      "needs": [
+        "@src",
+        "@tokens/tokens.json"
+      ]
     }
   ],
   "definitionOfDone": [

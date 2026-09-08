@@ -171,25 +171,17 @@ run() { pkg="$1"; sc="$2"; shift 2
     echo "SKIPPED $sc: pica-$pkg is not installed. NOT a pass."
   fi; }
 
+# The capture first: it is produced, not checked, and eight checks abstain until it exists.
 run html      capture-html-reference.mjs --dir html --out .audit
-run html      verify-html.mjs      .audit/html-reference.json .pica/state.json
-run html      contrast-check.mjs   .audit/html-reference.json .pica/state.json
-run html      spacing-check.mjs    .audit/html-reference.json .pica/state.json
-run html      coverage-check.mjs   .audit/html-reference.json .pica/state.json
-run html      parity-check.mjs     .audit/html-reference.json .pica/state.json
-run html      flow-check.mjs       --dir html --state .pica/state.json
-run html      shell-check.mjs      html/review.html .pica/state.json
-run content   copy-check.mjs       .audit/html-reference.json .pica/state.json
-run analyst   trace-check.mjs      .pica/state.json
-run analyst   domain-check.mjs     .pica/state.json
-run analyst   industry-check.mjs   .pica/state.json
-run research  schema-check.mjs     .pica/state.json
-run architect arch-check.mjs       .pica/state.json --feasibility
-run discover  discover-check.mjs   .pica/state.json
-run analyst   problem-check.mjs    .pica/state.json
-run model     value-check.mjs      .pica/state.json --gate
-run html      concept-check.mjs    .pica/state.json
-run core      proposal-check.mjs   .pica/state.json --phase design
+
+# Then everything applicable, in one table, phase by phase. pica-verify reads what to run
+# from each package's own manifest rather than from a list kept here, which is why this
+# block no longer has to name twenty-eight invocations and drift from them.
+run core      pica-verify.mjs      .pica/state.json --phase discover
+run core      pica-verify.mjs      .pica/state.json --phase research
+run core      pica-verify.mjs      .pica/state.json --phase value
+run core      pica-verify.mjs      .pica/state.json --phase analyse
+run core      pica-verify.mjs      .pica/state.json --phase design --evidence
 ```
 
 All zero, or fix and re-run. **A failing check is not an assumption**: it is a defect, and continuing
@@ -224,9 +216,9 @@ past it produces a demo that breaks in front of the client.
 | **6.1–6.4** | `pica-architect`: C4, ADRs, NFRs as numbers, **the API contract with its errors** | `state.nfr`, `state.adr`, `state.apiContract` |
 
 ```bash
-run estimate  estimate-check.mjs   .pica/state.json
-run architect arch-check.mjs       .pica/state.json
-run core      proposal-check.mjs   .pica/state.json --phase scope
+run core      pica-verify.mjs      .pica/state.json --phase scope
+run core      pica-verify.mjs      .pica/state.json --phase estimate
+run core      pica-verify.mjs      .pica/state.json --phase architect
 ```
 
 > ### ⏸ CONFIRM 3 - scope, deadline and the estimate
@@ -250,12 +242,12 @@ run core      proposal-check.mjs   .pica/state.json --phase scope
 | **8.1–8.5** | Prove against the **original brief**, hand over, freeze, log the real hours | `state.effortLog` |
 
 ```bash
-run developer dev-check.mjs         src .pica/state.json
-run html      code-tokens-check.mjs src tokens/tokens.json .pica/state.json
-run qa        qa-check.mjs          . .pica/state.json
-run impl      impl-check.mjs        . .pica/state.json
-run estimate  estimate-check.mjs    .pica/state.json --closeout
-run core      close-check.mjs       .pica/state.json
+run core      pica-verify.mjs      .pica/state.json --phase build --evidence
+run core      pica-verify.mjs      .pica/state.json --phase close
+
+# One run at the end over everything, so the closing report can state a number rather
+# than a feeling: how many assertions were verified, and how many checks abstained.
+run core      pica-verify.mjs      .pica/state.json --adopt --evidence
 ```
 
 `close-check` is the one that compares rather than trusts: it fails when `closeout.briefReadFrom`
@@ -284,7 +276,10 @@ So the closing report says, in this order:
 2. **The low-confidence assumptions**, most consequential first
 3. **What was not supplied** at 0.4, and what that cost
 4. **Every check that did not run**, and why
-5. **Explicitly: no human has looked at this yet.** Do not report the package complete
+5. **The verification total from `pica-verify --adopt --evidence`**: assertions verified,
+   checks abstained, and what each abstention needs. A count is what a client can check;
+   "everything passed" is not.
+6. **Explicitly: no human has looked at this yet.** Do not report the package complete
 
 ---
 

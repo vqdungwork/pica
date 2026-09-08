@@ -102,10 +102,25 @@ thing* and it does all nine, pausing only there.
 | **7 · Estimate** *(optional)* | each specialist, its own line | Whoever does the work prices it. For a client, for yourself, or skipped with a reason | `/pica-estimate` |
 | **8 · Architecture** | architect | How it is put together, every technology choice recorded with its downside, every performance promise written as a number | `/pica-architect` |
 | **9 · Build** | **developer**, tester, reviewer | **The code gets written.** Then tested. Then a release pipeline. Then the finished thing is measured back against the design you approved, **never by whoever built it** | `/pica-develop` |
+| **any time** | you | **One command, one table.** Every check that applies to where you are, what passed, what failed, and what abstained with the reason. `--evidence` lists every assertion, which is what a review quotes | `/pica-verify` |
 | **10 · Handover** | analyst | Proved against your **original brief**, not against a plan that drifted. Then the real hours are recorded so the next estimate is better | `/pica-close` |
 
 Figma is optional and sits beside step 7, never in front of it. Where Figma and the design disagree,
 Figma is wrong.
+
+## Something to read first
+
+`examples/approvals/` is a complete pica project: a payment-approval surface for a retail bank,
+small on purpose and complete on purpose. **Every check either passes on it or says why it
+abstains.**
+
+```bash
+node <pica>/packages/core/scripts/pica-verify.mjs .pica/state.json --evidence
+# 27 check(s): 24 passed, 0 failed, 3 abstained.  154 assertion(s) verified.
+```
+
+It is also the mutation suite's fixture, which is what keeps it honest: if a field in it is
+wrong, the suite stops catching something, and the suite runs on every change.
 
 ## Who does the work
 

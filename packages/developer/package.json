@@ -36,7 +36,12 @@
   "checks": [
     {
       "run": "dev-check.mjs",
-      "passes": "0 findings"
+      "passes": "0 findings",
+      "args": "<src> <state>",
+      "phase": "build",
+      "needs": [
+        "@src"
+      ]
     }
   ],
   "definitionOfDone": [

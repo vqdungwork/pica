@@ -34,7 +34,21 @@
   "checks": [
     {
       "run": "estimate-check.mjs",
-      "passes": "0 findings"
+      "passes": "0 findings",
+      "args": "<state>",
+      "phase": "estimate",
+      "needs": [
+        "estimate"
+      ]
+    },
+    {
+      "run": "estimate-check.mjs",
+      "passes": "an actual against every estimated line, with a reason on any variance over 20%",
+      "args": "<state> --closeout",
+      "phase": "close",
+      "needs": [
+        "effortLog"
+      ]
     }
   ],
   "definitionOfDone": [

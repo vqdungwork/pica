@@ -48,6 +48,7 @@ Or run the steps yourself:
 
 | | |
 |---|---|
+| `/pica-verify` | **every applicable check, once, in one table.** Start here on an existing project |
 | `/pica` | intake, the contract, exclusions |
 | `/pica-discover` | who uses it and what hurts, who can veto it, what the field charges |
 | `/pica-analyse` | glossary, AS-IS, TO-BE, business rules, domain model, PRD |

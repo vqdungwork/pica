@@ -35,7 +35,12 @@
   "checks": [
     {
       "run": "value-check.mjs",
-      "passes": "0 findings"
+      "passes": "0 findings",
+      "args": "<state> --gate",
+      "phase": "value",
+      "needs": [
+        "value"
+      ]
     }
   ],
   "definitionOfDone": [
