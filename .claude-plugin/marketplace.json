@@ -24,6 +24,12 @@
       "description": "pica research: audit the named sources and derive tokens with provenance. Measures shipped products across the nine foundations, records typography by role rather than by size, and refuses concept sites as evidence."
     },
     {
+      "name": "pica-discover",
+      "source": "./packages/discover",
+      "version": "0.9.5",
+      "description": "pica discover: who uses it, what hurts, who can veto it, and what the field charges."
+    },
+    {
       "name": "pica-analyst",
       "source": "./packages/analyst",
       "version": "0.9.5",

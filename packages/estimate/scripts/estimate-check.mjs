@@ -71,6 +71,7 @@ const TRADE = {
   "pica-developer": /^(fe|be|frontend|backend|dev|development|mobile|api)$/i,
   "pica-tester":    /^(qa|test|testing)$/i,
   "pica-modeller":  /^(value|pricing|business-case)$/i,
+  "pica-discoverer":/^(discovery|research-users|interviews)$/i,
 };
 /* ---- void detection ------------------------------------------------------ *
  * A field that has been EMPTIED reads exactly like a field that was answered. An early
