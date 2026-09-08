@@ -28,6 +28,7 @@ import fs from "fs";
 import path from "path";
 import { execFileSync } from "child_process";
 import { fileURLToPath } from "url";
+import { createRequire } from "module";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const PKG = path.join(ROOT, "packages");
@@ -295,6 +296,164 @@ function makeFixture() {
       doNothing: "Approvals stay in email, and the audit finding that triggered this repeats at the next inspection.",
       verdict: "build", decidedBy: "the client's finance director",
     },
+    viewports: [
+      { name: "desktop", w: 1440, h: 900, idiom: "desktop web, no device chrome", pointer: true,
+        breakpoints: [1024], chrome: [], grid: { columns: 12, gutter: 24, margin: 24, maxContent: 1200 } },
+      { name: "tablet", w: 768, h: 1024, idiom: "tablet web, no device chrome", pointer: false,
+        breakpoints: [768], chrome: [], grid: { columns: 8, gutter: 16, margin: 24, maxContent: 1200 } },
+      { name: "mobile", w: 375, h: 812, idiom: "mobile web, no device chrome", pointer: false,
+        breakpoints: [], chrome: [], grid: null },
+    ],
+
+    /* ---- the design direction, asserted as numbers ---------------------- *
+     * verify-html reads `assert` and fails a package that breaches it, so the direction
+     * mutation has something to breach. */
+    direction: {
+      name: "Ledger", field: "retail banking", mode: "propose",
+      precedent: [
+        { product: "Starling", measured: "radius 8, control 36, tabular figures, 1 hue" },
+        { product: "Monzo", measured: "radius 8, control 44, tabular figures, 2 hues" },
+        { product: "Wise", measured: "radius 4, control 40, tabular figures, 2 hues" },
+      ],
+      rationale: "The age of a held payment is the content. Large radii and a wide palette both cost row scannability.",
+      assert: { "radius.max": 8, "control.height.min": 32, "numerals.tabular": true,
+        "hue.count.max": 3, "type.roles.max": 5 },
+      deviations: [],
+    },
+
+    /* ---- arch-check ------------------------------------------------------ *
+     * retention and audit trail appear in domainConstraints above, so constraint-nfr
+     * requires each to have become an NFR with a number on it. */
+    stack: { runtime: "Node", db: "Postgres" },
+    risks: [
+      { id: "R-01", capability: "hold a payment until a second named approver releases it",
+        verdict: "possible", reason: "the settlement API already exposes a hold and a release, both idempotent",
+        affects: [] },
+      { id: "R-02", capability: "export the audit trail in the inspector's own format",
+        verdict: "risky", reason: "the format is published but no test file exists, so the first real export is the first test",
+        affects: ["be", "qa"] },
+      { id: "R-03", capability: "release a held payment from a mobile device",
+        verdict: "not-possible", reason: "strong customer authentication on this account type is desktop-only until the bank's own roadmap lands",
+        affects: [] },
+    ],
+    nfr: [
+      { id: "N-01", kind: "performance", requirement: "the approval queue renders in 800ms at p95",
+        condition: "500 held payments, on the shared branch terminal over the branch VPN",
+        measuredBy: "a synthetic check against staging every five minutes" },
+      { id: "N-02", kind: "retention", requirement: "approval records are kept for 7 years and are not deletable by any product path",
+        condition: "for every payment above the approval limit",
+        measuredBy: "a migration test asserting no DELETE grant on the approvals table" },
+      { id: "N-03", kind: "audit trail", requirement: "every state change records an actor id and a timestamp within 1 second of the action",
+        condition: "on every approval, rejection and release",
+        measuredBy: "an end-to-end test asserting the row exists with a non-null actor" },
+    ],
+    adr: [
+      { id: "ADR-01", title: "PostgreSQL 16 for the approval record",
+        context: "The approval record has to be queryable by actor and by date for seven years, and must not be deletable by any product path.",
+        options: ["PostgreSQL 16", "the existing document store", "an append-only log service"],
+        decision: "PostgreSQL 16, with no DELETE grant on the approvals table",
+        consequences: "One more system to operate than the document store, and a migration path for the existing holds. In exchange the retention NFR is enforceable by a grant rather than by a policy." },
+      { id: "ADR-02", title: "Node 22 for the service",
+        context: "The front end is already TypeScript and the team maintains no other runtime.",
+        options: ["Node 22", "Go", "the existing Java service"],
+        decision: "Node 22, so one language covers both halves",
+        consequences: "Slower on the export path than Go would be. The export is a background job, so the cost lands where nobody waits on it." },
+      { id: "ADR-03", title: "No queue: the approval is synchronous",
+        context: "An approval either succeeds or the approver must see why, immediately, while still on the screen.",
+        options: ["a queue with a callback", "synchronous", "optimistic with reconciliation"],
+        decision: "synchronous, so the approver never has to come back to find out",
+        consequences: "The request holds a connection for up to 800ms. At 40 approvals a day per branch that is not a capacity problem, and it removes a whole class of reconciliation defect." },
+    ],
+
+    /* ---- qa-check --------------------------------------------------------- */
+    perfBudget: [
+      { nfr: "N-01", metric: "approval queue render at p95", budget: 800, unit: "ms",
+        condition: "500 held payments, on the shared branch terminal over the branch VPN, cold cache",
+        measuredBy: "a CI step that fails the build when the synthetic check regresses past the budget" },
+    ],
+    testStrategy: {
+      shape: { unit: 48, integration: 14, e2e: 3 },
+      owner: { unit: "pica-developer", integration: "pica-developer", e2e: "pica-tester" },
+      smoke: "npm run test:smoke",
+    },
+    defects: [
+      { id: "D-01", title: "the queue sorted by reference rather than by age", severity: "blocker",
+        test: "UC-01 the oldest held payment is first in the queue", failedFirst: true },
+      { id: "D-02", title: "a released payment showed no actor on the audit row", severity: "major",
+        test: "UC-01 an approver releases a held payment and the actor is recorded", failedFirst: true },
+      { id: "D-03", title: "the fee row collapsed at 375px", severity: "minor",
+        test: "the fee row has no collapsed state at any viewport", failedFirst: true },
+      { id: "D-04", title: "the empty queue read as a loading state", severity: "minor",
+        test: "an empty queue reads as empty and not as loading", failedFirst: true },
+    ],
+    testData: {
+      provenance: "synthetic",
+      note: "generated from the branch directory's shape, with no real customer or payment record anywhere in it",
+      method: "names and account numbers from a seeded generator, cross-referenced so no identifier belongs to another row",
+      edgeCases: ["the longest legal name at 64 characters", "the empty queue", "a duplicate reference on two payments",
+        "a name with an apostrophe in it", "500 held payments", "a fee of zero", "an approver at their own limit"],
+    },
+    branchProtection: { verifiedBy: "the client's platform lead", on: "2027-01-10",
+      note: "main refuses direct pushes, requires one review and requires the ci workflow to pass, read from the repository settings page" },
+    rollbackExecuted: { on: "2027-01-18", by: "the client's platform lead",
+      what: "the approvals release was rolled back on staging in 4 minutes and the held payments reconciled with no manual step" },
+
+    /* ---- proposal-check --------------------------------------------------- *
+     * S1 and S2 presented, the rest skipped WITH a reason, because a slot nobody asked
+     * and a slot with no material look identical otherwise. Option text deliberately
+     * avoids the sector's forbidden wording, which not-forbidden matches on. */
+    proposals: [
+      { slot: "S1", presented: true, axis: "how much of the queue is visible at once",
+        options: [
+          { id: "A", names: "one row per payment, age in the first column",
+            from: "measured on Monzo and Starling, both of which lead with a single scannable column",
+            costs: "12 rows per screen at 1440x900" },
+          { id: "B", names: "grouped by branch, collapsed by default",
+            from: "measured on the incumbent core-banking module, which groups by originating unit",
+            costs: "3 groups per screen, one extra click to reach a payment" },
+          { id: "C", names: "a dense table, 44px rows, no grouping",
+            from: "measured on Wise and Revolut, both of which run 44px rows on ledger surfaces",
+            costs: "18 rows per screen, and the age column has to earn its width" },
+        ],
+        chosen: "C", by: "the client's head of branch operations", on: "2026-09-02",
+        why: "we work down the whole list, we do not go looking branch by branch" },
+      { slot: "S2", presented: true, axis: "how loud the pending state is",
+        options: [
+          { id: "A", names: "light mode, one accent, age shown as a number",
+            from: "measured on Starling, which spends one hue on the whole ledger",
+            costs: "the oldest item is legible but not shouted" },
+          { id: "B", names: "light mode, a second hue once an item passes its target age",
+            from: "measured on the fraud queues in Revolut, which escalate by hue at a threshold",
+            costs: "a second reserved hue, leaving one for everything else" },
+        ],
+        chosen: "B", by: "the client's compliance director", on: "2026-09-02",
+        why: "if one has been sitting too long I want to see it without reading the number" },
+      { slot: "S3", skipped: "no stakeholder fear here names a moment the field designs badly beyond the queue age, which S1 already settles" },
+      { slot: "S4", skipped: "the glossary carries one contested term, approval, and the client uses it the same way the sector does" },
+      { slot: "S5", skipped: "one audience on this surface: the branch approver. The compliance view is a separate work package" },
+      { slot: "S6", presented: true, axis: "how much of the approval flow lands in the first release",
+        options: [
+          { id: "A", names: "the queue and a single release action",
+            from: "priced from the use cases: UC-01 alone, one screen set",
+            costs: "the audit export waits, so the inspection is still answered by hand once" },
+          { id: "B", names: "the queue, the release action and the audit export",
+            from: "priced from the use cases plus the export path the regulator names",
+            costs: "the export is the risky capability at R-02, and it carries the wider spread" },
+        ],
+        chosen: "B", by: "the client's compliance director", on: "2026-09-04",
+        why: "the export is the whole reason we are doing this, doing it later means doing the inspection by hand again" },
+      { slot: "S7", presented: true, axis: "where an approver can do this",
+        options: [
+          { id: "A", names: "on a laptop at the branch desk only",
+            from: "the bank's own strong-authentication constraint on this account type",
+            costs: "one release pipeline, and it can be rolled back the way the web can" },
+          { id: "B", names: "on a laptop and on a phone",
+            from: "asked for at intake, and ruled not-possible at R-03 until the bank's roadmap lands",
+            costs: "two release pipelines, one of which cannot be rolled back the way the web can" },
+        ],
+        chosen: "A", by: "the client's compliance director", on: "2026-09-04",
+        why: "nobody approves payments on a phone here, they are at the desk when they do it" },
+    ],
     closeout: {
       briefReadFrom: "docs/brief.md",
       metricNow: 91, metricMeasuredOn: "2027-04-02",
@@ -319,8 +478,207 @@ function makeFixture() {
   fs.mkdirSync(path.join(d, "docs"), { recursive: true });
   fs.writeFileSync(path.join(d, "docs", "brief.md"),
     "We need to know who approved a payment. Right now it is in email somewhere.\n");
+  /* qa-check walks for test files and refuses an empty suite, correctly. The tests have to
+   * NAME the use case and the business rule, because uc-covered and rule-asserted match on
+   * the id: a suite that tests everything and names nothing is untraceable. */
+  fs.mkdirSync(path.join(d, "tests"), { recursive: true });
+  fs.writeFileSync(path.join(d, "tests", "approvals.e2e.spec.ts"), [
+    'import { test, expect } from "@playwright/test";',
+    '',
+    '/* UC-01 Send a payment: the whole flow, end to end. */',
+    'test("UC-01 an approver releases a held payment and the actor is recorded", async ({ page }) => {',
+    '  await page.goto("/approvals");',
+    '  await page.getByRole("row").first().getByRole("button", { name: "Release" }).click();',
+    '  await expect(page.getByText("Released")).toBeVisible();',
+    '});',
+    '',
+    'test("UC-01 the oldest held payment is first in the queue", async ({ page }) => {',
+    '  await page.goto("/approvals");',
+    '  const ages = await page.getByTestId("age").allTextContents();',
+    '  expect(ages).toEqual([...ages].sort((a, b) => Number(b) - Number(a)));',
+    '});', ''].join("\n"));
+  fs.writeFileSync(path.join(d, "tests", "rules.spec.ts"), [
+    'import { describe, it, expect } from "vitest";',
+    'import { approve } from "../src/approve";',
+    '',
+    '/* BR-01 A payment above the limit needs a second approver. Asserted on the server',
+    ' * path, because a rule enforced by hiding a button is not enforced. */',
+    'describe("BR-01 a payment above the limit needs a second approver", () => {',
+    '  it("BR-01 refuses a single approval above the limit", async () => {',
+    '    await expect(approve("p-above-limit", "actor-1")).rejects.toThrow(/second approver/);',
+    '  });',
+    '  it("BR-01 accepts the release once a second approver has signed", async () => {',
+    '    await expect(approve("p-above-limit", "actor-2")).resolves.toMatchObject({ status: "released" });',
+    '  });',
+    '});', ''].join("\n"));
+  fs.writeFileSync(path.join(d, "tests", "fee-row.spec.ts"), [
+    'import { describe, it, expect } from "vitest";',
+    'import { render } from "./helpers/render";',
+    '',
+    'describe("the fee row", () => {',
+    '  it("the fee row has no collapsed state at any viewport", () => {',
+    '    for (const w of [375, 768, 1440]) {',
+    '      const el = render("fee-row", { width: w });',
+    '      expect(el.querySelector("[hidden]")).toBeNull();',
+    '    }',
+    '  });',
+    '  it("an empty queue reads as empty and not as loading", () => {',
+    '    const el = render("queue", { rows: [] });',
+    '    expect(el.textContent).toContain("Nothing is waiting");',
+    '    expect(el.querySelector("[aria-busy=true]")).toBeNull();',
+    '  });',
+    '});', ''].join("\n"));
+  fs.writeFileSync(path.join(d, "tests", "smoke.spec.ts"), [
+    'import { test, expect } from "@playwright/test";',
+    'test("smoke: the approval queue loads", async ({ page }) => {',
+    '  await page.goto("/approvals");',
+    '  await expect(page.getByRole("heading", { name: "Held payments" })).toBeVisible();',
+    '});', ''].join("\n"));
+
+  /* impl-check reads the workflow AND package.json, because a workflow runs `npm run
+   * types` and what that does lives in the manifest. It also wants three environments. */
+  fs.mkdirSync(path.join(d, ".github", "workflows"), { recursive: true });
+  fs.writeFileSync(path.join(d, ".github", "workflows", "ci.yml"), [
+    "name: ci",
+    "on:",
+    "  push:",
+    "    branches: [main]",
+    "  pull_request:",
+    "    branches: [main]",
+    "jobs:",
+    "  verify:",
+    "    runs-on: ubuntu-latest",
+    "    steps:",
+    "      - uses: actions/checkout@v4",
+    "      - run: npm ci",
+    "      - run: npm run lint",
+    "      - run: npm run typecheck",
+    "      - run: npm test",
+    "  deploy-dev:",
+    "    needs: verify",
+    "    environment: dev",
+    "    runs-on: ubuntu-latest",
+    "    steps: [{ run: npm run deploy }]",
+    "  deploy-staging:",
+    "    needs: verify",
+    "    environment: staging",
+    "    runs-on: ubuntu-latest",
+    "    steps: [{ run: npm run deploy }]",
+    "  deploy-production:",
+    "    needs: [verify, deploy-staging]",
+    "    environment: production",
+    "    runs-on: ubuntu-latest",
+    "    steps:",
+    "      - run: npm run deploy",
+    "      - run: npm run test:smoke",
+    ""].join("\n"));
+  fs.writeFileSync(path.join(d, "package.json"), JSON.stringify({
+    name: "approvals", private: true, type: "module",
+    scripts: {
+      lint: "eslint src tests",
+      typecheck: "tsc --noEmit",
+      test: "vitest run && playwright test",
+      "test:smoke": "playwright test tests/smoke.spec.ts",
+      deploy: "node scripts/deploy.mjs",
+    },
+    dependencies: { pg: "^8.13.0" },
+  }, null, 2) + "\n");
+  fs.writeFileSync(path.join(d, "tsconfig.json"), JSON.stringify({
+    compilerOptions: { strict: true, noEmit: true, target: "ES2022", module: "ESNext",
+      moduleResolution: "bundler", types: ["node"] },
+    include: ["src", "tests"],
+  }, null, 2) + "\n");
+  fs.writeFileSync(path.join(d, "eslint.config.js"),
+    'export default [{ files: ["src/**/*.ts", "tests/**/*.ts"], rules: { eqeqeq: "error" } }];\n');
+  fs.writeFileSync(path.join(d, ".gitignore"), "node_modules\n.audit\n");
+
+  /* impl-check refuses a directory that is not a git repository, correctly: branch age
+   * and branch protection are properties of a repository and not of a folder. */
+  try {
+    const q = { cwd: d, stdio: "ignore" };
+    execFileSync("git", ["init", "-q", "-b", "main"], q);
+    execFileSync("git", ["-c", "user.email=fixture@example.invalid", "-c", "user.name=pica fixture",
+      "add", "-A"], q);
+    execFileSync("git", ["-c", "user.email=fixture@example.invalid", "-c", "user.name=pica fixture",
+      "commit", "-q", "-m", "the fixture, so branch age and protection have a repository to be about"], q);
+  } catch {}
+
+  /* ---- a capture, produced by the real producer ------------------------- *
+   * The capture sub-objects are POSITIONAL arrays, so hand-writing one here would be a
+   * second implementation of a format this repository already produces, and the two
+   * would drift exactly the way a copied field drifts. So the fixture writes html and
+   * runs capture-html-reference over it: the same code path a real project takes.
+   *
+   * Conditional on playwright, which the producer needs. Without it the four
+   * capture-reading mutations skip, and they SAY they skipped, which is the state this
+   * suite was in for every version before this one. */
+  const css = [
+    ":root{--s-1:4px;--s-2:8px;--s-3:12px;--s-4:16px;--s-5:24px;",
+    "--ink:#141816;--ground:#ffffff;--rule:#d7dcd8;--accent:#12433d;--r:8px}",
+    "*{box-sizing:border-box}",
+    "body{margin:0;background:var(--ground);color:var(--ink);",
+    "font:16px/1.5 -apple-system,system-ui,sans-serif;font-variant-numeric:tabular-nums}",
+    ".scr{padding:var(--s-5)}",
+    "h1{font-size:24px;line-height:1.2;margin:0 0 var(--s-4)}",
+    ".row{display:flex;gap:var(--s-4);align-items:center;padding:var(--s-3) 0;",
+    "border-bottom:1px solid var(--rule)}",
+    ".age{font-size:16px;min-width:64px}",
+    ".name{font-size:16px;flex:1}",
+    ".cap{font-size:13px;color:#3d4a45}",
+    "button{height:40px;padding:0 var(--s-4);border-radius:var(--r);border:0;",
+    "background:var(--accent);color:#ffffff;font-size:14px}",
+    ".frame-wrap{padding:var(--s-5)}",
+    ".frame-cap{font-size:13px;color:#3d4a45;padding-bottom:var(--s-2)}",
+    ".frame{border:1px solid var(--rule);border-radius:var(--r);overflow:hidden}",
+  ].join("");
+  /* The producer's own selectors: a .frame-wrap around a [data-viewport], with the screen
+   * inside it. Matching the convention rather than inventing one is the whole point of
+   * running the real producer. */
+  /* The producer reads .frame-cap for the screen's name, and parity-check pairs the
+   * three viewports of one screen by that name. Without it every frame is frame0,
+   * frame1, frame2 and parity reads three screens each present at one viewport. */
+  const frame = (vp, w, title, rows, scr) => [
+    `<div class="frame-wrap"><div class="frame-cap">${scr} \u00b7 ${vp}</div>`,
+    `<div class="frame" data-viewport="${vp}" data-uc="UC-01" style="width:${w}px">`,
+    `<section class="scr" data-scr="approvals"><h1>${title}</h1>`,
+    rows.length
+      ? rows.map((r) => `<div class="row"><span class="age">${r[1]}</span>` +
+          `<span class="name">${r[0]}</span><button type="button">Release</button></div>`).join("")
+      : '<p class="cap">Nothing is waiting. Held payments appear here.</p>',
+    rows.length ? '<p class="cap">Oldest first. Age in hours.</p>' : "",
+    "</section></div></div>",
+  ].join("");
+  const page = (title, rows, scr) => [
+    '<!doctype html><html lang="en"><head><meta charset="utf-8">',
+    '<meta name="viewport" content="width=device-width,initial-scale=1">',
+    `<title>${title}</title><style>${css}</style></head><body>`,
+    frame("desktop", 1440, title, rows, scr),
+    frame("tablet", 768, title, rows, scr),
+    frame("mobile", 375, title, rows, scr),
+    "</body></html>",
+  ].join("");
+  fs.mkdirSync(path.join(d, "html"), { recursive: true });
+  fs.writeFileSync(path.join(d, "html", "approvals.html"),
+    page("Held payments", [["Ridgeway Metals Ltd", "31"], ["Calder Freight", "18"], ["Ash Lane Dairy", "4"]], "approvals"));
+  fs.writeFileSync(path.join(d, "html", "approvals-empty.html"), page("Held payments", [], "approvals empty"));
+
   fs.writeFileSync(path.join(d, "tokens", "tokens.json"),
     JSON.stringify({ "--s-1": "4px", "--s-2": "8px", "--s-3": "12px", "--s-4": "16px", "--s-5": "24px" }, null, 2));
+  try {
+    /* Resolved from THIS script, not from the fixture's cwd: the producer walks up from
+     * its working directory and a temp dir has no node_modules above it. */
+    const args = [path.join(PKG, "html/scripts/capture-html-reference.mjs"),
+      "--dir", "html", "--out", ".audit"];
+    try {
+      const pw = path.dirname(createRequire(import.meta.url).resolve("playwright"));
+      args.push("--playwright", pw);
+    } catch {}
+    execFileSync("node", args, { cwd: d, stdio: "ignore" });
+  } catch {
+    console.log("NOTE  the fixture's capture could not be produced, most likely because playwright is");
+    console.log("      absent. The four capture-reading mutations will report SKIPPED below, and a");
+    console.log("      skipped mutation is not a passed one.\n");
+  }
   return d;
 }
 
@@ -475,7 +833,11 @@ const M = [
    * at a scale on which no real gap lands. */
   ["off-scale",        "html/scripts/spacing-check.mjs", [REF, S], "capture", (s) => {
     s.tokensPath = ".pica/mutant-tokens.json";
-    fs.writeFileSync(path.join(DIR, ".pica", "mutant-tokens.json"), JSON.stringify({ "--s-1": "7px" }));
+    /* A scale on which the EDGES still land and the gaps do not. A file with only
+     * "--s-1": "7px" put every edge inset off-scale too, so one redirected token file
+     * reported as two findings and sent the reader to two places. The fixture's frames
+     * pad 24 and gap 16 and 12, so a scale of 24 alone isolates the gap. */
+    fs.writeFileSync(path.join(DIR, ".pica", "mutant-tokens.json"), JSON.stringify({ "--s-1": "24px" }));
   }],
 ];
 
