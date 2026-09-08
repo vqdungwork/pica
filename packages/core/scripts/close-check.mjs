@@ -14,7 +14,8 @@
  *
  * Seven checks:
  *
- *   1. BRIEF COLD        read from briefPath, never from the contract.
+ *   1. BRIEF COLD        read from briefPath, never from the contract. An absence may be
+ *                        declared in briefAbsent; a brief that was recorded and lost may not.
  *   2. NOTHING EXCLUDED  compare shipped against the exclusions register.
  *   3. METRIC COMPARED   the number now, against the baseline taken at 1.2.
  *   4. COMMITTED SHIPPED every committed package shipped, or dropped with a reason.
@@ -52,9 +53,19 @@ const said = (x, min = 8) => {
   return t.length >= min && !VOID.test(t);
 };
 
+/* No closeout block means the project has not reached step 8, not that its closeout is
+ * defective. It reported between four and twenty-two findings on all nine real projects,
+ * none of which had closed out. */
+if (!state.closeout || !Object.keys(state.closeout).length) {
+  console.error("FAIL  state carries no closeout. Nothing to check, and findings against nothing would");
+  console.error("      read as a failed handover rather than as one that has not happened. Run");
+  console.error("      /pica-close when the work is delivered.");
+  process.exit(2);
+}
+
 const findings = [];
 const fail = (check, where, detail) => findings.push({ check, where, detail });
-const co = state.closeout || {};
+const co = state.closeout;
 
 /* ---- 1. BRIEF COLD ------------------------------------------------------- *
  * The check this file exists for. The brief is the only artefact that cannot have moved,
@@ -62,16 +73,31 @@ const co = state.closeout || {};
  * else in the project has been negotiated by the project. */
 let coldBad = 0;
 const bp = String(state.briefPath || "");
+
+/* A brief that was NEVER SUPPLIED is a different thing from one that was supplied and
+ * lost, and the first version of this check could not tell them apart. Run against nine
+ * real projects, eight had no brief on disk and one of those recorded the reason in its
+ * contract as a standing caveat: "No original brief was supplied." Failing that closed
+ * says nothing true about it.
+ *
+ * So an absence may be DECLARED, in `briefAbsent`, and the reason is the only thing
+ * checked. It is the same shape as `saidNoWhyNone` and `constraintsNotApplicable`: a
+ * declared absence is a decision, an undeclared one is an oversight, and afterwards
+ * nobody can tell which happened. What is still refused is a brief that was recorded and
+ * has since gone, because that one was supposed to survive the project. */
+const declaredAbsent = said(state.briefAbsent, 20);
+
 if (!said(bp, 6)) {
-  coldBad++;
-  fail("brief-cold", "briefPath",
-    "absent, so nothing names where the original wording went and closeout has nothing to read.");
+  if (!declaredAbsent) {
+    coldBad++;
+    fail("brief-cold", "briefPath",
+      "absent, and `briefAbsent` does not say why. Either record where the verbatim brief went, or state that none was supplied and what that costs: an undeclared absence and a lost file look identical.");
+  }
 } else if (!fs.existsSync(bp)) {
   coldBad++;
   fail("brief-cold", `briefPath (${bp})`,
-    "the file is gone. The brief is the one path that has to survive the whole project.");
-}
-if (String(co.briefReadFrom || "") !== bp) {
+    "recorded and the file is gone. The brief is the one path that has to survive the whole project, and a declared absence cannot excuse one that was supplied and lost.");
+} else if (String(co.briefReadFrom || "") !== bp) {
   coldBad++;
   fail("brief-cold", "closeout.briefReadFrom",
     `"${co.briefReadFrom ?? "absent"}" is not briefPath ("${bp}"). Reading the contract instead grades the work against a document it already renegotiated, so it always passes.`);
@@ -189,7 +215,8 @@ if (state.delivered) {
 
 /* ---- report -------------------------------------------------------------- */
 const table = [
-  ["brief-cold", coldBad, co.briefReadFrom ? `read from ${co.briefReadFrom}` : "no record of reading it"],
+  ["brief-cold", coldBad, declaredAbsent && !said(bp, 6) ? "no brief was supplied, and that is declared"
+    : (co.briefReadFrom ? `read from ${co.briefReadFrom}` : "no record of reading it")],
   ["nothing-excluded", builtExcluded, `${exclusions.length} exclusion(s) vs ${shipped.length} shipped`],
   ["metric-compared", metricBad,
     Number.isFinite(Number(co.metricNow)) ? `${p.baseline ?? "?"} to ${co.metricNow} ${p.unit || ""}`.trim() : "not compared"],

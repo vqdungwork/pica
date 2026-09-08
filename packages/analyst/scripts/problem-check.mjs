@@ -62,6 +62,18 @@ const said = (x, min = 8) => {
   return t.length >= min && !VOID.test(t);
 };
 
+/* Nothing this file covers exists means the project predates all of it, and eighteen
+ * findings is a worse answer than one sentence. It reported exactly that on eight of nine
+ * real projects. If ANY of the four blocks is present, check them all properly: a
+ * half-recorded problem statement is the thing worth finding. */
+if (!state.problem && !state.trigger && !state.commercialConstraint
+    && !Object.keys(state.workPackages || {}).length) {
+  console.error("FAIL  state carries no problem, trigger, commercialConstraint or workPackages.");
+  console.error("      Nothing to check, and a list of findings against nothing would say the project");
+  console.error("      is broken when it has simply not reached 1.2 yet. Run /pica then /pica-analyse.");
+  process.exit(2);
+}
+
 const findings = [];
 const fail = (check, where, detail) => findings.push({ check, where, detail });
 const p = state.problem || {};
@@ -302,6 +314,18 @@ const table = [
 ];
 for (const [name, n, scope] of table)
   console.log(`${n ? "FAIL" : "pass"}  ${name.padEnd(20)} ${String(n).padStart(3)} finding(s)   (${scope})`);
+
+/* Eighteen findings against a problem statement nobody has written yet is eighteen true
+ * things where one would do. The findings stay, because each names a field somebody has
+ * to fill, but the reader is told which situation they are in first: seven of nine real
+ * projects hit exactly this, and a list that long reads as a broken artefact rather than
+ * as an absent one. */
+if (!state.problem && !state.trigger && !state.commercialConstraint) {
+  console.log("");
+  console.log("NOTE  none of problem, trigger or commercialConstraint exists. The findings below are not");
+  console.log("      eighteen separate defects, they are one absence itemised: this project has never");
+  console.log("      recorded what number would move if it worked. Run /pica intake and /pica-analyse 1.2.");
+}
 
 if (allFixed) {
   console.log("");

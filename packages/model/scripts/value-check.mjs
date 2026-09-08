@@ -57,7 +57,18 @@ const said = (x, min = 8) => {
 const findings = [];
 const fail = (check, where, detail) => findings.push({ check, where, detail });
 
-const v = state.value || {};
+/* An ABSENT value case is not a broken one. Every sibling that reads a block it needs
+ * says so and exits 2: arch-check, estimate-check and discover-check all refuse rather
+ * than report findings against nothing. This one reported eight on all nine real projects
+ * in the wild, which said "your business case is broken" to nine teams who had simply
+ * never run this step. Zero findings would be a lie; so would eight. */
+if (!state.value || !Object.keys(state.value).length) {
+  console.error("FAIL  state carries no value. Nothing to check, and neither zero findings nor a list");
+  console.error("      of them would be true: run /pica-model first, or record value.for as \"skipped\"");
+  console.error("      with a reason if this project is not being priced.");
+  process.exit(2);
+}
+const v = state.value;
 const FOR = String(v.for || "").toLowerCase();
 const SELF = FOR === "self";
 const SKIPPED = FOR === "skipped";

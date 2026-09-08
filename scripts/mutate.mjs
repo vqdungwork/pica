@@ -441,6 +441,10 @@ const M = [
   ["choice-recorded",  "core/scripts/proposal-check.mjs", [S], "proposals", (s) => delete s.proposals.find((p) => p.presented)?.by],
   // close-check
   ["brief-cold",         "core/scripts/close-check.mjs", [S], "closeout", (s) => s.closeout.briefReadFrom = "docs/contract.md"],
+  /* Recorded and then gone. A declared absence excuses a brief nobody ever supplied; it
+   * cannot excuse one that was written down and lost, because that one was supposed to
+   * survive the project. */
+  ["brief-cold",         "core/scripts/close-check.mjs", [S], "closeout", (s) => { s.briefPath = "docs/gone.md"; s.briefAbsent = "the client never sent one, which is recorded here so it is not read as an oversight"; }],
   ["nothing-excluded",   "core/scripts/close-check.mjs", [S], "closeout", (s) => s.closeout.shipped.push("Card issuing")],
   ["metric-compared",    "core/scripts/close-check.mjs", [S], "closeout", (s) => delete s.closeout.metricNow],
   ["committed-shipped",  "core/scripts/close-check.mjs", [S], "closeout", (s) => { s.closeout.shipped = []; }],
