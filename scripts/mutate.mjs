@@ -99,6 +99,11 @@ if (FIXTURE || !DIR) {
   if (!FIXTURE && !DIR) console.log("no project given, generating a fixture. Pass a project directory to run against a real one.\n");
   DIR = makeFixture();
 }
+/* Absolute, because every check runs with cwd: DIR and is handed a path built from it.
+ * A relative directory made those two disagree, so `mutate.mjs examples/approvals` — the
+ * invocation the README documents — reported every check FAIL on a missing state file and
+ * refused as a failing baseline. The suite was fine; the argument was. */
+DIR = path.resolve(DIR);
 const S = path.join(DIR, ".pica", "state.json");
 if (!fs.existsSync(S)) {
   console.error(`FAIL  ${S} does not exist. Point this at a pica project, or pass --fixture.`);

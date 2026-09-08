@@ -1,5 +1,86 @@
 # Changelog
 
+## 1.2.2
+
+### The counts were wrong in every place nobody recounted
+
+1.2.1 corrected the check count "in the two places I fixed earlier and not in the four I missed".
+There were six. The version badge still read **0.9.5**, the checks badge **116**, the specialists
+badge **8** — and `assets/banner.svg`, the image at the top of the README, said 8 specialists and 116
+checks in the first thing anyone sees.
+
+Recounted from the code rather than from prose: **154 check ids across 24 scripts**, 10 agents, 19
+commands, 25 rule modules, 228 definition-of-done items, 26 check scripts. `What ships` had claimed
+16 commands, 23 rule modules, 173 items and 21 scripts. Both plugin manifests said 150 checks.
+
+Three defects in the table headed *"Listed so the number can be recounted rather than trusted"*, which
+is the one place a wrong number is not a typo but a broken promise:
+
+- It totalled **116** under a summary claiming 154, because it was the 0.9.5 table. `problem-check`,
+  `discover-check`, `value-check`, `close-check` and `concept-check` — 40 check ids — were missing.
+- `contrast-check` had **no description at all**: its four items had landed in `spacing-check`'s row
+  as a stray extra column, so one check was undocumented and the other described someone else's work.
+  Both counts were wrong too; they are 2 and 3.
+- `parity-check` and `geometry-diff` were credited with 2 and 1 named ids. They emit none: they report
+  a measured difference. Footnoted rather than counted.
+
+### The example's own numbers came from a run that does not reproduce
+
+`SKILL.md` and the 1.2.1 notes both claimed **26 of 28 checks and 161 assertions**. It reproduces as
+**25 of 28 and 153, 0 failures**. The difference is `impl-check`, which abstains for want of a
+repository of its own, and 8 assertions is exactly its weight — a number carried forward from a run
+where it found one. And `.audit/` is gitignored, so on a fresh clone **9 checks abstain rather than 3**
+until the capture is generated. Both facts are now in the README next to the command.
+
+### `mutate.mjs` refused the invocation the README documents
+
+Every check runs with `cwd: DIR` and is handed a state path built from the same `DIR`, so a relative
+directory made the two disagree. `node scripts/mutate.mjs examples/approvals` — the documented shape —
+reported all 19 state-reading checks `FAIL` on a missing state file and then refused to run at all as
+a failing baseline. Resolved absolute. **The suite was fine; the argument was**, which is the failure
+mode that looks most like a broken product.
+
+`--fixture` is now documented as the invocation that self-tests pica, because it builds the example
+with the two things it cannot carry in this repository: a git repository of its own and a fresh
+capture. Pointed at `examples/approvals` in place, `impl-check` reads *this* repository instead and
+reports it not ready to release — correctly. pica still has no CI pipeline of its own.
+
+### Six shipped checks were absent from the index a session reads
+
+`arch-check`, `contrast-check`, `spacing-check`, `shell-check`, `dev-check` and `qa-check` ship, are
+declared in their manifests, and run under `pica-verify` — and appeared nowhere in `SKILL.md`'s
+Scripts section, which is what a session reads to know what exists. `trace-check`, `verify-html` and
+`estimate-check` listed fewer ids than they emit (6 of 7, 5 of 7, 6 of 10).
+
+Documentation only: no check changed. 89 mutations caught, 0 missed, 0 skipped; `validate-packages`
+0 findings.
+
+## 1.2.1
+
+### The file that loads into every session knew nothing about any of this
+
+`design-flow/SKILL.md` is what a session reads before it does anything, and it had zero mentions of
+`pica-discover`, `pica-model`, `pica-verify`, `checkDisputes`, `proto.js`, or any of the five checks
+added since 1.0.0. Everything built that day was invisible to the framework's own entry point, which
+means a session using pica would not have known these existed. It now carries the two new phases in
+the flow table, the two new packages, the line saying `pica-verify` runs everything applicable, a
+table of the five new checks with the gap each closed, the dispute register, and a pointer to the
+example.
+
+`CHANGELOG` had stopped at 0.9.5 with nine releases behind it. Recorded — except for 1.2.1 itself,
+which is this entry, written in 1.2.2.
+
+`design-system.html`. `pica.md` has asked for the storybook since step 3 and `html-prototype.md`
+names it, and **no check reads it**: the only script that mentions the file is the capture producer,
+which excludes it. So it was a rule with no executable behind it, the class of gap 0.3.0 shipped
+three of. The example now ships a complete one, including the states that matter — a 64-character
+payee that wraps rather than truncating, a fee of zero rendered as `0.00`, an empty state that does
+not read as loading — and both the rule and the page itself say plainly that nothing checks them.
+
+What would close it: a check that every token in `tokens.json` appears on the page and every class a
+screen uses appears there with a variant. Recorded rather than built, because a check invented at the
+end of a long session is the kind nobody argued with.
+
 ## 1.2.0
 
 ### The router it declared and never shipped, and a register for arguing with a check

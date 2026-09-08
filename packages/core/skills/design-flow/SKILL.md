@@ -398,9 +398,13 @@ geometry diff that existed only in the project they were written from.
 |---|---|---|
 | `capture-html-reference.mjs` | measurement is possible | it writes an artefact; it refuses on 0 frames rather than emitting an empty one |
 | `concept-check.mjs` | a complex package widened before it narrowed | 2 or more concepts, exactly one kept, and each names what it serves badly. **State only, because divergence happens before the screens exist** |
-| `verify-html.mjs` | the HTML is internally sound | 0 findings across viewport-tagged, overflow, tall-screen-pair, viewport-coverage, direction |
+| `verify-html.mjs` | the HTML is internally sound | 0 findings across viewport-tagged, overflow, tall-screen-pair, viewport-coverage, direction, data-ownership, width-media |
 | `coverage-check.mjs` | **the design is what was agreed** | 0 across uc-covered, screen-traced, uc-exists, flow-reachable, target-buildable |
 | `copy-check.mjs` | the words are written | 0 across placeholder, glossary terms, copy rules, error next step, length realism |
+| `contrast-check.mjs` | the text is readable | 0 across unresolved background and exemption still needed. Reads the tokens, never a screenshot |
+| `spacing-check.mjs` | the geometry is on the scale | 0 across edge inset, insets agreeing across screens, gaps on the scale |
+| `shell-check.mjs` | the review page says what it is | 0 across says-what-it-is-not, flow leads, three zoom controls, tabs load in place, group order, frame inset |
+| `proposal-check.mjs` | the client was offered the decision | 0 across slot addressed, axis named, provenance, a real choice, nothing the sector forbids, choice recorded. **Refuses to run on a project with no register** |
 | `parity-check.mjs` | the viewports agree | 0 findings, nominal and structural. 2+ viewports only |
 | `flow-check.mjs` | the prototype goes where it says it goes | 0 findings across dangling-target, dangling-href, nav-target, unreachable, dead-end, orphan-prototype, flow-declared, **and** a non-zero screen and link count |
 
@@ -416,7 +420,7 @@ overflow, and a **census** of radii, control heights, hues and numerals. Frames 
 
 | Script | Proves | Passes when |
 |---|---|---|
-| `trace-check.mjs` | the requirements hold together | 0 across glossary closure, rule enforcement, use case trace, entity terms, AS-IS present, assumption radius |
+| `trace-check.mjs` | the requirements hold together | 0 across glossary closure, rule enforcement, use case trace, entity terms, AS-IS present, assumption radius, exclusions asked |
 | `domain-check.mjs` | the domain was asked about | 0 across all-categories, sourced, verified, agent claims surfaced, affects |
 | `industry-check.mjs` | **the design belongs to its sector** | 0 across industry-known, stakeholders, constraints, conventions, forbidden, style-excluded, evidence. **Fails closed on a sector the base does not cover** |
 | `schema-check.mjs` | the field was measured, not admired | 0 across sample size, nine foundations, type roles, provenance, shipped-not-concept, tradition named |
@@ -425,8 +429,11 @@ overflow, and a **census** of radii, control heights, hues and numerals. Frames 
 
 | Script | Proves | Passes when |
 |---|---|---|
-| `estimate-check.mjs` | the price is defensible | 0 across preconditions, three points, tier spread, risk reflected, headcount, effort log |
+| `estimate-check.mjs` | the price is defensible | 0 across preconditions, three points, estimated-by-doer, tier spread, risk reflected, headcount, effort log, and — for the roadmap — slice releasable, critical path, buffer stated |
+| `arch-check.mjs` | nothing was promised before it was possible | 0 across feasibility verdict, risk priced, NFR complete, constraint becomes an NFR, ADR complete, technology has an ADR, mobile signing custody |
 | `code-tokens-check.mjs` | the code consumes the tokens | 0 raw colour, spacing, radius, and no linear easing |
+| `dev-check.mjs` | the code has the seams the contract needs | 0 across API contract, error branch, state strategy, accessibility in code, performance budget, server guard, retry safety |
+| `qa-check.mjs` | the suite is shaped like the product's promises | 0 across pyramid shape, use case covered end to end, rule asserted, regression traced, severity defined, test data, release gate |
 | `impl-check.mjs` | the repository is releasable | 0 across test trace, CI, branch protection, branch age, environments, secrets, NFR measured, stack declared |
 | `build-diff.mjs` | **the build is the design that was approved** | 0 across frame paired, control height, radius, hue budget, text position |
 
@@ -477,10 +484,14 @@ is not evidence the checks are right.
 
 ## Something to read
 
-`examples/approvals/` is a complete pica project: **26 of 28 checks pass on it, 161 assertions
-verified, and both abstentions are named.** It carries the interactive prototype rule 8 asks for,
-`html/proto.js` (the router pica declares and shipped no implementation of until 1.2.0), the review
-shell, and one accepted dispute.
+`examples/approvals/` is a complete pica project: **25 of 28 checks pass on it, 153 assertions
+verified, 0 failures, and all three abstentions are named** — `geometry-diff` wants a Figma dump,
+`build-diff` a running build, `impl-check` a repository of its own. `.audit/` is not committed, so
+generate the capture first or 9 checks abstain rather than 3.
+
+It carries the interactive prototype rule 8 asks for, `html/proto.js` (the router pica declares and
+shipped no implementation of until 1.2.0), the review shell, `html/design-system.html` (added 1.2.1,
+because the shell linked a page that did not exist), and one accepted dispute.
 
 It is also the mutation suite's fixture, which is what stops it drifting: a wrong field in it stops the
 suite catching something, and the suite runs on every change.

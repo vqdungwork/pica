@@ -5,9 +5,9 @@
 **Describe the product you want. Get a design you can click, then a product you can ship.**
 <br>An expert team for Claude Code, with the checking built in.
 
-[![version](https://img.shields.io/badge/version-0.9.5-1f2328)](https://github.com/vqdungwork/pica/releases)
-[![checks](https://img.shields.io/badge/checks-116%20fail--closed-1f2328)](#what-gets-checked)
-[![agents](https://img.shields.io/badge/specialists-8-1f2328)](#who-does-the-work)
+[![version](https://img.shields.io/badge/version-1.2.2-1f2328)](https://github.com/vqdungwork/pica/releases)
+[![checks](https://img.shields.io/badge/checks-154%20fail--closed-1f2328)](#what-gets-checked)
+[![agents](https://img.shields.io/badge/specialists-10-1f2328)](#who-does-the-work)
 [![sectors](https://img.shields.io/badge/industries-28-1f2328)](#it-already-knows-your-industry)
 [![licence](https://img.shields.io/badge/licence-MIT-1f2328)](LICENSE)
 
@@ -47,7 +47,7 @@ All three are finished pieces of work, not truncated ones. Figma is optional and
 | **Understands the work** | Turns your paragraph into requirements your team recognises: what happens today, what changes, the rules, and a document a non-technical reader can follow |
 | **Knows your industry** | 28 of them. Who can say no, which colours already mean something, what the field treats as a mistake no matter what you asked for |
 | **Designs it so you can click it** | Real screens at every size and every state, in a day rather than a fortnight, cheap to change while your mind is still changing |
-| **Checks it before you see it** | 116 automated checks: contrast, coverage, the words, the wiring. Nothing reaches you having only been looked at |
+| **Checks it before you see it** | 154 automated checks: contrast, coverage, the words, the wiring. Nothing reaches you having only been looked at |
 | **Has it reviewed by others** | Three to five independent reviewers, none of them seeing each other's findings |
 | **Prices it, if you want** | Whoever does the work prices it, never one person guessing at four trades. Optional: for a client, for yourself, or skipped |
 | **Builds and tests it** | Working code, a test for everything the product promises, and a pipeline that will not release without them |
@@ -115,9 +115,15 @@ small on purpose and complete on purpose. **Every check either passes on it or s
 abstains.**
 
 ```bash
+# the measured checks need a capture first; .audit/ is not committed
+node <pica>/packages/html/scripts/capture-html-reference.mjs --dir html --out .audit
 node <pica>/packages/core/scripts/pica-verify.mjs .pica/state.json --evidence
-# 27 check(s): 24 passed, 0 failed, 3 abstained.  154 assertion(s) verified.
+# 28 check(s): 25 passed, 0 failed, 3 abstained.  153 assertion(s) verified.
 ```
+
+The three abstentions are named rather than hidden: `geometry-diff` wants a Figma dump, `build-diff`
+wants a running build, and `impl-check` wants a repository of its own. Skip the capture and 9 checks
+abstain instead of 3, which is the honest number for a project that has not been measured yet.
 
 It is also the mutation suite's fixture, which is what keeps it honest: if a field in it is
 wrong, the suite stops catching something, and the suite runs on every change.
@@ -153,38 +159,52 @@ wrong, and quietly makes design decisions that were never theirs to make.
 
 | Script | | What each one is |
 |:--|:--:|:--|
-| `trace-check` | 7 | no declared wrong term used, rule enforcement, use case trace, entity terms, AS-IS present, assumption radius, exclusions asked |
+| `trace-check` | 7 | glossary closure, rule enforcement, use case trace, entity terms, AS-IS present, assumption radius, exclusions asked |
 | `domain-check` | 5 | all eight categories answered, sourced, verified, agent claims surfaced, affects |
 | `industry-check` | 7 | sector known, stakeholders, constraints, conventions, forbidden, style excluded, evidence |
+| `problem-check` | 10 | trigger complete, metric, baseline, target, guardrail, counter-evidence, generative HMW, commercial constraint declared, tier declared, freeze attributed |
+| `discover-check` | 10 | segment defined, sample size, users provenance, evidence class, pain frequency, somebody who said no, stakeholder fears, competitor pricing, bottom-up market, buyer named |
 | `schema-check` | 6 | sample size, nine foundations, type roles, provenance, shipped not concept, tradition named |
+| `value-check` | 11 | value declared, trigger, horizon, run-cost, bottom-up revenue, three-point revenue, sensitivity, do-nothing baseline, tier fence, attribution, verdict |
+| `concept-check` | 1 | two or three concepts genuinely diverged, on complex tier only |
 | `verify-html` | 7 | viewport tagged, overflow, tall-screen pair, viewport coverage, direction, data ownership, width media |
-| `contrast-check` | 4 |
+| `contrast-check` | 2 | unresolved background, exemption still needed |
+| `spacing-check` | 3 | edge inset, insets agree across screens, gaps on the scale |
 | `shell-check` | 6 | says what it is not, flow leads, three zoom controls, tabs load in place, group order, frame inset |
-| `spacing-check` | 4 | edge inset, insets agree across screens, gaps on the scale, edge inset on the scale | body contrast, large-text contrast, unresolved background, exemption still needed |
 | `coverage-check` | 5 | use case covered, screen traced, use case exists, flow reachable, target buildable |
-| `parity-check` | 2 | nominal and structural, where two or more viewports are declared |
 | `copy-check` | 5 | no placeholder, glossary terms, copy rules, error next step, length realism |
 | `flow-check` | 7 | dead end, dangling href, dangling target, unreachable, orphan prototype, nav target, flow declared |
 | `arch-check` | 7 | feasibility verdict, risk priced, NFR complete, constraint becomes NFR, ADR complete, technology has an ADR, mobile signing custody |
 | `proposal-check` | 6 | slot addressed, axis named, provenance, a real choice, nothing the sector forbids, choice recorded |
-| `estimate-check` | 6 | preconditions, three points, tier spread, risk reflected, headcount, effort log |
+| `estimate-check` | 10 | preconditions, three points, estimated by the doer, tier spread, risk reflected, headcount, effort log, slice releasable, critical path, buffer stated |
 | `impl-check` | 8 | test trace, CI pipeline, branch protection, branch age, environments, secrets, NFR measured, stack declared |
 | `code-tokens-check` | 4 | raw colour, raw spacing, raw radius, linear easing |
 | `dev-check` | 7 | API contract, error branch, state strategy, accessibility in code, performance budget, server guard, retry safety |
 | `qa-check` | 7 | pyramid shape, use case covered end to end, rule asserted, regression traced, severity defined, test data, release gate |
+| `close-check` | 8 | brief read cold, nothing excluded, metric compared to baseline, committed against shipped, assumption outcome, effort logged, delivered only over a frozen package, a dispute that can be answered |
 | `build-diff` | 5 | frame paired, control height, radius, hue budget, text position |
-| `geometry-diff` | 1 | Figma position against the HTML reference |
-| | **116** | |
+| | **154** | |
+
+`parity-check` and `geometry-diff` report a measured difference rather than named check ids: nominal and
+structural parity wherever two or more viewports are declared, and Figma position against the HTML
+reference.
 
 Every one has been seen to fail on the defect it was written for, and you can watch it happen:
 
 ```bash
 node scripts/mutate.mjs <your-project-dir>
+node scripts/mutate.mjs --fixture        # pica checking itself: 89 caught, 0 missed, 0 skipped
 ```
 
 It reintroduces the defect each check was written for and reports whether that check fires, whether
 anything else fires with it, and whether your project was clean before it started. **It refuses to run
 over a failing baseline**, because a check firing on an already-broken project proves nothing.
+
+`--fixture` builds the worked example into a temp directory with the two things it cannot carry in
+this repository — a git repository of its own and a fresh capture — which is why that is the
+invocation that self-tests pica. Pointed at `examples/approvals` in place, `impl-check` reads *this*
+repository's git instead and reports it not ready to release, which it is: pica has no CI pipeline of
+its own.
 
 Each check is also recorded next to the failure that earned it in [`CHANGELOG.md`](CHANGELOG.md).
 
@@ -230,9 +250,9 @@ loaded. Approvals live on disk, because a hook is a script and cannot know you s
 | Count | What each one is |
 |:--|:--|
 | **15 plugins** | 14 packages plus a bundle, each declaring what it requires, produces, checks and considers done |
-| **16 commands** | Deterministic once typed |
-| **23 rule modules** | Loaded per step, never all at once. 173 definition-of-done items across them |
-| **21 check scripts** | Plus the capture harness, the status tool, and a harness that runs the in-Figma scripts outside Figma |
+| **19 commands** | Deterministic once typed |
+| **25 rule modules** | Loaded per step, never all at once. 228 definition-of-done items across them |
+| **26 check scripts** | Plus the capture harness, the status tool, and a harness that runs the in-Figma scripts outside Figma |
 | **154 checks** | Every one fails closed. `/pica-verify` runs every applicable one in a single table, and an abstention is never counted as a pass |
 | **28 sectors** | 264 names resolving to them, 4 deliberately refused as ambiguous |
 | **10 specialists** | Each loads its own craft rules and the sector entry before it starts, and estimates its own line. The evaluator has **no write access**, because a reviewer that can fix cannot be trusted to report |
@@ -279,18 +299,20 @@ ends complete, not truncated.
 </details>
 
 <details>
-<summary><b>The 23 rule modules</b></summary>
+<summary><b>The 25 rule modules</b></summary>
 
-<br>Loaded per step rather than all at once. 173 definition of done items across them, each either
+<br>Loaded per step rather than all at once. 228 definition of done items across them, each either
 decided by a check or explicitly left to a human.
 
 | Module | Package | Covers |
 |:--|:--|:--|
 | `research.md` | research | Intake packet, contract, exclusions, audit breadth, token provenance, client copy rules, data ownership |
 | `design-vocabulary.md` | research | The nine foundations, ten named styles with measurable signatures, style assertions, where to look |
+| `discovery.md` | discover | Three lists rather than one, evidence classes, frequency over adjectives, somebody who said no, the market derived bottom-up, what competitors charge |
 | `business-analysis.md` | analyst | Elicitation, AS-IS and TO-BE, the delta, business rules, use cases, the domain model, the PRD |
 | `domain-knowledge.md` | analyst | Where domain constraints live in order of authority, Event Storming without a workshop |
 | `industry-knowledge.md` | analyst | The 28-sector base and how to use it, the five convention axes, the waiver registers |
+| `value-modelling.md` | model | Build cost from the estimate, three points on revenue, bottom-up only, run cost across the horizon, the fence rather than the tier list, the do-nothing baseline, attribution per line |
 | `architecture.md` | architect | Feasibility as three lists, C4 stopping at component, ADRs with consequences, NFRs as numbers |
 | `html-prototype.md` | html | Layout, the review page, options versus the interactive flow, the tall-screen pair, state matrices |
 | `html-gates.md` | html | The measured gate, the flow gate, viewport parity, HTML-only coverage, definition of done |
