@@ -49,8 +49,27 @@ function makeFixture() {
     field: "retail banking", industry: { key: "finance",
       conventions: ["colour", "style", "density", "typography", "tone"].map((about) => ({
         about, followed: true, note: `follows the sector convention on ${about}, recorded here so the decision is visible` })),
-      forbiddenPrevented: [], departures: [] },
-    stakeholders: [{ role: "customer", wants: "to see the balance", fears: "a transfer that silently failed", decides: false }],
+      forbiddenPrevented: [
+        { forbidden: "animating a balance so it cannot be read immediately",
+          preventedBy: "the balance is rendered as static text and no transition token applies to it" },
+        { forbidden: "hiding a fee behind a disclosure the user has to open",
+          preventedBy: "the fee row is always expanded on the confirmation screen and has no collapsed state" },
+        { forbidden: "an irreversible transfer with no confirmation step naming the recipient in full",
+          preventedBy: "the confirm screen prints the recipient's full legal name and the button is disabled until it renders" },
+      ], departures: [] },
+    /* The sector entry decides what a project of this field must answer, and "finance"
+     * requires three DECIDING roles. A fixture naming only the customer failed
+     * industry-check on all three and took --fixture down with it. */
+    stakeholders: [
+      { role: "account holder", wants: "to see the true balance and move money without doubt",
+        fears: "a transfer that silently failed", decides: false, vetoes: false, informed: true },
+      { role: "compliance officer", wants: "to prove afterwards who did what",
+        fears: "an action with no attributable actor", decides: true, vetoes: true, informed: true },
+      { role: "fraud analyst", wants: "to stop a payment mid-flight",
+        fears: "a queue with no age on it", decides: true, vetoes: true, informed: true },
+      { role: "regulator", wants: "evidence of fair treatment and disclosure",
+        fears: "a cost the customer was not shown before consenting", decides: true, vetoes: true, informed: true },
+    ],
     glossary: [{ term: "payment", means: "one instruction to move money", notOurTerm: ["transaction"] }],
     businessRules: [{ id: "BR-01", rule: "A payment above the limit needs a second approver.",
       enforcedBy: "an API guard on the server route", source: "the brief" }],
@@ -61,11 +80,157 @@ function makeFixture() {
     delta: "Approval moves from email to the product, so who approved what is recorded rather than remembered.",
     assumptions: [{ id: "AS-01", about: "limit", assumed: "The approval limit is a single figure rather than one per account.",
       confidence: "low", produced: ["the approval screen"], affects: ["BR-01", "UC-01"],
-      correctBy: "the client has a limit per account, which changes the rule into a lookup" }],
+      correctBy: "the client has a limit per account, which changes the rule into a lookup",
+      outcome: "held" },
+      { id: "AS-02", about: "restricted claims", confidence: "low",
+        assumed: "Fees and rates must appear on the confirmation screen rather than only in the terms.",
+        why: "established by an agent from the market conduct handbook and not confirmed by the client's counsel",
+        produced: ["the confirmation screen"], affects: ["BR-01"],
+        correctBy: "counsel says the terms suffice, which removes a block from the confirmation screen",
+        outcome: "held" }],
     exclusions: [{ excluded: "Card issuing", why: "out of scope by the brief", source: "brief" }],
     exclusionsConfirmed: true,
+    briefPath: "docs/brief.md",
+
+    /* All eight categories, because domain-check matches on the category NAME and a
+     * category written any other way reads as an unanswered one. Anything verified by
+     * an agent also exists as a low-confidence assumption below, which the check
+     * enforces: an agent claim read as fact is how a search result becomes a liability. */
+    domainConstraints: [
+      { category: "standard", affects: ["the payment message schema", "the domain model"], constraint: "ISO 20022 for payment messaging", source: "the ISO 20022 published message catalogue", verifiedBy: "human" },
+      { category: "regulator", affects: ["the disclosure copy", "the confirmation screen"], constraint: "the central bank plus the market conduct authority", source: "the client's own compliance register", verifiedBy: "human" },
+      { category: "data protection", affects: ["the fields shown on any exported screen"], constraint: "personal data is minimised on every screen that leaves the building", source: "the client's data protection policy", verifiedBy: "human" },
+      { category: "identity", affects: ["the approval step", "the session policy"], constraint: "strong customer authentication on any payment above the limit", source: "the client's compliance register", verifiedBy: "human" },
+      { category: "retention", affects: ["the approval record", "an NFR on storage duration"], constraint: "approval records are kept for seven years", source: "the client's retention schedule", verifiedBy: "human" },
+      { category: "audit trail", affects: ["every state-changing screen", "an end-to-end test per use case"], constraint: "every state change records an attributable actor and a timestamp", source: "the client's audit policy", verifiedBy: "human" },
+      { category: "restricted claims", affects: ["the confirmation screen", "the fee row"], constraint: "no rate or fee is stated without the confirmation screen showing it", source: "the market conduct handbook", verifiedBy: "agent" },
+      { category: "professional duty", affects: ["nothing: no licensed duty applies here"], constraint: "not applicable: nobody here holds a licensed professional duty", source: "asked at intake and answered by the client", verifiedBy: "human" },
+    ],
+
+    /* Five shipped exemplars, because the sector entry asks for five and schema-check
+     * asks for all nine foundations with typography BY ROLE, a source URL and a method.
+     * None of these hosts is a concept host, which is the other thing it checks. */
+    measured: ["Monzo", "Revolut", "Wise", "Starling", "N26"].map((product, i) => ({
+      product, url: `https://${product.toLowerCase()}.com/`, shipped: true,
+      method: "measured from a full-page capture with the browser inspector",
+      tradition: "international / Swiss typographic style, executed flat with restrained elevation",
+      typography: { display: 32 - i, heading: 24, body: 16, label: 14, caption: 13 },
+      colour: { hues: 2, saturationRange: "24% to 68%", neutralSteps: 9, semantic: "one positive, one negative, one warning" },
+      spacing: { base: 8, scale: [4, 8, 12, 16, 24, 32, 48], brokenAt: "the dense transaction row, which runs on a 4px rhythm" },
+      elevation: { levels: 2, depths: ["0 1px 2px", "0 4px 12px"], transparency: "none over content" },
+      motion: { durations: { micro: 120, panel: 220 }, easing: "cubic-bezier(0.2, 0, 0, 1)", doesNotAnimate: "the balance" },
+      iconography: { style: "stroke", weight: 1.5, corners: "rounded", sizes: [16, 20, 24] },
+      grid: { columns: 12, gutter: 24, margin: 40, maxContent: 1200 },
+      density: { controlHeight: 32 + i, rowHeight: 44, contentToWhitespace: "high on the ledger, medium elsewhere" },
+      accessibility: { bodyContrast: 7.1, largeContrast: 4.8, touchTarget: 44, focus: "a 2px ring offset by 2px", reducedMotion: "respected" },
+    })),
+
+    /* Phase A and Phase E of the 1.0.0 plan. problem is the block that nothing in nine
+     * versions ever read, and it is what problem-check exists for. */
+    problem: {
+      statement: "Nobody can say afterwards who approved a payment, so every audit becomes a reconstruction.",
+      whose: "compliance officer",
+      metric: "share of payments with a named approver recorded at the time",
+      unit: "percent",
+      baseline: 0,
+      baselineMeasuredBy: "the settlement database, counting approvals with a null actor",
+      baselineMeasuredOn: "2026-08-14",
+      target: 95,
+      direction: "up",
+      guardrails: [{ metric: "median time to approve a payment", unit: "seconds", mustNotExceed: 90 }],
+      counterEvidence: "If the audit team already reconstructs approvals from email in under an hour, this is not worth building.",
+      hmw: "How might we make who approved what recoverable after the fact?",
+    },
+    trigger: {
+      changed: "The regulator published an audit-trail requirement carrying a compliance date.",
+      when: "2026-06",
+      ifNothing: "The next inspection repeats the existing finding and the penalty escalates.",
+      window: "The compliance date is 2027-03, so the window closes in roughly six months.",
+    },
+    constraint: {
+      fixed: "date", by: "the client's compliance director",
+      consequence: "The regulator's compliance date is 2027-03 and a miss escalates the existing finding.",
+      variable: ["scope", "resources"],
+    },
+    workPackages: {
+      approvals: { tier: "complex", htmlApproved: true, ported: false,
+        concepts: [
+          { id: "C1", approach: "a queue the approver works down, newest last", servesWell: ["UC-01"],
+            servesBadly: ["UC-01"], dropped: false,
+            why: "kept: it is the only shape that shows how long the oldest item has waited" },
+          { id: "C2", approach: "approval inside the payment record itself", servesWell: ["UC-01"],
+            servesBadly: ["UC-01"], dropped: true,
+            why: "it hides how many are waiting, which is the number the fraud analyst needs first" },
+        ] },
+    },
+    /* dev-check requires a placement for all four, and it is right to: most of the mess
+     * in a front end is server data living in a client store because the first screen was
+     * easier that way. */
+    stateStrategy: {
+      server: "every payment and every approval record, fetched per screen and never mirrored into a client store",
+      url: "the queue filter and the selected payment id, so a link reopens exactly what someone was looking at",
+      client: "only the collapsed or expanded state of the fee row",
+      form: "the approval note, held locally until the request succeeds and discarded after",
+    },
+    apiContract: [
+      { route: "POST /api/payments/:id/approve", request: "{ note?: string }",
+        response: "{ id, status, approvedBy, approvedAt }",
+        errors: ["409 already approved", "403 not an approver", "422 above the actor's limit"] },
+    ],
+    scopeFrozen: true,
+    frozenBy: "the client's compliance director",
+    changeControl: "Any addition is priced as a change order and moves the date by the same number of days.",
+    deadline: "2027-01-29",
+    durationWeeks: 14,
+    estimate: {
+      for: "client",
+      research:  { o: 24, m: 32, p: 56, by: "pica-researcher" },
+      analysis:  { o: 40, m: 60, p: 96, by: "pica-analyst" },
+      design:    { o: 60, m: 90, p: 140, by: "pica-designer" },
+      fe:        { o: 160, m: 220, p: 320, by: "pica-developer" },
+      be:        { o: 200, m: 280, p: 420, by: "pica-developer" },
+      qa:        { o: 80, m: 120, p: 200, by: "pica-tester" },
+    },
+    effortLog: [
+      { line: "research", actual: 30 }, { line: "analysis", actual: 58 },
+      { line: "design", actual: 96 }, { line: "fe", actual: 240 },
+      { line: "be", actual: 300 }, { line: "qa", actual: 130 },
+    ],
+    roadmap: {
+      slices: [
+        { id: "R1", contains: ["approvals"], closes: ["UC-01"],
+          moves: "the share of payments with a named approver", date: "2027-01-29", dependsOn: [] },
+        { id: "R2", contains: ["approvals"], closes: ["UC-01"],
+          moves: "the time taken to answer an audit request", date: "2027-Q2", dependsOn: ["R1"] },
+      ],
+      criticalPath: ["R1", "R2"],
+      capacity: [{ role: "fe", availablePct: 60, alsoOn: "the settlement rebuild" }],
+      bufferDays: 10,
+    },
+    closeout: {
+      briefReadFrom: "docs/brief.md",
+      metricNow: 91, metricMeasuredOn: "2027-04-02",
+      shipped: ["approvals"], dropped: [],
+    },
+    delivered: false,
   };
   fs.writeFileSync(path.join(d, ".pica", "state.json"), JSON.stringify(state, null, 2));
+  /* dev-check refuses an empty scan, correctly: "an empty scan is not a pass". One real
+   * file is enough for the mutation that matters, which is a business rule enforced by
+   * hiding a button rather than by the server. */
+  fs.mkdirSync(path.join(d, "src"), { recursive: true });
+  fs.writeFileSync(path.join(d, "src", "approve.ts"),
+    ["export async function approve(id: string, actor: string) {",
+     "  if (!actor) throw new Error(\"an approval needs an attributable actor\");",
+     "  const res = await fetch(`/api/payments/${id}/approve`, { method: \"POST\" });",
+     "  if (!res.ok) return { error: await res.json() };",
+     "  return res.json();",
+     "}", ""].join("\n"));
+  /* close-check reads briefPath and refuses when the file is gone, because the brief is
+   * the one path that has to survive the whole project. */
+  fs.mkdirSync(path.join(d, "docs"), { recursive: true });
+  fs.writeFileSync(path.join(d, "docs", "brief.md"),
+    "We need to know who approved a payment. Right now it is in email somewhere.\n");
   fs.writeFileSync(path.join(d, "tokens", "tokens.json"),
     JSON.stringify({ "--s-1": "4px", "--s-2": "8px", "--s-3": "12px", "--s-4": "16px", "--s-5": "24px" }, null, 2));
   return d;
@@ -170,11 +335,34 @@ const baseState = JSON.parse(base);
  * run left a mutated state on disk and the next run read it as the baseline, so 38
  * mutations "passed" against a project carrying four real defects. Establish it first,
  * refuse if it is dirty, and say what is wrong. */
+const have = (need) => {
+  if (!need) return true;
+  if (need === "capture") return hasCapture;
+  if (need === "capture+direction") return hasCapture && baseState.direction && baseState.direction.assert;
+  const v = baseState[need];
+  return Array.isArray(v) ? v.length > 0 : v !== undefined && v !== null;
+};
+
+/* A pair is EXERCISED only if some mutation on it will actually run: the script is in
+ * scope for --only, and the project carries the material that mutation needs. The gate
+ * used to demand all nineteen scripts pass, which contradicted this fixture's own design
+ * ("the checks that read a capture are skipped here and SAID to be skipped") and made
+ * --fixture refuse to run at all: 14 scripts reported findings on it, so the suite exited
+ * 2 before the first mutation and the one claim this file exists to prove was
+ * unverifiable by the very mode offered to people with no project to hand.
+ *
+ * Narrowing it does not weaken the gate. Its purpose is that no mutation is scored over
+ * a baseline that was already failing, and that purpose is served by checking exactly the
+ * pairs about to be scored. A script nothing will exercise proves nothing either way. */
+const exercised = (script, argv) => M.some(([, s, a, need]) =>
+  s === script && a.join(" ") === argv.join(" ") && (!ONLY || s.includes(ONLY)) && have(need));
+
 {
   const seen = new Set(); const bad = [];
   for (const [, script, argv] of M) {
     const key = script + argv.join(" ");
     if (seen.has(key)) continue; seen.add(key);
+    if (!exercised(script, argv)) continue;
     const out = run(script, argv);
     if (out && !/^0 finding|^PASS:/m.test(out))
       bad.push([path.basename(script), out.trim().split("\n").slice(-1)[0]]);
@@ -188,14 +376,6 @@ const baseState = JSON.parse(base);
     process.exit(2);
   }
 }
-
-const have = (need) => {
-  if (!need) return true;
-  if (need === "capture") return hasCapture;
-  if (need === "capture+direction") return hasCapture && baseState.direction && baseState.direction.assert;
-  const v = baseState[need];
-  return Array.isArray(v) ? v.length > 0 : v !== undefined && v !== null;
-};
 
 for (const [check, script, argv, need, mutate] of M) {
   if (ONLY && !script.includes(ONLY)) continue;
@@ -224,6 +404,7 @@ const clean = [];
 for (const [, script, argv] of M) {
   const key = script + argv.join(" ");
   if (clean.some(([k]) => k === key)) continue;
+  if (!exercised(script, argv)) continue;
   clean.push([key, script, argv, run(script, argv)]);
 }
 const dirty = clean.filter(([, , , out]) => out && !/^0 finding|^PASS:/m.test(out));
