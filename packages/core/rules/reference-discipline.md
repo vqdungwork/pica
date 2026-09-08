@@ -148,3 +148,35 @@ restates a rule stated above, in the form a person can tick.
 - [ ] Every fix applied at the definition, and the occurrences re-checked afterwards
 - [ ] Every promotion verified in a separate call, and every binding confirmed rather than assumed
 - [ ] Where a criterion could not be scored against the reference, that is reported as unscored, not as clean
+
+## When a check is wrong
+
+Every check id in this project is somebody's judgement. `deviations` and
+`rawValueExemptions` record an accepted **value**; until 1.2.0 nothing recorded an
+accepted argument that a check's **premise** was wrong for a project.
+
+Without that register a disagreement has two outcomes and both are bad: somebody edits
+the check and nobody knows why, or somebody ignores the finding and nobody knows they
+did. `state.checkDisputes` makes the third outcome recordable.
+
+```json
+"checkDisputes": [
+  { "check": "users-sample-size", "script": "discover-check.mjs",
+    "claim": "what the check asserts, restated",
+    "argument": "why it is wrong here, at length",
+    "acceptedBy": "who agreed", "on": "2026-09-05",
+    "outcome": "check-changed | project-exempted | argument-withdrawn | open",
+    "exemptionIn": "the register holding the exemption, when the outcome is that" }
+]
+```
+
+`close-check` reads it and is deliberately hard to satisfy. A register that accepted "we
+disagreed" would launder every ignored finding through it, so a dispute needs the claim
+restated, an argument of real length, a name, a date and an outcome. **An exemption has
+to name the register that actually holds it**, because otherwise the dispute is the only
+record and the check keeps firing with nothing to say why.
+
+**`open` on a delivered project is a finding.** A disagreement nobody settled before
+handover is one the client inherits without being told.
+
+Raising none is a valid state. It is not evidence the checks are right.

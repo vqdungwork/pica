@@ -224,6 +224,11 @@ const M = [
    * written the assumption down, and it is the first thing dropped in a hurried closeout. */
   ["assumption-outcome", "core/scripts/close-check.mjs", [S], "assumptions", (s) => { s.assumptions[0].outcome = "wrong"; }],
   ["effort-logged",      "core/scripts/close-check.mjs", [S], "effortLog", (s) => { s.effortLog = s.effortLog.slice(1); }],
+  /* Exempted and pointing at no register. A dispute that excuses a check without naming
+   * where the exemption lives IS the ignored finding it was built to prevent, wearing
+   * better paperwork. */
+  ["check-disputed",     "core/scripts/close-check.mjs", [S], "checkDisputes", (s) => delete s.checkDisputes[0].exemptionIn],
+  ["check-disputed",     "core/scripts/close-check.mjs", [S], "checkDisputes", (s) => { s.checkDisputes[0].argument = "we disagreed"; }],
   ["delivered-frozen",   "core/scripts/close-check.mjs", [S], "closeout", (s) => { s.delivered = true; s.workPackages.approvals.htmlApproved = false; }],
   // dev-check
   ["api-contract",     "developer/scripts/dev-check.mjs", ["src", S], "apiContract", (s) => delete s.apiContract[0].errors],

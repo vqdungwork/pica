@@ -22,6 +22,10 @@
  *   5. ASSUMPTION OUTCOME every assumption held or was wrong, and wrong ones cost something.
  *   6. EFFORT LOGGED     actuals against every estimated line.
  *   7. DELIVERED FROZEN  after delivery, nothing was modified.
+ *   8. CHECK DISPUTED    a check whose premise was argued with, and what happened. The
+ *                        register that did not exist: nothing recorded an accepted
+ *                        argument that a check was wrong, so a disagreement either
+ *                        edited a check silently or ignored a finding silently.
  *
  * Usage: node close-check.mjs <state.json>
  */
@@ -213,6 +217,69 @@ if (state.delivered) {
   }
 }
 
+/* ---- 8. CHECK DISPUTED -------------------------------------------------- *
+ * The register that did not exist. Every one of pica's check ids is somebody's judgement,
+ * and there was no way to record that a judgement had been argued with. `deviations` and
+ * `rawValueExemptions` record an accepted VALUE; nothing recorded an accepted argument
+ * that a check's PREMISE was wrong for this project.
+ *
+ * Without it a disagreement has two outcomes and both are bad: the team edits the check
+ * and nobody knows why, or the team ignores the finding and nobody knows they did. This
+ * makes the third outcome recordable, which is the one that makes a framework worth
+ * trusting rather than merely complying with.
+ *
+ * It is deliberately hard to fill in. A dispute needs the claim, the argument, a name,
+ * a date and what happened, because a register that accepts "we disagreed" would launder
+ * every ignored finding through it. */
+const OUTCOMES = ["check-changed", "project-exempted", "argument-withdrawn", "open"];
+let disputeBad = 0;
+const disputes = Array.isArray(state.checkDisputes) ? state.checkDisputes : [];
+for (const [i, x] of disputes.entries()) {
+  const where = `checkDisputes[${i}] (${x.check || "unnamed"})`;
+  if (!said(x.check, 3)) {
+    disputeBad++;
+    fail("check-disputed", where, "names no check. A dispute about nothing in particular cannot be answered.");
+  }
+  if (!said(x.claim, 15)) {
+    disputeBad++;
+    fail("check-disputed", where,
+      "does not state what the check claims. Arguing with a check you have not restated is arguing with a memory of it.");
+  }
+  if (!said(x.argument, 40)) {
+    disputeBad++;
+    fail("check-disputed", where,
+      "carries no argument, or too short a one. This register exists so a disagreement can be judged later, and forty characters is the floor at which that is possible.");
+  }
+  if (!said(x.acceptedBy, 4)) {
+    disputeBad++;
+    fail("check-disputed", where,
+      "nobody accepted it. An unattributed dispute is an ignored finding with better paperwork.");
+  }
+  if (!/^\d{4}-\d{2}(-\d{2})?$/.test(String(x.on || ""))) {
+    disputeBad++;
+    fail("check-disputed", where, `"${x.on ?? "absent"}" is not a date.`);
+  }
+  const oc = String(x.outcome || "").toLowerCase();
+  if (!OUTCOMES.includes(oc)) {
+    disputeBad++;
+    fail("check-disputed", where,
+      `outcome "${x.outcome ?? "absent"}" is not one of ${OUTCOMES.join(", ")}.`);
+  }
+  /* An exemption has to point at the register that actually holds it, or the dispute is
+   * the only record and the check still fires on every future run with nothing to say
+   * why. */
+  if (oc === "project-exempted" && !said(x.exemptionIn, 6)) {
+    disputeBad++;
+    fail("check-disputed", where,
+      "was exempted and does not name the register holding the exemption. deviations, rawValueExemptions, contrastExemptions, parityExemptions and constraintsNotApplicable are the registers; a dispute is not one of them.");
+  }
+  if (oc === "open" && state.delivered) {
+    disputeBad++;
+    fail("check-disputed", where,
+      "is still open on a delivered project. A disagreement nobody settled before handover is one the client inherits without being told.");
+  }
+}
+
 /* ---- report -------------------------------------------------------------- */
 const table = [
   ["brief-cold", coldBad, declaredAbsent && !said(bp, 6) ? "no brief was supplied, and that is declared"
@@ -224,6 +291,9 @@ const table = [
   ["assumption-outcome", outcomeBad, `${(state.assumptions || []).length} assumption(s)`],
   ["effort-logged", effortBad, `${est.length} estimated line(s), ${logged.size} logged`],
   ["delivered-frozen", frozenBad, state.delivered ? "delivered, checked" : "not delivered yet, not checked"],
+  ["check-disputed", disputeBad, disputes.length
+    ? `${disputes.length} dispute(s), ${disputes.filter((x) => String(x.outcome).toLowerCase() === "open").length} open`
+    : "none raised, which is a valid state and not evidence the checks are right"],
 ];
 for (const [name, n, scope] of table)
   console.log(`${n ? "FAIL" : "pass"}  ${name.padEnd(20)} ${String(n).padStart(3)} finding(s)   (${scope})`);
