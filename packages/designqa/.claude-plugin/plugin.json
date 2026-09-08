@@ -1,7 +1,7 @@
 {
   "name": "pica-designqa",
   "description": "pica design QA: heuristic evaluation fanned out to independent evaluators, cognitive walkthrough, and the build-versus-design comparison nobody owns.",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "author": {
     "name": "Dung Vuong"
   },

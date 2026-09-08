@@ -1,7 +1,7 @@
 {
   "name": "pica-architect",
   "description": "pica architect: feasibility before anything is promised, C4 diagrams, architecture decision records, and non-functional requirements stated as numbers.",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "author": {
     "name": "Dung Vuong"
   },

@@ -39,13 +39,19 @@ first gets made.
 derive becomes a labelled assumption the client corrects at review. The steps below are what it runs,
 and each has its own entry point because no session survives a multi-day project.
 
+**At any point, `/pica-verify` runs every applicable check once, in one table**, and says which
+abstained and why. `pica-status` says what CAN run; that runs it. An abstention is never counted as a
+pass, and `--adopt` turns the abstentions into the order a project should adopt them in.
+
 **Phase 0 to 2 — understand and define.** Ends with a PRD a non-technical reader follows.
 
 | # | Step | Command | Rules |
 |---|---|---|---|
 | 0 | Intake: brief verbatim, sources labelled, **analytics and support logs requested** | `/pica` | `packages/research/rules/research.md` |
 | 1 | Research: analytics, support logs, journey map, **measure 3 to 5 shipped products** | inside `/pica` | `packages/research/rules/design-vocabulary.md` |
+| 0.9 | Discovery: who uses it, **what actually hurts counted rather than assumed**, who can veto it and what they fear, what the field charges | `/pica-discover` | `packages/discover/rules/discovery.md` |
 | 1.8 | Feasibility, **before anything is promised** | `/pica-architect --feasibility` | `packages/architect/rules/architecture.md` |
+| 1.9b | The value case: cost to build, **cost to run for two years**, plausible return, the price fence. **The last point at which stopping is cheap** | `/pica-model` | `packages/model/rules/value-modelling.md` |
 | 2 | Domain knowledge, glossary, AS-IS, TO-BE, **the delta**, business rules, use cases, domain model, PRD | `/pica-analyse` | `packages/analyst/rules/business-analysis.md`, `packages/analyst/rules/domain-knowledge.md`, `packages/analyst/rules/industry-knowledge.md` |
 
 **Phase 3 — design and verify.** This phase is the deliverable. An HTML-only project ends here, fully
@@ -122,13 +128,15 @@ the wrong product** — content parity is a separate criterion and only the sour
 
 ## Packages
 
-pica is twelve packages plus a bundle. Each declares what it requires, produces, checks and considers
+pica is fourteen packages plus a bundle. Each declares what it requires, produces, checks and considers
 done, in its own manifest, and each installs on its own with only what it needs.
 
 | Package | Depends on | Owns |
 |---|---|---|
 | `pica-core` | — | intake, closeout, feedback, the state schema, every gate, and `/picaflow` |
-| `pica-analyst` | core | elicitation, domain knowledge, AS-IS and TO-BE, business rules, the domain model, the PRD |
+| `pica-discover` | core | users and what hurts, the people who can veto it, competitor pricing, the market derived from sourced factors |
+| `pica-analyst` | core | elicitation, domain knowledge, AS-IS and TO-BE, business rules, the domain model, the PRD, **the problem stated as a number** |
+| `pica-model` | core | cost to build, cost to run for two years, revenue bottom up, the pricing fence |
 | `pica-research` | core | the source audit, the nine foundations, design vocabulary, token provenance |
 | `pica-html` | core, research | work packages at every viewport, and the measured gate |
 | `pica-content` | core, html | the words: every state written, bound to the glossary |
@@ -389,6 +397,7 @@ geometry diff that existed only in the project they were written from.
 | Script | Proves | Passes when |
 |---|---|---|
 | `capture-html-reference.mjs` | measurement is possible | it writes an artefact; it refuses on 0 frames rather than emitting an empty one |
+| `concept-check.mjs` | a complex package widened before it narrowed | 2 or more concepts, exactly one kept, and each names what it serves badly. **State only, because divergence happens before the screens exist** |
 | `verify-html.mjs` | the HTML is internally sound | 0 findings across viewport-tagged, overflow, tall-screen-pair, viewport-coverage, direction |
 | `coverage-check.mjs` | **the design is what was agreed** | 0 across uc-covered, screen-traced, uc-exists, flow-reachable, target-buildable |
 | `copy-check.mjs` | the words are written | 0 across placeholder, glossary terms, copy rules, error next step, length realism |
@@ -442,6 +451,39 @@ script does.
 **And none of them can tell you a link is wrong, only that it is broken.** `flow-check` proves every
 destination exists; whether it is the *right* destination is answered by a human clicking. On the source
 project ten green harnesses coexisted with a home-screen row that opened another role's screen.
+
+## The checks added in 1.0.0, and why each existed nowhere before
+
+| Script | Guards | The gap it closed |
+|---|---|---|
+| `problem-check.mjs` | the metric, its baseline, the guardrail, the counter-evidence, the HMW question, the trigger, the commercial constraint, the tiers, the freeze | **`grep -rl 'state.problem' packages/*/scripts` returned nothing.** The number the project is judged by, and that closeout reads back, had no check behind it |
+| `value-check.mjs` | build cost, two years of run cost, revenue on two or more sourced drivers, the price fence, sensitivity, the do-nothing baseline | A design that is correct and unaffordable passed every other check here |
+| `discover-check.mjs` | segments with a context of use, pain with a frequency and an evidence class, somebody who said no, veto holders and their fears, competitor pricing, a derived market | Nine versions measured design and never asked a person anything |
+| `close-check.mjs` | the brief read cold, the exclusions compared, the metric against its baseline, every committed package accounted for, assumption outcomes, effort logged, **and disputes settled** | `pica-close` had asked since 0.3.0 for a comparison "by comparing, not by trusting" and shipped nothing that compares |
+| `pica-verify.mjs` | every applicable check, once, in phase order | Verifying meant 28 invocations you assembled yourself. **A check that is tedious to run is a check that gets skipped** |
+
+## When a check is wrong
+
+`state.checkDisputes`, read by `close-check`. Every check id here is somebody's judgement, and until
+1.2.0 nothing recorded that a judgement had been **argued with**: `deviations` records an accepted
+value, and nothing recorded an accepted argument that a check's **premise** was wrong.
+
+Without it a disagreement had two outcomes and both are bad: somebody edits the check and nobody knows
+why, or somebody ignores the finding and nobody knows they did.
+
+A dispute needs the claim restated, an argument of real length, a name, a date, an outcome, and where
+an exemption actually lives. **`open` on a delivered project is a finding.** Raising none is valid and
+is not evidence the checks are right.
+
+## Something to read
+
+`examples/approvals/` is a complete pica project: **26 of 28 checks pass on it, 161 assertions
+verified, and both abstentions are named.** It carries the interactive prototype rule 8 asks for,
+`html/proto.js` (the router pica declares and shipped no implementation of until 1.2.0), the review
+shell, and one accepted dispute.
+
+It is also the mutation suite's fixture, which is what stops it drifting: a wrong field in it stops the
+suite catching something, and the suite runs on every change.
 
 ## Rules
 

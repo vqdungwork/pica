@@ -1,5 +1,126 @@
 # Changelog
 
+## 1.2.0
+
+### The router it declared and never shipped, and a register for arguing with a check
+
+`proto.js`. pica declares an attribute vocabulary for interactive prototypes and shipped no
+implementation of it, so every project invented one and `flow-check` checked wiring nobody had a
+reference for. Written once now, in the example, in 100 lines with no build step. Two behaviours in
+it were navigation defects before they were rules, and both are the kind with no geometric signature
+because the destination renders perfectly: `data-tab` resets the stack and `data-go` does not, and an
+entry point lights the tab that **owns** the screen rather than the one last active.
+
+`review.html`. The shell has been specified since 0.3.0 and the example could not demonstrate it. It
+now satisfies all six of `shell-check`, and the boards and the flow share one stylesheet so they
+cannot drift. So the example demonstrates **rule 8**, which this project repeats most and could not
+previously show.
+
+`state.checkDisputes`, read by `close-check`. Every check id here is somebody's judgement and nothing
+recorded that one had been argued with. `deviations` records an accepted value; nothing recorded an
+accepted argument that a check's **premise** was wrong, so a disagreement either edited a check
+silently or ignored a finding silently. Deliberately hard to satisfy, because a register accepting
+"we disagreed" would launder every ignored finding through it. `open` on a delivered project is a
+finding.
+
+## 1.1.2
+
+### Three more checks the runner never called, and it hid them
+
+`pica-verify` silently ignored any declared check with no `args`, and figma had three. Two of them
+are not CLI scripts at all: they are pasted into a `use_figma` call and run in Figma's plugin
+runtime. That distinction was invisible because a silent `continue` looks identical whether a thing
+cannot run or merely was not wired. It now names everything it cannot run and says which kind of
+absence it is.
+
+## 1.1.1
+
+### The aggregate runner failed open
+
+`pica-verify`'s package walk stopped one level short in the installed layout and found **3 checks of
+27**, reporting a clean run over a project it had barely looked at. Every other check here fails
+closed; an aggregate runner that silently verifies a fraction fails **open**, and a clean report over
+one ninth of the checks is worse than no report.
+
+## 1.1.0
+
+### One command that runs every check, and the only complete pica project is now readable
+
+`pica-verify`. Verifying meant 28 separate invocations and assembling the picture yourself:
+`pica-status` said what could run and nothing ran it. A check that is tedious to run is a check that
+gets skipped. It carries no list of its own, reading what to run from each package's manifest.
+
+Three verdicts, and the difference between the last two is the point: `pass`, `FAIL`, and `abstain`.
+An abstention is never counted as a pass, and `--adopt` turns the abstentions into an adoption path.
+On a real legacy project that turned 18 findings into 22 named abstentions. `--evidence` lists every
+assertion that passed, because a green run printing `0 findings` is the least informative true thing
+available.
+
+`examples/approvals/`. The only complete pica project was a 637-line literal inside `mutate.mjs`,
+written into a temp directory and deleted. It is now a directory in the repository and the fixture
+copies it: 637 lines became 50. Keeping it **as** the fixture is what stops it drifting.
+
+`picaflow` went from 28 hand-listed invocations to 12.
+
+## 1.0.3
+
+### Every mutation now runs, and the skipped eighteen were the fixture's fault
+
+87 caught, 0 missed, 0 skipped, from 69 and 18. Every skip was material the bundled fixture did not
+carry, so eighteen checks shipped with this project's central claim resting on nothing. Fourteen
+closed with state the fixture should always have had. The last four needed a capture, and the
+decision was not to write one: the capture's sub-objects are positional arrays, so a hand-written
+fixture capture would be a second implementation of a format this repository already produces. The
+fixture writes html in pica's own frame convention and runs the real producer over it.
+
+## 1.0.2
+
+### Run against nine real projects, and three checks were shouting at people who had done nothing wrong
+
+`brief-cold` demanded a `docs/brief.md` that **eight of nine** real projects do not have, and one of
+those records the reason in its own contract: "No original brief was supplied." An absence may now be
+declared in `briefAbsent`; a brief that was recorded and lost still may not.
+
+`value-check` and `close-check` reported defects against steps a project had never run. Every sibling
+that reads a block it needs refuses instead. 29 of 45 real-project runs now say "no material".
+
+`problem-check` reported 18 findings where one sentence would do, and now leads with that sentence.
+
+## 1.0.1
+
+### The chain never called close-check, and three gates crashed rather than saying they could not run
+
+`close-check` shipped in 1.0.0 wired into `pica-close.md` and **not** into the chain. Found by
+executing every `run` line rather than reading the file.
+
+`verify-html`, `parity-check` and `capture-html-reference` threw unguarded `ENOENT` or exited 1 where
+they meant 2. Inside the chain 1 means "ran and found defects" and 2 means "could not run", so a
+project with nothing built yet arrived as a project with failures.
+
+## 1.0.0
+
+### Fourteen steps, fourteen definitions of done, and none of them a sentence
+
+Every step of the product build order has an owner, a check that returns non-zero, one sentence a
+human has to be able to say, and a gate no other step grants.
+
+Two new packages. `pica-model`: what it costs to build, what it costs to **run for two years**, what
+it plausibly returns, and the price fence. A design that is correct and unaffordable passed every
+other check here. `pica-discover`: who uses it and what actually hurts, counted rather than assumed.
+
+Three of the steps that were **claimed** covered were enforced by nothing. `grep -rl 'state.problem'
+packages/*/scripts` returned nothing, so the number the whole project is judged by had no check
+behind it. The commercial constraint was collected at intake and read by no script. And `pica-close`
+had said since 0.3.0 to compare the exclusions "by comparing, not by trusting" while shipping nothing
+that compares.
+
+`picaflow` stops at four points now, not three. The new first one is the business case, and it is the
+last confirmation at which stopping is cheap.
+
+And the suite that proves all of it could not run: `--fixture` failed its own baseline gate on 14 of
+19 scripts, so the one claim this project exists to make was unverifiable in the mode offered to
+people with no project to hand. From 0 runnable to 68 caught.
+
 ## 0.9.5
 
 ### The one claim that makes a check worth anything was unverifiable

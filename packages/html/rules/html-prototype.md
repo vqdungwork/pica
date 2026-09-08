@@ -440,6 +440,16 @@ Video or live surfaces add: buffering, connection lost, casting, and the fullscr
 `design-system.html` is built first, as a storybook: every token and every component with all variants
 and states, single file, no build step.
 
+**No check reads this file.** `pica.md` has asked for it since step 3, this rule names it, and the
+only script that mentions it is the capture producer, which *excludes* it. So the storybook is a rule
+with no executable behind it, which is the class of gap 0.3.0 shipped three of and this project keeps
+finding in itself. It is recorded here rather than left for somebody to notice.
+
+What would close it: a check that every token in `tokens/tokens.json` appears on the page, and that
+every class a screen uses appears there with at least one variant. Until that exists a component can
+enter the product without ever being documented, and nothing will say so. `examples/approvals/` ships
+a complete one anyway, and says the same thing at the bottom of it.
+
 From then on, **screens consume kit components.** A one-off built inline on a screen is a review
 finding, not a shortcut, because it will not receive the next token change and nobody will notice.
 

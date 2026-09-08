@@ -146,7 +146,7 @@ wrong, and quietly makes design decisions that were never theirs to make.
 ---
 
 <details>
-<summary><b>All 116 checks, and what is enforced by a hook</b></summary>
+<summary><b>All 154 checks, and what is enforced by a hook</b></summary>
 
 
 <br>Listed so the number can be recounted rather than trusted.
@@ -229,13 +229,13 @@ loaded. Approvals live on disk, because a hook is a script and cannot know you s
 
 | Count | What each one is |
 |:--|:--|
-| **13 plugins** | 12 packages plus a bundle, each declaring what it requires, produces, checks and considers done |
+| **15 plugins** | 14 packages plus a bundle, each declaring what it requires, produces, checks and considers done |
 | **16 commands** | Deterministic once typed |
 | **23 rule modules** | Loaded per step, never all at once. 173 definition-of-done items across them |
 | **21 check scripts** | Plus the capture harness, the status tool, and a harness that runs the in-Figma scripts outside Figma |
-| **116 checks** | Every one fails closed |
+| **154 checks** | Every one fails closed. `/pica-verify` runs every applicable one in a single table, and an abstention is never counted as a pass |
 | **28 sectors** | 264 names resolving to them, 4 deliberately refused as ambiguous |
-| **8 specialists** | Each loads its own craft rules and the sector entry before it starts, and estimates its own line. The evaluator has **no write access**, because a reviewer that can fix cannot be trusted to report |
+| **10 specialists** | Each loads its own craft rules and the sector entry before it starts, and estimates its own line. The evaluator has **no write access**, because a reviewer that can fix cannot be trusted to report |
 | **2 hooks** | One loads the rules every session; one refuses a Figma write that has not earned it |
 
 <details>

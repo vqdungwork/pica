@@ -1,7 +1,7 @@
 {
   "name": "pica",
   "description": "From the brief to the shipped product. Analyse the domain and its sector, design in HTML at every viewport you declare, verify by measurement rather than opinion, then estimate, architect, build, test and release. Ten specialists, each pricing its own work, 150 checks that fail closed, four gates enforced by hook.",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "author": {
     "name": "Dung Vuong"
   },
