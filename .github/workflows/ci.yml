@@ -34,15 +34,35 @@ jobs:
         with:
           node-version: '24'
 
-      # No install step, and that is deliberate: both scripts import Node builtins only
-      # and the repository has no package.json. Adding a dependency here would need this
-      # comment deleted first, which is the point of it.
+      # The two suites import Node builtins only. Playwright is not for them — it is for
+      # the FIXTURE. mutate.mjs produces the capture by running capture-html-reference.mjs,
+      # and without a browser four capture-reading mutations report SKIPPED:
+      # verify-html·direction, contrast-check·exemption-used, coverage-check·uc-covered
+      # and spacing-check·off-scale.
+      #
+      # The first run of this workflow did exactly that — 85 caught · 0 missed · 4 skipped,
+      # green, while proving four fewer checks than the machine it was written on. The
+      # suite's own words: a skipped mutation is not a passed one. A green tick over four
+      # unproven checks is the failure mode this whole workflow exists to end, so the
+      # browser is installed and the run is held to 89.
+      - name: install playwright
+        run: |
+          npm install --no-save playwright@1.62.1
+          npx playwright install --with-deps chromium
 
       - name: validate packages
         run: node scripts/validate-packages.mjs
 
+      # The gate is folded into the run rather than repeating it: mutate.mjs exits 0 with
+      # mutations SKIPPED, so a green tick alone does not mean every check was proven.
       - name: mutation suite
-        run: node scripts/mutate.mjs --fixture
+        run: |
+          set -o pipefail
+          node scripts/mutate.mjs --fixture | tee mutate.log
+          if grep -qE '[1-9][0-9]* skipped' mutate.log; then
+            echo "::error::a skipped mutation is not a passed one — see the skip lines above"
+            exit 1
+          fi
 
 # Deliberately NOT run here: the mutation suite against examples/approvals.
 #
