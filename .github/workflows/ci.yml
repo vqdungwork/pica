@@ -59,6 +59,11 @@ jobs:
       - name: scope test
         run: node scripts/scope-test.mjs
 
+      # Every number the README and the banner state about this repository, recounted from
+      # the code. Four releases running shipped a wrong one, 1.2.3 included.
+      - name: count test
+        run: node scripts/count-test.mjs
+
       # The gate is folded into the run rather than repeating it: mutate.mjs exits 0 with
       # mutations SKIPPED, so a green tick alone does not mean every check was proven.
       - name: mutation suite

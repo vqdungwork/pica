@@ -5,7 +5,7 @@
 **Describe the product you want. Get a design you can click, then a product you can ship.**
 <br>An expert team for Claude Code, with the checking built in.
 
-[![version](https://img.shields.io/badge/version-1.2.3-1f2328)](https://github.com/vqdungwork/pica/releases)
+[![version](https://img.shields.io/badge/version-1.2.4-1f2328)](https://github.com/vqdungwork/pica/releases)
 [![checks](https://img.shields.io/badge/checks-154%20fail--closed-1f2328)](#what-gets-checked)
 [![agents](https://img.shields.io/badge/specialists-10-1f2328)](#who-does-the-work)
 [![sectors](https://img.shields.io/badge/industries-28-1f2328)](#it-already-knows-your-industry)

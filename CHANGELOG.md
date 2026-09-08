@@ -1,5 +1,34 @@
 # Changelog
 
+## 1.2.4
+
+### The counts, recounted by something that does not forget
+
+Four releases running shipped a wrong number about this repository. 1.2.1 fixed the check count in two
+places and missed four. 1.2.2 found six more, including a banner claiming 8 specialists and 116 checks.
+1.2.3 bumped thirty manifests and left the version badge reading **1.2.2** — the same defect, one
+release after the release that was about that defect.
+
+The counts were never hard to get right. Nothing recomputed them, so each was a sentence somebody had
+to remember to edit.
+
+`scripts/count-test.mjs` derives every number from code and asserts it wherever the repository states
+it — four badges, the `What ships` table, the prose, and `assets/banner.svg`. The check count comes
+from summing the README's own enumeration table, the one headed *"Listed so the number can be
+recounted rather than trusted"*: it is the register, and this is what recounts it.
+
+A claim site that matches **nothing** fails too. A check that silently stops watching because someone
+reworded a heading is the failure mode this file has already recorded twice.
+
+Watched failing on all five ways it can go stale before it was believed: a badge left behind, a stale
+banner, one manifest bumped without the others, a reworded claim site, and a table row edited without
+the total following it.
+
+Two derivation bugs found while writing it, both of which would have made it worthless: it summed
+every table row that looked like a row, reaching 183 across 29 rows by including a table whose numbers
+mean something else; and an alternation read the wrong capture group, so the prose claim silently
+matched nothing.
+
 ## 1.2.3
 
 ### A pipeline of its own, and the check that was reading the wrong repository
