@@ -142,6 +142,18 @@ const M = [
   ["exclusions-asked", "analyst/scripts/trace-check.mjs", [S], null, (s) => s.exclusionsConfirmed = false],
   // industry-check
   ["industry-known",   "analyst/scripts/industry-check.mjs", [S], null, (s) => { s.field = "assorted things"; delete s.industry.key; }],
+
+  // archetype-check
+  ["archetype-declared", "analyst/scripts/archetype-check.mjs", [S], "applications", (s) => { delete s.applications[0].archetype; delete s.archetype; }],
+  ["archetype-resolved", "analyst/scripts/archetype-check.mjs", [S], "applications", (s) => { s.applications[0].archetype = "widget-thing"; }],
+  ["archetype-ambiguous","analyst/scripts/archetype-check.mjs", [S], "applications", (s) => { s.applications[0].archetype = "platform"; }],
+
+  // audience-check
+  ["audience-resolved",  "analyst/scripts/audience-check.mjs", [S], "audience", (s) => { s.audience.dimensions.age.value = "middle-aged"; }],
+  ["audience-dimensions","analyst/scripts/audience-check.mjs", [S], "audience", (s) => { delete s.audience.dimensions.literacy; }],
+  ["audience-floors",    "analyst/scripts/audience-check.mjs", [S], "audience", (s) => { s.audience.dimensions.age.value = "older-adults"; }],
+  ["audience-evidence",  "analyst/scripts/audience-check.mjs", [S], "audience", (s) => { delete s.audience.dimensions.region.evidence; }],
+  ["audience-ambiguous", "analyst/scripts/audience-check.mjs", [S], "audience", (s) => { s.audience.dimensions.region.value = "asia"; }],
   ["conventions",      "analyst/scripts/industry-check.mjs", [S], "industry", (s) => s.industry.conventions.pop()],
   ["stakeholders",     "analyst/scripts/industry-check.mjs", [S], "stakeholders", (s) => s.stakeholders = []],
   // domain-check

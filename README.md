@@ -6,7 +6,7 @@
 <br>An expert team for Claude Code, with the checking built in.
 
 [![version](https://img.shields.io/badge/version-1.2.4-1f2328)](https://github.com/vqdungwork/pica/releases)
-[![checks](https://img.shields.io/badge/checks-101%20fail--closed-1f2328)](#what-gets-checked)
+[![checks](https://img.shields.io/badge/checks-110%20fail--closed-1f2328)](#what-gets-checked)
 [![agents](https://img.shields.io/badge/specialists-6-1f2328)](#who-does-the-work)
 [![sectors](https://img.shields.io/badge/industries-28-1f2328)](#it-already-knows-your-industry)
 [![licence](https://img.shields.io/badge/licence-MIT-1f2328)](LICENSE)
@@ -47,7 +47,7 @@ All three are finished pieces of work, not truncated ones. Figma is optional and
 | **Understands the work** | Turns your paragraph into requirements your team recognises: what happens today, what changes, the rules, and a document a non-technical reader can follow |
 | **Knows your industry** | 28 of them. Who can say no, which colours already mean something, what the field treats as a mistake no matter what you asked for |
 | **Designs it so you can click it** | Real screens at every size and every state, in a day rather than a fortnight, cheap to change while your mind is still changing |
-| **Checks it before you see it** | 101 automated checks: contrast, coverage, the words, the wiring. Nothing reaches you having only been looked at |
+| **Checks it before you see it** | 110 automated checks: contrast, coverage, the words, the wiring. Nothing reaches you having only been looked at |
 | **Has it reviewed by others** | Three to five independent reviewers, none of them seeing each other's findings |
 | **Prices it, if you want** | Whoever does the work prices it, never one person guessing at four trades. Optional: for a client, for yourself, or skipped |
 | **Builds and tests it** | Working code, a test for everything the product promises, and a pipeline that will not release without them |
@@ -148,7 +148,7 @@ wrong, and quietly makes design decisions that were never theirs to make.
 ---
 
 <details>
-<summary><b>All 101 checks, and what is enforced by a hook</b></summary>
+<summary><b>All 110 checks, and what is enforced by a hook</b></summary>
 
 
 <br>Listed so the number can be recounted rather than trusted.
@@ -158,6 +158,8 @@ wrong, and quietly makes design decisions that were never theirs to make.
 | `trace-check` | 7 | glossary closure, rule enforcement, use case trace, entity terms, AS-IS present, assumption radius, exclusions asked |
 | `domain-check` | 5 | all eight categories answered, sourced, verified, agent claims surfaced, affects |
 | `industry-check` | 7 | sector known, stakeholders, constraints, conventions, forbidden, style excluded, evidence |
+| `archetype-check` | 4 | archetype declared per application, resolved, ambiguity refused, required screens present |
+| `audience-check` | 5 | every value resolved, every dimension answered, floors merged by maximum, evidence per selection, ambiguity refused |
 | `problem-check` | 8 | metric, baseline, target, guardrail, counter-evidence, generative HMW, tier declared, freeze attributed |
 | `discover-check` | 10 | segment defined, sample size, users provenance, evidence class, pain frequency, somebody who said no, stakeholder fears, competitor pricing, bottom-up market, buyer named |
 | `schema-check` | 6 | sample size, nine foundations, type roles, provenance, shipped not concept, tradition named |
@@ -173,7 +175,7 @@ wrong, and quietly makes design decisions that were never theirs to make.
 | `code-tokens-check` | 4 | raw colour, raw spacing, raw radius, linear easing |
 | `close-check` | 7 | brief read cold, nothing excluded, metric compared to baseline, committed against shipped, assumption outcome, delivered only over a frozen package, a dispute that can be answered |
 | `build-diff` | 5 | frame paired, control height, radius, hue budget, text position |
-| | **101** | |
+| | **110** | |
 
 `parity-check` and `geometry-diff` report a measured difference rather than named check ids: nominal and
 structural parity wherever two or more viewports are declared, and Figma position against the HTML
@@ -245,9 +247,9 @@ loaded. Approvals live on disk, because a hook is a script and cannot know you s
 |:--|:--|
 | **9 plugins** | 8 packages plus a bundle, each declaring what it requires, produces, checks and considers done |
 | **13 commands** | Deterministic once typed |
-| **19 rule modules** | Loaded per step, never all at once. 228 definition-of-done items across them |
+| **20 rule modules** | Loaded per step, never all at once. 228 definition-of-done items across them |
 | **26 check scripts** | Plus the capture harness, the status tool, and a harness that runs the in-Figma scripts outside Figma |
-| **101 checks** | Every one fails closed. `/pica-verify` runs every applicable one in a single table, and an abstention is never counted as a pass |
+| **110 checks** | Every one fails closed. `/pica-verify` runs every applicable one in a single table, and an abstention is never counted as a pass |
 | **28 sectors** | 264 names resolving to them, 4 deliberately refused as ambiguous |
 | **6 specialists** | Each loads its own craft rules and the sector entry before it starts. The evaluator has **no write access**, because a reviewer that can fix cannot be trusted to report |
 | **2 hooks** | One loads the rules every session; one refuses a Figma write that has not earned it |
@@ -290,14 +292,15 @@ ends complete, not truncated.
 </details>
 
 <details>
-<summary><b>The 19 rule modules</b></summary>
+<summary><b>The 20 rule modules</b></summary>
 
 <br>Loaded per step rather than all at once. 228 definition of done items across them, each either
 decided by a check or explicitly left to a human.
 
 | Module | Package | Covers |
 |:--|:--|:--|
-| `research.md` | research | Intake packet, contract, exclusions, audit breadth, token provenance, client copy rules, data ownership |
+| `intake.md` | core | The five-input packet, source authority, the engagement contract, exclusions, the disclosure policy |
+| `research.md` | research | Audit breadth, the direction derived from measurement, token provenance, mock-data provenance, data ownership |
 | `design-vocabulary.md` | research | The nine foundations, ten named styles with measurable signatures, style assertions, where to look |
 | `discovery.md` | discover | Three lists rather than one, evidence classes, frequency over adjectives, somebody who said no, the market derived bottom-up, what competitors charge |
 | `business-analysis.md` | analyst | Elicitation, AS-IS and TO-BE, the delta, business rules, use cases, the domain model, the PRD |

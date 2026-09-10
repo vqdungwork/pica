@@ -15,7 +15,9 @@
       "domain-check.mjs",
       "industry-check.mjs",
       "trace-check.mjs",
-      "problem-check.mjs"
+      "problem-check.mjs",
+      "audience-check.mjs",
+      "archetype-check.mjs"
     ],
     "agents": [
       "pica-analyst.md"
@@ -23,7 +25,10 @@
   },
   "requires": {
     "state": [
-      "field"
+      "field",
+      "asIs",
+      "audience",
+      "archetype"
     ],
     "artifacts": [
       "docs/brief.md"
@@ -38,7 +43,6 @@
       "domainModel",
       "domainConstraints",
       "industry",
-      "asIs",
       "toBe",
       "delta",
       "stakeholders",
@@ -87,6 +91,24 @@
       "phase": "analyse",
       "needs": [
         "problem|trigger|commercialConstraint"
+      ]
+    },
+    {
+      "run": "archetype-check.mjs",
+      "passes": "0 findings",
+      "args": "<state>",
+      "phase": "intake",
+      "needs": [
+        "applications|archetype"
+      ]
+    },
+    {
+      "run": "audience-check.mjs",
+      "passes": "0 findings",
+      "args": "<state>",
+      "phase": "discover",
+      "needs": [
+        "audience"
       ]
     }
   ],

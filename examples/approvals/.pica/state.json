@@ -1041,5 +1041,46 @@
       "outcome": "project-exempted",
       "exemptionIn": "discovery.segments[1].shortfallWhy"
     }
-  ]
+  ],
+  "applications": [
+    {
+      "name": "approvals",
+      "archetype": "workflow-approval"
+    }
+  ],
+  "archetype": {
+    "approvals": "workflow-approval"
+  },
+  "audience": {
+    "dimensions": {
+      "age": {
+        "value": "working-age",
+        "evidence": "observed: 11 of 11 approvers in the access log are staff on the payments desk"
+      },
+      "region": {
+        "value": "europe-west",
+        "evidence": "stated: the bank operates in the UK and Ireland only, confirmed by the compliance director"
+      },
+      "accessibility": {
+        "value": "baseline",
+        "evidence": "stated: no declared need beyond the bank's own WCAG AA policy"
+      },
+      "literacy": {
+        "value": "expert-daily",
+        "evidence": "observed: approvers open the queue a median of 34 times per working day"
+      },
+      "conditions": {
+        "values": [
+          "desk",
+          "shared-device"
+        ],
+        "evidence": "observed: two approval terminals on the desk, four named approvers per terminal"
+      }
+    },
+    "floors": {
+      "typeSizePx": 14,
+      "contrastRatio": 4.5,
+      "targetSizePx": 44
+    }
+  }
 }

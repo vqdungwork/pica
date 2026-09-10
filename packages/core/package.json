@@ -11,6 +11,7 @@
       "picaflow.md"
     ],
     "rules": [
+      "intake.md",
       "proposals.md",
       "reference-discipline.md",
       "review-discipline.md"
@@ -47,7 +48,8 @@
       "intakeApproved",
       "field",
       "scopeFrozen",
-      "deadline"
+      "deadline",
+      "archetype"
     ],
     "artifacts": [
       "docs/brief.md",

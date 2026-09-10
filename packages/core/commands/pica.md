@@ -8,8 +8,9 @@ argument-hint: "[the brief, or a path to it]"
 Runs steps 1 to 4: intake, research and tokens, the HTML UI kit, and if Figma is in scope, the
 foundations port. These happen in one sitting. Steps 5 onward have their own commands.
 
-Load the research package's `research.md` before anything else. If the research package is not
-installed, stop and say so rather than proceeding without it.
+Load `packages/core/rules/intake.md` before anything else. It is core's own rule now, so intake runs
+with core alone — a project that arrives with its own PRD and wants design only no longer drags in a
+package it will never use.
 
 `$ARGUMENTS` may contain the brief or a path to it. If it is empty, ask for the intake packet.
 
@@ -19,34 +20,28 @@ installed, stop and say so rather than proceeding without it.
 
 ### 1a. Collect the packet
 
-**Refuse to proceed without the first five.** The Figma declaration is the exception: nothing before
-phase 7 depends on it, so an unknown answer is recorded as an assumption rather than treated as a
-blocker. Figma is a developer handoff artefact, and who builds is often not settled until the contract.
-
-For the rest, refuse. List what is missing rather than filling gaps with assumptions.
+**Refuse to proceed without all five.** List what is missing rather than filling gaps with
+assumptions.
 
 | Input | Ask for |
 |---|---|
-| The brief | Raw and unedited. Not a summary |
-| Sources | Every file, URL and capture, each labelled `use` or `ignore` |
-| Commercial constraint | Hours or days, fixed-scope or T&M, any existing estimate, and **anything the client must not be told** |
-| Environment | Fonts installed, tools live, and **what only the human can do** |
-| Figma declaration | Is Figma a deliverable, yes or no. **Ask it now because it is free; it does not bind until the contract** |
-| Field and use | The field named **narrowly**, who uses it and how often, and the conditions of use: desk, outdoors, one-handed, gloved, shared device |
-| The trigger | What changed, when, what happens if nobody acts, and when the window closes |
+| The brief | Raw and unedited. Not a summary. `briefPath` is a **list** — an RFP with an annex is one brief in three documents, and any format is fine |
+| Sources | Every file, URL and capture, each with its **authority**: `authoritative`, `reference`, `historical`, `ignore`. One that is not `ignore` and cannot be opened **stops intake** |
+| Environment | Which MCP servers and tools are live, and **what only the human can do**. pica checks `playwright`, node, a package manager and a free port itself |
+| Field | The field named **narrowly**, resolved against `industries.json`. Refused rather than approximated when it is ambiguous |
+| Archetype | What shape each application is, **one per application**, resolved against `archetypes.json` |
 
-Ask for all seven in one message. Do not interrogate one at a time.
+Ask for all five in one message. Do not interrogate one at a time.
 
-The trigger is the cheapest of the seven and the one most often absent. If nothing changed, the
-product is being built because it can be, which is the commonest root cause of a product nobody
-wanted. It is also what makes a break-even month mean anything: a figure with no window against it
-cannot be prioritised against anything else.
+**Derive the last two where the brief states them.** Mark each value as derived with the section it
+came from, and confirm rather than re-ask. Confirm with the **consequences**, not just the label:
+*"finance → red means overdrawn, high density, a regulator applies."* A wrong classification is
+invisible as a name and obvious as a consequence.
 
-And **write down which of scope, date and resources is actually fixed**, and who fixed it. The
-deadline is almost never something you derive: it arrives from a funding round, a trade show, a
-regulatory date or a competitor. If all three are claimed fixed, record that as the top project
-risk and get it acknowledged, because it is the precise condition under which projects fail and it
-is nearly always survivable said early and fatal said late.
+**Three things intake no longer asks.** The audience is researched by `pica-discoverer`, because most
+briefs cannot answer it and a researched profile beats a guessed one. Whether Figma is a deliverable is
+asked at the port decision, after the freeze. Fonts are not a constraint at all — the family is
+declared in the tokens and verified at handoff.
 
 **Write the brief to `docs/brief.md` the moment it arrives, verbatim.** Not after the contract, not at
 the end of intake — the moment it arrives, before you have had a chance to tidy it. It is a reference,
@@ -91,11 +86,6 @@ defined scope, which are the ones where scope grows. The ask is what fills that 
 recorded, an empty `exclusions` means two different things: nobody was asked, or they were asked and
 there is genuinely nothing. GATE 1 cannot tell those apart, and neither can you in week three.
 
-### 1d. Cost the options
-
-Two or three delivery approaches in **one table with comparable totals**. Two options that cannot be
-compared are not a choice. Recommend one and say why.
-
 ### 1e. Tier the packages
 
 Label each `standard` or `complex`. Complex if any of: no precedent in the product, changes IA or
@@ -125,10 +115,11 @@ Write `.pica/state.json`:
     { "name": "mobile",  "w": 375,  "h": 812,  "idiom": "mobile web in a device frame",
       "pointer": false, "breakpoints": [],     "chrome": [ ... ], "grid": null }
   ],
-  "briefPath": "docs/brief.md",
-  "trigger": { "changed": "", "when": "", "ifNothing": "", "window": "" },
-  "commercialConstraint": { "fixed": "", "by": "", "consequence": "", "variable": [] },
+  "briefPath": ["docs/brief.md"],
+  "briefAbsent": "",
   "field": "",
+  "archetype": {},
+  "disclosure": [],
   "measured": [],
   "targets": [
     { "kind": "web",     "viewports": ["desktop", "tablet", "mobile"], "stack": "react" },
@@ -186,15 +177,7 @@ aspirational. Four are filled now, two accumulate:
   single-design question and lets the target decide only what gets built. `coverage-check` fails a
   target that names a viewport the design never produced, so "we cannot build iOS, nobody drew tablet"
   is found in Phase 3 rather than in Phase 7.
-- **`trigger`** what changed in the world, when, and the window it opens. `problem-check` reads it,
-  and `value-check` reads it again for a client case. Collected at 1a because it costs one question
-  and because a business case with no trigger is a solution hunting a problem.
-- **`commercialConstraint`** which of `scope`, `date` or `resources` is fixed by the outside world,
-  **who fixed it**, and what happens if it is missed. Named at length rather than `constraint`
-  because this project already carries `domainConstraints` and `constraintsNotApplicable`, and the
-  barest of four similar names is the one a reader resolves wrongly. For nine versions the
-  commercial constraint was collected here and read by nothing.
-- **`briefPath`** — where the verbatim brief was written at 1a. Step 9 reads it and is forbidden from
+- **`briefPath`** — a **list** of the documents the brief arrived as, written at 1a. Step 9 reads it and is forbidden from
   substituting the contract, so this is the one path that must survive the whole project. A rule that
   says "write it down" with nothing naming where is a preference; this is the name.
 - **`exclusionsConfirmed`** — false until the human has been asked what to exclude **beyond** what the
@@ -232,12 +215,13 @@ Open three artefacts that run for the life of the project, and say they exist:
 
 ### GATE 1
 
-Present the contract, the exclusions, the costed options and the tiers. **Stop. Wait for approval of
-all four.** Do not begin research.
+Present the contract, the exclusions and the tiers. **Stop. Wait for approval of all three.** Do not
+begin research.
 
-**Refuse to pass this gate while `exclusionsConfirmed` is false, while `docs/brief.md` does not
-exist, or while `commercialConstraint.fixed` names none of scope, date or resources.** Both are one question and one file, and both are unrecoverable later: the brief because the
-session that carried it will be gone, the ask because nobody remembers whether it happened.
+**Refuse to pass this gate while `exclusionsConfirmed` is false, or while no path in `briefPath`
+exists and `briefAbsent` does not say why.** Both are one question and one file, and both are
+unrecoverable later: the brief because the session that carried it will be gone, the ask because
+nobody remembers whether it happened.
 
 ---
 

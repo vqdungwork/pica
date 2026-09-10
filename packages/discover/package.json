@@ -18,20 +18,25 @@
   },
   "requires": {
     "state": [
-      "field"
+      "field",
+      "archetype"
     ],
     "artifacts": [],
     "gates": []
   },
   "produces": {
     "state": [
-      "discovery"
+      "discovery",
+      "audience",
+      "operatingModel",
+      "asIs"
     ],
     "artifacts": [
       "docs/research/pain-points.md",
       "docs/research/stakeholders.md",
       "docs/research/competitors.md",
-      "docs/research/market.md"
+      "docs/research/market.md",
+      "docs/research/operating-model.md"
     ]
   },
   "checks": [
