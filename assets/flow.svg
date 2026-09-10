@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 836" width="1180" height="836" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">
+<rect width="1180" height="836" fill="#0d1117"/>
+<text x="40" y="46" fill="#e6edf3" font-size="22" font-weight="600">pica 8 packages · 7 agents · 7 phases</text>
+<text x="40" y="70" fill="#8b949e" font-size="13">Generated from the package manifests. Lanes are phases, boxes are packages, stops are where a human decides.</text>
+<line x1="40" y1="96" x2="1140" y2="96" stroke="#21262d" stroke-width="1"/>
+<text x="40" y="122" fill="#7d8590" font-size="11" letter-spacing="1.4">INTAKE</text>
+<rect x="172" y="108" width="150" height="52" rx="4" fill="#161b22" stroke="#30363d"/>
+<text x="186" y="129" fill="#e6edf3" font-size="13" font-weight="600">analyst</text>
+<text x="186" y="147" fill="#7d8590" font-size="11">analyst · 1 check</text>
+<rect x="908" y="110" width="232" height="48" rx="4" fill="#2d1618" stroke="#8b3a3a"/>
+<text x="920" y="129" fill="#f0857d" font-size="11" font-weight="600">⏸ STOPS HERE</text>
+<text x="920" y="147" fill="#8b949e" font-size="11">engagement scope</text>
+<line x1="40" y1="188" x2="1140" y2="188" stroke="#21262d" stroke-width="1"/>
+<text x="40" y="214" fill="#7d8590" font-size="11" letter-spacing="1.4">DISCOVER</text>
+<rect x="172" y="200" width="150" height="52" rx="4" fill="#161b22" stroke="#30363d"/>
+<text x="186" y="221" fill="#e6edf3" font-size="13" font-weight="600">analyst</text>
+<text x="186" y="239" fill="#7d8590" font-size="11">analyst · 1 check</text>
+<rect x="336" y="200" width="150" height="52" rx="4" fill="#161b22" stroke="#30363d"/>
+<text x="350" y="221" fill="#e6edf3" font-size="13" font-weight="600">discover</text>
+<text x="350" y="239" fill="#7d8590" font-size="11">discoverer ×3–5 · 1 check</text>
+<rect x="908" y="202" width="232" height="48" rx="4" fill="#1c1a11" stroke="#7a6a2a"/>
+<text x="920" y="221" fill="#d4b352" font-size="11" font-weight="600">▸ shown, continues</text>
+<text x="920" y="239" fill="#8b949e" font-size="11">audience profile</text>
+<line x1="40" y1="280" x2="1140" y2="280" stroke="#21262d" stroke-width="1"/>
+<text x="40" y="306" fill="#7d8590" font-size="11" letter-spacing="1.4">RESEARCH</text>
+<rect x="172" y="292" width="150" height="52" rx="4" fill="#161b22" stroke="#30363d"/>
+<text x="186" y="313" fill="#e6edf3" font-size="13" font-weight="600">research</text>
+<text x="186" y="331" fill="#7d8590" font-size="11">researcher ×3–5 · 1 check</text>
+<line x1="40" y1="372" x2="1140" y2="372" stroke="#21262d" stroke-width="1"/>
+<text x="40" y="398" fill="#7d8590" font-size="11" letter-spacing="1.4">ANALYSE</text>
+<rect x="172" y="384" width="150" height="52" rx="4" fill="#161b22" stroke="#30363d"/>
+<text x="186" y="405" fill="#e6edf3" font-size="13" font-weight="600">analyst</text>
+<text x="186" y="423" fill="#7d8590" font-size="11">analyst · 8 checks</text>
+<rect x="908" y="386" width="232" height="48" rx="4" fill="#1c1a11" stroke="#7a6a2a"/>
+<text x="920" y="405" fill="#d4b352" font-size="11" font-weight="600">▸ shown, continues</text>
+<text x="920" y="423" fill="#8b949e" font-size="11">the problem, restated</text>
+<line x1="40" y1="464" x2="1140" y2="464" stroke="#21262d" stroke-width="1"/>
+<text x="40" y="490" fill="#7d8590" font-size="11" letter-spacing="1.4">DESIGN</text>
+<rect x="172" y="476" width="150" height="52" rx="4" fill="#161b22" stroke="#30363d"/>
+<text x="186" y="497" fill="#e6edf3" font-size="13" font-weight="600">content</text>
+<text x="186" y="515" fill="#7d8590" font-size="11">writer · 1 check</text>
+<rect x="336" y="476" width="150" height="52" rx="4" fill="#161b22" stroke="#30363d"/>
+<text x="350" y="497" fill="#e6edf3" font-size="13" font-weight="600">designqa</text>
+<text x="350" y="515" fill="#7d8590" font-size="11">evaluator ×3–5 · 1 check</text>
+<rect x="500" y="476" width="150" height="52" rx="4" fill="#161b22" stroke="#30363d"/>
+<text x="514" y="497" fill="#e6edf3" font-size="13" font-weight="600">figma</text>
+<text x="514" y="515" fill="#7d8590" font-size="11">main thread · 2 checks</text>
+<rect x="664" y="476" width="150" height="52" rx="4" fill="#161b22" stroke="#30363d"/>
+<text x="678" y="497" fill="#e6edf3" font-size="13" font-weight="600">html</text>
+<text x="678" y="515" fill="#7d8590" font-size="11">designer · 12 checks</text>
+<rect x="908" y="478" width="232" height="48" rx="4" fill="#2d1618" stroke="#8b3a3a"/>
+<text x="920" y="497" fill="#f0857d" font-size="11" font-weight="600">⏸ STOPS HERE</text>
+<text x="920" y="515" fill="#8b949e" font-size="11">the design system</text>
+<line x1="40" y1="556" x2="1140" y2="556" stroke="#21262d" stroke-width="1"/>
+<text x="40" y="582" fill="#7d8590" font-size="11" letter-spacing="1.4">SCOPE</text>
+<rect x="172" y="568" width="150" height="52" rx="4" fill="#161b22" stroke="#30363d"/>
+<text x="186" y="589" fill="#e6edf3" font-size="13" font-weight="600">core</text>
+<text x="186" y="607" fill="#7d8590" font-size="11">main thread · 1 check</text>
+<rect x="908" y="570" width="232" height="48" rx="4" fill="#2d1618" stroke="#8b3a3a"/>
+<text x="920" y="589" fill="#f0857d" font-size="11" font-weight="600">⏸ STOPS HERE</text>
+<text x="920" y="607" fill="#8b949e" font-size="11">PRD · scope · demo</text>
+<line x1="40" y1="648" x2="1140" y2="648" stroke="#21262d" stroke-width="1"/>
+<text x="40" y="674" fill="#7d8590" font-size="11" letter-spacing="1.4">CLOSE</text>
+<rect x="172" y="660" width="150" height="52" rx="4" fill="#161b22" stroke="#30363d"/>
+<text x="186" y="681" fill="#e6edf3" font-size="13" font-weight="600">html</text>
+<text x="186" y="699" fill="#7d8590" font-size="11">designer · 1 check</text>
+<line x1="40" y1="740" x2="1140" y2="740" stroke="#21262d"/>
+<text x="40" y="768" fill="#7d8590" font-size="11" letter-spacing="1.4">UNDERNEATH</text>
+<text x="172" y="768" fill="#8b949e" font-size="12">core — the state schema, every gate, pica-verify, intake, the freeze and the close. Not a step; everything depends on it.</text>
+<text x="40" y="798" fill="#6e7681" font-size="11">Regenerate with scripts/flow-diagram.mjs. A diagram nobody generates is a diagram that disagrees with the code and looks authoritative doing it.</text>
+</svg>

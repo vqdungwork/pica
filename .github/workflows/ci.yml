@@ -73,6 +73,12 @@ jobs:
       - name: knowledge drift
         run: node scripts/knowledge-gen.mjs --check
 
+      # The flow was described in prose in four places and drawn nowhere, and the four
+      # drifted. It is generated from the manifests now, so the picture cannot disagree
+      # with the code — and this is what says so when somebody forgets to regenerate.
+      - name: flow diagram
+        run: node scripts/flow-diagram.mjs --check
+
       # The gate is folded into the run rather than repeating it: mutate.mjs exits 0 with
       # mutations SKIPPED, so a green tick alone does not mean every check was proven.
       - name: mutation suite

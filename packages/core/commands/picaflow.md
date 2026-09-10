@@ -1,9 +1,9 @@
 ---
-description: Run a whole project from a brief — analysis, design, build, test, release — stopping only where a human has to decide
-argument-hint: "[the brief, or a path to it] [--to design|figma|product] [--resume]"
+description: Run a whole engagement from a brief — discovery, analysis, design, demo — stopping only where a human has to decide
+argument-hint: "[the brief, or a path to it] [--to design|figma] [--resume]"
 ---
 
-# picaflow: a brief in, a delivered thing out
+# picaflow: a brief in, a confirmed demo out
 
 Runs the chain and stops **only** where a person has to decide something a machine cannot.
 
@@ -19,33 +19,34 @@ blast radius, surfaced beside the screen it produced, correctable in one round.
 
 ---
 
-## Three places it can finish, and each is a delivery
+## Where it finishes
 
-`--to` names where to stop. **Every one of them is a complete pica project, not a truncated one.**
+pica delivers a **confirmed PRD, an agreed scope of work, and a working interactive demo.** What it costs
+to build from there is your estimate to make, outside pica.
 
 | `--to` | You get | Stops after |
 |:--|:--|:--|
-| `design` *(default)* | a measured, clickable `review.html`, the PRD, and the assumptions register | CONFIRM 2 |
-| `figma` | that, plus the ported Figma file verified frame by frame against the HTML | CONFIRM 3 |
-| `product` | that, plus working front end and back end, tested, released | CONFIRM 4 |
+| `design` *(default)* | the PRD, the assumptions register, and **`demo.html`** — React, interactive, served | the freeze |
+| `figma` | that, plus the ported Figma file verified frame by frame against the capture | the port |
 
-Figma is **optional and off the critical path**. `--to product` goes straight from the approved HTML to
-production code without touching it, and that is a supported route rather than a shortcut.
-
-Without `--to`, stop at `design` and say what the next two would cost.
+Figma is **optional and off the critical path**. It is not asked about at intake: after the freeze you
+either say "port it", and pica checks the MCP then, or you do not and the port never happens.
 
 ---
 
-## Four confirmations, and nothing else stops
+## Three hard stops, three soft checkpoints
 
-| | What the human confirms | Why a machine cannot |
+| | What the human does | Why a machine cannot |
 |:--:|:--|:--|
-| **CONFIRM 1** | the business case: cost to build, cost to run for two years, plausible return | whether it is worth building at all, while saying no is still free |
-| **CONFIRM 2** | the business flow **and** the design, in `review.html` | whether this is their business, and whether the assumptions were right |
-| **CONFIRM 3** | scope and deadline, written to `scopeFrozen` and `deadline` | a commercial commitment, and an estimate before it prices a guess |
-| **CONFIRM 4** | the released product against the original brief | whether what was built is what was wanted |
+| **⏸ 1** | signs the **engagement scope**: what is in, what is out, and anything the client must not be told | a commercial commitment |
+| **▸** | reacts to the **restated problem**, the **lo-fi structure**, and the **direction** | each is a built thing to correct, not a question to answer |
+| **⏸ 2** | approves the **design system** | it propagates into every screen; reversing it later rebuilds everything |
+| **⏸ 3** | confirms the **PRD is correct**, the **scope of work is agreed**, and the **demo does what they expect** | whether this is their business, and whether the assumptions were right |
 
-At CONFIRM 2 present, in this order: the **delta** first, then **what they chose and why**, then the
+A soft checkpoint presents and continues. Silence becomes a labelled assumption with a blast radius,
+surfaced beside the screen it produced. A hard stop writes a gate to disk and nothing downstream runs.
+
+At stop 3 present, in this order: the **delta** first, then **what they chose and why**, then the
 low-confidence assumptions most consequential first, then what was not supplied and what its absence
 cost.
 
@@ -59,35 +60,33 @@ looks like consent and is not.
 
 ## Every step runs as its role
 
-Each phase is delegated to the agent that owns it, and each agent loads its own rules and **reads the
-sector entry before it starts**. That is what keeps a clinician's screen and a warehouse handheld from
-coming out of the same template.
+Each phase is delegated to the agent that owns it, and each agent **reads the sector, audience and
+archetype entries before it starts**. That is what keeps a clinician's screen and a warehouse handheld
+from coming out of the same template.
 
 | Phase | Agent | Loads |
 |:--|:--|:--|
-| 1 · research | `pica-researcher` ×3–5, one per product, none seeing another's findings | `design-vocabulary.md` |
-| 1.8 · feasibility | `pica-architect` | `architecture.md` |
-| 3.1 · proposals | main thread, never an agent | `proposals.md` |
-| 2 · analysis | `pica-analyst` | `business-analysis.md`, `domain-knowledge.md`, `industry-knowledge.md` |
-| 3 · design | `pica-designer` | `html-prototype.md`, `html-gates.md`, `native-mobile.md` |
-| 3.5 · the words | `pica-writer` | `content.md` |
-| 3.8 · evaluation | `pica-evaluator` ×3–5, one lens each, **no write access** | `evaluation.md` |
-| 5 · estimate | **each agent, its own line** | `estimation.md` |
-| 6 · architecture | `pica-architect` | `architecture.md` |
-| 7 · build | `pica-developer` | `engineering.md`, `implementation.md` |
-| 7.8 · test | `pica-tester` | `testing.md` |
-| 7f · Figma | main thread, gated by hook | `figma-*.md` |
+| discover | `pica-discoverer` ×3–5, one per segment | `discovery.md` |
+| research | `pica-researcher` ×3–5, one per product, none seeing another's findings | `design-vocabulary.md` |
+| analyse A, C | `pica-analyst` | `business-analysis.md`, `domain-knowledge.md`, `industry-knowledge.md` |
+| analyse B | `pica-modeller` | `modelling.md` |
+| design | `pica-designer` | `html-prototype.md`, `html-gates.md`, `react-demo.md`, `native-mobile.md` |
+| the words | `pica-writer` | `content.md` |
+| evaluation | `pica-evaluator` ×3–5, one lens each, **no write access** | `evaluation.md` |
+| proposals | main thread, **never an agent** | `proposals.md` |
+| intake, scope, close | main thread | `intake.md` |
+| the port | main thread, gated by hook | `figma-*.md` |
 
-**Fan out measurement. Never fan out judgement.** Research at 1.7 and evaluation at 3.8 are the two
-places, both spawned in one message, same return schema, and a unit with no provenance is rejected
-rather than merged.
+**Fan out measurement. Never fan out judgement.** Research and evaluation are the two places, both
+spawned in one message, same return schema, and a unit with no provenance is rejected rather than merged.
 
 ---
 
 ## Before starting
 
 `$ARGUMENTS` is the brief, or a path to it. **Write it to `docs/brief.md` verbatim the moment it
-arrives**, before you have had a chance to tidy it.
+arrives**, before you have had a chance to tidy it. `briefPath` is a list: an RFP with an annex is one
+brief in three documents.
 
 `pica-core` cannot depend on the packages this drives — they all depend on core and a cycle is not
 installable — so every script call below is guarded, names the missing package, and prints a line for
@@ -96,16 +95,12 @@ the exact failure this project exists to prevent.**
 
 | Missing | What stops working |
 |---|---|
-| `pica-discover` | no users, no pain with a frequency, no veto holders. The AS-IS rests on assertion |
-| `pica-model` | no business case. The design may be correct and unaffordable, and nothing says so |
-| `pica-analyst` | no PRD, no glossary, no sector. The client has nothing to agree to |
-| `pica-research` | direction has no measured precedent behind it |
+| `pica-discover` | no users, no pain with a frequency, no veto holders, **no audience profile** — every floor the design owes is unset |
+| `pica-research` | nothing is measured, and the direction has no precedent behind it |
+| `pica-analyst` | no PRD, no glossary, no sector, **no models**. The client has nothing to agree to |
 | `pica-html` | nothing is built and nothing is measured |
 | `pica-content` | screens carry placeholder text |
 | `pica-designqa` | no independent evaluation before the client sees it |
-| `pica-architect` | no feasibility, no API contract, NFRs are adjectives |
-| `pica-developer` | no code |
-| `pica-qa` | no test suite, and the release gate has nothing to read |
 
 With `--resume`, read `state.chain.completed` and continue from the next step.
 
@@ -113,26 +108,64 @@ With `--resume`, read `state.chain.completed` and continue from the next step.
 
 ## The chain
 
-### Phase 0 to 3 — to a reviewable design
+### Intake, discovery, research
 
 | Step | Does | Writes |
 |---|---|---|
-| **0.4** | Note what was supplied: analytics, support logs, live product access | `state.inputs` |
-| **1.1–1.3** | Split the brief, name the problem, **narrow the field to `state.field`** | `state.problem`, `state.field` |
-| **1.5b** | Journey map: stages, goals, pain, opportunity | `docs/research/journey.md` |
-| **1.6–1.7** | **Fan out** `pica-researcher`, nine foundations each | `state.measured`, `docs/research/measured.json` |
-| **0.9** | **Fan out** `pica-discoverer`, one per segment: pain with a frequency and a class, the people who can veto it, competitor pricing, the market derived | `state.discovery`, `docs/research/*.md` |
-| **1.8** | `pica-architect --feasibility`: possible, not possible, risky | `state.risks` |
-| **1.9b** | `pica-modeller`: build cost from the estimate, two years of run cost, revenue bottom up, the pricing fence | `state.value`, `docs/value-case.md` |
-| **2.1–2.1c** | Stakeholders, domain constraints, **the sector resolved** | `state.stakeholders`, `state.domainConstraints`, `state.industry` |
-| **2.2–2.11** | Glossary, AS-IS, TO-BE, **delta**, rules, flows, use cases, domain model, PRD | `state.*`, `docs/contract.md` |
-| **3.0** | IA, screen inventory traced to use cases, state matrix, data source per screen | `state.screens` |
-| **3.1** | **Offer the direction**: the busiest screen built three ways, same content, each naming its measured source. Then S2, S3, S4, S5 | `state.proposals` |
-| **3.2–3.3** | The chosen direction asserted as numbers, tokens, kit | `state.direction`, `tokens/` |
-| **3.4–3.5** | Screens at every viewport in every state, then `pica-writer` | `html/` |
-| **3.7** | **Measure** | see below |
-| **3.8–3.9** | **Fan out** `pica-evaluator`, then a walkthrough per use case | `docs/reviews/` |
-| **3.11** | Assemble `review.html`, flow leading, assumptions beside the screens that produced them | `html/review.html` |
+| **1.1** | The five-input packet. **Derive the field and the archetype** from the brief where it says them, marked derived, and confirm with their consequences | `briefPath`, `field`, `archetype`, `viewports` |
+| **1.2** | Limitations **before any capability claim**. The engagement contract, the exclusions, the tiers | `docs/contract.md`, `docs/exclusions.md` |
+| **1.5** | Journey spine: the stages, before anybody has been asked about pain | `docs/research/journey.md` |
+| **2.1** | **Fan out** `pica-discoverer`, one per segment: pain with a frequency and a class, the people who can veto it, competitor pricing, the market derived | `discovery`, `stakeholders` |
+| **2.2** | The **audience profile** across five dimensions, and the **operating model**: how the business earns and who does what | `audience`, `operatingModel` |
+| **2.3** | **AS-IS**, observed rather than described, each step carrying its evidence class | `asIs` |
+| **3.1** | **Fan out** `pica-researcher`, nine foundations each, on products the archetype picks | `measured`, `tokens/` |
+
+> ### ⏸ Stop 1 — the engagement scope
+>
+> Signed before research spends anything. Nothing downstream runs while `exclusionsConfirmed` is false
+> or while no path in `briefPath` exists and `briefAbsent` does not say why.
+
+> ### ▸ The audience profile
+>
+> Present it with its evidence **and the floors it sets** — type size, contrast, target size. Confirmed
+> before tokens exist, so the floors shape the design system rather than being retrofitted onto it.
+
+### Analysis
+
+| Step | Does | Writes |
+|---|---|---|
+| **4.A** | `pica-analyst`: the real problem, glossary and data dictionary, business rules, domain constraints, **NFRs as numbers** | `problem`, `glossary`, `businessRules`, `nfr` |
+| **4.B** | `pica-modeller`: **TO-BE process model** (BPMN when it crosses roles), **domain model**, **CRUD matrix**, **state model** | `toBe`, `domainModel`, `rolesPermissions`, `stateModel` |
+| **4.C** | `pica-analyst`: use cases, requirements **classified**, journey maps per laned actor, the delta, **the PRD** | `useCases`, `requirements`, `journeys`, `delta`, `docs/prd.md` |
+
+> ### ▸ The restated problem
+>
+> The problem as the analysis found it, against the one the brief stated, and the delta. Present and
+> continue; silence is an assumption.
+
+### Design
+
+| Step | Does | Writes |
+|---|---|---|
+| **5.0** | IA, screen inventory traced to use cases, data source per screen. The **state matrix arrives from analysis** | `screens` |
+| **5.1** | **Lo-fi structure**: greyscale, real content lengths, every state drawn or excused | `html/structure/` |
+| **5.2** | **Offer the direction**: the busiest screen built three ways, three different traditions, one of them the sector's own, each naming its measured source. Then S2–S5 | `proposals` |
+| **5.3** | **Foundations**: palette with roles and computed contrast, type scale, spacing, the kit in every state, the icon set, motion tokens | `direction`, `tokens/`, `html/design-system.html` |
+| **5.4** | Every screen at every viewport in every state, then `pica-writer` | `html/` |
+| **5.5** | **Measure** | see below |
+| **5.6** | **Fan out** `pica-evaluator`, then a walkthrough per use case | `docs/reviews/` |
+| **5.7** | **`demo.html`** — React, responsive, interactive, mock data, motion behaviour, **every state addressable by URL**, served | the demo |
+
+> ### ▸ Structure, then ▸ the direction
+>
+> Two soft checkpoints, both a built thing. Structure before anything is styled; the direction as three
+> screens, because a client cannot judge `--radius-lg: 12px` and can judge two screens in three seconds.
+
+> ### ⏸ Stop 2 — the design system
+>
+> The foundations page, presented **for approval, not for re-choosing**. The direction already decided
+> the type, the buttons and the density; this is a decision being shown, and pica says so rather than
+> dressing it as a choice. If it is wrong, the answer is a second round of three directions.
 
 ```bash
 # pica_find <package> <script> — the script's path, or nothing when the package is absent.
@@ -172,14 +205,15 @@ run() { pkg="$1"; sc="$2"; shift 2
   fi; }
 
 # The capture first: it is produced, not checked, and eight checks abstain until it exists.
+# --url for the demo, --dir for the static boards. It refuses to write an unsettled capture.
 run html      capture-html-reference.mjs --dir html --out .audit
 
 # Then everything applicable, in one table, phase by phase. pica-verify reads what to run
 # from each package's own manifest rather than from a list kept here, which is why this
 # block no longer has to name twenty-eight invocations and drift from them.
+run core      pica-verify.mjs      .pica/state.json --phase intake
 run core      pica-verify.mjs      .pica/state.json --phase discover
 run core      pica-verify.mjs      .pica/state.json --phase research
-run core      pica-verify.mjs      .pica/state.json --phase value
 run core      pica-verify.mjs      .pica/state.json --phase analyse
 run core      pica-verify.mjs      .pica/state.json --phase design --evidence
 ```
@@ -187,62 +221,24 @@ run core      pica-verify.mjs      .pica/state.json --phase design --evidence
 All zero, or fix and re-run. **A failing check is not an assumption**: it is a defect, and continuing
 past it produces a demo that breaks in front of the client.
 
-> ### ⏸ CONFIRM 1 - the business case
+> ### ⏸ Stop 3 — the PRD, the scope, and the demo
 >
-> **Only when `value.for` is `"client"`.** `"self"` sizes your own idea and commits nobody, so it
-> runs without stopping; `"skipped"` with a reason skips the phase. Both are recorded, because a
-> skip nobody explained looks exactly like a case nobody remembered.
+> Three things confirmed together: the PRD is correct, the scope of work is agreed, and **the demo does
+> what they expect**. `scopeFrozen` and `deadline` are written by a human recording that a client agreed,
+> and by no command, which is the point.
 >
-> Present **the pessimistic column, not the likely one.** Then the three assumptions the answer
-> rests on, from `sensitivity`, then the do-nothing baseline.
->
-> **This is the last confirmation at which stopping is cheap**, so it is the one worth a real
-> conversation. A verdict of `do-not-build` here is a successful run of this command, and it is
-> worth more than the design it prevented.
+> This is the handoff. What it costs to build is yours to estimate from here.
 
-> ### ⏸ CONFIRM 2 - the business flow and the design
->
-> Present `review.html`, the delta, and the low-confidence assumptions. **Stop.**
->
-> `--to design` ends here. Say what `--to figma` and `--to product` would add.
-
-### Phase 4 to 6 — to something buildable
+### Close, and the optional port
 
 | Step | Does | Writes |
 |---|---|---|
-| **4.5** | **Offer S6 and S7**: every use case priced, and where it runs stated in consequences | `state.proposals` |
-| **4.6–4.7** | The human records the frozen scope and the deadline | `scopeFrozen`, `deadline` |
-| **5.1–5.2** | **Each agent estimates its own line, and only its own.** Three points each, then the arithmetic. `estimate.for` says whether this is for a client, for yourself, or skipped with a reason | `state.estimate`, `state.workPackages` |
-| **6.1–6.4** | `pica-architect`: C4, ADRs, NFRs as numbers, **the API contract with its errors** | `state.nfr`, `state.adr`, `state.apiContract` |
+| **6.1** | S6 and S7 offered: what is in the first release, and where it runs | `proposals` |
+| **7.1** | Prove against the **original brief** and its amendments, never the contract. Hand over, freeze | `delivered`, `docs/handover.md` |
+| **7f** | Only if you ask for it: check the Figma MCP, port, verify frame by frame | `.audit/figma-dump.json` |
 
 ```bash
 run core      pica-verify.mjs      .pica/state.json --phase scope
-run core      pica-verify.mjs      .pica/state.json --phase estimate
-run core      pica-verify.mjs      .pica/state.json --phase architect
-```
-
-> ### ⏸ CONFIRM 3 - scope, deadline and the estimate
->
-> **Only when the estimate is for a client.** `estimate.for: "self"` is sizing your own work and commits
-> nobody, so nothing has to be frozen first; `"skipped"` with a reason skips the phase entirely. Both are
-> recorded, because a skip nobody explained looks exactly like an estimate nobody remembered.
->
-> For a client: **nothing downstream runs until `scopeFrozen` and `deadline` are on disk.** They are written by a
-> human recording that a client agreed, and by no command, which is the point.
-
-### Phase 7 to 8 — to a released product
-
-| Step | Does | Writes |
-|---|---|---|
-| **7.1–7.7** | `pica-developer`: stack, tokens, components, screens in every state, API, motion, a11y | `src/`, `state.perfBudget` |
-| **7.8** | `pica-tester`: the suite's shape, one e2e per use case, exploratory, regression | `state.testStrategy`, `state.defects` |
-| **7.9** | The repository gate: tests traced, pipeline, branches, environments, secrets | |
-| **7.10** | **`pica-evaluate --build <url>`: the built product against the approved design** | `docs/reviews/` |
-| **7f** | Only with `--to figma`: port, verify, wire the prototype | `.audit/figma-dump.json` |
-| **8.1–8.5** | Prove against the **original brief**, hand over, freeze, log the real hours | `state.effortLog` |
-
-```bash
-run core      pica-verify.mjs      .pica/state.json --phase build --evidence
 run core      pica-verify.mjs      .pica/state.json --phase close
 
 # One run at the end over everything, so the closing report can state a number rather
@@ -254,41 +250,37 @@ run core      pica-verify.mjs      .pica/state.json --adopt --evidence
 is anything other than `briefPath`, because a closeout that reads the contract grades the work
 against a document the work already renegotiated, and that always passes.
 
-**7.10 is not run by whoever built it.** The builder does not grade their own build: someone who knows
-why a value was chosen will find the reason it is acceptable.
-
-> ### ⏸ CONFIRM 4 - the product against the brief
->
-> Re-read `docs/brief.md`, not the contract. Copies drift, and substituting the contract for the brief
-> is exactly what closeout exists to prevent.
-
 ---
 
 ## What it cannot do, and says so
 
-**The chain cannot perform step 3.10 or its equivalent at 7.10: render every screen, look at it, and
-click the main flow.** Ten green checks once coexisted with four screenshot-obvious defects and a home
-row that opened another role's screen.
+**The chain cannot render every screen, look at it, and click the main flow.** Ten green checks once
+coexisted with four screenshot-obvious defects and a home row that opened another role's screen.
+
+**And it does not test with real users.** Evaluation is 3–5 agents with distinct lenses plus a cognitive
+walkthrough — an established method that recognises up to 80% of usability problems, and one that exists
+precisely because users are not always available. It is not a substitute: it cannot find what a
+practitioner spots in one second, and it cannot tell you whether anybody wants the thing.
 
 So the closing report says, in this order:
 
 1. **What was delivered**, and which `--to` it stopped at
 2. **The low-confidence assumptions**, most consequential first
-3. **What was not supplied** at 0.4, and what that cost
+3. **What was not supplied** at intake, and what that cost
 4. **Every check that did not run**, and why
 5. **The verification total from `pica-verify --adopt --evidence`**: assertions verified,
    checks abstained, and what each abstention needs. A count is what a client can check;
-   "everything passed" is not.
-6. **Explicitly: no human has looked at this yet.** Do not report the package complete
+   "everything passed" is not
+6. **Explicitly: no human has used this yet.** Do not report the package complete
 
 ---
 
 ## Definition of done
 
-- [ ] Ran to its `--to` target without asking a question between confirmations
+- [ ] Ran to its `--to` target without asking a question between the stops
 - [ ] Every step wrote its artefact and appended to `state.chain.completed`
-- [ ] Every step ran as its role agent, and each agent read the sector entry first
+- [ ] Every step ran as its role agent, and each read sector, audience and archetype first
 - [ ] Every gap became an assumption with a confidence and a blast radius
 - [ ] Every measured check returned zero, and every skipped check was named
-- [ ] The four confirmations were presented as decisions, never inferred from silence
-- [ ] **Nothing was reported complete that a human has not looked at**
+- [ ] The three hard stops were presented as decisions, never inferred from silence
+- [ ] **Nothing was reported complete that a human has not used**

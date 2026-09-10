@@ -1,7 +1,7 @@
 {
   "name": "pica-content",
   "description": "pica content: the words. Glossary-bound terms, every state written, length-realistic copy, and mock data that is not quietly wrong.",
-  "version": "1.2.4",
+  "version": "2.0.0",
   "author": {
     "name": "Dung Vuong"
   },

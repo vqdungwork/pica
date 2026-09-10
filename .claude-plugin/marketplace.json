@@ -8,55 +8,55 @@
     {
       "name": "pica",
       "source": "./",
-      "version": "1.2.4",
+      "version": "2.0.0",
       "description": "From the brief to a demo the client can use. Analyse the domain and its sector, design in HTML at every viewport you declare, verify by measurement rather than opinion, then hand over a PRD, a frozen scope and a working prototype. Six specialists, 101 checks that fail closed, three gates enforced by hook."
     },
     {
       "name": "pica-core",
       "source": "./packages/core",
-      "version": "1.2.4",
+      "version": "2.0.0",
       "description": "pica core: intake, the contract, the state schema, and every approval gate."
     },
     {
       "name": "pica-research",
       "source": "./packages/research",
-      "version": "1.2.4",
+      "version": "2.0.0",
       "description": "pica research: audit the named sources and derive tokens with provenance. Measures shipped products across the nine foundations, records typography by role rather than by size, and refuses concept sites as evidence."
     },
     {
       "name": "pica-discover",
       "source": "./packages/discover",
-      "version": "1.2.4",
+      "version": "2.0.0",
       "description": "pica discover: who uses it and what actually hurts, who can veto it and what they fear, what the field charges, and a market size derived from factors rather than asserted."
     },
     {
       "name": "pica-analyst",
       "source": "./packages/analyst",
-      "version": "1.2.4",
+      "version": "2.0.0",
       "description": "pica analyst: elicitation, AS-IS and TO-BE, business rules, the domain model, and a PRD a non-technical reader follows. Carries a 28-sector knowledge base: who the stakeholders are, which colours the sector has already spent and why, the design tradition it settled on, and what it treats as a defect regardless of the brief. Fails closed on a sector it does not cover."
     },
     {
       "name": "pica-html",
       "source": "./packages/html",
-      "version": "1.2.4",
+      "version": "2.0.0",
       "description": "pica html: build each work package at every declared viewport and measure it before approval."
     },
     {
       "name": "pica-content",
       "source": "./packages/content",
-      "version": "1.2.4",
+      "version": "2.0.0",
       "description": "pica content: the words. Glossary-bound terms, every state written, length-realistic copy, and mock data that is not quietly wrong."
     },
     {
       "name": "pica-designqa",
       "source": "./packages/designqa",
-      "version": "1.2.4",
+      "version": "2.0.0",
       "description": "pica design QA: heuristic evaluation fanned out to independent evaluators, cognitive walkthrough, and the build-versus-design comparison nobody owns."
     },
     {
       "name": "pica-figma",
       "source": "./packages/figma",
-      "version": "1.2.4",
+      "version": "2.0.0",
       "description": "pica figma: port an approved package or rebuild an existing Figma file, annotate it, and verify it by measurement."
     }
   ]

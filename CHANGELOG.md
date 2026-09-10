@@ -1,5 +1,89 @@
 # Changelog
 
+## 2.0.0
+
+### The build half goes, and everything that was asked for and never checked
+
+pica took a brief to a released product. It now takes a brief to a **confirmed PRD, an agreed scope of
+work, and a working interactive demo** — and stops. What it costs to build from there is the
+operator's estimate to make, outside pica.
+
+Six packages deleted: `developer`, `qa`, `impl`, `architect`, `estimate`, and `model`, whose entire
+content was ROI costing built on the estimate it can no longer have. `packages/_planned` went with
+them; all four contracts it held were implementation packages for a product pica no longer builds.
+Fourteen packages become eight, ten agents become seven, eleven phases become seven, four
+confirmations become three hard stops and three soft checkpoints.
+
+**Uninstall the six.** They are removed from the marketplace, so `update` will not take them off a
+machine that already has them:
+
+```
+claude plugin uninstall pica-developer@pica pica-qa@pica pica-impl@pica \
+                        pica-architect@pica pica-estimate@pica pica-model@pica
+```
+
+### The manifests describe a graph, and nothing had ever read it
+
+`pica-status` has resolved `requires`/`produces` since the packages split and the graph itself was
+never checked, so the declarations drifted from the chain and from each other. `contract-check`
+returns twelve findings against 1.2.4. `docs/contract.md` had two producers, which is not a tie the
+resolver reports but one it silently breaks — inventing an edge from research to analyst that
+reverses the documented order. `state.field` was required by two packages and produced by none: the
+main thread writes it at intake and never said so.
+
+### Four rules that asked for something and no check enforced
+
+Each of these was written down, believed, and unverified. The pattern is the one this repository
+keeps finding in itself, and three of the four say so in their own words.
+
+- **The storybook.** `html-prototype.md`: *"No check reads this file… the storybook is a rule with no
+  executable behind it."* It also said exactly what would close it. `foundations-check` is written to
+  that specification.
+- **The state matrix.** Eight minimum states named, and *"the cheapest possible way to avoid finding
+  a missing state during handoff"* — read by nothing. A happy-path screen at every viewport was green
+  with seven states missing.
+- **Frame inventory.** `geometry-diff` documents that it cannot detect absence and hands the job to
+  `parity-check`, which states outright that it does not do it. A port dropping five frames passed
+  everything. A check delegating to a check that does not accept the job is worse than a rule with no
+  executable, because the delegation reads as coverage.
+- **Process modelling.** AS-IS and TO-BE were four sentences of prose, no notation named anywhere in
+  the repository, and `trace-check` asserting that a non-empty string existed.
+
+### Three knowledge axes instead of one
+
+`industries.json` answered one question — what field is this — and it was never the only one that
+shapes a screen. `audiences.json` adds five composable dimensions whose numeric floors merge by
+maximum, which is what turns "audience floors override sector density" into arithmetic.
+`archetypes.json` attaches per application and says what shape it is. Every agent carries a generated
+register of all three, and `knowledge-gen --check` fails when a copy goes stale.
+
+The audience is **researched, not declared**. Most briefs cannot answer it, and a guessed band
+silently removes the floors that protect the people who need them.
+
+### The demo is React, and the port did not have to change
+
+Boards stay static — the rule now reads *no build step to view a **board***. The flow becomes
+`demo.html`, served, with every state addressable by URL. The port never read HTML: it reads the
+capture, and `capture-html-reference` has had `--url` since it was written.
+
+Three new guards for the three ways a React capture can be silently wrong: `capture-settled` refuses
+to write a reference taken mid-render, `font-check` catches a webfont that fell back, and
+`state-coverage-check` catches a state nobody built — which in static HTML is a missing file you can
+see and in React is a branch nobody wrote.
+
+### Fonts stop being a constraint
+
+Intake asked which fonts were installed. That existed only because Figma's plugin runtime cannot load
+a font installed during a session — Figma's limit, applied to the source of truth, inverting the rule
+that where the two disagree Figma is wrong. Design is font-free; the family is declared in the tokens
+and on the kit page; the port resolves it and reports substitutions.
+
+### Counts
+
+154 checks across 24 scripts becomes **153 across 22**, and every number in the README and the banner
+is recounted by `count-test` rather than remembered. The flow diagram is generated from the manifests
+by `scripts/flow-diagram.mjs`, so the picture cannot disagree with the code.
+
 ## 1.2.4
 
 ### The counts, recounted by something that does not forget
