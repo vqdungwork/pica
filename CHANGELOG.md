@@ -80,8 +80,10 @@ and on the kit page; the port resolves it and reports substitutions.
 
 ### Counts
 
-154 checks across 24 scripts becomes **153 across 22**, and every number in the README and the banner
-is recounted by `count-test` rather than remembered. The flow diagram is generated from the manifests
+154 assertions across 24 check scripts becomes **156 across 32**, and every number in the README
+and the banner is recounted by `count-test` rather than remembered. Two more checks run inside a
+Figma session and node cannot invoke them, so `pica-verify` reports them separately rather than
+counting them in either direction. The flow diagram is generated from the manifests
 by `scripts/flow-diagram.mjs`, so the picture cannot disagree with the code.
 
 ## 1.2.4

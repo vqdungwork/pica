@@ -361,6 +361,20 @@ Use `install`, not `update`.
 have, and pica then reports the missing checks as `SKIPPED. NOT a pass`, which is honest and not what
 you wanted.
 
+### Coming from 1.x, uninstall the six that are gone
+
+2.0.0 removed `developer`, `qa`, `impl`, `architect`, `estimate` and `model`. They are gone from the
+marketplace, which means **neither `install` nor `update` will take them off a machine that already
+has them**: their commands keep appearing and their rules keep loading, describing a chain that no
+longer exists.
+
+```bash
+claude plugin uninstall pica-developer@pica pica-qa@pica pica-impl@pica \
+                        pica-architect@pica pica-estimate@pica pica-model@pica
+```
+
+Nothing loads until the session restarts, in either direction.
+
 ## Philosophy
 
 - **Measure, do not eyeball.** The defects that matter most survive a visual review
