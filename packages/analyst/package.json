@@ -48,7 +48,7 @@
       "constraint"
     ],
     "artifacts": [
-      "docs/contract.md"
+      "docs/prd.md"
     ]
   },
   "checks": [

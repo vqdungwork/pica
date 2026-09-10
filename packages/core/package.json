@@ -44,9 +44,13 @@
       "workPackages",
       "exclusions",
       "flows",
-      "intakeApproved"
+      "intakeApproved",
+      "field",
+      "scopeFrozen",
+      "deadline"
     ],
     "artifacts": [
+      "docs/brief.md",
       "docs/contract.md",
       "docs/exclusions.md",
       ".pica/state.json"

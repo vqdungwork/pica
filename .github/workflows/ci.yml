@@ -64,6 +64,12 @@ jobs:
       - name: count test
         run: node scripts/count-test.mjs
 
+      # The manifests describe a graph that nothing has ever checked, so the
+      # declarations drifted from the chain and from each other. Walking them by
+      # hand found seven defects; this is what stops the eighth.
+      - name: contract test
+        run: node scripts/contract-check.mjs
+
       # The gate is folded into the run rather than repeating it: mutate.mjs exits 0 with
       # mutations SKIPPED, so a green tick alone does not mean every check was proven.
       - name: mutation suite
