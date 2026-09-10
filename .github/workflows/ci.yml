@@ -67,6 +67,12 @@ jobs:
       - name: contract test
         run: node scripts/contract-check.mjs
 
+      # Every agent carries a generated register of the three knowledge axes. An
+      # embedded copy that no longer matches its source is the drift the generator
+      # exists to prevent, so the check is the generator run with --check.
+      - name: knowledge drift
+        run: node scripts/knowledge-gen.mjs --check
+
       # The gate is folded into the run rather than repeating it: mutate.mjs exits 0 with
       # mutations SKIPPED, so a green tick alone does not mean every check was proven.
       - name: mutation suite
