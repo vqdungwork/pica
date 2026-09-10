@@ -64,8 +64,9 @@ function makeFixture() {
   const d = fs.mkdtempSync(path.join(process.env.TMPDIR || "/tmp", "pica-mutate-"));
   execFileSync("rsync", ["-a", "--exclude", ".git", "--exclude", "node_modules", src + "/", d + "/"]);
 
-  /* impl-check refuses a directory that is not a git repository, correctly: branch age
-   * and branch protection are properties of a repository and not of a folder. */
+  /* The fixture gets a repository of its own. No surviving check reads git — impl-check
+   * did and went with the build half — but a project directory that is not a repository
+   * is not a shape pica should be proven against. */
   try {
     const q = { cwd: d, stdio: "ignore" };
     const who = ["-c", "user.email=fixture@example.invalid", "-c", "user.name=pica fixture"];
@@ -157,22 +158,11 @@ const M = [
   ["guardrail",           "analyst/scripts/problem-check.mjs", [S], "problem", (s) => s.problem.guardrails = []],
   ["counter-evidence",    "analyst/scripts/problem-check.mjs", [S], "problem", (s) => s.problem.counterEvidence = "n/a"],
   ["hmw-generative",      "analyst/scripts/problem-check.mjs", [S], "problem", (s) => s.problem.hmw = "How might we build an approvals dashboard?"],
-  ["trigger-complete",    "analyst/scripts/problem-check.mjs", [S], "trigger", (s) => delete s.trigger.window],
-  ["constraint-declared", "analyst/scripts/problem-check.mjs", [S], "commercialConstraint", (s) => delete s.commercialConstraint.by],
   ["tier-declared",       "analyst/scripts/problem-check.mjs", [S], "workPackages", (s) => delete s.workPackages.approvals.tier],
   ["freeze-attributed",   "analyst/scripts/problem-check.mjs", [S, "--freeze"], "workPackages", (s) => delete s.frozenBy],
   // schema-check
   ["sample-size",      "research/scripts/schema-check.mjs", [S], "measured", (s) => s.measured = s.measured.slice(0, 2)],
   ["provenance",       "research/scripts/schema-check.mjs", [S], "measured", (s) => delete s.measured[0].method],
-  // arch-check
-  ["feasibility",      "architect/scripts/arch-check.mjs", [S, "--feasibility"], "risks", (s) => delete s.risks[0].verdict],
-  ["nfr-complete",     "architect/scripts/arch-check.mjs", [S], "nfr", (s) => delete s.nfr[0].measuredBy],
-  ["adr-complete",     "architect/scripts/arch-check.mjs", [S], "adr", (s) => delete s.adr[0].consequences],
-  ["tech-has-adr",     "architect/scripts/arch-check.mjs", [S], "adr", (s) => s.stack = { ...(s.stack || {}), cache: "Memcached" }],
-  // estimate-check
-  ["preconditions",    "estimate/scripts/estimate-check.mjs", [S], "estimate", (s) => { delete s.scopeFrozen; s.estimate.for = "client"; }],
-  ["estimated-by-doer","estimate/scripts/estimate-check.mjs", [S], "estimate", (s) => { for (const v of Object.values(s.estimate)) if (v && v.o !== undefined) delete v.by; }],
-  ["three-points",     "estimate/scripts/estimate-check.mjs", [S], "estimate", (s) => { const k = Object.keys(s.estimate).find((x) => s.estimate[x] && s.estimate[x].o !== undefined); s.estimate[k] = { o: 1, m: 1, p: 1, by: s.estimate[k].by }; }],
   // discover-check
   ["segment-defined",    "discover/scripts/discover-check.mjs", [S], "discovery", (s) => delete s.discovery.segments[0].context],
   ["users-sample-size",  "discover/scripts/discover-check.mjs", [S], "discovery", (s) => { s.discovery.segments[0].interviews = 2; }],
@@ -184,32 +174,14 @@ const M = [
   ["competitor-pricing", "discover/scripts/discover-check.mjs", [S], "discovery", (s) => { s.discovery.competitors[1].pricing = "unknown"; }],
   ["market-bottom-up",   "discover/scripts/discover-check.mjs", [S], "discovery", (s) => { s.discovery.market.size = 950000; }],
   ["users-provenance",   "discover/scripts/discover-check.mjs", [S], "discovery", (s) => delete s.discovery.painPoints[1].source],
-  // value-check
-  ["value-declared",       "model/scripts/value-check.mjs", [S], "value", (s) => delete s.value.for],
-  ["value-attribution",    "model/scripts/value-check.mjs", [S], "value", (s) => delete s.value.revenue[0].by],
-  ["run-cost",             "model/scripts/value-check.mjs", [S], "value", (s) => delete s.value.runCost[0].basis],
-  ["run-cost",             "model/scripts/value-check.mjs", [S], "value", (s) => delete s.value.maintenancePct],
-  ["value-horizon",        "model/scripts/value-check.mjs", [S], "value", (s) => s.value.horizonMonths = 12],
-  ["value-trigger",        "model/scripts/value-check.mjs", [S], "trigger", (s) => delete s.trigger.changed],
-  ["revenue-three-points", "model/scripts/value-check.mjs", [S], "value", (s) => { const r = s.value.revenue[0]; r.o = r.m = r.p = 66000; }],
-  ["revenue-three-points", "model/scripts/value-check.mjs", [S], "value", (s) => { s.value.revenue[0].o = 120000; }],
   /* Strip the PROVENANCE from a driver rather than deleting the driver. Deleting it also
    * orphaned the sensitivity entry naming it, so one missing driver reported as two
    * findings and sent the reader in two directions. An unsourced driver is the defect
    * this check is actually written for. */
-  ["bottom-up",            "model/scripts/value-check.mjs", [S], "value", (s) => delete s.value.revenue[0].drivers[1].from],
-  ["tier-fence",           "model/scripts/value-check.mjs", [S], "value", (s) => { s.value.pricing.tiers[1].fence = ""; }],
-  ["sensitivity",          "model/scripts/value-check.mjs", [S], "value", (s) => { s.value.sensitivity[0].assumption = "the phase of the moon"; }],
-  ["do-nothing",           "model/scripts/value-check.mjs", [S], "value", (s) => delete s.value.doNothing],
-  ["value-verdict",        "model/scripts/value-check.mjs", [S, "--gate"], "value", (s) => delete s.value.verdict],
   // concept-check  (state only: divergence happens before any screen exists)
   ["concepts-diverged", "html/scripts/concept-check.mjs", [S], "workPackages", (s) => { s.workPackages.approvals.concepts = s.workPackages.approvals.concepts.slice(0, 1); }],
   ["concepts-diverged", "html/scripts/concept-check.mjs", [S], "workPackages", (s) => { for (const c of s.workPackages.approvals.concepts) c.servesBadly = []; }],
   ["concepts-diverged", "html/scripts/concept-check.mjs", [S], "workPackages", (s) => { for (const c of s.workPackages.approvals.concepts) c.dropped = false; }],
-  // roadmap, inside estimate-check
-  ["slice-releasable", "estimate/scripts/estimate-check.mjs", [S], "roadmap", (s) => { s.roadmap.slices[0].closes = []; }],
-  ["critical-path",    "estimate/scripts/estimate-check.mjs", [S], "roadmap", (s) => { s.roadmap.criticalPath = ["R1", "R9"]; }],
-  ["buffer-stated",    "estimate/scripts/estimate-check.mjs", [S], "roadmap", (s) => delete s.roadmap.bufferDays],
   // proposal-check
   ["slot-addressed",   "core/scripts/proposal-check.mjs", [S], "proposals", (s) => s.proposals = s.proposals.filter((p) => p.slot !== "S1")],
   ["axis-named",       "core/scripts/proposal-check.mjs", [S], "proposals", (s) => delete s.proposals.find((p) => p.presented)?.axis],
@@ -228,25 +200,12 @@ const M = [
   /* Wrong WITHOUT a cost, not merely wrong. What it cost is the whole value of having
    * written the assumption down, and it is the first thing dropped in a hurried closeout. */
   ["assumption-outcome", "core/scripts/close-check.mjs", [S], "assumptions", (s) => { s.assumptions[0].outcome = "wrong"; }],
-  ["effort-logged",      "core/scripts/close-check.mjs", [S], "effortLog", (s) => { s.effortLog = s.effortLog.slice(1); }],
   /* Exempted and pointing at no register. A dispute that excuses a check without naming
    * where the exemption lives IS the ignored finding it was built to prevent, wearing
    * better paperwork. */
   ["check-disputed",     "core/scripts/close-check.mjs", [S], "checkDisputes", (s) => delete s.checkDisputes[0].exemptionIn],
   ["check-disputed",     "core/scripts/close-check.mjs", [S], "checkDisputes", (s) => { s.checkDisputes[0].argument = "we disagreed"; }],
   ["delivered-frozen",   "core/scripts/close-check.mjs", [S], "closeout", (s) => { s.delivered = true; s.workPackages.approvals.htmlApproved = false; }],
-  // dev-check
-  ["api-contract",     "developer/scripts/dev-check.mjs", ["src", S], "apiContract", (s) => delete s.apiContract[0].errors],
-  ["state-strategy",   "developer/scripts/dev-check.mjs", ["src", S], "stateStrategy", (s) => delete s.stateStrategy.url],
-  ["server-guard",     "developer/scripts/dev-check.mjs", ["src", S], "businessRules", (s) => s.businessRules[0].enforcedBy = "the button is hidden in the interface"],
-  // qa-check
-  ["pyramid",          "qa/scripts/qa-check.mjs", [".", S], "testStrategy", (s) => s.testStrategy.shape = { unit: 4, integration: 9, e2e: 60 }],
-  ["regression",       "qa/scripts/qa-check.mjs", [".", S], "defects", (s) => s.defects[0].failedFirst = false],
-  ["test-data",        "qa/scripts/qa-check.mjs", [".", S], "testData", (s) => s.testData.provenance = "production export"],
-  ["release",          "qa/scripts/qa-check.mjs", [".", S], "rollbackExecuted", (s) => delete s.rollbackExecuted],
-  // impl-check
-  ["nfr-measured",     "impl/scripts/impl-check.mjs", [".", S], "nfr", (s) => delete s.nfr[0].measuredBy],
-  ["stack-declared",   "impl/scripts/impl-check.mjs", [".", S], "stack", (s) => s.stack = { ...s.stack, search: "Elasticsearch" }],
   // capture-reading checks
   ["direction",        "html/scripts/verify-html.mjs", [REF, S], "capture+direction", (s) => s.direction.assert["type.roles.max"] = 1],
   ["exemption-used",   "html/scripts/contrast-check.mjs", [REF, S], "capture", (s) => s.contrastExemptions = [{ where: "nothing here", why: "a stale exemption nobody removed", by: "somebody" }]],

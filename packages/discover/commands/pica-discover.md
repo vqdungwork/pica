@@ -75,7 +75,7 @@ trigger that makes a buyer change.
 `state.discovery` and `state.stakeholders`, plus `docs/research/pain-points.md`, `stakeholders.md`, `competitors.md` and
 `market.md`. **The state keys are what gets checked; the files are what get read.**
 
-Those files are also where `/pica-model` points its revenue drivers, so a driver's `from` should
+Those files are also where the operating model points its evidence, so a claim's `from` should
 name a real line in one of them.
 
 ---
@@ -93,5 +93,5 @@ inferred rather than observed**, because those are the ones the client should co
 
 ## When this finishes
 
-`/pica-model` can price it and `/pica-analyse` can write the PRD on it. Say plainly how many
+`/pica-analyse` can write the PRD on it. Say plainly how many
 people were actually interviewed, and name any segment that is still a hypothesis.

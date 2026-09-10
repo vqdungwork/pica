@@ -12,6 +12,10 @@
  * reads the contract is grading the work against a document the work already negotiated,
  * and it always passes.
  *
+ * EFFORT LOGGED was the eighth until 2.0.0 removed the estimate
+ * package: pica no longer produces the estimated lines it compared actuals against, and a
+ * check whose input nothing writes passes vacuously, which is worse than not having it.
+ *
  * Seven checks:
  *
  *   1. BRIEF COLD        read from briefPath, never from the contract. An absence may be
@@ -20,9 +24,8 @@
  *   3. METRIC COMPARED   the number now, against the baseline taken at 1.2.
  *   4. COMMITTED SHIPPED every committed package shipped, or dropped with a reason.
  *   5. ASSUMPTION OUTCOME every assumption held or was wrong, and wrong ones cost something.
- *   6. EFFORT LOGGED     actuals against every estimated line.
- *   7. DELIVERED FROZEN  after delivery, nothing was modified.
- *   8. CHECK DISPUTED    a check whose premise was argued with, and what happened. The
+ *   6. DELIVERED FROZEN  after delivery, nothing was modified.
+ *   7. CHECK DISPUTED    a check whose premise was argued with, and what happened. The
  *                        register that did not exist: nothing recorded an accepted
  *                        argument that a check was wrong, so a disagreement either
  *                        edited a check silently or ignored a finding silently.
@@ -184,24 +187,6 @@ for (const [i, a] of (Array.isArray(state.assumptions) ? state.assumptions : [])
   }
 }
 
-/* ---- 6. EFFORT LOGGED --------------------------------------------------- *
- * Three-point estimation requires history from past projects, and this is the only place
- * that history is created. Skipping it means every future estimate is a first guess. */
-let effortBad = 0;
-const est = Object.entries(state.estimate || {})
-  .filter(([k, v]) => !["for", "why"].includes(k) && v && v.o !== undefined);
-const logged = new Set((Array.isArray(state.effortLog) ? state.effortLog : [])
-  .map((e) => String(e.line || "").toLowerCase()));
-if (String((state.estimate || {}).for || "") !== "skipped") {
-  for (const [line] of est) {
-    if (!logged.has(line.toLowerCase())) {
-      effortBad++;
-      fail("effort-logged", `effortLog (${line})`,
-        "estimated and never logged. Without the actual, the next estimate for this line is a first guess again.");
-    }
-  }
-}
-
 /* ---- 7. DELIVERED FROZEN ------------------------------------------------ *
  * Rule 4: after handover the file is read-only. This cannot watch the filesystem, so it
  * checks the state for the shape a post-delivery edit leaves behind: an approval revoked,
@@ -289,7 +274,6 @@ const table = [
     Number.isFinite(Number(co.metricNow)) ? `${p.baseline ?? "?"} to ${co.metricNow} ${p.unit || ""}`.trim() : "not compared"],
   ["committed-shipped", unaccounted, `${Object.keys(state.workPackages || {}).length} committed`],
   ["assumption-outcome", outcomeBad, `${(state.assumptions || []).length} assumption(s)`],
-  ["effort-logged", effortBad, `${est.length} estimated line(s), ${logged.size} logged`],
   ["delivered-frozen", frozenBad, state.delivered ? "delivered, checked" : "not delivered yet, not checked"],
   ["check-disputed", disputeBad, disputes.length
     ? `${disputes.length} dispute(s), ${disputes.filter((x) => String(x.outcome).toLowerCase() === "open").length} open`

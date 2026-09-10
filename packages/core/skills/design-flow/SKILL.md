@@ -50,8 +50,6 @@ pass, and `--adopt` turns the abstentions into the order a project should adopt 
 | 0 | Intake: brief verbatim, sources labelled, **analytics and support logs requested** | `/pica` | `packages/research/rules/research.md` |
 | 1 | Research: analytics, support logs, journey map, **measure 3 to 5 shipped products** | inside `/pica` | `packages/research/rules/design-vocabulary.md` |
 | 0.9 | Discovery: who uses it, **what actually hurts counted rather than assumed**, who can veto it and what they fear, what the field charges | `/pica-discover` | `packages/discover/rules/discovery.md` |
-| 1.8 | Feasibility, **before anything is promised** | `/pica-architect --feasibility` | `packages/architect/rules/architecture.md` |
-| 1.9b | The value case: cost to build, **cost to run for two years**, plausible return, the price fence. **The last point at which stopping is cheap** | `/pica-model` | `packages/model/rules/value-modelling.md` |
 | 2 | Domain knowledge, glossary, AS-IS, TO-BE, **the delta**, business rules, use cases, domain model, PRD | `/pica-analyse` | `packages/analyst/rules/business-analysis.md`, `packages/analyst/rules/domain-knowledge.md`, `packages/analyst/rules/industry-knowledge.md` |
 
 **Phase 3 — design and verify.** This phase is the deliverable. An HTML-only project ends here, fully
@@ -70,21 +68,19 @@ verified.
 | 3.10 | Render every frame and **look at it**, then click the main flow end to end | inside `/pica-wp` | [review-discipline.md](../../rules/review-discipline.md) |
 | 3.11 | **GATE: the client approves this package** | inside `/pica-wp` | `packages/html/rules/html-gates.md` |
 
-**Phase 4 to 5 — commercial.** Nothing here may run before the client froze scope and gave a date.
+**Phase 4 — the freeze.** The client confirms three things together, and nothing downstream runs
+until all three are recorded.
 
 | # | Step | Command | Rules |
 |---|---|---|---|
-| 4 | Client confirms the business flow **and** the design. Account writes `scopeFrozen` and `deadline` | human | — |
-| 5 | **Three-point effort by role**, work order derived from the deadline | `/pica-estimate` | `packages/estimate/rules/estimation.md` |
+| 4 | Client confirms the **PRD is correct**, the **scope of work is agreed**, and **the demo does what they expect**. A human writes `scopeFrozen` and `deadline` | human | — |
 
-**Phase 6 to 8 — build and release.** After the contract.
+**Phase 5 — handover.** Figma is optional and sits beside this, never in front of it.
 
 | # | Step | Command | Rules |
 |---|---|---|---|
-| 6 | C4 diagrams, **ADRs**, NFRs stated as numbers | `/pica-architect` | `packages/architect/rules/architecture.md` |
-| 7 | Build, test, release, and **compare the build against the approved design** | `/pica-build` | `packages/impl/rules/implementation.md`, `packages/html/rules/native-mobile.md` |
-| 7f | Port to Figma for the developers, verify, wire the prototype | `/pica-port`, `/pica-review`, `/pica-prototype` | `packages/figma/rules/figma-screens.md` |
-| 8 | Closeout, then **log the real hours back** so the next estimate is better | `/pica-close`, `/pica-estimate --closeout` | [review-discipline.md](../../rules/review-discipline.md) |
+| 5f | Port to Figma, verify frame by frame, wire the prototype | `/pica-port`, `/pica-review`, `/pica-prototype` | `packages/figma/rules/figma-screens.md` |
+| 5 | Closeout, proved against the **original brief** and not against the contract | `/pica-close` | [review-discipline.md](../../rules/review-discipline.md) |
 | — | Feedback arrives | `/pica-feedback` | [review-discipline.md](../../rules/review-discipline.md) |
 
 **One design, three viewports; targets choose what they consume.** A responsive website takes desktop,
@@ -136,19 +132,13 @@ done, in its own manifest, and each installs on its own with only what it needs.
 | `pica-core` | — | intake, closeout, feedback, the state schema, every gate, and `/picaflow` |
 | `pica-discover` | core | users and what hurts, the people who can veto it, competitor pricing, the market derived from sourced factors |
 | `pica-analyst` | core | elicitation, domain knowledge, AS-IS and TO-BE, business rules, the domain model, the PRD, **the problem stated as a number** |
-| `pica-model` | core | cost to build, cost to run for two years, revenue bottom up, the pricing fence |
 | `pica-research` | core | the source audit, the nine foundations, design vocabulary, token provenance |
 | `pica-html` | core, research | work packages at every viewport, and the measured gate |
 | `pica-content` | core, html | the words: every state written, bound to the glossary |
 | `pica-designqa` | core, html | independent evaluators, cognitive walkthrough, build versus design |
-| `pica-architect` | core | feasibility before anything is promised, C4, ADRs, NFRs |
-| `pica-estimate` | core | three-point effort by role, the work order, the effort record |
-| `pica-developer` | core, html, analyst | **the code**: the API contract as a seam, where state lives, failure shapes, accessibility |
-| `pica-qa` | core, analyst | **the tests**: the shape of the suite, who owns each layer, the release gate |
-| `pica-impl` | core, html, designqa | the repository: pipeline, branches, environments, secrets, and what release means |
 | `pica-figma` | core, html | the port, annotations, and the geometry diff |
 
-`pica` installs all twelve. A project that will never touch Figma installs `pica-html`, which pulls in
+`pica` installs all eight. A project that will never touch Figma installs `pica-html`, which pulls in
 `pica-core` and `pica-research` and never sees the Figma half. A team that only wants the business
 analysis installs `pica-analyst`, which pulls in `pica-core` and nothing else.
 
@@ -159,25 +149,6 @@ packages divide by artefact domain and the agents divide by who reasons about wh
 **No package may grant a gate it benefits from.** `html` requests `htmlApproved`; core
 grants it on human approval; `figma` requires it and cannot grant it. Run
 `node packages/core/scripts/pica-status.mjs` to see what is ready and what is blocked.
-
-### Phase 7 is three packages, and the split is the point
-
-`pica-developer` writes the code. `pica-qa` decides whether the suite is a suite or a number.
-`pica-impl` owns the repository around both.
-
-They are separate because they are separate jobs, and merging them produced the failure this split
-fixed: a build with good components, no pipeline, and secrets in the source. How a component is built is
-a craft question; whether a branch may reach production is a repository question; whether the tests
-prove anything is neither.
-
-**Nobody grades their own build.** Step 7.10 runs `pica-evaluate --build` against the approved design,
-and it is not run by whoever wrote the code: someone who knows why a value was chosen will find the
-reason it is acceptable.
-
-`packages/_planned/` keeps the two contracts still unbuilt — `impl-ios` and `impl-android`, the native
-builds `native-mobile.md` writes rules for and no package ships. `impl-web` and `e2e` are marked
-**superseded**: 0.9.0 delivered them as `pica-developer` and `pica-qa`. They are kept rather than deleted
-because what was promised, and what delivered it, is worth more than a tidy directory.
 
 ## What is offered rather than decided
 
@@ -201,21 +172,16 @@ clean.
 
 ## The role agents
 
-Ten, and phase 5 has no assembling agent: **each agent estimates its own line**, because a
-trade pricing work it will not do is a guess with a signature on it. Each loads its own craft rules **and reads the sector entry before it starts**,
+Six. Each loads its own craft rules **and reads the sector entry before it starts**,
 which is what keeps a clinician's screen and a warehouse handheld from coming out of the same template.
 
 | Agent | Package | Step |
 |---|---|---|
 | `pica-researcher` | research | 1.6–1.7, fanned out, none seeing another's findings |
 | `pica-analyst` | analyst | 2 |
-| `pica-architect` | architect | 1.8 feasibility, then 6 |
 | `pica-designer` | html | 3 |
 | `pica-writer` | content | 3.5 |
-| `pica-evaluator` | designqa | 3.8 and 7.10, fanned out, **no write access** |
-
-| `pica-developer` | developer | 7.1–7.7 |
-| `pica-tester` | qa | 7.8 |
+| `pica-evaluator` | designqa | 3.8, fanned out, **no write access** |
 
 **Fan out measurement. Never fan out judgement.** Research and evaluation are the two places, both
 spawned in one message, same return schema, and a unit with no provenance is rejected rather than

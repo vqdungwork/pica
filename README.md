@@ -6,8 +6,8 @@
 <br>An expert team for Claude Code, with the checking built in.
 
 [![version](https://img.shields.io/badge/version-1.2.4-1f2328)](https://github.com/vqdungwork/pica/releases)
-[![checks](https://img.shields.io/badge/checks-154%20fail--closed-1f2328)](#what-gets-checked)
-[![agents](https://img.shields.io/badge/specialists-10-1f2328)](#who-does-the-work)
+[![checks](https://img.shields.io/badge/checks-101%20fail--closed-1f2328)](#what-gets-checked)
+[![agents](https://img.shields.io/badge/specialists-6-1f2328)](#who-does-the-work)
 [![sectors](https://img.shields.io/badge/industries-28-1f2328)](#it-already-knows-your-industry)
 [![licence](https://img.shields.io/badge/licence-MIT-1f2328)](LICENSE)
 
@@ -47,7 +47,7 @@ All three are finished pieces of work, not truncated ones. Figma is optional and
 | **Understands the work** | Turns your paragraph into requirements your team recognises: what happens today, what changes, the rules, and a document a non-technical reader can follow |
 | **Knows your industry** | 28 of them. Who can say no, which colours already mean something, what the field treats as a mistake no matter what you asked for |
 | **Designs it so you can click it** | Real screens at every size and every state, in a day rather than a fortnight, cheap to change while your mind is still changing |
-| **Checks it before you see it** | 154 automated checks: contrast, coverage, the words, the wiring. Nothing reaches you having only been looked at |
+| **Checks it before you see it** | 101 automated checks: contrast, coverage, the words, the wiring. Nothing reaches you having only been looked at |
 | **Has it reviewed by others** | Three to five independent reviewers, none of them seeing each other's findings |
 | **Prices it, if you want** | Whoever does the work prices it, never one person guessing at four trades. Optional: for a client, for yourself, or skipped |
 | **Builds and tests it** | Working code, a test for everything the product promises, and a pipeline that will not release without them |
@@ -92,18 +92,14 @@ thing* and it does all nine, pausing only there.
 
 | Step | Who | What happens | Command |
 |:--|:--|:--|:--|
-| **0 · Intake** | you | Your brief, kept word for word. What is in scope, what is out, which screen sizes it has to work on | `/pica` |
-| **1 · Discovery** | 3 to 5 researchers, one per group of users | Who uses it and **what actually hurts**, counted rather than assumed. Who can stop the project, and what they are afraid of. What your competitors charge | `/pica-discover` |
-| **2 · Research** | 3 to 5 researchers, then an architect | Real products in your field, measured rather than admired. Then someone says what **cannot** be built, while saying it is still free | `/pica-architect` |
-| **3 · Is it worth it** | a modeller, then **you** | What it costs to build, what it costs to **run for two years**, and what it plausibly earns. **The last point where stopping is cheap** | `/pica-model` |
-| **4 · Analysis** | analyst | What happens today, what changes, the rules your business runs on, and a requirements document your team can actually read | `/pica-analyse` |
-| **5 · Design** | designer, writer, 3 to 5 reviewers | Every screen, every size, every state, and the words on them. **Measured, reviewed and looked at** before it reaches you | `/pica-wp` |
-| **6 · You approve** | **you** | The business flow **and** the design. Scope and deadline settled. **Nothing further runs until they are** | none |
-| **7 · Estimate** *(optional)* | each specialist, its own line | Whoever does the work prices it. For a client, for yourself, or skipped with a reason | `/pica-estimate` |
-| **8 · Architecture** | architect | How it is put together, every technology choice recorded with its downside, every performance promise written as a number | `/pica-architect` |
-| **9 · Build** | **developer**, tester, reviewer | **The code gets written.** Then tested. Then a release pipeline. Then the finished thing is measured back against the design you approved, **never by whoever built it** | `/pica-develop` |
+| **1 · Intake** | you | Your brief, kept word for word. What is in scope, what is out, which screen sizes it has to work on, and the field it is in | `/pica` |
+| **2 · Discovery** | 3 to 5 researchers, one per group of users | Who uses it and **what actually hurts**, counted rather than assumed. Who can stop the project and what they fear. What your competitors charge, and how the business itself runs | `/pica-discover` |
+| **3 · Research** | 3 to 5 researchers, none seeing another's findings | Real products in your field, **measured rather than admired**. The tokens come out of what was measured | none |
+| **4 · Analysis** | analyst and modeller | The real problem, the process across every role, the rules, who may see what, and a requirements document your team can actually read | `/pica-analyse` |
+| **5 · Design** | designer, writer, 3 to 5 reviewers | Structure first, then a direction chosen from three, then the design system, then every screen at every size in every state — and the words on them | `/pica-wp` |
+| **6 · You confirm** | **you** | The PRD is right, the scope is agreed, and **the demo does what you expect**. Nothing further runs until all three are | none |
+| **7 · Handover** | analyst | Proved against your **original brief**, not against a plan that drifted. Figma, if you want it, is ported and verified frame by frame | `/pica-close` |
 | **any time** | you | **One command, one table.** Every check that applies to where you are, what passed, what failed, and what abstained with the reason. `--evidence` lists every assertion, which is what a review quotes | `/pica-verify` |
-| **10 · Handover** | analyst | Proved against your **original brief**, not against a plan that drifted. Then the real hours are recorded so the next estimate is better | `/pica-close` |
 
 Figma is optional and sits beside step 7, never in front of it. Where Figma and the design disagree,
 Figma is wrong.
@@ -130,7 +126,7 @@ wrong, the suite stops catching something, and the suite runs on every change.
 
 ## Who does the work
 
-Ten specialists. Each has a trade of its own, each reads up on your industry before it starts work,
+Six specialists. Each has a trade of its own, each reads up on your industry before it starts work,
 and **each prices its own work** when you ask for an estimate.
 
 | Specialist | Does | Reads about your industry first |
@@ -152,7 +148,7 @@ wrong, and quietly makes design decisions that were never theirs to make.
 ---
 
 <details>
-<summary><b>All 154 checks, and what is enforced by a hook</b></summary>
+<summary><b>All 101 checks, and what is enforced by a hook</b></summary>
 
 
 <br>Listed so the number can be recounted rather than trusted.
@@ -162,10 +158,9 @@ wrong, and quietly makes design decisions that were never theirs to make.
 | `trace-check` | 7 | glossary closure, rule enforcement, use case trace, entity terms, AS-IS present, assumption radius, exclusions asked |
 | `domain-check` | 5 | all eight categories answered, sourced, verified, agent claims surfaced, affects |
 | `industry-check` | 7 | sector known, stakeholders, constraints, conventions, forbidden, style excluded, evidence |
-| `problem-check` | 10 | trigger complete, metric, baseline, target, guardrail, counter-evidence, generative HMW, commercial constraint declared, tier declared, freeze attributed |
+| `problem-check` | 8 | metric, baseline, target, guardrail, counter-evidence, generative HMW, tier declared, freeze attributed |
 | `discover-check` | 10 | segment defined, sample size, users provenance, evidence class, pain frequency, somebody who said no, stakeholder fears, competitor pricing, bottom-up market, buyer named |
 | `schema-check` | 6 | sample size, nine foundations, type roles, provenance, shipped not concept, tradition named |
-| `value-check` | 11 | value declared, trigger, horizon, run-cost, bottom-up revenue, three-point revenue, sensitivity, do-nothing baseline, tier fence, attribution, verdict |
 | `concept-check` | 1 | two or three concepts genuinely diverged, on complex tier only |
 | `verify-html` | 7 | viewport tagged, overflow, tall-screen pair, viewport coverage, direction, data ownership, width media |
 | `contrast-check` | 2 | unresolved background, exemption still needed |
@@ -174,16 +169,11 @@ wrong, and quietly makes design decisions that were never theirs to make.
 | `coverage-check` | 5 | use case covered, screen traced, use case exists, flow reachable, target buildable |
 | `copy-check` | 5 | no placeholder, glossary terms, copy rules, error next step, length realism |
 | `flow-check` | 7 | dead end, dangling href, dangling target, unreachable, orphan prototype, nav target, flow declared |
-| `arch-check` | 7 | feasibility verdict, risk priced, NFR complete, constraint becomes NFR, ADR complete, technology has an ADR, mobile signing custody |
 | `proposal-check` | 6 | slot addressed, axis named, provenance, a real choice, nothing the sector forbids, choice recorded |
-| `estimate-check` | 10 | preconditions, three points, estimated by the doer, tier spread, risk reflected, headcount, effort log, slice releasable, critical path, buffer stated |
-| `impl-check` | 8 | test trace, CI pipeline, branch protection, branch age, environments, secrets, NFR measured, stack declared |
 | `code-tokens-check` | 4 | raw colour, raw spacing, raw radius, linear easing |
-| `dev-check` | 7 | API contract, error branch, state strategy, accessibility in code, performance budget, server guard, retry safety |
-| `qa-check` | 7 | pyramid shape, use case covered end to end, rule asserted, regression traced, severity defined, test data, release gate |
-| `close-check` | 8 | brief read cold, nothing excluded, metric compared to baseline, committed against shipped, assumption outcome, effort logged, delivered only over a frozen package, a dispute that can be answered |
+| `close-check` | 7 | brief read cold, nothing excluded, metric compared to baseline, committed against shipped, assumption outcome, delivered only over a frozen package, a dispute that can be answered |
 | `build-diff` | 5 | frame paired, control height, radius, hue budget, text position |
-| | **154** | |
+| | **101** | |
 
 `parity-check` and `geometry-diff` report a measured difference rather than named check ids: nominal and
 structural parity wherever two or more viewports are declared, and Figma position against the HTML
@@ -253,13 +243,13 @@ loaded. Approvals live on disk, because a hook is a script and cannot know you s
 
 | Count | What each one is |
 |:--|:--|
-| **15 plugins** | 14 packages plus a bundle, each declaring what it requires, produces, checks and considers done |
-| **19 commands** | Deterministic once typed |
-| **25 rule modules** | Loaded per step, never all at once. 228 definition-of-done items across them |
+| **9 plugins** | 8 packages plus a bundle, each declaring what it requires, produces, checks and considers done |
+| **13 commands** | Deterministic once typed |
+| **19 rule modules** | Loaded per step, never all at once. 228 definition-of-done items across them |
 | **26 check scripts** | Plus the capture harness, the status tool, and a harness that runs the in-Figma scripts outside Figma |
-| **154 checks** | Every one fails closed. `/pica-verify` runs every applicable one in a single table, and an abstention is never counted as a pass |
+| **101 checks** | Every one fails closed. `/pica-verify` runs every applicable one in a single table, and an abstention is never counted as a pass |
 | **28 sectors** | 264 names resolving to them, 4 deliberately refused as ambiguous |
-| **10 specialists** | Each loads its own craft rules and the sector entry before it starts, and estimates its own line. The evaluator has **no write access**, because a reviewer that can fix cannot be trusted to report |
+| **6 specialists** | Each loads its own craft rules and the sector entry before it starts. The evaluator has **no write access**, because a reviewer that can fix cannot be trusted to report |
 | **2 hooks** | One loads the rules every session; one refuses a Figma write that has not earned it |
 
 <details>
@@ -269,13 +259,10 @@ loaded. Approvals live on disk, because a hook is a script and cannot know you s
 
 | Install | You get | Because |
 |:--|:--:|:--|
-| `pica-analyst` · `pica-architect` · `pica-estimate` · `pica-research` | 2 | they need the state schema and nothing else |
+| `pica-analyst` · `pica-discover` · `pica-research` | 2 | they need the state schema and nothing else |
 | `pica-html` | 3 | it consumes `tokens/tokens.css`, which research produces |
-| `pica-qa` | 3 | a test asserts a business rule, and the rules live in the analyst's state |
 | `pica-content` · `pica-designqa` · `pica-figma` | 4 | all three read the capture artefact html produces |
-| `pica-developer` | 5 | it builds an approved HTML design against the analyst's contract |
-| `pica-impl` | 5 | the build-versus-design comparison belongs to Design QA, not the builder |
-| `pica` | 13 | the bundle |
+| `pica` | 8 | the bundle |
 | pica is for | pica is not for |
 |:--|:--|
 | Applications: web, mobile, desktop | Illustration, images, photography |
@@ -303,7 +290,7 @@ ends complete, not truncated.
 </details>
 
 <details>
-<summary><b>The 25 rule modules</b></summary>
+<summary><b>The 19 rule modules</b></summary>
 
 <br>Loaded per step rather than all at once. 228 definition of done items across them, each either
 decided by a check or explicitly left to a human.

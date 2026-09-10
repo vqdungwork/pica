@@ -56,9 +56,6 @@ jobs:
       # A check must report on the project it was pointed at, not on whichever repository
       # encloses it. impl-check did the latter until 1.2.3, and its credential scan passed
       # having scanned nothing.
-      - name: scope test
-        run: node scripts/scope-test.mjs
-
       # Every number the README and the banner state about this repository, recounted from
       # the code. Four releases running shipped a wrong one, 1.2.3 included.
       - name: count test
