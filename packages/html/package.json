@@ -21,7 +21,10 @@
       "shell-check.mjs",
       "spacing-check.mjs",
       "verify-html.mjs",
-      "concept-check.mjs"
+      "concept-check.mjs",
+      "structure-check.mjs",
+      "direction-spread-check.mjs",
+      "foundations-check.mjs"
     ],
     "agents": [
       "pica-designer.md"
@@ -131,6 +134,34 @@
       "phase": "build",
       "needs": [
         "@src",
+        "@tokens/tokens.json"
+      ]
+    },
+    {
+      "run": "structure-check.mjs",
+      "passes": "0 findings",
+      "args": "<structureDir> <state>",
+      "phase": "design",
+      "needs": [
+        "@html/structure"
+      ]
+    },
+    {
+      "run": "direction-spread-check.mjs",
+      "passes": "0 findings",
+      "args": "<state>",
+      "phase": "design",
+      "needs": [
+        "proposals"
+      ]
+    },
+    {
+      "run": "foundations-check.mjs",
+      "passes": "0 findings",
+      "args": "<designSystem> <tokens> <state>",
+      "phase": "design",
+      "needs": [
+        "@html/design-system.html",
         "@tokens/tokens.json"
       ]
     }

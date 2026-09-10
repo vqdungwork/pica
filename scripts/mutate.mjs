@@ -254,6 +254,22 @@ const M = [
     /* spacing-check reads the TOKEN FILE first and falls back to state.spacingScale, so
    * mutating the fallback did nothing on any project that has tokens. Redirect the path
    * at a scale on which no real gap lands. */
+  // direction-spread-check
+  ["three-offered",     "html/scripts/direction-spread-check.mjs", [S], "proposals", (s) => { const p = s.proposals.find((x) => x.slot === "S1"); p.options = p.options.slice(0, 2); }],
+  ["traditions-differ", "html/scripts/direction-spread-check.mjs", [S], "proposals", (s) => { const p = s.proposals.find((x) => x.slot === "S1"); p.options[1].tradition = p.options[0].tradition; }],
+  ["baseline-present",  "html/scripts/direction-spread-check.mjs", [S], "proposals", (s) => { for (const o of s.proposals.find((x) => x.slot === "S1").options) o.isSectorBaseline = false; }],
+  ["numbers-differ",    "html/scripts/direction-spread-check.mjs", [S], "proposals", (s) => { for (const o of s.proposals.find((x) => x.slot === "S1").options) o.asserts.radius = 8; }],
+
+  // structure-check
+  ["lofi-traced",     "html/scripts/structure-check.mjs", ["html/structure", S], "@html/structure", (s) => { s.useCases = s.useCases.filter((u) => u.id !== "UC-01"); s.useCases.push({ id: "UC-77", name: "something else", actor: "account holder", tracesTo: ["BR-01"], touches: [{ entity: "payment", ops: "cr" }, { entity: "approval", ops: "cru" }] }); }],
+  ["lofi-states",     "html/scripts/structure-check.mjs", ["html/structure", S], "@html/structure", (s) => { s.structureExemptions = []; }],
+
+  // foundations-check
+  ["contrast-floor",    "html/scripts/foundations-check.mjs", ["html/design-system.html", "tokens/tokens.json", S], "direction", (s) => { s.audience.floors.contrastRatio = 21; }],
+  ["state-covered",     "html/scripts/foundations-check.mjs", ["html/design-system.html", "tokens/tokens.json", S], "direction", (s) => { s.direction.components[0].states.push("pressed"); }],
+  ["icon-set",          "html/scripts/foundations-check.mjs", ["html/design-system.html", "tokens/tokens.json", S], "direction", (s) => { delete s.direction.icons.licence; }],
+  ["icon-set",          "html/scripts/foundations-check.mjs", ["html/design-system.html", "tokens/tokens.json", S], "direction", (s) => { s.direction.icons.strokeWidth = "2"; }],
+
   ["off-scale",        "html/scripts/spacing-check.mjs", [REF, S], "capture", (s) => {
     s.tokensPath = ".pica/mutant-tokens.json";
     /* A scale on which the EDGES still land and the gaps do not. A file with only
@@ -279,6 +295,10 @@ const have = (need) => {
   if (!need) return true;
   if (need === "capture") return hasCapture;
   if (need === "capture+direction") return hasCapture && baseState.direction && baseState.direction.assert;
+  /* `@path` is a path on disk, the same convention pica-verify's `needs` uses. Without it a
+     mutation on a check that reads a directory rather than state was skipped for want of a
+     state key it never wanted, and a skip reads as "no material" rather than as a bug here. */
+  if (need.startsWith("@")) return fs.existsSync(path.join(DIR, need.slice(1)));
   const v = baseState[need];
   return Array.isArray(v) ? v.length > 0 : v !== undefined && v !== null;
 };

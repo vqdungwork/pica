@@ -968,7 +968,45 @@
       "hue.count.max": 3,
       "type.roles.max": 5
     },
-    "deviations": []
+    "deviations": [],
+    "pairs": [
+      {
+        "name": "body on surface",
+        "fg": "#1b1f1d",
+        "bg": "#fbfcfa"
+      },
+      {
+        "name": "muted on surface",
+        "fg": "#525854",
+        "bg": "#fbfcfa"
+      }
+    ],
+    "componentStates": [
+      "default",
+      "hover",
+      "focus",
+      "disabled"
+    ],
+    "components": [
+      {
+        "name": "btn",
+        "states": [
+          "default",
+          "hover",
+          "focus",
+          "disabled"
+        ]
+      }
+    ],
+    "icons": {
+      "name": "Lucide",
+      "licence": "ISC",
+      "strokeWidth": "1.5",
+      "gridSize": "24"
+    },
+    "asserts": {
+      "strokeWidth": "1.5"
+    }
   },
   "nfr": [
     {
@@ -989,19 +1027,43 @@
           "id": "A",
           "names": "one row per payment, age in the first column",
           "from": "measured on Monzo and Starling, both of which lead with a single scannable column",
-          "costs": "12 rows per screen at 1440x900"
+          "costs": "12 rows per screen at 1440x900",
+          "tradition": "International / Swiss",
+          "isSectorBaseline": false,
+          "asserts": {
+            "radius": 8,
+            "controlHeight": 36,
+            "hueCount": 1,
+            "spacingStep": 8
+          }
         },
         {
           "id": "B",
           "names": "grouped by branch, collapsed by default",
           "from": "measured on the incumbent core-banking module, which groups by originating unit",
-          "costs": "3 groups per screen, one extra click to reach a payment"
+          "costs": "3 groups per screen, one extra click to reach a payment",
+          "tradition": "Material",
+          "isSectorBaseline": false,
+          "asserts": {
+            "radius": 4,
+            "controlHeight": 48,
+            "hueCount": 2,
+            "spacingStep": 4
+          }
         },
         {
           "id": "C",
           "names": "a dense table, 44px rows, no grouping",
           "from": "measured on Wise and Revolut, both of which run 44px rows on ledger surfaces",
-          "costs": "18 rows per screen, and the age column has to earn its width"
+          "costs": "18 rows per screen, and the age column has to earn its width",
+          "tradition": "Minimalism",
+          "isSectorBaseline": true,
+          "asserts": {
+            "radius": 2,
+            "controlHeight": 44,
+            "hueCount": 1,
+            "spacingStep": 12
+          }
         }
       ],
       "chosen": "C",
@@ -1308,6 +1370,16 @@
           ]
         }
       ]
+    }
+  ],
+  "structureExemptions": [
+    {
+      "state": "approved",
+      "why": "the approved state is the recorded screen seen from the payment's side; one structure screen serves both"
+    },
+    {
+      "state": "pending",
+      "why": "an approval is pending only while the approver is on the decide screen, which has no separate structure"
     }
   ]
 }
