@@ -154,6 +154,35 @@ const M = [
   ["audience-floors",    "analyst/scripts/audience-check.mjs", [S], "audience", (s) => { s.audience.dimensions.age.value = "older-adults"; }],
   ["audience-evidence",  "analyst/scripts/audience-check.mjs", [S], "audience", (s) => { delete s.audience.dimensions.region.evidence; }],
   ["audience-ambiguous", "analyst/scripts/audience-check.mjs", [S], "audience", (s) => { s.audience.dimensions.region.value = "asia"; }],
+
+  // process-check
+  ["notation-named",   "analyst/scripts/process-check.mjs", [S], "toBe", (s) => { s.toBe.notation = "uml-activity"; }],
+  ["notation-named",   "analyst/scripts/process-check.mjs", [S], "toBe", (s) => { delete s.toBe.notationWhy; }],
+  ["activity-laned",   "analyst/scripts/process-check.mjs", [S], "toBe", (s) => { delete s.toBe.nodes.find((n) => n.id === "raise").lane; }],
+  ["gateway-forks",    "analyst/scripts/process-check.mjs", [S], "toBe", (s) => { s.toBe.edges = s.toBe.edges.filter((e) => !(e.from === "decide" && e.to === "amend")); }],
+  ["no-dead-end",      "analyst/scripts/process-check.mjs", [S], "toBe", (s) => { s.toBe.edges = s.toBe.edges.filter((e) => e.from !== "record"); }],
+  ["activity-traced",  "analyst/scripts/process-check.mjs", [S], "toBe", (s) => { delete s.toBe.nodes.find((n) => n.id === "raise").tracesTo; }],
+
+  // permissions-check
+  ["cell-answered",    "analyst/scripts/permissions-check.mjs", [S], "rolesPermissions", (s) => { delete s.rolesPermissions["account holder"].payment; }],
+  ["entity-owned",     "analyst/scripts/permissions-check.mjs", [S], "rolesPermissions", (s) => { s.rolesPermissions["account holder"].payment = "r"; }],
+  ["role-known",       "analyst/scripts/permissions-check.mjs", [S], "rolesPermissions", (s) => { s.rolesPermissions["shadow admin"] = { payment: "crud", approval: "crud" }; }],
+  ["use-case-backs",   "analyst/scripts/permissions-check.mjs", [S], "rolesPermissions", (s) => { s.rolesPermissions["compliance officer"].payment = "rd"; }],
+
+  // requirements-check
+  ["nfr-measured",     "analyst/scripts/requirements-check.mjs", [S], "nfr", (s) => { s.nfr[0].requirement = "the approval queue is fast"; }],
+  ["nfr-measured",     "analyst/scripts/requirements-check.mjs", [S], "nfr", (s) => { delete s.nfr[0].measuredBy; }],
+  ["classified",       "analyst/scripts/requirements-check.mjs", [S], "requirements", (s) => { delete s.requirements[0].class; }],
+  ["transition-flagged","analyst/scripts/requirements-check.mjs", [S], "requirements", (s) => { delete s.requirements.find((r) => r.class === "transition").untilWhen; }],
+  ["state-closed",     "analyst/scripts/requirements-check.mjs", [S], "stateModel", (s) => { delete s.stateModel[0].states.find((x) => x.name === "held").to; }],
+  ["state-closed",     "analyst/scripts/requirements-check.mjs", [S], "stateModel", (s) => { s.stateModel[0].states.find((x) => x.name === "approved").terminal = false; }],
+
+  // journey-check
+  ["lane-covered",     "analyst/scripts/journey-check.mjs", [S], "journeys", (s) => { s.journeys[0].actor = "somebody with no lane"; }],
+  ["stage-derived",    "analyst/scripts/journey-check.mjs", [S], "journeys", (s) => { s.journeys[0].stages[0].from = ["a step that is not in the lane"]; }],
+  ["pain-sourced",     "analyst/scripts/journey-check.mjs", [S], "journeys", (s) => { delete s.journeys[0].stages[0].pain[0].nOf; }],
+  ["pain-sourced",     "analyst/scripts/journey-check.mjs", [S], "journeys", (s) => { delete s.journeys[0].stages[0].pain[0].class; }],
+  ["delta-stated",     "analyst/scripts/journey-check.mjs", [S], "journeys", (s) => { delete s.delta; }],
   ["conventions",      "analyst/scripts/industry-check.mjs", [S], "industry", (s) => s.industry.conventions.pop()],
   ["stakeholders",     "analyst/scripts/industry-check.mjs", [S], "stakeholders", (s) => s.stakeholders = []],
   // domain-check

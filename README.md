@@ -6,8 +6,8 @@
 <br>An expert team for Claude Code, with the checking built in.
 
 [![version](https://img.shields.io/badge/version-1.2.4-1f2328)](https://github.com/vqdungwork/pica/releases)
-[![checks](https://img.shields.io/badge/checks-110%20fail--closed-1f2328)](#what-gets-checked)
-[![agents](https://img.shields.io/badge/specialists-6-1f2328)](#who-does-the-work)
+[![checks](https://img.shields.io/badge/checks-127%20fail--closed-1f2328)](#what-gets-checked)
+[![agents](https://img.shields.io/badge/specialists-7-1f2328)](#who-does-the-work)
 [![sectors](https://img.shields.io/badge/industries-28-1f2328)](#it-already-knows-your-industry)
 [![licence](https://img.shields.io/badge/licence-MIT-1f2328)](LICENSE)
 
@@ -47,7 +47,7 @@ All three are finished pieces of work, not truncated ones. Figma is optional and
 | **Understands the work** | Turns your paragraph into requirements your team recognises: what happens today, what changes, the rules, and a document a non-technical reader can follow |
 | **Knows your industry** | 28 of them. Who can say no, which colours already mean something, what the field treats as a mistake no matter what you asked for |
 | **Designs it so you can click it** | Real screens at every size and every state, in a day rather than a fortnight, cheap to change while your mind is still changing |
-| **Checks it before you see it** | 110 automated checks: contrast, coverage, the words, the wiring. Nothing reaches you having only been looked at |
+| **Checks it before you see it** | 127 automated checks: contrast, coverage, the words, the wiring. Nothing reaches you having only been looked at |
 | **Has it reviewed by others** | Three to five independent reviewers, none of them seeing each other's findings |
 | **Prices it, if you want** | Whoever does the work prices it, never one person guessing at four trades. Optional: for a client, for yourself, or skipped |
 | **Builds and tests it** | Working code, a test for everything the product promises, and a pipeline that will not release without them |
@@ -126,7 +126,7 @@ wrong, the suite stops catching something, and the suite runs on every change.
 
 ## Who does the work
 
-Six specialists. Each has a trade of its own, each reads up on your industry before it starts work,
+Seven specialists. Each has a trade of its own, each reads up on your industry before it starts work,
 and **each prices its own work** when you ask for an estimate.
 
 | Specialist | Does | Reads about your industry first |
@@ -148,7 +148,7 @@ wrong, and quietly makes design decisions that were never theirs to make.
 ---
 
 <details>
-<summary><b>All 110 checks, and what is enforced by a hook</b></summary>
+<summary><b>All 127 checks, and what is enforced by a hook</b></summary>
 
 
 <br>Listed so the number can be recounted rather than trusted.
@@ -160,6 +160,10 @@ wrong, and quietly makes design decisions that were never theirs to make.
 | `industry-check` | 7 | sector known, stakeholders, constraints, conventions, forbidden, style excluded, evidence |
 | `archetype-check` | 4 | archetype declared per application, resolved, ambiguity refused, required screens present |
 | `audience-check` | 5 | every value resolved, every dimension answered, floors merged by maximum, evidence per selection, ambiguity refused |
+| `process-check` | 5 | notation named with a reason, every activity in a lane, every gateway forks, no dead ends, every activity traces to a use case |
+| `permissions-check` | 4 | every entity × role cell answered, every entity creatable, every role registered, every permission backed by a use case |
+| `requirements-check` | 4 | NFRs as numbers with a condition and a measure, every requirement classified, transition requirements flagged temporary, state model closes |
+| `journey-check` | 4 | every lane has a journey, stages derived from the lane, pain carries frequency and class, the delta stated |
 | `problem-check` | 8 | metric, baseline, target, guardrail, counter-evidence, generative HMW, tier declared, freeze attributed |
 | `discover-check` | 10 | segment defined, sample size, users provenance, evidence class, pain frequency, somebody who said no, stakeholder fears, competitor pricing, bottom-up market, buyer named |
 | `schema-check` | 6 | sample size, nine foundations, type roles, provenance, shipped not concept, tradition named |
@@ -175,7 +179,7 @@ wrong, and quietly makes design decisions that were never theirs to make.
 | `code-tokens-check` | 4 | raw colour, raw spacing, raw radius, linear easing |
 | `close-check` | 7 | brief read cold, nothing excluded, metric compared to baseline, committed against shipped, assumption outcome, delivered only over a frozen package, a dispute that can be answered |
 | `build-diff` | 5 | frame paired, control height, radius, hue budget, text position |
-| | **110** | |
+| | **127** | |
 
 `parity-check` and `geometry-diff` report a measured difference rather than named check ids: nominal and
 structural parity wherever two or more viewports are declared, and Figma position against the HTML
@@ -247,11 +251,11 @@ loaded. Approvals live on disk, because a hook is a script and cannot know you s
 |:--|:--|
 | **9 plugins** | 8 packages plus a bundle, each declaring what it requires, produces, checks and considers done |
 | **13 commands** | Deterministic once typed |
-| **20 rule modules** | Loaded per step, never all at once. 228 definition-of-done items across them |
+| **21 rule modules** | Loaded per step, never all at once. 228 definition-of-done items across them |
 | **26 check scripts** | Plus the capture harness, the status tool, and a harness that runs the in-Figma scripts outside Figma |
-| **110 checks** | Every one fails closed. `/pica-verify` runs every applicable one in a single table, and an abstention is never counted as a pass |
+| **127 checks** | Every one fails closed. `/pica-verify` runs every applicable one in a single table, and an abstention is never counted as a pass |
 | **28 sectors** | 264 names resolving to them, 4 deliberately refused as ambiguous |
-| **6 specialists** | Each loads its own craft rules and the sector entry before it starts. The evaluator has **no write access**, because a reviewer that can fix cannot be trusted to report |
+| **7 specialists** | Each loads its own craft rules and the sector entry before it starts. The evaluator has **no write access**, because a reviewer that can fix cannot be trusted to report |
 | **2 hooks** | One loads the rules every session; one refuses a Figma write that has not earned it |
 
 <details>
@@ -292,7 +296,7 @@ ends complete, not truncated.
 </details>
 
 <details>
-<summary><b>The 20 rule modules</b></summary>
+<summary><b>The 21 rule modules</b></summary>
 
 <br>Loaded per step rather than all at once. 228 definition of done items across them, each either
 decided by a check or explicitly left to a human.
@@ -306,6 +310,7 @@ decided by a check or explicitly left to a human.
 | `business-analysis.md` | analyst | Elicitation, AS-IS and TO-BE, the delta, business rules, use cases, the domain model, the PRD |
 | `domain-knowledge.md` | analyst | Where domain constraints live in order of authority, Event Storming without a workshop |
 | `industry-knowledge.md` | analyst | The 28-sector base and how to use it, the five convention axes, the waiver registers |
+| `modelling.md` | analyst | The four models: process notation, domain, roles and permissions, state, and NFRs as numbers |
 | `value-modelling.md` | model | Build cost from the estimate, three points on revenue, bottom-up only, run cost across the horizon, the fence rather than the tier list, the do-nothing baseline, attribution per line |
 | `architecture.md` | architect | Feasibility as three lists, C4 stopping at component, ADRs with consequences, NFRs as numbers |
 | `html-prototype.md` | html | Layout, the review page, options versus the interactive flow, the tall-screen pair, state matrices |

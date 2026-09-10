@@ -38,6 +38,7 @@ const AGENTS = [
   "packages/research/agents/pica-researcher.md",
   "packages/discover/agents/pica-discoverer.md",
   "packages/analyst/agents/pica-analyst.md",
+  "packages/analyst/agents/pica-modeller.md",
   "packages/html/agents/pica-designer.md",
   "packages/content/agents/pica-writer.md",
   "packages/designqa/agents/pica-evaluator.md",

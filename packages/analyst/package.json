@@ -9,7 +9,8 @@
     "rules": [
       "business-analysis.md",
       "domain-knowledge.md",
-      "industry-knowledge.md"
+      "industry-knowledge.md",
+      "modelling.md"
     ],
     "scripts": [
       "domain-check.mjs",
@@ -17,10 +18,15 @@
       "trace-check.mjs",
       "problem-check.mjs",
       "audience-check.mjs",
-      "archetype-check.mjs"
+      "archetype-check.mjs",
+      "process-check.mjs",
+      "permissions-check.mjs",
+      "requirements-check.mjs",
+      "journey-check.mjs"
     ],
     "agents": [
-      "pica-analyst.md"
+      "pica-analyst.md",
+      "pica-modeller.md"
     ]
   },
   "requires": {
@@ -48,8 +54,11 @@
       "stakeholders",
       "exclusionsConfirmed",
       "problem",
-      "trigger",
-      "constraint"
+      "rolesPermissions",
+      "stateModel",
+      "nfr",
+      "requirements",
+      "journeys"
     ],
     "artifacts": [
       "docs/prd.md"
@@ -109,6 +118,42 @@
       "phase": "discover",
       "needs": [
         "audience"
+      ]
+    },
+    {
+      "run": "process-check.mjs",
+      "passes": "0 findings",
+      "args": "<state>",
+      "phase": "analyse",
+      "needs": [
+        "toBe|asIs"
+      ]
+    },
+    {
+      "run": "permissions-check.mjs",
+      "passes": "0 findings",
+      "args": "<state>",
+      "phase": "analyse",
+      "needs": [
+        "rolesPermissions"
+      ]
+    },
+    {
+      "run": "requirements-check.mjs",
+      "passes": "0 findings",
+      "args": "<state>",
+      "phase": "analyse",
+      "needs": [
+        "nfr|requirements|stateModel"
+      ]
+    },
+    {
+      "run": "journey-check.mjs",
+      "passes": "0 findings",
+      "args": "<state>",
+      "phase": "analyse",
+      "needs": [
+        "journeys|toBe"
       ]
     }
   ],
@@ -189,6 +234,10 @@
     {
       "type": "gate",
       "grants": "scopeFrozen"
+    },
+    {
+      "type": "gate",
+      "grants": "modelsClosed"
     }
   ]
 }

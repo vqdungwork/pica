@@ -89,6 +89,10 @@
       "notOurTerm": [
         "transaction"
       ]
+    },
+    {
+      "term": "approval",
+      "definition": "the recorded decision of a named approver on a held payment"
     }
   ],
   "businessRules": [
@@ -103,8 +107,19 @@
     {
       "id": "UC-01",
       "name": "Send a payment",
+      "actor": "account holder",
       "tracesTo": [
         "BR-01"
+      ],
+      "touches": [
+        {
+          "entity": "payment",
+          "ops": "cr"
+        },
+        {
+          "entity": "approval",
+          "ops": "cru"
+        }
       ]
     }
   ],
@@ -114,10 +129,91 @@
       "attributes": [
         "payment"
       ]
+    },
+    {
+      "entity": "approval",
+      "attributes": [
+        "approval"
+      ]
     }
   ],
   "asIs": "Payments are approved by email and nobody can tell afterwards who approved which one.",
-  "toBe": "A payment above the limit is held until a second named approver releases it.",
+  "toBe": {
+    "notation": "flowchart",
+    "notationWhy": "one actor raises and amends; the approval decision is a branch in their own path, not a handoff to another lane",
+    "lanes": [
+      {
+        "id": "account holder"
+      }
+    ],
+    "nodes": [
+      {
+        "id": "start",
+        "kind": "start",
+        "lane": "account holder"
+      },
+      {
+        "id": "raise",
+        "kind": "activity",
+        "lane": "account holder",
+        "tracesTo": [
+          "UC-01"
+        ]
+      },
+      {
+        "id": "decide",
+        "kind": "gateway",
+        "lane": "account holder"
+      },
+      {
+        "id": "amend",
+        "kind": "activity",
+        "lane": "account holder",
+        "tracesTo": [
+          "UC-01"
+        ]
+      },
+      {
+        "id": "record",
+        "kind": "activity",
+        "lane": "account holder",
+        "tracesTo": [
+          "UC-01"
+        ]
+      },
+      {
+        "id": "done",
+        "kind": "end",
+        "lane": "account holder"
+      }
+    ],
+    "edges": [
+      {
+        "from": "start",
+        "to": "raise"
+      },
+      {
+        "from": "raise",
+        "to": "decide"
+      },
+      {
+        "from": "decide",
+        "to": "record"
+      },
+      {
+        "from": "decide",
+        "to": "amend"
+      },
+      {
+        "from": "amend",
+        "to": "decide"
+      },
+      {
+        "from": "record",
+        "to": "done"
+      }
+    ]
+  },
   "delta": "Approval moves from email to the product, so who approved what is recorded rather than remembered.",
   "assumptions": [
     {
@@ -879,22 +975,8 @@
       "id": "N-01",
       "kind": "performance",
       "requirement": "the approval queue renders in 800ms at p95",
-      "condition": "500 held payments, on the shared branch terminal over the branch VPN",
-      "measuredBy": "a synthetic check against staging every five minutes"
-    },
-    {
-      "id": "N-02",
-      "kind": "retention",
-      "requirement": "approval records are kept for 7 years and are not deletable by any product path",
-      "condition": "for every payment above the approval limit",
-      "measuredBy": "a migration test asserting no DELETE grant on the approvals table"
-    },
-    {
-      "id": "N-03",
-      "kind": "audit trail",
-      "requirement": "every state change records an actor id and a timestamp within 1 second of the action",
-      "condition": "on every approval, rejection and release",
-      "measuredBy": "an end-to-end test asserting the row exists with a non-null actor"
+      "condition": "500 held payments, a cold cache, on the office network",
+      "measuredBy": "a synthetic run against the staging queue on every release"
     }
   ],
   "proposals": [
@@ -1082,5 +1164,150 @@
       "contrastRatio": 4.5,
       "targetSizePx": 44
     }
-  }
+  },
+  "rolesPermissions": {
+    "account holder": {
+      "payment": "cr",
+      "approval": "cru"
+    },
+    "compliance officer": {
+      "payment": "",
+      "approval": ""
+    },
+    "fraud analyst": {
+      "payment": "",
+      "approval": ""
+    },
+    "regulator": {
+      "payment": "",
+      "approval": ""
+    }
+  },
+  "requirements": [
+    {
+      "id": "R-01",
+      "class": "business",
+      "text": "every payment above the threshold carries a named approver"
+    },
+    {
+      "id": "R-02",
+      "class": "functional",
+      "text": "an approver can approve or return a payment with a reason"
+    },
+    {
+      "id": "R-03",
+      "class": "non-functional",
+      "text": "see N-01"
+    },
+    {
+      "id": "R-04",
+      "class": "transition",
+      "text": "import twelve months of historical approvals from the ledger export",
+      "untilWhen": "once the ledger integration is live the import screen is removed"
+    }
+  ],
+  "stateModel": [
+    {
+      "entity": "payment",
+      "states": [
+        {
+          "name": "draft",
+          "to": [
+            "held"
+          ],
+          "by": "payments clerk"
+        },
+        {
+          "name": "held",
+          "to": [
+            "approved",
+            "returned"
+          ],
+          "by": "approver"
+        },
+        {
+          "name": "returned",
+          "to": [
+            "held"
+          ],
+          "by": "payments clerk"
+        },
+        {
+          "name": "approved",
+          "terminal": true
+        }
+      ]
+    },
+    {
+      "entity": "approval",
+      "states": [
+        {
+          "name": "pending",
+          "to": [
+            "recorded"
+          ],
+          "by": "approver"
+        },
+        {
+          "name": "recorded",
+          "terminal": true
+        }
+      ]
+    }
+  ],
+  "journeys": [
+    {
+      "actor": "account holder",
+      "stages": [
+        {
+          "name": "raise it",
+          "from": [
+            "raise"
+          ],
+          "pain": [
+            {
+              "what": "no way to tell whether an approver has even seen it",
+              "nOf": [
+                6,
+                7
+              ],
+              "class": "stated"
+            }
+          ]
+        },
+        {
+          "name": "chase it",
+          "from": [
+            "amend"
+          ],
+          "pain": [
+            {
+              "what": "a return arrives with no reason attached",
+              "nOf": [
+                5,
+                7
+              ],
+              "class": "observed"
+            }
+          ]
+        },
+        {
+          "name": "see it recorded",
+          "from": [
+            "record"
+          ],
+          "pain": [
+            {
+              "what": "the approver is inferred from the session rather than named",
+              "nOf": [
+                2,
+                2
+              ],
+              "class": "observed"
+            }
+          ]
+        }
+      ]
+    }
+  ]
 }
