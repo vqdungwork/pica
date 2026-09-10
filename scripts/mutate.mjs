@@ -254,6 +254,11 @@ const M = [
     /* spacing-check reads the TOKEN FILE first and falls back to state.spacingScale, so
    * mutating the fallback did nothing on any project that has tokens. Redirect the path
    * at a scale on which no real gap lands. */
+  // font-check
+  ["family-declared",  "html/scripts/font-check.mjs", [REF, S], "capture", (s) => { delete s.direction.fontsWhy; }],
+  ["family-resolved",  "html/scripts/font-check.mjs", [REF, S], "capture", (s) => { s.direction.fonts.display = "Archivo, Helvetica, sans-serif"; }],
+  ["fallback-stated",  "html/scripts/font-check.mjs", [REF, S], "capture", (s) => { s.direction.fonts.body = "Archivo"; }],
+
   // state-coverage-check
   ["state-captured",   "html/scripts/state-coverage-check.mjs", [REF, S], "capture", (s) => { s.stateExemptions = s.stateExemptions.filter((x) => x.state !== "returned"); }],
   ["minimum-present",  "html/scripts/state-coverage-check.mjs", [REF, S], "capture", (s) => { s.stateExemptions = s.stateExemptions.filter((x) => x.state !== "error"); }],

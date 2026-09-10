@@ -26,7 +26,8 @@
       "structure-check.mjs",
       "direction-spread-check.mjs",
       "foundations-check.mjs",
-      "state-coverage-check.mjs"
+      "state-coverage-check.mjs",
+      "font-check.mjs"
     ],
     "agents": [
       "pica-designer.md"
@@ -175,6 +176,16 @@
       "needs": [
         "@.audit/html-reference.json",
         "stateModel"
+      ]
+    },
+    {
+      "run": "font-check.mjs",
+      "passes": "0 findings",
+      "args": "<ref> <state>",
+      "phase": "close",
+      "needs": [
+        "@.audit/html-reference.json",
+        "direction"
       ]
     }
   ],
