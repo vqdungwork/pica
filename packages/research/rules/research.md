@@ -46,7 +46,7 @@ is wrong the moment a field moves. What pica ships instead is the method, which 
 3. **Measure them.** Corner radius, control height, how many hues the interface actually spends, whether
    figures are tabular, how tight the spacing scale runs. A screenshot and a ruler is enough; a browser's
    inspector is better.
-4. Write down what they agree on, and — more informative — what they disagree on. Where a field is
+4. Write down what they agree on, and, more informative, what they disagree on. Where a field is
    unanimous, that is a convention and departing from it costs something. Where it is split, that is a
    genuine choice and it belongs to the human.
 5. Propose **two or three named directions**, each citing what it was derived from, each with the
@@ -57,10 +57,10 @@ runs a 6px radius, 32px controls, tabular figures and two hues" is a position th
 
 ### Two modes, and the second one is where the value is
 
-**Propose** — no accessible brand exists. The directions are the palette's origin. The human picks one and
+**Propose**: no accessible brand exists. The directions are the palette's origin. The human picks one and
 that pick is what step 2d derives tokens from.
 
-**Audit** — a brand exists and tokens were taken from it. The direction is then *the client's own system*,
+**Audit**: a brand exists and tokens were taken from it. The direction is then *the client's own system*,
 and the job is not to replace it but to **score it against what its field does** and report the gaps. A
 retail banking dashboard whose figures are proportional, or whose controls are 24px on a screen people
 work in all day, is worth one question before a hundred screens inherit it.
@@ -93,7 +93,7 @@ and an unnoticed one look identical three weeks later.
 ```
 
 `assert` is the part that survives. A direction agreed in conversation and recorded as prose lasts about
-as long as a copy rule does — which is to say, about a day — and this file already has a table of three
+as long as a copy rule does, which is to say, about a day, and this file already has a table of three
 that had to be made executable after the fact. `verify-html` reads `assert` and fails the package on a
 breach, so the direction is still in force at package eleven. Every field in `assert` is optional; what is
 not optional is that a declared direction assert **something**, since a direction that asserts nothing

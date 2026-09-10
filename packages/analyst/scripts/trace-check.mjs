@@ -1,5 +1,5 @@
 /**
- * trace-check.mjs — the analysis gate. Runs at the end of /pica-analyse, before the
+ * trace-check.mjs: the analysis gate. Runs at the end of /pica-analyse, before the
  * Product Designer is allowed to start.
  *
  * Analysis produces prose, and prose is where requirements go to die quietly: a rule
@@ -32,7 +32,7 @@
  *
  *
  * Exit 0 only when every check passes. A check that could not run is a failure, not a
- * pass — see the "green check" rule in core's review-discipline.md.
+ * pass: see the "green check" rule in core's review-discipline.md.
  *
  * Usage: node trace-check.mjs <state.json>
  */
@@ -223,7 +223,7 @@ for (const uc of useCases) {
 let invented = 0;
 for (const e of entities) {
   /* `entity` or `name`. This read only `name`, no command documented either, and the shape
-   * everything actually writes is `entity` — so the loop skipped every entry and reported
+   * everything actually writes is `entity`, so the loop skipped every entry and reported
    * zero on a data model that had invented every word in it. */
   const name = String(e.entity || e.name || "").toLowerCase().trim();
   if (name && !known.has(name)) {

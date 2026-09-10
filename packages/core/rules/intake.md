@@ -3,7 +3,7 @@
 What has to be true before anything is designed. Load this for step 1.
 
 These rules lived in `packages/research/rules/research.md` until 2.0.0, which meant intake could not
-run without the research package installed — on a project that wanted design only and had brought its
+run without the research package installed: on a project that wanted design only and had brought its
 own PRD, that pulled in a package it never used. Intake belongs to core. Measurement and tokens belong
 to research.
 
@@ -14,7 +14,7 @@ to research.
 **Five inputs. Refuse to start without all of them**, and say which are missing rather than proceeding
 on assumptions. Ask for all five in one message; do not interrogate one at a time.
 
-Two of the five — the field and the archetype — are **derived from the brief where the brief states
+Two of the five, the field and the archetype, are **derived from the brief where the brief states
 them**, marked as derived with the section they came from, and confirmed rather than asked from
 scratch. A wrong extraction has to be visible; a silently authoritative one is worse than a question.
 
@@ -23,7 +23,7 @@ scratch. A wrong extraction has to be visible; a silently authoritative one is w
 Not a summary, not your restatement. The original.
 
 **`briefPath` is a list.** A brief arrives as a document, or three: an RFP with an annex and a spec.
-All of them are the brief, all are read-only, all are read cold at closeout. Any format — text,
+All of them are the brief, all are read-only, all are read cold at closeout. Any format: text,
 `.docx`, `.pdf`, `.pptx`. Pasted text is written to `docs/brief.md`; a file stays the file and
 `briefPath` points at it. Converting a document to markdown to make it tidier is the tidying this rule
 forbids.
@@ -33,9 +33,9 @@ A phrase as specific as "we do not mean the subscription plan picker" is the kin
 settles, months later, whether a screen should ever have been designed.
 
 **Verbatim, in the source language.** A brief in Czech stays in Czech. A translation is a separate,
-clearly derived file — `docs/brief.en.md` — so `brief-cold` still reads the original.
+clearly derived file, `docs/brief.en.md`, so `brief-cold` still reads the original.
 
-The brief is a reference and read-only from the moment it lands — see
+The brief is a reference and read-only from the moment it lands: see
 [reference-discipline.md](reference-discipline.md). Not to fix a typo, not to make a check pass.
 
 **A client who changes their mind does not edit the brief.** Amendments go in append-only
@@ -47,7 +47,7 @@ in week three makes closeout fail against a brief nobody intended to deliver.
 `briefAbsent` and what its absence costs. What is still refused is a brief that was recorded and lost:
 an undeclared absence and a lost file look identical otherwise.
 
-Length is not a criterion. "A portfolio for a designer" is a complete and valid brief — the brief is
+Length is not a criterion. "A portfolio for a designer" is a complete and valid brief: the brief is
 **what the client said**, not a specification. Making it usable is the contract's job, below.
 
 ### 2. Sources, each with its authority
@@ -68,7 +68,7 @@ Four levels rather than `use` and `ignore`, because research's own definition of
 it is and what authority it carries", and two values cannot carry a scale.
 
 **A source labelled anything but `ignore` that cannot be opened stops intake.** A Figma file you have
-no access to, a URL behind a login, a file that will not parse — name it and stop. The alternative is
+no access to, a URL behind a login, a file that will not parse: name it and stop. The alternative is
 discovering at token time that the system you were told to reuse was never readable, and
 "refuse to invent and call it reuse" in `packages/research/rules/research.md` already forbids the way out
 of that.
@@ -76,12 +76,12 @@ of that.
 ### 3. Environment facts
 
 - Which **MCP servers and tools** are live
-- **What only the human can do** — client access, credentials, approvals
+- **What only the human can do**: client access, credentials, approvals
 
 pica checks the rest itself and does not ask: `playwright`, node, a package manager, a free port.
 
 **Fonts are not an intake question.** They were until 2.0.0, because Figma's plugin runtime cannot load
-a font installed during a session — but that is Figma's limit, and Figma is the derived artefact.
+a font installed during a session, but that is Figma's limit, and Figma is the derived artefact.
 Design in whatever the direction needs; the family is declared in the tokens and on the kit page; the
 port resolves it and reports substitutions; `font-check` verifies at handoff that the declared family
 actually painted.
@@ -100,7 +100,7 @@ not "healthcare". The narrow name has real products behind it that can be measur
 only a mood.
 
 Resolves against `packages/analyst/data/industries.json`. **An unresolvable field is refused, not
-approximated** — the `ambiguous` register names what a vague word could mean and stops there.
+approximated**: the `ambiguous` register names what a vague word could mean and stops there.
 
 **Confirmed with its consequences, not just its name.** Show the derived value, the brief section it
 came from, and the two or three constraints that follow: *"finance → red means overdrawn, high
@@ -126,7 +126,7 @@ multi-family-office portal should be measured against other wealth portals, not 
 | The commercial constraint | dropped. Only the disclosure policy ever reached a client-facing artefact, and it is recorded in the engagement scope and enforced by `disclosure-check` |
 | Is Figma a deliverable | asked at the port decision, after the freeze |
 | Which fonts are installed | not asked; verified at handoff instead |
-| The audience | **researched, not declared.** `pica-discoverer` profiles it — most briefs cannot answer it, and a researched answer beats a guessed one |
+| The audience | **researched, not declared.** `pica-discoverer` profiles it: most briefs cannot answer it, and a researched answer beats a guessed one |
 | The trigger | removed. Discovery researches *why buyers change*, which is the same question asked where it can be answered |
 
 ---
@@ -140,7 +140,7 @@ owns it. The **product** requirements are `docs/prd.md` and the analyst owns tho
 "redesign the dashboard", the criteria are the four or five things that would make it good, agreed
 before drawing.
 
-**The declared viewports, each with its idiom** — native app, mobile web bare, or mobile web in a
+**The declared viewports, each with its idiom**: native app, mobile web bare, or mobile web in a
 device frame. The idiom decides the chrome and it is a human decision the flow may neither infer nor
 default. A width of 375 says nothing about whether a home indicator belongs.
 
@@ -151,7 +151,7 @@ the others for real.
 else to add, and **set `exclusionsConfirmed` once you have asked.**
 
 That register exists because this artefact is weakest where it matters most. A thin brief rules nothing
-out, so the quoted half is empty — and a thin brief is precisely the project whose scope will grow. The
+out, so the quoted half is empty, and a thin brief is precisely the project whose scope will grow. The
 ask is the whole defence, and an unrecorded ask is indistinguishable from one that never happened.
 
 > This is the highest-value artefact in the whole flow. A screen the brief
@@ -164,6 +164,6 @@ scans them against it.
 
 **Package tiering.** Each package `standard` or `complex`. Complex if any of: no precedent in the
 product, changes IA or navigation, no reference design exists, or the client will challenge the
-decision. Present the labels for confirmation — the human knows which are harder than they look.
+decision. Present the labels for confirmation: the human knows which are harder than they look.
 
 Costed delivery options are **not** produced here. pica no longer prices work.

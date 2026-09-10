@@ -1,5 +1,5 @@
 /**
- * journey-check.mjs — the journey maps against the process model they are a view of.
+ * journey-check.mjs: the journey maps against the process model they are a view of.
  *
  * BPMN answers who does what and where it branches. A journey map answers where it hurts. They are
  * not two documents about the same thing, which is the trap: they are ONE model with two views, and
@@ -84,7 +84,7 @@ for (const j of journeys) {
       stageBad++;
       fail("stage-derived", `${actor}/${nm}`,
         "names no activity it comes from. The stage axis is derived from the lane, never written " +
-        "by hand — two accounts of one process disagree within a month.");
+        "by hand: two accounts of one process disagree within a month.");
     } else if (own) {
       for (const a of from) if (!own.has(a)) {
         stageBad++;
@@ -98,7 +98,7 @@ for (const j of journeys) {
       if (!Array.isArray(n) || n.length !== 2 || !Number.isFinite(n[0]) || !Number.isFinite(n[1])) {
         painBad++;
         fail("pain-sourced", `${actor}/${nm}: "${String(p.what ?? p).slice(0, 40)}"`,
-          'carries no frequency. "Most users" is not a finding — nOf [6, 7] is, and without the ' +
+          'carries no frequency. "Most users" is not a finding: nOf [6, 7] is, and without the ' +
           "denominator nobody can tell a pain point from the one interview that stuck.");
       }
       if (!CLASSES.includes(String(p.class || "").toLowerCase())) {

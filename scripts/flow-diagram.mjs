@@ -1,5 +1,5 @@
 /**
- * flow-diagram.mjs — the chain, drawn from the manifests rather than by hand.
+ * flow-diagram.mjs: the chain, drawn from the manifests rather than by hand.
  *
  * pica's flow has been described in prose in four places and drawn nowhere, and the four drifted:
  * deleting six packages left the README's flow table with steps numbered 0, 1, 4, 5, 6, 9, 10 and a
@@ -10,7 +10,7 @@
  * self-contained SVG. The diagram cannot disagree with the manifests because it has no other source.
  *
  * Lanes are phases. Nodes are packages, placed in the phase their checks declare. Edges come from
- * requires/produces — the same graph contract-check asserts is sound and pica-status resolves at
+ * requires/produces: the same graph contract-check asserts is sound and pica-status resolves at
  * runtime. Stops are read from a list here, because a stop is a human decision and no manifest
  * knows about it; everything else is derived.
  *
@@ -51,7 +51,7 @@ if (manifests.length < 2) {
 const phaseIndex = Object.fromEntries(PHASES.map((p, i) => [p, i]));
 const placed = [];
 /* One entry per (package, phase), not per package. Taking only the earliest phase dropped scope
-   and close from the diagram entirely — core has checks in four phases, and the two it owns alone
+   and close from the diagram entirely: core has checks in four phases, and the two it owns alone
    are the freeze and the close, which is to say the last two hard stops. The chain ended three
    lanes early and looked complete. */
 for (const j of manifests) {
@@ -70,7 +70,7 @@ for (const j of manifests) {
   }
 }
 /* core has checks in four phases and is the spine rather than a step. It is drawn in a lane only
-   where it is the ONLY thing acting — the freeze and the close are real phases with real stops, and
+   where it is the ONLY thing acting: the freeze and the close are real phases with real stops, and
    dropping them because core owns them left the diagram ending three phases early. */
 const soloCore = new Set(PHASES.filter((p) =>
   placed.some((x) => x.phase === p && x.infra) && !placed.some((x) => x.phase === p && !x.infra)));
@@ -127,7 +127,7 @@ used.forEach((phase, i) => {
 const yEnd = TOP + used.length * LANE_H;
 L.push(`<line x1="${PAD}" y1="${yEnd}" x2="${W - PAD}" y2="${yEnd}" stroke="#21262d"/>`);
 L.push(`<text x="${PAD}" y="${yEnd + 28}" fill="#7d8590" font-size="11" letter-spacing="1.4">UNDERNEATH</text>`);
-L.push(`<text x="${PAD + 132}" y="${yEnd + 28}" fill="#8b949e" font-size="12">core — the state schema, every gate, pica-verify, intake, the freeze and the close. Not a step; everything depends on it.</text>`);
+L.push(`<text x="${PAD + 132}" y="${yEnd + 28}" fill="#8b949e" font-size="12">core: the state schema, every gate, pica-verify, intake, the freeze and the close. Not a step; everything depends on it.</text>`);
 L.push(`<text x="${PAD}" y="${yEnd + 58}" fill="#6e7681" font-size="11">Regenerate with scripts/flow-diagram.mjs. A diagram nobody generates is a diagram that disagrees with the code and looks authoritative doing it.</text>`);
 L.push("</svg>");
 const svg = L.join("\n") + "\n";
@@ -142,4 +142,4 @@ if (CHECK) {
 }
 fs.mkdirSync(path.dirname(OUT), { recursive: true });
 fs.writeFileSync(OUT, svg);
-console.log(`wrote assets/flow.svg — ${used.length} phase(s), ${placed.length} package(s), ${STOPS.length} stop(s)`);
+console.log(`wrote assets/flow.svg: ${used.length} phase(s), ${placed.length} package(s), ${STOPS.length} stop(s)`);

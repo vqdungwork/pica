@@ -1,10 +1,10 @@
 /**
- * permissions-check.mjs — who may do what to which thing, answered rather than assumed.
+ * permissions-check.mjs: who may do what to which thing, answered rather than assumed.
  *
  * BABOK names the roles-and-permissions matrix as a technique for exactly this knowledge area, and
  * pica has been asking for half of it in the wrong place since 0.8.0: the contract demanded a
  * data-ownership table at INTAKE, "per entity, who owns it and what this surface may create, change
- * or only read" — before anybody knew what the entities were. It belongs after the domain model.
+ * or only read": before anybody knew what the entities were. It belongs after the domain model.
  *
  * This is the artefact that makes an admin console designable. Without it the designer guesses at
  * scope per role, and a leak between roles arrives looking like a layout choice.
@@ -78,13 +78,13 @@ for (const role of roles) {
   for (const ent of entities) {
     cells++;
     const cell = row[ent];
-    /* "" IS an answer — it means no access — and the message below says so. Treating it as
+    /* "" IS an answer, it means no access, and the message below says so. Treating it as
        unanswered would contradict the instruction the check itself gives, and a check that
        does that teaches people to stop reading it. Only absent is absent. */
     if (cell === undefined || cell === null) {
       cellBad++;
       fail("cell-answered", `${role} × ${ent}`,
-        'carries no value. Write "" for no access if that is the answer — a blank cell and an ' +
+        'carries no value. Write "" for no access if that is the answer: a blank cell and an ' +
         "unasked question look identical, and only one of them is safe to build on.");
       continue;
     }
@@ -108,7 +108,7 @@ for (const ent of entities) {
   ownedBad++;
   fail("entity-owned", `${ent}`,
     "can be created by nobody in the matrix. Either a role is missing a permission, or the entity " +
-    "arrives from somewhere the model does not describe — an import, an integration — and that " +
+    "arrives from somewhere the model does not describe, an import, an integration, and that " +
     "belongs in the model too.");
 }
 

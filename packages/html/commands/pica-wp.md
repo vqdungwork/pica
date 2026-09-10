@@ -30,7 +30,7 @@ sector's own tradition as the baseline. Three palettes are not a proposal; nobod
 Record every offer and every answer in `state.proposals`, then:
 
 ```bash
-# pica_find <package> <script> — two layouts: the repository, where packages sit side by
+# pica_find <package> <script>: two layouts: the repository, where packages sit side by
 # side under packages/, and an install, where each has its own versioned directory under
 # the marketplace cache. A path assuming only the first resolves to nothing on every real
 # install. Prints nothing when the package is absent, which is a finding, not a skip.
@@ -106,7 +106,7 @@ the deliverable.
   Label anything genuinely unavailable as a placeholder in the frame.
 - Screens taller than the viewport ship as a **pair**: interactive with real scrolling and pinned chrome,
   and full-height (`· hug`) showing the whole content. Both carry the declared device chrome, the home
-  indicator included — a hug frame is the same screen at a taller viewport, not a documentation board.
+  indicator included: a hug frame is the same screen at a taller viewport, not a documentation board.
   **Never a third mid-scroll version.**
 - **Tag every frame** `data-viewport="<name>"` matching a viewport in `.pica/state.json`. The capture
   script locates frames by that attribute and every downstream check reads the viewport from it.
@@ -156,7 +156,7 @@ Pass criteria, all of them, no partial credit:
 
 | Check | Passes when |
 |---|---|
-| capture | writes an artefact at all — it refuses on 0 frames, which means a selector matched nothing |
+| capture | writes an artefact at all: it refuses on 0 frames, which means a selector matched nothing |
 | forced-font capture | (figma-in-scope packages only) writes `.audit/html-reference-forced.json` |
 | `viewport-tagged` | 0 findings: every frame tagged with a declared viewport name |
 | `overflow` | 0 findings: nothing extends past a frame's right edge |
@@ -169,10 +169,10 @@ Pass criteria, all of them, no partial credit:
 | `flow-check` | 0 findings across its seven checks, **and** a non-zero screen and link count. No interactive prototype is a failure unless you pass `--allow-none` and say so at the gate |
 
 A non-zero count is a defect to fix, not a number to explain. The registers exist so that a real
-decision can be recorded and the check can still return zero — reaching for a register is legitimate,
+decision can be recorded and the check can still return zero: reaching for a register is legitimate,
 leaving a finding unregistered is not.
 
-**Measurement does not replace looking.** These checks find what the eye misses — 83px of clipped
+**Measurement does not replace looking.** These checks find what the eye misses: 83px of clipped
 overflow behind a frame edge, one row silently absent from a column. They are blind to what only the eye
 catches: cramped type, a label that reads wrong, a card that is technically correct and ugly. **Render
 every frame and look at it, per viewport, before you present.** Both classes of defect shipped in the
@@ -188,7 +188,7 @@ something must be **seen to fail** on that exact defect before you trust it.
 resolves; only clicking proves it goes somewhere sensible.
 
 **5. Self-review, and say what you checked.** Against the state matrix, the grid, the kit, and the
-acceptance criteria for this package in `docs/contract.md`. Report the check output — the actual counts,
+acceptance criteria for this package in `docs/contract.md`. Report the check output: the actual counts,
 not "checks pass". State findings, including "none". Never report complete on work you have not verified.
 
 ---

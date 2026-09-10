@@ -1,9 +1,9 @@
 /**
- * count-test.mjs — the numbers this repository states about itself, recounted.
+ * count-test.mjs: the numbers this repository states about itself, recounted.
  *
  * Three releases in a row shipped a wrong count. 1.2.1 fixed the check count "in the two
  * places I fixed earlier and not in the four I missed". 1.2.2 found six, including the
- * version badge reading 0.9.5 and the banner — the first image anyone sees — claiming 8
+ * version badge reading 0.9.5 and the banner, the first image anyone sees, claiming 8
  * specialists and 116 checks. 1.2.3 bumped thirty manifests and left the version badge on
  * 1.2.2 again, which is the same defect a fourth time.
  *
@@ -13,7 +13,7 @@
  * Truth is derived from code, never from prose:
  *
  *   version      every manifest, which must also agree with itself
- *   checks       the README's own enumeration table, summed — the table headed "Listed so
+ *   checks       the README's own enumeration table, summed: the table headed "Listed so
  *                the number can be recounted rather than trusted" is the register, and
  *                this is what recounts it
  *   specialists  agents declared across the package manifests
@@ -41,9 +41,9 @@ const bad = (m) => { failures++; console.log(`  FAIL  ${m}`); };
  * which is how a check quietly becomes decorative. */
 const claim = (label, truth, text, re) => {
   /* First defined group, so a pattern may carry alternatives for the same claim written
-   * two ways — "**154 checks**" in a table and "154 automated checks" in a sentence. */
+   * two ways: "**154 checks**" in a table and "154 automated checks" in a sentence. */
   const found = [...text.matchAll(re)].map((m) => m.slice(1).find((g) => g !== undefined));
-  if (!found.length) return bad(`${label}: no occurrence found — the wording moved and this stopped checking it`);
+  if (!found.length) return bad(`${label}: no occurrence found, the wording moved and this stopped checking it`);
   const wrong = found.filter((f) => f !== String(truth));
   if (wrong.length) bad(`${label}: says ${[...new Set(wrong)].join(", ")}, code says ${truth}`);
   else ok(`${label}: ${truth} (${found.length} place${found.length > 1 ? "s" : ""})`);
@@ -101,7 +101,7 @@ console.log("the manifests agree with each other");
 }
 
 console.log("\nthe enumeration table is the register");
-if (!tableRows.length) bad("the check table was not found — it is where the count comes from");
+if (!tableRows.length) bad("the check table was not found: it is where the count comes from");
 else ok(`${tableRows.length} scripts listed, summing to ${checks}`);
 
 /* ---- every place that states a number ----------------------------------- */

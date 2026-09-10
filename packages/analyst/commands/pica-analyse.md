@@ -1,5 +1,5 @@
 ---
-description: Turn the brief into requirements the business recognises — glossary, AS-IS, TO-BE, business rules, domain model, PRD
+description: Turn the brief into requirements the business recognises, glossary, AS-IS, TO-BE, business rules, domain model, PRD
 argument-hint: "[work package, or empty for the whole project]"
 ---
 
@@ -84,7 +84,7 @@ future integration a translation layer.
 Then run Event Storming against the artefacts you have, since there is rarely a workshop: name the
 **domain events** in business language and past tense, ask what command caused each, who may issue it,
 which events change together, and what must be true for each to be legal. **Mark every event you
-inferred rather than observed** — a wrong event list shown to a client is worth more than a right
+inferred rather than observed**: a wrong event list shown to a client is worth more than a right
 question asked of them.
 
 ## 2.1c Industry knowledge, before any design decision

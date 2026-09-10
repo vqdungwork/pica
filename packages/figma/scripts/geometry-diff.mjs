@@ -1,5 +1,5 @@
 /**
- * geometry-diff.mjs — Figma against the HTML reference. Runs at the port and at
+ * geometry-diff.mjs: Figma against the HTML reference. Runs at the port and at
  * review. Only for a project with `figmaInScope: true`.
  *
  * HTML is the source of truth. Where the two disagree, Figma is wrong.
@@ -11,7 +11,7 @@
  * WHAT THIS CANNOT DO: detect absence. A node that was never created has no
  * coordinates, so it cannot be over tolerance. A frame missing a third of its
  * content still reports every node it does have as correct. Frame inventory and
- * text-run counts are parity-check.mjs's and verify-html.mjs's job — a clean
+ * text-run counts are parity-check.mjs's and verify-html.mjs's job: a clean
  * geometry diff is not evidence a frame is complete.
  *
  * PASS: 0 findings, and a nonzero number of text runs actually compared.
@@ -27,7 +27,7 @@
  *
  * `w` and `align` are OPTIONAL and were added in 0.7.1. Without them the diff falls
  * back to comparing left edges for every run, which is only correct for left-aligned
- * text — see COMPARE THE EDGE THE ALIGNMENT MAKES MEANINGFUL below. The fallback is
+ * text: see COMPARE THE EDGE THE ALIGNMENT MAKES MEANINGFUL below. The fallback is
  * announced in the output rather than applied silently.
  */
 import fs from "fs";
@@ -69,11 +69,11 @@ const TOL = state.geometryTolerance ?? 3;
  * node's LAYOUT BOX. For left-aligned text those two share a left edge, so comparing
  * `x` to `x` is sound. For anything else it is not:
  *
- *   right-aligned FILL text — the box starts at the container's left while the ink
+ *   right-aligned FILL text: the box starts at the container's left while the ink
  *   ends at the container's right, so `dx` is the container's width minus the string.
  *   Nothing about that number is a defect, and nothing about it is a pass either.
  *
- *   centred text — the box spans the container, the ink sits in the middle, and the
+ *   centred text: the box spans the container, the ink sits in the middle, and the
  *   error scales with the string, so a long label fails while being perfectly placed.
  *
  * Through 0.7.0 this was handled by ANNOTATING centred findings and by asking projects
@@ -99,8 +99,8 @@ const norm = (s) => s.replace(/\s+/g, " ").trim().toLowerCase().slice(0, 24);
  * carries no Figma node ids and pairing here is by text content, so a node id would match
  * nothing whatever it named.
  *
- * figma-gates.md documented the entry as `{node: "29:119", prop: "y"}` — a node id and a
- * property name — for three releases. An entry written exactly as documented could never
+ * figma-gates.md documented the entry as `{node: "29:119", prop: "y"}`, a node id and a
+ * property name: for three releases. An entry written exactly as documented could never
  * match, and the same file says that without this register the definition of done is
  * unfalsifiable. Both spellings are accepted now so an existing register keeps working,
  * and the documented example is the one that does something. */
@@ -119,7 +119,7 @@ const DEV = new Set(
  *
  * A frame with no mapping is a FINDING, not a skip. Through 0.3.0 it was a skip,
  * which meant a project with no frameMap compared zero runs, reported "0 over
- * tolerance" and exited 0 — a green check that had done nothing. */
+ * tolerance" and exited 0: a green check that had done nothing. */
 const MAP = state.frameMap || {};
 
 /* THE TWO SIDES MUST BE IN THE SAME FONT, AND BOTH MUST SAY WHICH.
@@ -194,7 +194,7 @@ const rows = [];
 for (const f of fig) {
   const screen = MAP[`${f.pkg}|${f.frame}`];
   if (!screen) {
-    rows.push({ level: "FINDING", msg: `no frameMap entry for "${f.pkg}|${f.frame}" — nothing was compared for this frame` });
+    rows.push({ level: "FINDING", msg: `no frameMap entry for "${f.pkg}|${f.frame}", nothing was compared for this frame` });
     findings++;
     continue;
   }
@@ -261,7 +261,7 @@ for (const r of rows) {
               + `=${String(w.dx).padStart(7)} dy=${String(w.dy).padStart(7)}  `
               + `figma=${JSON.stringify(w.figma)} html=${JSON.stringify(w.html)}  "${w.s}"`
               + `${w.edged ? `  [compared the ${w.edge} edge, per text-align]`
-                           : `  [left edge only — the dump carries no width, so the ${w.align || "?"} `
+                           : `  [left edge only, the dump carries no width, so the ${w.align || "?"} `
                              + `edge could not be compared]`}`);
 }
 

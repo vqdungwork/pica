@@ -7,16 +7,16 @@ finished, which is why this line is here.
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Split pica from one plugin into four installable packages — `core`, `research`, `html`, `figma` — each declaring what it requires, produces, checks and considers done, without changing any rule's meaning or breaking existing installs.
+**Goal:** Split pica from one plugin into four installable packages, `core`, `research`, `html`, `figma`, each declaring what it requires, produces, checks and considers done, without changing any rule's meaning or breaking existing installs.
 
-**Architecture:** One repository, `packages/*` subdirectories, each a real plugin listed in `.claude-plugin/marketplace.json` with `dependencies`. A `package.json` per package declares the contract. A validator (`validate-packages.mjs`) enforces that every declared file exists and every shipped file is owned — it is written first and fails first, so the restructure is driven by a check rather than by inspection.
+**Architecture:** One repository, `packages/*` subdirectories, each a real plugin listed in `.claude-plugin/marketplace.json` with `dependencies`. A `package.json` per package declares the contract. A validator (`validate-packages.mjs`) enforces that every declared file exists and every shipped file is owned: it is written first and fails first, so the restructure is driven by a check rather than by inspection.
 
 **Tech Stack:** Node ≥18 (ESM, no dependencies), Claude Code plugin manifests, Markdown rules, git.
 
 ## Global Constraints
 
 - **No rule text may change meaning in this restructure.** Sections move verbatim. Reword nothing. A rule that changes while being moved is indistinguishable from a rule that was lost.
-- **Nothing downstream of Figma is authored.** `impl-web`, `impl-ios`, `impl-android` and `e2e` are declared as contracts with `status: "coming-soon"` only — no rules, no scripts, no commands. Their content is the author's to define later.
+- **Nothing downstream of Figma is authored.** `impl-web`, `impl-ios`, `impl-android` and `e2e` are declared as contracts with `status: "coming-soon"` only, no rules, no scripts, no commands. Their content is the author's to define later.
 - **Nothing is removed from the roadmap automatically.** `coming-soon` packages stay declared and are shown as `PLANNED`.
 - **Existing installs must not break.** `pica` remains a listed plugin that depends on `core`, `research`, `html`, `figma`.
 - **Scripts are ESM `.mjs`, zero npm dependencies**, matching the seven that ship today.
@@ -61,7 +61,7 @@ finished, which is why this line is here.
 
 ```js
 /**
- * validate-packages.mjs — the restructure's own check.
+ * validate-packages.mjs: the restructure's own check.
  *
  * Asserts four things, each of which was a real failure mode in earlier pica releases:
  *   1. every package.json parses and has the required fields
@@ -102,7 +102,7 @@ for (const name of dirs) {
 
   let m;
   try { m = JSON.parse(fs.readFileSync(manifestPath, "utf8")); }
-  catch (e) { findings.push(`${name}: package.json does not parse — ${e.message}`); continue; }
+  catch (e) { findings.push(`${name}: package.json does not parse, ${e.message}`); continue; }
 
   for (const f of REQUIRED) if (!(f in m)) findings.push(`${name}: missing required field "${f}"`);
   if (m.name !== name) findings.push(`${name}: manifest name is "${m.name}", directory is "${name}"`);
@@ -127,7 +127,7 @@ for (const name of dirs) {
     if (!["check", "human", "gate", "artifact"].includes(d.type))
       findings.push(`${name}: definitionOfDone entry has invalid type "${d.type}"`);
     if (d.type === "human" && d.run)
-      findings.push(`${name}: a "human" definition-of-done item must not name a script — that is the point of the type`);
+      findings.push(`${name}: a "human" definition-of-done item must not name a script, that is the point of the type`);
   }
 }
 
@@ -243,7 +243,7 @@ git commit -m "Create core package: intake, closeout, feedback, hooks"
 
 ---
 
-## Task 3: Split review-gates.md — core's share
+## Task 3: Split review-gates.md, core's share
 
 **Files:**
 - Create: `packages/core/rules/review-discipline.md`
@@ -252,7 +252,7 @@ git commit -m "Create core package: intake, closeout, feedback, hooks"
 **Interfaces:**
 - Produces: `review-discipline.md`, referenced by `packages/core/package.json` and later by every other package's rules.
 
-**Context the implementer needs:** `review-gates.md` is 685 lines with 30 `##` sections. This task moves the **23 medium-independent** ones. Two `###` subsections — *A check must fail closed* (line 464) and *Every named check must ship* (line 483) — currently sit nested under *The measured HTML gate*; they are general principles, so they must be **promoted to `##`** and moved here, while their parent section stays behind for Task 4.
+**Context the implementer needs:** `review-gates.md` is 685 lines with 30 `##` sections. This task moves the **23 medium-independent** ones. Two `###` subsections, *A check must fail closed* (line 464) and *Every named check must ship* (line 483), currently sit nested under *The measured HTML gate*; they are general principles, so they must be **promoted to `##`** and moved here, while their parent section stays behind for Task 4.
 
 - [ ] **Step 1: Create the file with its header, then move these sections verbatim**
 
@@ -300,7 +300,7 @@ Then move these 23 sections **verbatim, no rewording**, in this order:
 # What remains is html's 3 and figma's 6 = 9.
 grep -c '^## ' packages/core/rules/review-discipline.md   # expect 23
 grep -c '^## ' skills/design-flow/rules/review-gates.md   # expect 9
-grep -c '^### ' skills/design-flow/rules/review-gates.md  # expect 0 — both were promoted
+grep -c '^### ' skills/design-flow/rules/review-gates.md  # expect 0: both were promoted
 
 # No text changed: every moved heading must appear exactly once across the two files
 diff <(git show HEAD:skills/design-flow/rules/review-gates.md | grep '^## \|^### ' | sed 's/^#*  *//' | sort) \
@@ -359,11 +359,11 @@ The gates the html package owns. Medium-independent review discipline is in core
 Move verbatim: `## The measured HTML gate`, `## The flow gate`, `## The viewport parity check`,
 `## HTML-only coverage`, `## Behaviour review, for prototypes`.
 
-**Exception — `## Definition of done` is split, not moved whole.** `review-gates.md`'s single
+**Exception: `## Definition of done` is split, not moved whole.** `review-gates.md`'s single
 `## Definition of done` section contains an HTML-side checklist and a Figma-side checklist under one
-heading (Task 3 moved the whole block rather than split it — that was deliberate, splitting it was
+heading (Task 3 moved the whole block rather than split it: that was deliberate, splitting it was
 left for here and for Task 5). This task takes only the **HTML-side** checklist items into its own
-`## Definition of done` heading in `html-gates.md`. Do not take the Figma-side items — those belong to
+`## Definition of done` heading in `html-gates.md`. Do not take the Figma-side items: those belong to
 Task 5's `figma-gates.md`, under its own `## Definition of done` heading. Do not delete or edit the
 Figma-side items here; Task 5 is responsible for cutting them out of `review-gates.md` when it runs.
 
@@ -472,12 +472,12 @@ Move verbatim: `## Match by text content, compare position only`, `## Capture el
 render, and the render over your memory`, `## Always read the font family and style distribution`,
 `## The audit checklist`.
 
-**Exception — `## Definition of done` is split, not moved whole.** As noted in Task 4: this section
+**Exception: `## Definition of done` is split, not moved whole.** As noted in Task 4: this section
 holds both an HTML-side checklist and a Figma-side checklist under one heading. This task takes only
 the **Figma-side** checklist items into their own `## Definition of done` heading in
 `figma-gates.md`. The HTML-side items were already taken by Task 4 (run first). Once both the
 HTML-side items (removed by Task 4) and the Figma-side items (removed by this step) are gone from
-`review-gates.md`, nothing of that section remains there — do not leave a `## Definition of done`
+`review-gates.md`, nothing of that section remains there: do not leave a `## Definition of done`
 heading behind in `review-gates.md` with no content, and do not leave any content behind with no
 heading either. This task's removal of the Figma-side half is what finally empties the section out of
 `review-gates.md` entirely.
@@ -492,7 +492,7 @@ git rm skills/design-flow/rules/review-gates.md
 Expected: 0 sections remain. `review-gates.md` held 15 sections after Task 3: Task 4 takes 5 whole
 plus the HTML-side half of `## Definition of done`; this task (5) takes 9 whole plus the Figma-side
 half of `## Definition of done`. 5 + 9 + 1 split = all 15 accounted for, and the file is deleted at
-the end of this step. If any section remains, it was not classified — stop and classify it before
+the end of this step. If any section remains, it was not classified: stop and classify it before
 deleting.
 
 - [ ] **Step 4: Write `packages/figma/package.json`**
@@ -529,7 +529,7 @@ deleting.
 }
 ```
 
-Note: `annotation-check.mjs` from the spec (D2) is **not** included. It does not exist yet, and the validator would reject a check with no script — correctly. It is a separate piece of work.
+Note: `annotation-check.mjs` from the spec (D2) is **not** included. It does not exist yet, and the validator would reject a check with no script: correctly. It is a separate piece of work.
 
 - [ ] **Step 5: Write `packages/figma/plugin.json`**
 
@@ -606,10 +606,10 @@ git mv skills/design-flow/rules/research.md packages/research/rules/research.md
 }
 ```
 
-- [ ] **Step 2: Run the validator — it should now pass except for core's missing status script**
+- [ ] **Step 2: Run the validator, it should now pass except for core's missing status script**
 
 Run: `node scripts/validate-packages.mjs`
-Expected: exit 1 with exactly one finding — `core: owns scripts/pica-status.mjs, which does not exist`. Any other finding must be fixed now.
+Expected: exit 1 with exactly one finding, `core: owns scripts/pica-status.mjs, which does not exist`. Any other finding must be fixed now.
 
 - [ ] **Step 3: Commit**
 
@@ -627,13 +627,13 @@ git commit -m "Create research package: audit and token provenance"
 
 **Interfaces:**
 - Consumes: `packages/*/package.json` (Task 2, 4, 5, 6), `.pica/state.json` written by core.
-- Produces: CLI `node packages/core/scripts/pica-status.mjs [state.json]`. Exit 0 always — it is a report, not a gate.
+- Produces: CLI `node packages/core/scripts/pica-status.mjs [state.json]`. Exit 0 always: it is a report, not a gate.
 
 - [ ] **Step 1: Write the resolver**
 
 ```js
 /**
- * pica-status.mjs — what can run now, what is blocked, and why.
+ * pica-status.mjs: what can run now, what is blocked, and why.
  *
  * A report, never a gate: it exits 0 even when everything is blocked, because its job is
  * to explain state, not to enforce it. Enforcement lives in each command's requires check
@@ -690,8 +690,8 @@ Expected: `0 finding(s).` and exit 0. Confirm with `echo $?`.
 - [ ] **Step 3: Test the resolver from a project directory, not from the pica repo**
 
 Resolving `packages/` from `process.cwd()` means the resolver only works when the working directory
-happens to be the pica repo itself. Run from a **project** directory instead — where `.pica/state.json`
-and the built artifacts actually live, and where `packages/` does not exist — with an absent or empty
+happens to be the pica repo itself. Run from a **project** directory instead: where `.pica/state.json`
+and the built artifacts actually live, and where `packages/` does not exist: with an absent or empty
 `.pica/state.json`:
 
 ```
@@ -701,7 +701,7 @@ cd /path/to/some/project && node /path/to/pica/packages/core/scripts/pica-status
 Expected: it still runs (exit 0), because `packages/` resolves from the script's own location
 (`import.meta.url`), not from the working directory. `research`, `html` and `figma` report BLOCKED with
 their missing gates, state and artifacts named, proving `requires` actually blocks rather than
-decorating — from the location this script is actually meant to be run from. If `packages/` is instead
+decorating: from the location this script is actually meant to be run from. If `packages/` is instead
 resolved from `process.cwd()`, this step exits 2, because a project directory has no `packages/` of its
 own.
 
@@ -719,7 +719,7 @@ git commit -m "Add pica-status resolver; package validator now returns zero"
 **Files:**
 - Create: `packages/_planned/impl-web.package.json`, `impl-ios.package.json`, `impl-android.package.json`, `e2e.package.json`
 
-**Context:** these live under `packages/_planned/` — which the validator skips, because directories starting with `_` are excluded. They are contracts, not packages. **No rules, no scripts, no commands are authored for them; that content is the author's to define later.**
+**Context:** these live under `packages/_planned/`, which the validator skips, because directories starting with `_` are excluded. They are contracts, not packages. **No rules, no scripts, no commands are authored for them; that content is the author's to define later.**
 
 - [ ] **Step 1: Write the four contracts**
 
@@ -729,7 +729,7 @@ git commit -m "Add pica-status resolver; package validator now returns zero"
 {
   "name": "impl-ios",
   "status": "coming-soon",
-  "description": "Implement the verified design as a native iOS application. Contract only — content to be defined by the author.",
+  "description": "Implement the verified design as a native iOS application. Contract only: content to be defined by the author.",
   "owns": { "commands": [], "rules": [], "scripts": [] },
   "requires": {
     "state": [],
@@ -748,7 +748,7 @@ git commit -m "Add pica-status resolver; package validator now returns zero"
 {
   "name": "e2e",
   "status": "coming-soon",
-  "description": "End-to-end tests against a built application, one per platform. Contract only — content to be defined by the author.",
+  "description": "End-to-end tests against a built application, one per platform. Contract only: content to be defined by the author.",
   "owns": { "commands": [], "rules": [], "scripts": [] },
   "requires": { "state": [], "artifacts": [], "gates": [] },
   "produces": { "state": ["packages.e2e.reported"], "artifacts": [] },
@@ -841,9 +841,9 @@ git commit -m "List the four packages in the marketplace; pica becomes the bundl
 ## Task 10: Update the documentation to describe packages
 
 **Files:**
-- Modify: `skills/design-flow/SKILL.md` — the Scripts section paths, and a new Packages section
-- Modify: `README.md` — install section, offering the bundle or individual packages
-- Modify: `CHANGELOG.md` — the `0.6.0` entry
+- Modify: `skills/design-flow/SKILL.md`, the Scripts section paths, and a new Packages section
+- Modify: `README.md`, install section, offering the bundle or individual packages
+- Modify: `CHANGELOG.md`, the `0.6.0` entry
 
 - [ ] **Step 1: Add a Packages section to `SKILL.md` after "The flow"**
 
@@ -855,7 +855,7 @@ considers done, in its own `package.json`.
 
 | Package | Depends on | Owns |
 |---|---|---|
-| `pica-core` | — | intake, closeout, feedback, the state schema, every gate |
+| `pica-core` |: | intake, closeout, feedback, the state schema, every gate |
 | `pica-research` | core | the source audit and token provenance |
 | `pica-html` | core | work packages at every viewport, and the measured gate |
 | `pica-figma` | core, html | the port, annotations, and the geometry diff |
@@ -867,7 +867,7 @@ never sees the Figma half.
 grants it on human approval; `figma` requires it and cannot grant it. Run
 `node packages/core/scripts/pica-status.mjs` to see what is ready and what is blocked.
 
-The path past Figma — implementation for web, iOS and Android, then end-to-end testing —
+The path past Figma: implementation for web, iOS and Android, then end-to-end testing,
 is declared in `packages/_planned/` as contracts only. Those are not built.
 ```
 
@@ -885,20 +885,20 @@ Replace each with its new location: `capture-html-reference.mjs`, `verify-html.m
 grep -rn 'skills/design-flow/scripts/\|skills/design-flow/rules/' packages/ skills/ commands/ README.md CHANGELOG.md 2>/dev/null | grep -v CHANGELOG
 ```
 
-Expected: no output. Hits in `CHANGELOG.md` are historical and correct — earlier releases genuinely had those paths.
+Expected: no output. Hits in `CHANGELOG.md` are historical and correct: earlier releases genuinely had those paths.
 
 - [ ] **Step 4: Add the `0.6.0` CHANGELOG entry**
 
 ```markdown
 ## 0.6.0
 
-pica becomes four packages — `core`, `research`, `html`, `figma` — plus a bundle that
+pica becomes four packages, `core`, `research`, `html`, `figma`, plus a bundle that
 installs all of them, so an existing install keeps working unchanged.
 
 Each package declares what it requires, what it produces, which checks it owns and what
 done means for it. `requires` is what makes omitting a package safe: a package refuses to
 start when its inputs are missing and names which. `definitionOfDone` items are typed,
-and a `human` item cannot be satisfied by any script — the schema rejects one that names
+and a `human` item cannot be satisfied by any script: the schema rejects one that names
 a script, because ten green harnesses and four screenshot-obvious defects on the fourth
 one place is what that type exists to prevent.
 
@@ -916,7 +916,7 @@ Those packages are planned, not built, and are shown as `PLANNED` everywhere the
 ### Known limits
 
 - No package has been exercised as a separate install on a real project yet. The split is
-  verified structurally — the validator returns zero, every script still fails closed —
+  verified structurally: the validator returns zero, every script still fails closed,
   not by having run a project through four separately installed plugins.
 - `annotation-check.mjs`, required by the spec's D2, is not built. The Figma package
   declares no check for annotations, so a missing annotation is currently invisible.
@@ -945,10 +945,10 @@ git commit -m "Document the package split; 0.6.0"
 
 ## Self-Review
 
-**Spec coverage.** Every section of `docs/specs/2026-08-13-pica-packages-design.md` that falls in scope has a task: the contract (Tasks 2, 4, 5, 6), the package list (2, 4, 5, 6), state and gates (2, 7), definition of done as typed data (2, 4, 5, 6, validated in 1), migration order (2→9), `coming-soon` contracts (8), the bundle (9). D2's annotation work is **deliberately out of scope** — `annotation-check.mjs` does not exist, and Task 5 says so rather than declaring a check with no script. Review agents (spec section "Review agents") are **not** in this plan; they are a separate piece of work and none are authored here.
+**Spec coverage.** Every section of `docs/specs/2026-08-13-pica-packages-design.md` that falls in scope has a task: the contract (Tasks 2, 4, 5, 6), the package list (2, 4, 5, 6), state and gates (2, 7), definition of done as typed data (2, 4, 5, 6, validated in 1), migration order (2→9), `coming-soon` contracts (8), the bundle (9). D2's annotation work is **deliberately out of scope**: `annotation-check.mjs` does not exist, and Task 5 says so rather than declaring a check with no script. Review agents (spec section "Review agents") are **not** in this plan; they are a separate piece of work and none are authored here.
 
 **Placeholder scan.** No `TBD`, no "similar to Task N", no "add error handling". Every manifest and both scripts are given in full.
 
 **Type consistency.** `package.json` field names are identical across all six manifests: `name`, `status`, `description`, `owns.{commands,rules,scripts}`, `requires.{state,artifacts,gates}`, `produces.{state,artifacts}`, `checks[].{run,passes}`, `definitionOfDone[].{type,run,passes,says,grants,path}`. `validate-packages.mjs` (Task 1) checks exactly these names, and `pica-status.mjs` (Task 7) reads exactly `requires.{gates,state,artifacts}` and `status`. Gate names are consistent: core grants `intakeApproved`, research grants `tokensApproved`, html grants `htmlApproved:<wp>`, figma requires `htmlApproved:<wp>` and grants `figmaVerified:<wp>`, and `impl-*` requires `figmaVerified:<wp>`.
 
-**One risk the plan cannot remove.** Task 3 and Task 5 move prose by hand. The line-count and heading-diff checks in Task 3 Steps 2–3 catch loss and renaming, but they cannot catch a section moved into the *wrong* file. That judgement is recorded in the task text — 22 core, 5 html, 9 figma, with the two promoted `###` subsections named explicitly — and should be re-read against the file before Task 5 Step 3 deletes the original.
+**One risk the plan cannot remove.** Task 3 and Task 5 move prose by hand. The line-count and heading-diff checks in Task 3 Steps 2–3 catch loss and renaming, but they cannot catch a section moved into the *wrong* file. That judgement is recorded in the task text, 22 core, 5 html, 9 figma, with the two promoted `###` subsections named explicitly, and should be re-read against the file before Task 5 Step 3 deletes the original.

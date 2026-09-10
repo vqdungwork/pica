@@ -66,6 +66,6 @@
 <text x="186" y="699" fill="#7d8590" font-size="11">designer · 1 check</text>
 <line x1="40" y1="740" x2="1140" y2="740" stroke="#21262d"/>
 <text x="40" y="768" fill="#7d8590" font-size="11" letter-spacing="1.4">UNDERNEATH</text>
-<text x="172" y="768" fill="#8b949e" font-size="12">core — the state schema, every gate, pica-verify, intake, the freeze and the close. Not a step; everything depends on it.</text>
+<text x="172" y="768" fill="#8b949e" font-size="12">core: the state schema, every gate, pica-verify, intake, the freeze and the close. Not a step; everything depends on it.</text>
 <text x="40" y="798" fill="#6e7681" font-size="11">Regenerate with scripts/flow-diagram.mjs. A diagram nobody generates is a diagram that disagrees with the code and looks authoritative doing it.</text>
 </svg>

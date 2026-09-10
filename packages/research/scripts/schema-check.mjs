@@ -1,5 +1,5 @@
 /**
- * schema-check.mjs — the research gate. Runs at the end of step 1.7, before the
+ * schema-check.mjs: the research gate. Runs at the end of step 1.7, before the
  * measurement table is handed to the Product Designer at 3.1.
  *
  * Research fails quietly. A lazy unit and a careful one have the same shape, so a

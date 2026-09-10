@@ -1,5 +1,5 @@
 /**
- * direction-spread-check.mjs — three directions that are actually three.
+ * direction-spread-check.mjs: three directions that are actually three.
  *
  * proposals.md has required S1 to be "the same screen three times" since 0.9.1, and
  * proposal-check verifies that a slot was addressed, that an axis was named, that each option
@@ -12,7 +12,7 @@
  * and added the spread requirement instead, because widening to five buys less than making the
  * three genuinely different and costs 67% more building.
  *
- * Four checks, all against S1 only — the other slots are single-axis by design:
+ * Four checks, all against S1 only: the other slots are single-axis by design:
  *
  *   1. THREE OFFERED    S1 carries exactly three options. proposals.md: "a slot with one option is
  *                       not a proposal", and four is a matrix rather than a comparison.

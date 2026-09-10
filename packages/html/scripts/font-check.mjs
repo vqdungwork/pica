@@ -1,8 +1,8 @@
 /**
- * font-check.mjs — the family the design declares against the family that actually painted.
+ * font-check.mjs: the family the design declares against the family that actually painted.
  *
- * 2.0.0 took fonts out of intake. They were input 4's first line — "which fonts are installed
- * locally, and which are missing" — and the constraint existed only because Figma's plugin runtime
+ * 2.0.0 took fonts out of intake. They were input 4's first line: "which fonts are installed
+ * locally, and which are missing", and the constraint existed only because Figma's plugin runtime
  * cannot load a font installed during a session. That is Figma's limit, and Figma is the derived
  * artefact: letting it constrain the source of truth inverts the rule that where HTML and Figma
  * disagree, Figma is wrong. So design is font-free now, and the family is a webfont.
@@ -10,7 +10,7 @@
  * A webfont can fail. And when it does, nothing says so: the browser silently substitutes, the page
  * looks slightly different, and every text position in the capture describes a layout in a family
  * nobody chose. Downstream, geometry-diff compares that against a Figma file rendering the real face
- * and reports hundreds of differences that are pure substitution — or, worse, both sides fall back,
+ * and reports hundreds of differences that are pure substitution: or, worse, both sides fall back,
  * everything "matches", and the design was never verified at all.
  *
  * This is a HANDOFF gate, not a design gate. During iteration a fallback is noise. At handoff it is
@@ -81,7 +81,7 @@ for (const [role, stack] of Object.entries(fonts || {})) {
     declaredBad++;
     fail("family-declared", `direction.fonts.${role}`, "is empty.");
   } else if (GENERIC.test(first) && !said(dir.fontsWhy, 15)) {
-    /* A system stack IS a valid direction — fast, native, no webfont to fail. What is not valid is
+    /* A system stack IS a valid direction: fast, native, no webfont to fail. What is not valid is
        arriving at one by default. So it passes when the direction says it was chosen and why, and
        fails when nothing does: the difference between a decision and an omission is the sentence. */
     declaredBad++;
@@ -117,7 +117,7 @@ if (!resolved) {
   forcedBad++;
   fail("forced-declared", "meta.font",
     "records no resolved family. The capture is meant to record the family the browser ACTUALLY " +
-    "resolved, forced or not — without it a capture in one family gets diffed against a design in another.");
+    "resolved, forced or not: without it a capture in one family gets diffed against a design in another.");
 }
 
 /* ---- 2. FAMILY RESOLVED -------------------------------------------------- */

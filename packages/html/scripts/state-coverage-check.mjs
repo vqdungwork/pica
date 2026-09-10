@@ -1,9 +1,9 @@
 /**
- * state-coverage-check.mjs — every state, not every screen.
+ * state-coverage-check.mjs: every state, not every screen.
  *
  * coverage-check verifies use case × viewport and says so in its own header. Nothing verified
- * STATES. html-prototype.md names eight minimum states — default, loading, empty, error, disabled,
- * keyboard-open, focus, plus the video set — and calls writing the matrix first "the cheapest
+ * STATES. html-prototype.md names eight minimum states: default, loading, empty, error, disabled,
+ * keyboard-open, focus, plus the video set, and calls writing the matrix first "the cheapest
  * possible way to avoid finding a missing state during handoff". No script read it. A happy-path
  * screen present at every viewport returned green with seven states missing.
  *
@@ -14,7 +14,7 @@
  * REACT MAKES THIS MANDATORY RATHER THAN MERELY GOOD. In static HTML a missing state is a missing
  * file you can see in a directory listing. In a React demo it is a branch nobody wrote, and there
  * is nothing to look at. The capture reaches states by URL, so "not addressable" and "not built"
- * collapse into one finding — which is the right outcome.
+ * collapse into one finding: which is the right outcome.
  *
  * Four checks:
  *
@@ -68,7 +68,7 @@ const fail = (check, where, detail) => findings.push({ check, where, detail });
 const said = (x, min = 10) => String(x || "").trim().length >= min;
 
 /* `frames` is an object keyed by source file, each value an array of frames. And the identity is
-   not the file: the capture's own comment settles it — "a screen and its empty state serve the same
+   not the file: the capture's own comment settles it, "a screen and its empty state serve the same
    use case at the same size… the identity is uc + state + viewport". Keying on the file would make
    approvals-empty.html a different SCREEN rather than a different STATE, which is exactly the
    pairing bug that comment records. */
@@ -92,8 +92,8 @@ const ex = state.stateExemptions || [];
 let capturedBad = 0, excusedBad = 0, minimumBad = 0, staleBad = 0, cells = 0;
 
 /* ---- 1. STATE CAPTURED & 2. EXCUSED NAMED -------------------------------- *
- * Two different axes, and conflating them was wrong. An entity's LIFECYCLE states — draft,
- * held, approved — each need a screen that shows one, at every declared viewport, because
+ * Two different axes, and conflating them was wrong. An entity's LIFECYCLE states: draft,
+ * held, approved: each need a screen that shows one, at every declared viewport, because
  * viewport parity is a separate promise. They do not need to appear on every screen: not
  * every use case shows a payment in every state, and demanding screens × viewports × states
  * would ask for cells the product has no reason to contain.
@@ -112,7 +112,7 @@ for (const st of modelStates) {
       capturedBad++;
       fail("state-captured", `${st} · ${vp}`,
         "no captured frame shows this lifecycle state at this viewport, and it is not excused. " +
-        "In a React demo a state nobody built is a branch nobody wrote — there is no missing file " +
+        "In a React demo a state nobody built is a branch nobody wrote: there is no missing file " +
         "to notice, so this is the only thing that will say so.");
     } else if (!said(hit.why, 10)) {
       excusedBad++;

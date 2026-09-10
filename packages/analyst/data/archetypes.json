@@ -1,10 +1,10 @@
 {
-  "_note": "An archetype attaches to an APPLICATION, not to a project. A product with a client portal and an admin console has two, and they are different shapes with different screens. This file says what shape an application is; industries.json says how it should look and speak; audiences.json sets the floors it may not go below. Colour and tone are deliberately absent here — three axes all asserting colour would conflict, and that argument belongs to the sector.",
+  "_note": "An archetype attaches to an APPLICATION, not to a project. A product with a client portal and an admin console has two, and they are different shapes with different screens. This file says what shape an application is; industries.json says how it should look and speak; audiences.json sets the floors it may not go below. Colour and tone are deliberately absent here, three axes all asserting colour would conflict, and that argument belongs to the sector.",
   "archetypes": {
     "crm": {
       "label": "Customer relationship management",
       "aka": ["sales pipeline", "deal tracker", "contact management", "account management"],
-      "primaryObject": "the relationship — a contact, an account or a deal, depending on what the business sells",
+      "primaryObject": "the relationship: a contact, an account or a deal, depending on what the business sells",
       "coreScreens": [
         { "id": "list", "purpose": "every record, filtered and sorted", "required": true },
         { "id": "detail", "purpose": "one record, with its history", "required": true },
@@ -23,7 +23,7 @@
     "erp": {
       "label": "Enterprise resource planning, or any module of one",
       "aka": ["inventory", "procurement", "order management", "back office", "operations system"],
-      "primaryObject": "the transactional document — an order, an invoice, a movement",
+      "primaryObject": "the transactional document: an order, an invoice, a movement",
       "coreScreens": [
         { "id": "list", "purpose": "documents by state", "required": true },
         { "id": "detail", "purpose": "one document, its lines, its state", "required": true },
@@ -46,7 +46,7 @@
       "coreScreens": [
         { "id": "directory", "purpose": "everyone, searchable", "required": true },
         { "id": "profile", "purpose": "one person, their record and their history", "required": true },
-        { "id": "request", "purpose": "leave, expenses, changes — raised and tracked", "required": true },
+        { "id": "request", "purpose": "leave, expenses, changes, raised and tracked", "required": true },
         { "id": "approval-queue", "purpose": "what a manager owes an answer on", "required": true },
         { "id": "org-view", "purpose": "who reports to whom", "required": false }
       ],
@@ -61,7 +61,7 @@
     "portal": {
       "label": "Client or customer portal",
       "aka": ["client area", "self-service", "member area", "account portal"],
-      "primaryObject": "the client's own holdings — whatever the business holds on their behalf",
+      "primaryObject": "the client's own holdings, whatever the business holds on their behalf",
       "coreScreens": [
         { "id": "overview", "purpose": "everything at a glance, the number that matters first", "required": true },
         { "id": "holdings", "purpose": "the list of what they have", "required": true },
@@ -70,7 +70,7 @@
         { "id": "messages", "purpose": "what the business has told them", "required": false },
         { "id": "contact", "purpose": "how to reach a person", "required": true }
       ],
-      "navigationShape": "overview leads, and everything else is a drill-down from it. The client sees only their own data and the boundary is absolute — a portal that leaks between clients has no second chance.",
+      "navigationShape": "overview leads, and everything else is a drill-down from it. The client sees only their own data and the boundary is absolute, a portal that leaks between clients has no second chance.",
       "density": "moderate: read occasionally, by people who are not professionals in this domain",
       "antiPatterns": [
         { "what": "presenting a figure without saying when it was valued", "why": "an undated number is a claim the business cannot stand behind" },

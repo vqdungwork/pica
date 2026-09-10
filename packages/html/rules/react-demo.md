@@ -14,7 +14,7 @@ product is broken. The demo was inert and the client could not tell that was on 
 | | Static board | React demo |
 |---|---|---|
 | What it is | option boards, decision records | the flow the client uses |
-| Ported to Figma | no — a board stops being a deliverable the moment the decision is made | yes |
+| Ported to Figma | no: a board stops being a deliverable the moment the decision is made | yes |
 | Captured | `--dir` | **`--url`, per route** |
 | Opened how | double-click | **a hosted URL** |
 
@@ -44,7 +44,7 @@ Three consequences, and all three are gains:
 
 - `state-coverage-check` multiplies `screens × viewports × states` from `state.stateModel` and
   compares it against what was captured. A state nobody built fails rather than passing quietly.
-- **"not addressable" and "not built" become one finding**, which is correct — a state the client
+- **"not addressable" and "not built" become one finding**, which is correct: a state the client
   cannot be sent a link to is a state they have not reviewed.
 - Review gets easier. You send a link to the empty state instead of telling somebody which four
   things to click.
@@ -59,7 +59,7 @@ and the reason it can is that they are in the markup. Its own rule: *"a link bui
 invisible to it. Keep targets in markup."*
 
 **In JSX they still are.** Emit the same attributes and they land in the rendered DOM, where
-`flow-check --url` reads them. What changes is where the check looks, not what it looks for — and
+`flow-check --url` reads them. What changes is where the check looks, not what it looks for: and
 what it catches is the class of defect the rules call out as having **no geometric signature**: a row
 on one role's home screen that opens another role's screen. Every screenshot correct, every measured
 check green, the wiring wrong.
@@ -74,7 +74,7 @@ place: a figure on the overview and the same figure on the detail screen come fr
 cannot disagree. Two static files can, and nothing checks them against each other.
 
 Length-realistic still applies, and now applies harder. If the audience profile carries a text
-expansion above 1, the mock data is written at that length — a layout sized to English breaks at 1.3
+expansion above 1, the mock data is written at that length: a layout sized to English breaks at 1.3
 and Czech and German both exceed it.
 
 ## Two failures the demo introduces, and both are checked
@@ -88,7 +88,7 @@ settle window before measuring, and fails rather than measuring anyway.
 
 **A font that did not load.** The design is font-free by decision, so the family is a webfont and a
 webfont can fail. `font-check` records which family actually painted each text run and fails when it
-is a fallback rather than the declared face. It runs as a **handoff gate**, not a design gate — during
+is a fallback rather than the declared face. It runs as a **handoff gate**, not a design gate: during
 iteration a fallback is noise, at handoff it is the difference between a measured reference and a
 meaningless one.
 

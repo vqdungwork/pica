@@ -1,11 +1,11 @@
 /**
- * contrast-check.mjs — the accessibility measurement this harness never made.
+ * contrast-check.mjs: the accessibility measurement this harness never made.
  *
  * pica measures geometry to a tenth of a pixel and, until 0.8.0, never measured contrast.
  * That is the one accessibility property which is objective, computable, and in one sector
  * legally binding: the knowledge base records WCAG 2.2 AA as a statutory floor for
  * public-sector services, and four more sectors call contrast functional rather than
- * aesthetic — a warehouse handheld in sunlight, a plant screen behind polycarbonate, a
+ * aesthetic: a warehouse handheld in sunlight, a plant screen behind polycarbonate, a
  * clinician's monitor under theatre lighting, a phone in a tractor cab.
  *
  * `evaluation.md` has required "contrast computed from tokens" since 0.5.0 and nothing

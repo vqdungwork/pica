@@ -2,7 +2,7 @@
  * Capture an HTML prototype as a measurement reference for Figma comparison.
  *
  * Records, per frame:
- *   - `viewport` and `hug`, TAGGED not inferred — never parse the caption, pica's
+ *   - `viewport` and `hug`, TAGGED not inferred: never parse the caption, pica's
  *     naming convention puts "·" inside screen names (F19)
  *   - `contentH` and `overflowX`, so clipped content is measurable (F15, F26)
  *   - text runs: glyph rect via Range.getBoundingClientRect(), font size, weight,
@@ -76,7 +76,7 @@ const WRAP = get("--sel", ".frame-wrap");
  *
  * Through 0.3.0 this defaulted to ".phone", from the mobile-only era. A desktop or
  * two-viewport project whose frames are not called .phone matched nothing, and the
- * script reported "0 frames" as ordinary output rather than as an error — so the
+ * script reported "0 frames" as ordinary output rather than as an error, so the
  * default silently produced an empty artefact that every downstream check then
  * passed. Defaulting to [data-viewport] makes the one attribute do both jobs: it
  * locates the frame and names its viewport, which is what verify-html.mjs asserts.
@@ -172,7 +172,7 @@ for (const src of sources) {
   /* ---- capture-settled ----------------------------------------------------
    * A route measured mid-render produces geometry for a layout that existed for 200ms, and
    * says nothing: no error, a page that looks right, every number wrong. It is the same
-   * failure shape as a webfont silently falling back, and it arrived with --url — a
+   * failure shape as a webfont silently falling back, and it arrived with --url: a
    * directory of static files has nothing to wait for.
    *
    * Sample the layout twice and require the two to agree. Not a timeout: a longer wait is a
@@ -200,7 +200,7 @@ for (const src of sources) {
 
   /* Record the family the browser ACTUALLY resolved, forced or not. `forcedFont` only
    * says what was asked for; when nothing is forced it is null and the artefact carries
-   * no font at all — which is how a capture in one family comes to be diffed against a
+   * no font at all: which is how a capture in one family comes to be diffed against a
    * design in another, with every metric difference read as a layout defect. */
   if (!resolvedFont) {
     resolvedFont = await page.evaluate((FRAME) => {
@@ -232,12 +232,12 @@ for (const src of sources) {
       const shadowBlur = new Set(), easings = new Set();
 
       /* Direction census. A declared design direction (state.direction) asserts
-       * facts about the kit — corner radius, control height, numerals, how many
+       * facts about the kit: corner radius, control height, numerals, how many
        * hues the palette actually spends. The four geometric checks are blind to
        * all of it: a screen can measure correct to the pixel and still be the
        * wrong design system. Recorded here because verify-html reads this
        * artefact and never re-renders, and AGGREGATED per frame because a
-       * direction is a property of the kit, not of one node — recording it per
+       * direction is a property of the kit, not of one node: recording it per
        * element would multiply the file by the node count to say the same thing. */
       const radii = new Map(), controlH = new Set(), hues = new Set();
       let numericRuns = 0, tabularRuns = 0;
@@ -279,7 +279,7 @@ for (const src of sources) {
             // so text belonging to a registered reflow reports forever as drift (F8).
             // Without text-align, a centred or FILL run's x cannot be compared: the
             // capture records glyph ink and a design tool records the layout box (F24).
-            // A numeric run is a run that IS a number — "1,234.56", "$42", "8%" —
+            // A numeric run is a run that IS a number: "1,234.56", "$42", "8%",
             // not prose that happens to contain a digit. Tabular figures only
             // matter where numbers stack into a column and have to align.
             const bare = s.replace(/[\s,.\u00a0%+\-–—:/$€£¥]/g, "");
@@ -308,7 +308,7 @@ for (const src of sources) {
                * sits on, appended so every existing consumer keeps its positions.
                *
                * Contrast is the one accessibility property that is objective, computable
-               * and legally binding — WCAG 2.2 AA is a statutory floor for public-sector
+               * and legally binding: WCAG 2.2 AA is a statutory floor for public-sector
                * services, and four other sectors in the knowledge base call it functional
                * rather than aesthetic. This harness measured geometry to a tenth of a
                * pixel and never measured it, because the capture recorded no colour pair.
@@ -331,8 +331,8 @@ for (const src of sources) {
                * consumer keeps its positions. Index 7 stays the run's own class and is
                * unchanged.
                *
-               * A run's own element is very often unclassed — `<span class="warn">` wrapping
-               * a bare `<span>` is the normal shape for a message with a label — and index 7
+               * A run's own element is very often unclassed: `<span class="warn">` wrapping
+               * a bare `<span>` is the normal shape for a message with a label, and index 7
                * is then empty. copy-check narrows its next-step scan to the runs an error
                * component owns, and with only index 7 that scan saw the word "Refused" and
                * not the sentence beneath it, so it failed a refusal that said exactly what
@@ -354,7 +354,7 @@ for (const src of sources) {
 
       // Boxes carry DEPTH and PARENT INDEX at indexes 5 and 6. Excusing a
       // reflowing component has to excuse what is inside it, and that needs the
-      // tree — otherwise every registered reflow leaks count mismatches through
+      // tree: otherwise every registered reflow leaks count mismatches through
       // its descendants and the parity check can never return zero (F11).
       const idxOf = new Map();
       frame.querySelectorAll("*").forEach(el => {
@@ -366,7 +366,7 @@ for (const src of sources) {
         while (a && a !== frame) { depth++; a = a.parentElement; }
         // Parent is the nearest CLASSED ancestor, not the immediate parent. Unclassed
         // elements are not recorded, so using the immediate parent breaks the chain
-        // the moment one sits between a registered component and its descendants —
+        // the moment one sits between a registered component and its descendants,
         // a <td> wrapping a score pill defeated subtree pruning exactly this way.
         let pa = el.parentElement, parentIdx = -1;
         while (pa && pa !== frame) {
@@ -474,7 +474,7 @@ for (const src of sources) {
         for (const corner of ["borderTopLeftRadius", "borderTopRightRadius",
                               "borderBottomLeftRadius", "borderBottomRightRadius"]) {
           const v = cs[corner];
-          // A percentage radius is a circle — an avatar, a status dot — not a corner
+          // A percentage radius is a circle, an avatar, a status dot, not a corner
           // style, and scoring it against a px maximum is a category error.
           if (!v || v.includes("%")) continue;
           const px = Math.round(parseFloat(v));
@@ -545,7 +545,7 @@ for (const src of sources) {
  *
  * A selector that matches nothing produced "0 frames" as ordinary output, wrote a
  * well-formed artefact containing no frames, and every downstream check then passed
- * it — a green run that measured nothing. Refuse to write instead, and name both
+ * it: a green run that measured nothing. Refuse to write instead, and name both
  * selectors so the cause is obvious. */
 const totalFrames = Object.values(all).reduce((a, d) => a + d.length, 0);
 if (!totalFrames) {
@@ -578,5 +578,5 @@ console.log("\nwrote " + path.join(OUT, "html-reference.json"));
 console.log(FONT ? `font forced to ${FONT}, re-run without --font once Figma uses the same family`
                  : "rendered native");
 console.log(`settled: ${settled.length} source(s) reached a stable layout before measurement`);
-console.log(`resolved font family: ${resolvedFont ?? "unknown"} — the design dump must be taken in the same one`);
+console.log(`resolved font family: ${resolvedFont ?? "unknown"}: the design dump must be taken in the same one`);
 await browser.close();

@@ -24,10 +24,10 @@ The boundary is: analysis says **what must be true**. Design says **what it look
 
 A single "business flow" is the mistake this rule exists to prevent.
 
-- **AS-IS** — how the business works today. Observed from the live product, the analytics and the
+- **AS-IS**: how the business works today. Observed from the live product, the analytics and the
   support logs wherever possible, not only from what someone describes in a meeting.
-- **TO-BE** — how it works with the product.
-- **The delta** — what actually changes.
+- **TO-BE**: how it works with the product.
+- **The delta**: what actually changes.
 
 **The delta is what is being bought.** Without an AS-IS beside it, nothing proves the new design fixes
 anything, an improvement is indistinguishable from a lateral move, and at handover there is no way to

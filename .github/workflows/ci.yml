@@ -1,4 +1,4 @@
-# ci.yml — this repository submitting to its own rule.
+# ci.yml: this repository submitting to its own rule.
 #
 # pica requires every project it validates to run its checks in a pipeline, and until now
 # ran its own two suites only when somebody remembered to. impl-check has asserted
@@ -10,7 +10,7 @@
 #   1. validate-packages   the manifests, the ownership map, the links resolve
 #   2. mutate --fixture    every check is seen to FAIL on the defect it was written for
 #
-# The README's claim — "every one has been seen to fail on the defect it was written for" —
+# The README's claim: "every one has been seen to fail on the defect it was written for",
 # is worth exactly as much as the last run of the mutation suite. Now that is every push.
 #
 # Both exit non-zero on findings, so a red run means a real defect and not a warning
@@ -34,13 +34,13 @@ jobs:
         with:
           node-version: '24'
 
-      # The two suites import Node builtins only. Playwright is not for them — it is for
+      # The two suites import Node builtins only. Playwright is not for them: it is for
       # the FIXTURE. mutate.mjs produces the capture by running capture-html-reference.mjs,
       # and without a browser four capture-reading mutations report SKIPPED:
       # verify-html·direction, contrast-check·exemption-used, coverage-check·uc-covered
       # and spacing-check·off-scale.
       #
-      # The first run of this workflow did exactly that — 85 caught · 0 missed · 4 skipped,
+      # The first run of this workflow did exactly that: 85 caught · 0 missed · 4 skipped,
       # green, while proving four fewer checks than the machine it was written on. The
       # suite's own words: a skipped mutation is not a passed one. A green tick over four
       # unproven checks is the failure mode this whole workflow exists to end, so the
@@ -75,7 +75,7 @@ jobs:
 
       # The flow was described in prose in four places and drawn nowhere, and the four
       # drifted. It is generated from the manifests now, so the picture cannot disagree
-      # with the code — and this is what says so when somebody forgets to regenerate.
+      # with the code: and this is what says so when somebody forgets to regenerate.
       - name: flow diagram
         run: node scripts/flow-diagram.mjs --check
 
@@ -86,14 +86,14 @@ jobs:
           set -o pipefail
           node scripts/mutate.mjs --fixture | tee mutate.log
           if grep -qE '[1-9][0-9]* skipped' mutate.log; then
-            echo "::error::a skipped mutation is not a passed one — see the skip lines above"
+            echo "::error::a skipped mutation is not a passed one, see the skip lines above"
             exit 1
           fi
 
 # Deliberately NOT run here: the mutation suite against examples/approvals.
 #
 # impl-check's branch-age reads the git branches of the ENCLOSING repository, and the
-# worked example is not its own repo — so pointed at examples/approvals it reports on
+# worked example is not its own repo: so pointed at examples/approvals it reports on
 # pica's own stale branches instead. It currently fails locally for that reason alone
 # (0.8.0, packaging-restructure, role-agents-and-the-build, v0.2.0) while a default
 # Actions checkout fetches one ref and would quietly pass.

@@ -1,5 +1,5 @@
 /**
- * copy-check.mjs — the words gate. Runs with the HTML gate, before approval.
+ * copy-check.mjs: the words gate. Runs with the HTML gate, before approval.
  *
  * Copy fails in a way geometry never does: it looks finished. Lorem reads as text, a
  * wrong term reads as a word, and an error message that says nothing reads like an
@@ -151,7 +151,7 @@ for (const cr of copyRules) {
   }
   /* Two different kinds of rule share this shape, and defaulting `expect` to 0 collided
    * them. A BAN says "this must appear zero times". A SPELLING rule says "wherever this
-   * appears, it is spelled this way" — and it is expected to appear, often. With no
+   * appears, it is spelled this way", and it is expected to appear, often. With no
    * explicit expect, every correct occurrence of a wordmark was reported as a violation
    * of the rule protecting it.
    *
@@ -214,7 +214,7 @@ let wholeFrameScoped = 0;
  * checked by this person" passed, because an unrelated card on the same screen was
  * titled "Check against the prescription" and "check" is in the list above.
  *
- * Verified by mutation — the dead end was introduced deliberately and the check still
+ * Verified by mutation: the dead end was introduced deliberately and the check still
  * reported "0 findings (2 error frames)", which is the silence-reads-as-success failure
  * this file argues against.
  *

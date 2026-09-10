@@ -1,5 +1,5 @@
 /**
- * process-check.mjs — the process model, held to closing rather than to existing.
+ * process-check.mjs: the process model, held to closing rather than to existing.
  *
  * Until 2.0.0 the whole specification for this was four sentences of prose. AS-IS was "how they work
  * today", TO-BE was "how they work with the product", no notation was named anywhere in the
@@ -37,7 +37,7 @@ catch (e) {
 }
 
 /* Both directions are the same shape. AS-IS is discovery's and TO-BE is the modeller's, and each is
-   checked the same way — a model that does not close is not improved by who drew it. */
+   checked the same way: a model that does not close is not improved by who drew it. */
 const models = [];
 if (state.toBe && typeof state.toBe === "object") models.push(["toBe", state.toBe]);
 if (state.asIs && typeof state.asIs === "object") models.push(["asIs", state.asIs]);

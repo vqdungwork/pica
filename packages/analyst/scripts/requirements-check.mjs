@@ -1,5 +1,5 @@
 /**
- * requirements-check.mjs — NFRs as numbers, requirements as classes, states as a list design can be
+ * requirements-check.mjs: NFRs as numbers, requirements as classes, states as a list design can be
  * held to. Three things analysis owes and none of which pica checked.
  *
  * NFRs came from the architect package, which 2.0.0 deleted. They are requirements, and requirements
@@ -8,7 +8,7 @@
  *
  * The classification is BABOK's and pica had none: everything was a business rule or a use case.
  * Business, stakeholder and solution, and solution splits into functional, non-functional and
- * TRANSITION. That last one is the one worth having — a transition requirement exists only to get
+ * TRANSITION. That last one is the one worth having: a transition requirement exists only to get
  * from the current state to the future one and is never needed again. An Excel import that gets a
  * year of history in is not a feature, and designed as one it becomes a permanent screen nobody
  * wanted.

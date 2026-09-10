@@ -1,10 +1,10 @@
 /**
- * structure-check.mjs — the lo-fi gate, which pica did not have.
+ * structure-check.mjs: the lo-fi gate, which pica did not have.
  *
  * The industry puts greyscale wireframes in front of the client BEFORE the design system, for one
  * reason: it forces the conversation onto structure while structure is still cheap to change. pica
  * went from the screen inventory straight to three fully-built directions, and then approved the
- * business flow and the visual design together at one confirmation — which bundles the two things
+ * business flow and the visual design together at one confirmation: which bundles the two things
  * the lo-fi gate exists to separate. Structural rework discovered there is expensive rework.
  *
  * Built in the same HTML rather than a wireframe tool, so one medium carries the whole chain, the
@@ -14,7 +14,7 @@
  * Four checks:
  *
  *   1. TRACED        every lo-fi screen names a use case. Same link coverage-check holds the built
- *                    screens to, applied before anything is styled — a screen that has no reason to
+ *                    screens to, applied before anything is styled: a screen that has no reason to
  *                    exist is cheapest to delete now.
  *   2. GREYSCALE     no colour outside the grey ramp. The moment a brand hue appears the client
  *                    starts reviewing the palette, which is the conversation this gate defers.
@@ -22,7 +22,7 @@
  *                    against short text breaks on the real thing, and for a language that runs 1.3
  *                    against English it breaks by a third.
  *   4. STATES NAMED  every state the model declares appears, or is excused by name. The state model
- *                    exists by now — the modeller produced it — so lo-fi is the cheapest place to
+ *                    exists by now, the modeller produced it, so lo-fi is the cheapest place to
  *                    find out that nobody has thought about the empty one.
  *
  * Usage: node structure-check.mjs <html-dir> <state.json>
@@ -141,7 +141,7 @@ for (const st of declared) {
   stateBad++;
   fail("lofi-states", `state "${st}"`,
     "is in the state model and appears on no structure screen. Excuse it by name in " +
-    "structureExemptions with a reason, or draw it — this is the cheapest gate at which to find out " +
+    "structureExemptions with a reason, or draw it: this is the cheapest gate at which to find out " +
     "nobody has thought about it.");
 }
 

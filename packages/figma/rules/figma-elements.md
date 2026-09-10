@@ -87,7 +87,7 @@ bulk-binding.
 
 `.pica/state.json` is the **authoritative** home, under `rawValueExemptions`, with a reason each. The
 audit runs inside Figma and cannot read the filesystem, so populate its config block from state before
-pasting — never the other way round, or the two drift and the reasons are lost.
+pasting: never the other way round, or the two drift and the reasons are lost.
 
 ```json
 { "rawValueExemptions": [
@@ -124,7 +124,7 @@ progress bar invisible, and 56px control circles went opaque white with white ic
 rendered as blank discs.
 
 **Never carry alpha as a manual paint opacity on a bound paint.** It is an override, and it re-resolves
-away — reliably on nested instance children, which discard it and fall back to the token's alpha. Three
+away: reliably on nested instance children, which discard it and fall back to the token's alpha. Three
 separate attempts to hold `0.2` on a nested skip button reverted to `1.0` before the alpha was moved
 into the token.
 
@@ -138,7 +138,7 @@ overlay/control  #ffffff @ 0.20   // on-video control backgrounds, spinner track
 overlay/track    #ffffff @ 0.30   // on-video progress track and hairline
 ```
 
-When you match colours, key on **RGBA**, and never exclude alpha-bearing tokens from the candidate set —
+When you match colours, key on **RGBA**, and never exclude alpha-bearing tokens from the candidate set:
 that exclusion is what guarantees the correct token can never win.
 
 **Audit fingerprint for past damage:** any node whose SOLID fill is bound, sits at `opacity 1`, and lies
@@ -152,8 +152,8 @@ Three cases from one project where the per-instance version would have been wron
 - **Single-line truncation.** Four component variants propagated to all 16 instances with zero forced
   overrides. Per instance it would have been sixteen edits, and any instance added later would have
   reverted to wrapping.
-- **Control heights across viewports.** Bind them to tokens — `control/h-pointer` 40 / `control/h-touch`
-  44 — so a viewport difference is an auditable token swap on the instance rather than a stale fixed
+- **Control heights across viewports.** Bind them to tokens: `control/h-pointer` 40 / `control/h-touch`
+  44, so a viewport difference is an auditable token swap on the instance rather than a stale fixed
   height, which is what pica already warns about.
 - **Icon sizing.** Fixing the artwork size once at the component fixed every row it appeared in.
 
@@ -161,7 +161,7 @@ Three cases from one project where the per-instance version would have been wron
 
 Kit entries must show the component **as the screens use it**, including children hidden at that
 viewport. A desktop nav demo written without its burger button documented a component the screens do not
-have — and the storybook is what a developer builds from.
+have, and the storybook is what a developer builds from.
 
 Two traps that follow:
 
@@ -328,7 +328,7 @@ failures that look identical in Figma and have different fixes:
 
 **1. The static desktop build registers one family per weight.** Several foundries ship OTFs using the
 legacy four-style naming: `nameID 1` (family) is `Chillax Semibold` and `nameID 2` (style) is `Regular`,
-with the real typographic family in `nameID 16/17`. Apps that read `nameID 1` — Figma among them — see
+with the real typographic family in `nameID 16/17`. Apps that read `nameID 1`, Figma among them, see
 **six separate families**:
 
 | File | Family it registers as | Style |
@@ -345,7 +345,7 @@ a family that does not contain those weights.
 **2. The variable build is a third family name.** `Chillax-Variable.ttf` registers as `Chillax Variable`
 with an `fvar` `wght` axis 200–700 and six named instances (Extralight, Light, Regular, Medium, Semibold,
 Bold), all in **one** family. That is the build a token architecture needs. Install the variable font,
-remove the statics, and set the family variable to the variable font's name — which is neither the
+remove the statics, and set the family variable to the variable font's name: which is neither the
 marketing name nor the CSS name. Expect three different strings for one typeface:
 
 | Context | String |
@@ -384,7 +384,7 @@ A font installed while Figma is running stays invisible: `listAvailableFontsAsyn
 
 The tell is a font count that does not move. Two calls minutes apart both returning exactly 8,927 fonts
 means the list was never rescanned, so "the font is not installed" is the wrong conclusion. Check the OS
-first — on macOS, `ls ~/Library/Fonts` — before asking anyone to reinstall anything.
+first, on macOS, `ls ~/Library/Fonts`, before asking anyone to reinstall anything.
 
 Locally installed fonts **are** reachable once Figma has rescanned. The hard limit is narrower than "local
 fonts are invisible": it is that you cannot pick up a font installed *during* the session.
@@ -464,7 +464,7 @@ chip.setProperties({ [propId]: true });
 string.
 
 **Check whether the element is already there before you build anything.** The most common version of this
-problem is not a missing icon — it is an icon that exists in every variant, sits `visible: false`, and has
+problem is not a missing icon: it is an icon that exists in every variant, sits `visible: false`, and has
 **no property wired to it**, so no instance can switch it on.
 
 That is a two-line fix mistaken for a modelling problem. On one file every `input` variant already carried
@@ -530,7 +530,7 @@ The flow-wide statement is *promote slowly, bind always*, in
 **Default to not making a component.** Build it on the screen; promote when a second occurrence appears
 that is the same *thing*, not the same shape. What earns one: the brief names it, two or more real
 occurrences, or it carries a state someone switches. What does not: it appears twice, it is a section,
-it is large, it would tidy the layer list. The cost of the reflex is measured — one library reached 147
+it is large, it would tidy the layer list. The cost of the reflex is measured: one library reached 147
 components of which 36 were arrangements and 9 were duplicates.
 
 **Every value is bound on first appearance**, with no threshold: colour, gap, padding, corner radius,
@@ -548,7 +548,7 @@ nothing but instances and is a layout. Both look identical to that test.
 What separates them is **what the wrapper decides**. Dissolve to a plain auto-layout frame when both
 conditions hold:
 
-1. **The master contributes no content of its own** — no text, no shape, no fill, stroke or effect.
+1. **The master contributes no content of its own**: no text, no shape, no fill, stroke or effect.
    **Separators do not count as content.** A block that is three `stat` instances with two dividers
    between them is an arrangement; the dividers are part of the arranging. Excluding them is what
    collapses a family of four components that were the same idea at two, three, three and four stats.
@@ -557,7 +557,7 @@ conditions hold:
    survive.
 
 Plus one clause from the other direction: **a container used exactly once is dissolved regardless of
-variants.** An atomic element used once is kept — the harm is in one-off containers, not one-off atoms.
+variants.** An atomic element used once is kept: the harm is in one-off containers, not one-off atoms.
 
 Applied to one library this dissolved 36 components: lists, sections, stat rows, and wrappers whose
 entire job was a gap.
@@ -565,7 +565,7 @@ entire job was a gap.
 ### This does not license detaching
 
 Part 2 says never detach, and that stands. The two rules answer different questions. **Never detach an
-instance so it can differ** — that is what a variant is for. **Do detach when the component should not
+instance so it can differ**: that is what a variant is for. **Do detach when the component should not
 exist**, because detaching a wrapper is how you delete it without losing what it held: the children stay
 instances, and `detachInstance()` is appearance-preserving by construction, so the operation cannot move
 a pixel.
@@ -576,7 +576,7 @@ loop until a pass finds nothing (this took three passes, 98 then 2 then 0).
 ### The heuristic will catch something it should not
 
 Remove a variant axis at the client's request and the component that kept it now trips the rule. On this
-project `wh/check-row` — no own paint, no axis, only instance children — is the repeated row of the order
+project `wh/check-row`, no own paint, no axis, only instance children, is the repeated row of the order
 list, used 35 times, and the client had named that exact node as the correct shape.
 
 A pure container is an arrangement when it appears once or twice on one screen and a component when it is
@@ -589,8 +589,8 @@ with no register is a preference; an exemption with no reason is an oversight.
 Check what actually differs between variants before believing the axis name.
 
 One set shipped `lang = en | sk`. Both variants read `QR kód`. Instances of *both* carried Slovak and
-English labels. What the axis actually tracked was colour — one variant `green/500`, the other
-`green/600` — and the client's file has **one** colour for all thirty-four of those chips. The split was
+English labels. What the axis actually tracked was colour: one variant `green/500`, the other
+`green/600`, and the client's file has **one** colour for all thirty-four of those chips. The split was
 manufactured twice: once by a palette normalisation landing one source colour on two ramp steps, then by
 someone reading two greens as two languages.
 
@@ -598,8 +598,8 @@ The same fault in a milder form: one `tone` value meaning green-on-pale-green at
 white-on-dark at another, in a set that already had the right value available for the second case.
 
 Two smells, both cheap to test:
-- **identical rendered content across an axis's members** — collapse it
-- **one value meaning different things at different points on another axis** — rename it to the value
+- **identical rendered content across an axis's members**: collapse it
+- **one value meaning different things at different points on another axis**: rename it to the value
   that already exists
 
 ## Name by role, never by measurement
@@ -620,7 +620,7 @@ table. `size = 56 | 64 | 72 | 120 | 140` tells them the pixel heights of five bu
 two screen widths. `sm | md | lg | xl | 2xl` tells them the scale, which is what they pick from.
 
 **When a size scale cannot name the members uniquely, the axis is not a size axis.** One `title-block`
-carried font-size pairs — `41-30`, `32-24`, `16-12`, `12-8`, `12-7` — nine of them, with two pairs
+carried font-size pairs, `41-30`, `32-24`, `16-12`, `12-8`, `12-7`, nine of them, with two pairs
 sharing a leading size. Naming by role produced nine distinct names where naming by size produced a
 collision: `page`, `screen`, `section`, `card`, `list`, `map`, `map-compact`, `row`, `row-compact`.
 
@@ -629,7 +629,7 @@ the labels change per instance, so position is the only stable thing to name. It
 three fixed segments, so `active = today | week | month` says what the numbers stood for.
 
 **A rename is finished when the structures the old names justified are gone too.** Once every icon became
-`icon/*`, the section called "Warehouse — icons" was named for a distinction that had just been deleted.
+`icon/*`, the section called "Warehouse: icons" was named for a distinction that had just been deleted.
 
 ## Merging components: capture, mutate, restore, in one script
 
@@ -648,7 +648,7 @@ Done that way, a 35-instance conversion came back 35/35 identical, images includ
 Collapsing a two-variant set to a single component means swapping the doomed variant's instances onto the
 survivor, deleting the doomed variant, and reparenting the survivor out of the set.
 
-That last step **resets the text overrides on every instance of it** — including the ones you never
+That last step **resets the text overrides on every instance of it**: including the ones you never
 touched. Twenty-nine chips silently reverted to the master's string. Nothing threw. The structural audit
 stayed at zero on all seventeen criteria, because every node was still present, bound, on-grid and inside
 its parent; it just said the wrong word.

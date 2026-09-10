@@ -14,7 +14,7 @@ Load `${CLAUDE_PLUGIN_ROOT}/rules/review-discipline.md`.
 
 **The brief. Not `docs/contract.md`, not the plan, not your memory of it.**
 
-Read the file at `briefPath` in `.pica/state.json` — `docs/brief.md` unless intake put it elsewhere. If
+Read the file at `briefPath` in `.pica/state.json`: `docs/brief.md` unless intake put it elsewhere. If
 that key is missing or the file is gone, **say so and stop**: this step cannot run, and reconstructing
 the brief from the contract is exactly the substitution it exists to prevent. Report it as a failed
 closeout check rather than quietly reading the contract instead.
@@ -23,7 +23,7 @@ Both the contract and the plan are copies, and copies drift. This step recovered
 scored deliverable that had been missed entirely: the brief asked for design reasoning, and nothing in
 the plan carried it.
 
-Read `docs/exclusions.md` again too, and **check nothing excluded was built** — by comparing, not by
+Read `docs/exclusions.md` again too, and **check nothing excluded was built**: by comparing, not by
 recalling. Copy `exclusions` from `.pica/state.json` into the audit's `EXCLUSIONS` config and let it match
 frame names for you. Prose is what the client reads; the register is what gets checked.
 
@@ -57,7 +57,7 @@ at the walkthrough is a failure.
 
 **Recount every number from the file, in the same script that writes it.** Do not carry a count forward
 from an earlier document. The audit now parses claims out of the file's own text and recounts them, so a
-cover reading "45 designed screens" is checked against the actual frame count rather than trusted — that
+cover reading "45 designed screens" is checked against the actual frame count rather than trusted: that
 exact claim was once counting five annotation boards.
 
 Also empty the registers deliberately. Every `deviations` entry marked `by: "html-fix-pending"` is a

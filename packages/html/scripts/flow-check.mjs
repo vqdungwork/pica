@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * flow-check.mjs — the interactive flow is wired, and wired to the right place.
+ * flow-check.mjs: the interactive flow is wired, and wired to the right place.
  *
  *   node flow-check.mjs --dir html [--state .pica/state.json] [--allow-none]
  *   node flow-check.mjs --url <u> [--url <another>] [--state .pica/state.json]
@@ -8,7 +8,7 @@
  * --url reads the RENDERED DOM instead of the source files, which is what a React demo
  * needs. The vocabulary does not change: this file's own rule is "a link built in
  * JavaScript is invisible to it, keep targets in markup", and in JSX the data-* attributes
- * still are — they land in the DOM, and this is where they get read. What changes is where
+ * still are: they land in the DOM, and this is where they get read. What changes is where
  * the check looks, not what it looks for.
  *
  * Losing this check is the one thing a React demo could genuinely cost. It catches the
@@ -20,7 +20,7 @@
  * flow (html-prototype.md, "Options decide, the flow is the deliverable"). The
  * boards are static and measurable. The flow is not: every defect a human found
  * by *using* a prototype rather than looking at it is a navigation defect with no
- * geometric signature — a row that opened another role's screen, a back control
+ * geometric signature: a row that opened another role's screen, a back control
  * that left the application, a deep link that bounced through the launcher, an
  * entry point that lit the wrong tab.
  *
@@ -44,7 +44,7 @@
  *
  * Textual parse, no browser and no dependencies: this runs before the capture
  * harness and has to work when the page is broken. The consequence is that a
- * link built in JS is invisible here, so keep link targets in markup — which is
+ * link built in JS is invisible here, so keep link targets in markup: which is
  * the convention anyway, because a target in markup is greppable.
  *
  * Exits non-zero on any finding, and also when it found nothing to check: zero
@@ -114,7 +114,7 @@ for (const { name: f, src } of sources) {
   /* Either quote style. In source the JSON is single-quoted so its own double quotes survive;
      in a rendered DOM outerHTML normalises attribute quotes to double and escapes the inner
      ones as &quot;. Matching only the source form made --url find zero screens on a demo that
-     carried twelve links — the vocabulary was there and the regex was looking for the wrong
+     carried twelve links: the vocabulary was there and the regex was looking for the wrong
      punctuation. */
   const nav = /data-nav='([^']*)'/.exec(src)
     || (() => {
@@ -155,12 +155,12 @@ for (const { name: f, src } of sources) {
 // Detect the router by its own tag, never by "does this file mention data-home".
 // A documentation board that *describes* the convention in a <code> block matched
 // the looser test and was then reported as an interactive prototype with a
-// broken root — a finding about prose.
+// broken root: a finding about prose.
 const interactive = [...doc].filter(([, d]) => d.router);
 
 // Screens the router itself opens, rather than any control in the markup: the
 // bell, a deep-link default, a redirect. Collected from the string literals in
-// the prototype's own scripts, which is loose but wrong in the safe direction —
+// the prototype's own scripts, which is loose but wrong in the safe direction:
 // it can excuse a screen that is genuinely unreachable, so the reachability
 // finding stays advisory-strict and rendering every screen remains the real
 // check.
@@ -321,7 +321,7 @@ for (const c of CHECKS) {
 }
 
 if (findings.length) {
-  console.error(`\nFAIL: ${findings.length} finding(s). A dangling link is not cosmetic — it is the ` +
+  console.error(`\nFAIL: ${findings.length} finding(s). A dangling link is not cosmetic: it is the ` +
     `defect class no screenshot and no geometry diff can see.`);
   process.exit(1);
 }

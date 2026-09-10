@@ -2,12 +2,12 @@
 
 The structural half of analysis. Load this for stage B of `/pica-analyse`.
 
-`business-analysis.md` covers language and behaviour — the problem, the glossary, the rules, the use
+`business-analysis.md` covers language and behaviour: the problem, the glossary, the rules, the use
 cases. This file covers the four models, and they are a different kind of work: one is argued in
 sentences, the other is drawn and has to close.
 
-Until 2.0.0 pica asked for AS-IS and TO-BE in four sentences of prose with **no notation named** —
-the words BPMN and swimlane appeared nowhere in the repository — and `trace-check` asserted only that
+Until 2.0.0 pica asked for AS-IS and TO-BE in four sentences of prose with **no notation named**:
+the words BPMN and swimlane appeared nowhere in the repository, and `trace-check` asserted only that
 a non-empty string existed. One sentence in `state.asIs` was a green check. That is the gap this file
 closes.
 
@@ -23,7 +23,7 @@ closes.
 | **State** | what states a thing can be in, and which transitions are legal | here |
 
 The journey map is not here. It is `pica-analyst`'s, at stage C, and it is **a projection of the
-process model** rather than a fifth model — see below.
+process model** rather than a fifth model: see below.
 
 ---
 
@@ -42,7 +42,7 @@ and say why**, in one line, so the choice is reviewable rather than habitual.
 
 ### It is data before it is a picture
 
-The model is typed JSON — `lanes`, `nodes`, `edges` — validated against a schema and rendered to
+The model is typed JSON, `lanes`, `nodes`, `edges`, validated against a schema and rendered to
 self-contained SVG. Not a diagram somebody drew.
 
 A drawn diagram drifts from the process it depicts and nothing catches it. A generated one cannot: it
@@ -62,7 +62,7 @@ the image.
 
 They are different jobs and they belong to different agents. `pica-discoverer` draws AS-IS from the
 live product, the analytics and the support logs, and each step carries the evidence class discovery
-already uses — `observed`, `stated`, `inferred`. A step somebody described and nobody watched is
+already uses: `observed`, `stated`, `inferred`. A step somebody described and nobody watched is
 visibly `stated`, which is what the old prose instruction asked for and nothing enforced.
 
 **The delta is the difference between the two diagrams.** State it explicitly: it is what is being
@@ -72,7 +72,7 @@ bought, and it is the first thing presented at the confirmation.
 
 ## Domain model
 
-Entities, relationships, lifecycle. **Business level, not database level** — enough to know what a
+Entities, relationships, lifecycle. **Business level, not database level**: enough to know what a
 screen shows and where a link goes, not enough to be a schema.
 
 Per entity: the name **from the glossary**, who owns it, the key fields a screen actually displays,
@@ -106,8 +106,8 @@ role, and a leak between roles looks like a layout choice.
 
 What states each entity can be in, and which transitions are legal.
 
-This moved out of design. It used to be part of the screen inventory at 3.0 — the designer worked it
-out while drawing — and that is too late and the wrong person. It is a business question: whether an
+This moved out of design. It used to be part of the screen inventory at 3.0: the designer worked it
+out while drawing, and that is too late and the wrong person. It is a business question: whether an
 invoice can go from `paid` back to `draft` is not a design decision.
 
 **And it is what makes state coverage checkable.** The design phase owes a screen for every state, and

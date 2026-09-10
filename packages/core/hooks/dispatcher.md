@@ -25,7 +25,7 @@ These eight rules hold for the whole session. They are not suggestions and they 
 6. **Never claim a state you have not verified in a separate call.** Same-call read-back returns the
    in-memory value, which may never reach the document.
 
-7. **Offer before you assert.** Seven slots in `proposals.md` are the client's decisions, not yours —
+7. **Offer before you assert.** Seven slots in `proposals.md` are the client's decisions, not yours:
    the direction above all, built as the same screen three times. The slots are universal; what fills
    them comes from the sector, the measurement and the analysis. A client who first sees the design
    fully built, in one direction, was never offered the decision that was theirs.

@@ -9,7 +9,7 @@ Runs steps 1 to 4: intake, research and tokens, the HTML UI kit, and if Figma is
 foundations port. These happen in one sitting. Steps 5 onward have their own commands.
 
 Load `packages/core/rules/intake.md` before anything else. It is core's own rule now, so intake runs
-with core alone — a project that arrives with its own PRD and wants design only no longer drags in a
+with core alone: a project that arrives with its own PRD and wants design only no longer drags in a
 package it will never use.
 
 `$ARGUMENTS` may contain the brief or a path to it. If it is empty, ask for the intake packet.
@@ -25,7 +25,7 @@ assumptions.
 
 | Input | Ask for |
 |---|---|
-| The brief | Raw and unedited. Not a summary. `briefPath` is a **list** — an RFP with an annex is one brief in three documents, and any format is fine |
+| The brief | Raw and unedited. Not a summary. `briefPath` is a **list**: an RFP with an annex is one brief in three documents, and any format is fine |
 | Sources | Every file, URL and capture, each with its **authority**: `authoritative`, `reference`, `historical`, `ignore`. One that is not `ignore` and cannot be opened **stops intake** |
 | Environment | Which MCP servers and tools are live, and **what only the human can do**. pica checks `playwright`, node, a package manager and a free port itself |
 | Field | The field named **narrowly**, resolved against `industries.json`. Refused rather than approximated when it is ambiguous |
@@ -40,15 +40,15 @@ invisible as a name and obvious as a consequence.
 
 **Three things intake no longer asks.** The audience is researched by `pica-discoverer`, because most
 briefs cannot answer it and a researched profile beats a guessed one. Whether Figma is a deliverable is
-asked at the port decision, after the freeze. Fonts are not a constraint at all — the family is
+asked at the port decision, after the freeze. Fonts are not a constraint at all: the family is
 declared in the tokens and verified at handoff.
 
 **Write the brief to `docs/brief.md` the moment it arrives, verbatim.** Not after the contract, not at
-the end of intake — the moment it arrives, before you have had a chance to tidy it. It is a reference,
+the end of intake: the moment it arrives, before you have had a chance to tidy it. It is a reference,
 so `reference-discipline.md` governs it: never edit it, and never regenerate it from the contract.
 
 Step 9 re-reads it cold and is forbidden from reading the contract instead, so a brief that lives only
-in a chat window makes closeout impossible on any project long enough to span sessions — which is every
+in a chat window makes closeout impossible on any project long enough to span sessions: which is every
 project past Phase A.
 
 The last row is the one that gets skipped and the one that most often invalidates a design after it is
@@ -81,7 +81,7 @@ Write `docs/exclusions.md`: everything the brief rules out, **quoted from the br
 human what else to add, and **set `exclusionsConfirmed` to true in state once you have asked.**
 
 This is the single highest-value artefact here, and it is weakest exactly where it is needed most. A
-one-line brief rules nothing out, so the quoted half comes back empty — on the projects with the least
+one-line brief rules nothing out, so the quoted half comes back empty: on the projects with the least
 defined scope, which are the ones where scope grows. The ask is what fills that gap, and until it is
 recorded, an empty `exclusions` means two different things: nobody was asked, or they were asked and
 there is genuinely nothing. GATE 1 cannot tell those apart, and neither can you in week three.
@@ -156,48 +156,48 @@ than a habit. A single-application project declares one entry.
 The rest are **registers**, and they are what make later judgement calls checkable rather than
 aspirational. Four are filled now, two accumulate:
 
-- **`exclusions`** — a short matchable name for each thing the brief rules out, alongside the prose in
+- **`exclusions`**: a short matchable name for each thing the brief rules out, alongside the prose in
   `docs/exclusions.md`. `["settings", "profile", "onboarding video"]`. The audit compares frame names
   against these, because a ruled-out screen got designed anyway and was only caught
   two days later by a human re-reading the brief.
-- **`bannedChars`** — declared here rather than buried in the audit script's config, since it is a project
+- **`bannedChars`**: declared here rather than buried in the audit script's config, since it is a project
   fact established at intake.
-- **`copyRules`** — the client's house conventions on wording and punctuation, each with the check that
+- **`copyRules`**: the client's house conventions on wording and punctuation, each with the check that
   enforces it. A punctuation ban and a mixed-case wordmark both arrived as asides,
   and both had to be enforced mechanically afterwards. Ask for them at intake; a copy rule that lives only
   in conversation lasts about a day.
-- **`dataOwnership`** — per entity, who owns it and what this surface may do with it:
+- **`dataOwnership`**: per entity, who owns it and what this surface may do with it:
   `{entity, ownedBy, thisSurface, why}`. Read-only is never a blanket. An instruction
   that the user's data could not be changed on mobile was first applied to everything and disabled the
   request and approval flows the product exists for. What was meant was the **person's own record**, while
   everything a person *does* stays interactive. Per entity, that distinction is designable and checkable.
-- **`targets`** — the implementation targets, and **which viewports each one consumes**. One design at
+- **`targets`**: the implementation targets, and **which viewports each one consumes**. One design at
   three viewports; a responsive website takes all three, a native app takes tablet and mobile and never
   desktop. The surface is a property of the target, not of the viewport, which keeps parity a
   single-design question and lets the target decide only what gets built. `coverage-check` fails a
   target that names a viewport the design never produced, so "we cannot build iOS, nobody drew tablet"
   is found in Phase 3 rather than in Phase 7.
-- **`briefPath`** — a **list** of the documents the brief arrived as, written at 1a. Step 9 reads it and is forbidden from
+- **`briefPath`**: a **list** of the documents the brief arrived as, written at 1a. Step 9 reads it and is forbidden from
   substituting the contract, so this is the one path that must survive the whole project. A rule that
   says "write it down" with nothing naming where is a preference; this is the name.
-- **`exclusionsConfirmed`** — false until the human has been asked what to exclude **beyond** what the
+- **`exclusionsConfirmed`**: false until the human has been asked what to exclude **beyond** what the
   brief quotes. Distinguishes an empty `exclusions` that was checked from one that was never asked about.
-- **`direction`** — starts `null`, filled at step 2c with the design direction and the assertions
+- **`direction`**: starts `null`, filled at step 2c with the design direction and the assertions
   `verify-html` holds every package to. A project may finish without one; a project may not have one that
   asserts nothing.
-- **`rawValueExemptions`** — starts empty, grows during the port when a value genuinely has no token.
-- **`deviations`** — starts empty, grows when the human approves Figma differing from the HTML.
+- **`rawValueExemptions`**: starts empty, grows during the port when a value genuinely has no token.
+- **`deviations`**: starts empty, grows when the human approves Figma differing from the HTML.
 
   **Ask this as S7 in `proposals.md`, in consequences rather than platforms.** *"Only on a phone, or on
   a laptop too?"* is answerable by anyone; *"iOS native or React Native?"* is answerable by about four
-  per cent of clients and is the wrong question anyway — the platform follows from the answer. State
+  per cent of clients and is the wrong question anyway: the platform follows from the answer. State
   what each target buys: a native build is two release pipelines, one of which cannot be rolled back the
   way the web can.
 
 A register with no entries is a valid state and means something: nothing has been excused yet.
 
 **Chrome is declared, never defaulted.** Each `chrome` entry carries a name, `required` (must be on
-every frame at that viewport) or optional (may appear; if it does, it must match), and `pinH`/`pinV` —
+every frame at that viewport) or optional (may appear; if it does, it must match), and `pinH`/`pinV`:
 two axes, because a sidebar pins horizontally and stretches vertically. Record **who** declared it: a
 rule that says "declare X" is violated just as much by the assistant quietly declaring X as by nobody
 declaring it.
@@ -294,7 +294,7 @@ nothing wrote it, so the evidence check had nothing to find.
 
 **`assert` is the whole point.** A direction recorded as prose lasts about a day, exactly like a copy
 rule. `verify-html` reads `assert` and fails any package that breaches it, so the direction is still in
-force at package eleven. Do not write a direction with an empty `assert` — the check reports that as a
+force at package eleven. Do not write a direction with an empty `assert`: the check reports that as a
 finding, because a direction nothing can breach passes every screen by default.
 
 ### 2d. Extract tokens
@@ -318,7 +318,7 @@ found**. Name products and conventions. Quote platform guidelines where they app
 ### GATE 2
 
 Present the audit, the direction and the tokens together. **Stop. Wait for approval.** Everything
-downstream consumes these, so a late change is expensive — and the direction is the most expensive of the
+downstream consumes these, so a late change is expensive, and the direction is the most expensive of the
 three to change, because every screen built after it inherits it.
 
 ---
@@ -339,11 +339,11 @@ Present the kit. **Stop. Wait for confirmation.**
 
 ---
 
-## Step 4: Foundations into Figma — Phase C, optional
+## Step 4: Foundations into Figma, Phase C, optional
 
 **Skip this step entirely if `figmaInScope` is false.** Say so and finish: the project is HTML-only and
 the next thing to run is `/pica-wp <name>`. An HTML-only project is a complete pica project, not a
-truncated one — it is verified by the measured gate in `/pica-wp`, which is where the checks live.
+truncated one: it is verified by the measured gate in `/pica-wp`, which is where the checks live.
 
 **This step is not required before the first work package, and running it early is usually wrong.** It
 belongs to the optional Figma phase. Building the kit in HTML (step 3) is what every screen consumes;

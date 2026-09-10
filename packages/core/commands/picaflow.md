@@ -1,5 +1,5 @@
 ---
-description: Run a whole engagement from a brief — discovery, analysis, design, demo — stopping only where a human has to decide
+description: Run a whole engagement from a brief, discovery, analysis, design, demo, stopping only where a human has to decide
 argument-hint: "[the brief, or a path to it] [--to design|figma] [--resume]"
 ---
 
@@ -26,7 +26,7 @@ to build from there is your estimate to make, outside pica.
 
 | `--to` | You get | Stops after |
 |:--|:--|:--|
-| `design` *(default)* | the PRD, the assumptions register, and **`demo.html`** — React, interactive, served | the freeze |
+| `design` *(default)* | the PRD, the assumptions register, and **`demo.html`**: React, interactive, served | the freeze |
 | `figma` | that, plus the ported Figma file verified frame by frame against the capture | the port |
 
 Figma is **optional and off the critical path**. It is not asked about at intake: after the freeze you
@@ -50,7 +50,7 @@ At stop 3 present, in this order: the **delta** first, then **what they chose an
 low-confidence assumptions most consequential first, then what was not supplied and what its absence
 cost.
 
-**The proposals are not part of the confirmation, they precede it.** `proposals.md` names seven slots —
+**The proposals are not part of the confirmation, they precede it.** `proposals.md` names seven slots:
 universal on every project, filled from the sector entry, the measurement and the analysis, never from a
 list. A client who first sees the design fully built, in one direction, was not offered the decision that
 was theirs; a client asked twenty questions stops reading by the fourth and approves the rest, which
@@ -88,14 +88,14 @@ spawned in one message, same return schema, and a unit with no provenance is rej
 arrives**, before you have had a chance to tidy it. `briefPath` is a list: an RFP with an annex is one
 brief in three documents.
 
-`pica-core` cannot depend on the packages this drives — they all depend on core and a cycle is not
-installable — so every script call below is guarded, names the missing package, and prints a line for
+`pica-core` cannot depend on the packages this drives: they all depend on core and a cycle is not
+installable, so every script call below is guarded, names the missing package, and prints a line for
 every check that did not run. **A chain reported as complete with four of its checks silently absent is
 the exact failure this project exists to prevent.**
 
 | Missing | What stops working |
 |---|---|
-| `pica-discover` | no users, no pain with a frequency, no veto holders, **no audience profile** — every floor the design owes is unset |
+| `pica-discover` | no users, no pain with a frequency, no veto holders, **no audience profile**: every floor the design owes is unset |
 | `pica-research` | nothing is measured, and the direction has no precedent behind it |
 | `pica-analyst` | no PRD, no glossary, no sector, **no models**. The client has nothing to agree to |
 | `pica-html` | nothing is built and nothing is measured |
@@ -120,14 +120,14 @@ With `--resume`, read `state.chain.completed` and continue from the next step.
 | **2.3** | **AS-IS**, observed rather than described, each step carrying its evidence class | `asIs` |
 | **3.1** | **Fan out** `pica-researcher`, nine foundations each, on products the archetype picks | `measured`, `tokens/` |
 
-> ### ⏸ Stop 1 — the engagement scope
+> ### ⏸ Stop 1: the engagement scope
 >
 > Signed before research spends anything. Nothing downstream runs while `exclusionsConfirmed` is false
 > or while no path in `briefPath` exists and `briefAbsent` does not say why.
 
 > ### ▸ The audience profile
 >
-> Present it with its evidence **and the floors it sets** — type size, contrast, target size. Confirmed
+> Present it with its evidence **and the floors it sets**: type size, contrast, target size. Confirmed
 > before tokens exist, so the floors shape the design system rather than being retrofitted onto it.
 
 ### Analysis
@@ -154,21 +154,21 @@ With `--resume`, read `state.chain.completed` and continue from the next step.
 | **5.4** | Every screen at every viewport in every state, then `pica-writer` | `html/` |
 | **5.5** | **Measure** | see below |
 | **5.6** | **Fan out** `pica-evaluator`, then a walkthrough per use case | `docs/reviews/` |
-| **5.7** | **`demo.html`** — React, responsive, interactive, mock data, motion behaviour, **every state addressable by URL**, served | the demo |
+| **5.7** | **`demo.html`**: React, responsive, interactive, mock data, motion behaviour, **every state addressable by URL**, served | the demo |
 
 > ### ▸ Structure, then ▸ the direction
 >
 > Two soft checkpoints, both a built thing. Structure before anything is styled; the direction as three
 > screens, because a client cannot judge `--radius-lg: 12px` and can judge two screens in three seconds.
 
-> ### ⏸ Stop 2 — the design system
+> ### ⏸ Stop 2: the design system
 >
 > The foundations page, presented **for approval, not for re-choosing**. The direction already decided
 > the type, the buttons and the density; this is a decision being shown, and pica says so rather than
 > dressing it as a choice. If it is wrong, the answer is a second round of three directions.
 
 ```bash
-# pica_find <package> <script> — the script's path, or nothing when the package is absent.
+# pica_find <package> <script>: the script's path, or nothing when the package is absent.
 #
 # Two layouts, and only one of them is the one users have. In the repository, packages sit
 # side by side under packages/, so a sibling is ${CLAUDE_PLUGIN_ROOT}/../<name>. Installed,
@@ -221,7 +221,7 @@ run core      pica-verify.mjs      .pica/state.json --phase design --evidence
 All zero, or fix and re-run. **A failing check is not an assumption**: it is a defect, and continuing
 past it produces a demo that breaks in front of the client.
 
-> ### ⏸ Stop 3 — the PRD, the scope, and the demo
+> ### ⏸ Stop 3: the PRD, the scope, and the demo
 >
 > Three things confirmed together: the PRD is correct, the scope of work is agreed, and **the demo does
 > what they expect**. `scopeFrozen` and `deadline` are written by a human recording that a client agreed,
@@ -258,7 +258,7 @@ against a document the work already renegotiated, and that always passes.
 coexisted with four screenshot-obvious defects and a home row that opened another role's screen.
 
 **And it does not test with real users.** Evaluation is 3–5 agents with distinct lenses plus a cognitive
-walkthrough — an established method that recognises up to 80% of usability problems, and one that exists
+walkthrough: an established method that recognises up to 80% of usability problems, and one that exists
 precisely because users are not always available. It is not a substitute: it cannot find what a
 practitioner spots in one second, and it cannot tell you whether anybody wants the thing.
 

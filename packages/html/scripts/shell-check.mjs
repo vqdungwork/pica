@@ -1,9 +1,9 @@
 /**
- * shell-check.mjs — the review shell. Runs before the shell is handed to anyone.
+ * shell-check.mjs: the review shell. Runs before the shell is handed to anyone.
  *
  * `html-prototype.md` has specified the shell since 0.3.0 and nothing read it. Every rule
- * in it was earned by a review that went wrong — a document instead of a demo, a tab bar
- * in build order, a tab that navigated away — and all of them stayed enforceable only by
+ * in it was earned by a review that went wrong: a document instead of a demo, a tab bar
+ * in build order, a tab that navigated away, and all of them stayed enforceable only by
  * somebody remembering.
  *
  * Textual, no browser, like flow-check and for the same reason: this has to work when the

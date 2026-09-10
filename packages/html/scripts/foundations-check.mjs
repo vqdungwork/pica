@@ -1,5 +1,5 @@
 /**
- * foundations-check.mjs — the storybook, checked at last.
+ * foundations-check.mjs: the storybook, checked at last.
  *
  * html-prototype.md has asked for `design-system.html` since step 3 and then says this about it,
  * in its own words:
@@ -56,7 +56,7 @@ const fail = (check, where, detail) => findings.push({ check, where, detail });
 const said = (x, min = 3) => String(x || "").trim().length >= min;
 
 /* The prototype shell is not the design system. `frame`, `scr` and the rest are proto.js's
-   machinery — documented in html-prototype.md, owned by the router, and never a component the
+   machinery: documented in html-prototype.md, owned by the router, and never a component the
    client approves. Asking the storybook to document them would make the check demand the wrong
    thing loudly, which is worse than not asking. */
 const SHELL = new Set(["frame", "frame-wrap", "scr", "sheetwrap", "sheet", "viewport", "tabbar",
@@ -118,7 +118,7 @@ for (const pair of (state.direction && state.direction.pairs) || []) {
   contrastBad++;
   fail("contrast-floor", `${pair.name || `${pair.fg} on ${pair.bg}`}`,
     `computes ${ratio.toFixed(2)}:1 and the audience floor is ${need}:1. A floor is not a preference ` +
-    "to be balanced against the sector's density — it is the number below which a real user cannot read this.");
+    "to be balanced against the sector's density: it is the number below which a real user cannot read this.");
 }
 
 /* ---- 4. STATE COVERED ---------------------------------------------------- */
@@ -164,7 +164,7 @@ if (!icons) {
 }
 
 let emojiBad = 0;
-/* emoji as CONTENT is a different question — a reaction picker's subject is emoji. Only an emoji
+/* emoji as CONTENT is a different question: a reaction picker's subject is emoji. Only an emoji
    sitting where an icon belongs is a finding, so look inside the icon slots. */
 const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/u;
 for (const m of ds.matchAll(/<(?:i|span|div)[^>]*class="[^"]*icon[^"]*"[^>]*>([^<]*)</g)) {

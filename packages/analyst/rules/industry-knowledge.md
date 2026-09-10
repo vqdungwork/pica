@@ -72,7 +72,7 @@ correction or an error.
 The check does not require you to follow the sector's convention. It requires you to have **decided**.
 
 Each of the five axes is either followed with a note saying how, or departed from with a reason. Silence
-on an axis is the failure, because an undecided axis does not stay undecided — it gets filled with
+on an axis is the failure, because an undecided axis does not stay undecided: it gets filled with
 whatever the model produced by default, and nobody can tell afterwards that a decision was never made.
 
 ```json
@@ -137,7 +137,7 @@ A departure in `departures` works the same way: without a reason it does not sil
 register becomes the way round the register.
 
 **Writing "not applicable" into `domainConstraints` does not waive anything.** That field answers a
-different question, and three real projects had voided a sector requirement there — one of them with
+different question, and three real projects had voided a sector requirement there: one of them with
 sound reasoning, written in the place nothing reads it.
 
 ---
@@ -154,8 +154,8 @@ mean **the least-supported projects get the quietest gate**, which is exactly ba
 The failure message names the gap and says what closing it requires, because a gate that blocks without
 saying what would unblock it is a gate people route around.
 
-**This has already caught a real hole.** The project's own north-star test — a portfolio for a fullstack
-developer — resolved to no sector at all, because the base had twenty-one industries and none of them was
+**This has already caught a real hole.** The project's own north-star test: a portfolio for a fullstack
+developer: resolved to no sector at all, because the base had twenty-one industries and none of them was
 professional practice. The check found that; reading the base would not have.
 
 ---
@@ -205,8 +205,8 @@ the base exists so that a direction can be argued from precedent rather than fro
 The base is `packages/analyst/data/industries.json`. A new sector needs every field the others carry, and
 the two that take real work are the ones worth taking it over:
 
-- **`colour.avoid`** — each entry needs `what` and `why`. An avoidance with no reason will be overridden
-- **`forbidden`** — what this sector treats as a defect regardless of what the client asked for. These
+- **`colour.avoid`**: each entry needs `what` and `why`. An avoidance with no reason will be overridden
+- **`forbidden`**: what this sector treats as a defect regardless of what the client asked for. These
   become required entries in `forbiddenPrevented`, so each one has to be preventable by a design decision
   rather than a policy
 

@@ -1,15 +1,15 @@
 /**
- * frame-inventory-check.mjs — does Figma contain the frames the reference has.
+ * frame-inventory-check.mjs: does Figma contain the frames the reference has.
  *
  * geometry-diff documents its own blindness, in its own words:
  *
  *   "WHAT THIS CANNOT DO: detect absence. A node that was never created has no coordinates, so it
  *    cannot be over tolerance. A frame missing a third of its content still reports every node it
  *    does have as correct. Frame inventory and text-run counts are parity-check.mjs's and
- *    verify-html.mjs's job — a clean geometry diff is not evidence a frame is complete."
+ *    verify-html.mjs's job: a clean geometry diff is not evidence a frame is complete."
  *
  * It hands the job to two checks that do not take it. parity-check compares VIEWPORT TO VIEWPORT
- * WITHIN THE HTML — it never receives the Figma dump — and states outright: "WHAT IT DOES NOT
+ * WITHIN THE HTML, it never receives the Figma dump, and states outright: "WHAT IT DOES NOT
  * CHECK: the set of screen names present at each viewport". verify-html is HTML-only too.
  *
  * So nothing verified that Figma has every frame the reference has, and a port that silently
@@ -17,7 +17,7 @@
  * and it says so.
  *
  * This is a check delegating to a check that does not accept the job, which is one level worse than
- * a rule with no executable — the delegation reads as coverage.
+ * a rule with no executable: the delegation reads as coverage.
  *
  * Four checks:
  *
@@ -25,7 +25,7 @@
  *   2. NO EXTRA        every dump frame exists in the reference. Extra is scope nobody designed,
  *                      and it will be built.
  *   3. PAIRED BY MAP   pairing uses the declared frame map, never names. reference-discipline.md:
- *                      "Names are not identity" — duplicate names and renames are the two most
+ *                      "Names are not identity": duplicate names and renames are the two most
  *                      ordinary events in a project.
  *   4. TEXT RUNS       a paired frame carries a comparable number of text runs. A frame present but
  *                      two thirds empty is exactly what a clean geometry diff hides.
@@ -73,7 +73,7 @@ if (!Array.isArray(fig)) {
 const findings = [];
 const fail = (check, where, detail) => findings.push({ check, where, detail });
 
-/* reference-discipline.md settles the pairing channel: "Figma port — frame name plus the viewport
+/* reference-discipline.md settles the pairing channel: "Figma port, frame name plus the viewport
    section it sits in, declared in the frame map". The map is what makes this a lookup rather than a
    guess, and a project that has not declared one is told so rather than silently name-matched. */
 const map = state.frameMap || {};
@@ -141,7 +141,7 @@ for (const [k, f] of figByKey) {
   extraBad++;
   fail("no-extra", `${f.pkg} · ${f.frame} · ${f.vp}`,
     "is in the Figma file and in no capture. Either the HTML it should have come from was never " +
-    "built, or this is scope nobody designed — and Figma is the derived artefact, so it does not " +
+    "built, or this is scope nobody designed, and Figma is the derived artefact, so it does not " +
     "get to add screens.");
 }
 

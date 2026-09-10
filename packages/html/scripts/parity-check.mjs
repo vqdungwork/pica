@@ -1,5 +1,5 @@
 /**
- * parity-check.mjs — viewport parity. Runs in the HTML gate, alongside
+ * parity-check.mjs: viewport parity. Runs in the HTML gate, alongside
  * verify-html.mjs, and again at review.
  *
  * Only meaningful for a project declaring two or more viewports. With one viewport
@@ -11,9 +11,9 @@
  * between two hand-maintained columns.
  *
  * Two passes:
- *   1. NOMINAL   — a screen missing at a viewport entirely. Excused only by a
+ *   1. NOMINAL  : a screen missing at a viewport entirely. Excused only by a
  *                  `parityExemptions` entry naming that screen.
- *   2. STRUCTURAL — per-class element COUNTS compared across viewports. Excused
+ *   2. STRUCTURAL: per-class element COUNTS compared across viewports. Excused
  *                  only by a scoped `reflowNotes` entry.
  *
  * Counts, not sets: delete one of five candidate rows from one column and the class
@@ -24,7 +24,7 @@
  * capture records. Without this, a registered component's descendants leak gaps the
  * register cannot cover and the check can never return zero.
  *
- * PASS: 0 findings. Legitimate reflow is not "expected noise" to be eyeballed — each
+ * PASS: 0 findings. Legitimate reflow is not "expected noise" to be eyeballed: each
  * instance is declared in `reflowNotes` or it is a finding. That is what makes
  * responsive behaviour something that returns zero.
  *
@@ -98,7 +98,7 @@ if (VIEWPORTS.length < 2) {
 }
 
 /* reflowNotes are SCOPED: a component is excused either globally ("*") or only on a
- * named screen. A flat global set was tried first and was too blunt — one screen's
+ * named screen. A flat global set was tried first and was too blunt: one screen's
  * legitimate reflow silently excused the same component everywhere. */
 const REFLOW = new Map();
 for (const n of state.reflowNotes || []) {
@@ -122,7 +122,7 @@ const vpOf = (frame) => {
  * rightwards.
  *
  * NOT a split on the first "·". pica's naming convention is
- * `family / state · qualifier`, so "·" appears INSIDE screen names —
+ * `family / state · qualifier`, so "·" appears INSIDE screen names:
  * "search / entry · error · desktop 1440×900" must yield "search / entry · error",
  * not "search / entry". Splitting naively collapses distinct screens into one
  * bucket and invents findings. Using the frame's tagged viewport rather than an
@@ -166,7 +166,7 @@ const screens = new Map();
 
 /* The tall-screen pair is NOT two screens.
  *
- * A hug twin exists because its screen's content exceeds THAT viewport's height — a
+ * A hug twin exists because its screen's content exceeds THAT viewport's height: a
  * property of the viewport, not a decision about coverage. Counting each twin as its
  * own screen makes nominal parity report "absent at desktop" for something that has
  * no reason to exist there. A twin folds into its base screen; whether it exists at
@@ -205,7 +205,7 @@ for (const [key, byVp] of screens) {
     const ex = (state.parityExemptions || []).find((e) => e.screen === screenName);
     const excusedAll = ex && missing.every((v) => !(ex.presentAt || []).includes(v));
     if (excusedAll) {
-      console.log(`ok       ${key}  (absent at ${missing.join(", ")} — recorded decision: ${ex.why})`);
+      console.log(`ok       ${key}  (absent at ${missing.join(", ")}: recorded decision: ${ex.why})`);
       exempt++;
       continue;
     }
@@ -231,7 +231,7 @@ for (const [key, byVp] of screens) {
   /* Text parity is ADVISORY BY DESIGN, not pending implementation.
    *
    * Owner attribution works, so text inside a registered reflow is already excused.
-   * What remains is genuine copy that differs between viewports — a shortened
+   * What remains is genuine copy that differs between viewports: a shortened
    * desktop label, a mobile-only hint. Some of that is deliberate and some is a
    * mistake, and nothing measurable tells them apart. Counted and printed so a
    * reviewer can read them; never a finding, because a check that cannot decide

@@ -60,7 +60,7 @@ Diff element boxes by class name too. Text runs say where things are; containers
 
 **A delta above tolerance is a finding unless it is in the `deviations` register.** Read `deviations` from
 `.pica/state.json` and classify each delta as *finding* or *recorded decision*. Never resolve one by
-deciding it looks intentional — that judgement is exactly what the register exists to capture, and an
+deciding it looks intentional: that judgement is exactly what the register exists to capture, and an
 unrecorded deviation is indistinguishable from a defect on the next run.
 
 ### 2. Text bindings
@@ -139,7 +139,7 @@ per-side keys instead, so check all five; and `COMPONENT_SET` geometry is varian
 
 Structural checks prove bindings exist, not that the pixel held. Diff `scripts/capture-baseline.js` output
 from before the pass. A bound paint takes its alpha from the token, so binding a translucent paint to an
-opaque token flattens it silently — and every existence check still passes.
+opaque token flattens it silently, and every existence check still passes.
 
 ---
 
@@ -163,11 +163,11 @@ Present the report. Clear `activeReview`, and `writeAuthorization` if fix mode s
 
 This gate is not shaped like the others. Every gate before it asks the human to approve work that is
 finished; this one hands over a list and asks **which of it is worth doing**. Zero findings still passes
-through here — the human is told what ran and what it proved, because a review that reports nothing and a
+through here: the human is told what ran and what it proved, because a review that reports nothing and a
 review that never ran look identical in a transcript.
 
 **Report mode ends here. It does not slide into fix mode.** The step exists because the right fix is
-frequently a design decision rather than a repair — a contrast failure is solved by darkening the scrim
+frequently a design decision rather than a repair: a contrast failure is solved by darkening the scrim
 or by changing the text colour, and that choice is not the flow's to make. `--fix` is a second
 invocation, entered only after the human has said which findings to act on.
 

@@ -16,7 +16,7 @@
  * 2.0.0 removed two of the ten. TRIGGER asked what changed and when the window closes;
  * intake no longer asks, because most briefs cannot answer it and discovery researches
  * the same thing better as "why buyers change". CONSTRAINT read commercialConstraint,
- * which left intake with input 3 — only its disclosure half reached a client-facing
+ * which left intake with input 3: only its disclosure half reached a client-facing
  * artefact, and that is enforced by disclosure-check instead. A check that outlives the
  * field it reads is the fail-open shape this file exists to argue against.
  *

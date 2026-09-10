@@ -109,8 +109,8 @@ forever, in a colour that looks like success.
 
 At 4.4 and 8.1 every client claim is verified before it is accepted. Both outcomes are findings:
 
-- **True** — reproduce it, measure it, record the evidence
-- **False** — say so, with the measurement that shows it. Accepting a false claim to be agreeable
+- **True**: reproduce it, measure it, record the evidence
+- **False**: say so, with the measurement that shows it. Accepting a false claim to be agreeable
   spends the budget on a defect that does not exist
 
 **Whether a true finding is in scope or chargeable is not this role's call.** That is a commercial

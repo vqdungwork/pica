@@ -1,5 +1,5 @@
 /**
- * mutate.mjs — this repository proving its own claim.
+ * mutate.mjs: this repository proving its own claim.
  *
  * The README says "every one has been seen to fail on the defect it was written for", and
  * until 0.9.5 that was true and unverifiable: the suites were run ad hoc in a scratch
@@ -64,8 +64,8 @@ function makeFixture() {
   const d = fs.mkdtempSync(path.join(process.env.TMPDIR || "/tmp", "pica-mutate-"));
   execFileSync("rsync", ["-a", "--exclude", ".git", "--exclude", "node_modules", src + "/", d + "/"]);
 
-  /* The fixture gets a repository of its own. No surviving check reads git — impl-check
-   * did and went with the build half — but a project directory that is not a repository
+  /* The fixture gets a repository of its own. No surviving check reads git: impl-check
+   * did and went with the build half, but a project directory that is not a repository
    * is not a shape pica should be proven against. */
   try {
     const q = { cwd: d, stdio: "ignore" };
@@ -101,8 +101,8 @@ if (FIXTURE || !DIR) {
   DIR = makeFixture();
 }
 /* Absolute, because every check runs with cwd: DIR and is handed a path built from it.
- * A relative directory made those two disagree, so `mutate.mjs examples/approvals` — the
- * invocation the README documents — reported every check FAIL on a missing state file and
+ * A relative directory made those two disagree, so `mutate.mjs examples/approvals`: the
+ * invocation the README documents: reported every check FAIL on a missing state file and
  * refused as a failing baseline. The suite was fine; the argument was. */
 DIR = path.resolve(DIR);
 const S = path.join(DIR, ".pica", "state.json");

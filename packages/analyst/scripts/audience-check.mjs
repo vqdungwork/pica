@@ -1,7 +1,7 @@
 /**
- * audience-check.mjs — the second knowledge axis, resolved rather than asserted.
+ * audience-check.mjs: the second knowledge axis, resolved rather than asserted.
  *
- * industries.json answered one question for eight versions — what field is this — and it was
+ * industries.json answered one question for eight versions, what field is this, and it was
  * never the only one that shapes a screen. healthcare for clinicians and healthcare for older
  * patients are not the same product: the sector says what red means, the audience says how big
  * the text has to be before anyone can read it.

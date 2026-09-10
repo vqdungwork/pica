@@ -1,15 +1,15 @@
 /**
  * Content parity against the client's own file. Paste as the `code` argument of one use_figma call.
  *
- * For a REBUILD (see ../rules/figma-rebuild.md), the arbiter is not HTML — it is the untouched source
+ * For a REBUILD (see ../rules/figma-rebuild.md), the arbiter is not HTML: it is the untouched source
  * pages. This proves what the structural audit cannot: that every screen still says what the source
  * says, in the same places.
  *
  * It answers four questions and fails closed on each:
- *   1. contamination — does any instance on a SOURCE page point at a master you created?   must be 0
- *   2. pairing       — is every source screen matched to a rebuilt one by canvas position? name the misses
- *   3. text parity   — per screen, which visible strings are missing or extra?             must be 0
- *   4. displaced     — which nodes sit at their screen's origin where the source has them elsewhere?
+ *   1. contamination: does any instance on a SOURCE page point at a master you created?   must be 0
+ *   2. pairing      : is every source screen matched to a rebuilt one by canvas position? name the misses
+ *   3. text parity  : per screen, which visible strings are missing or extra?             must be 0
+ *   4. displaced    : which nodes sit at their screen's origin where the source has them elsewhere?
  *
  * Why position and not name: duplicate screen names are normal in a client file (four screens called
  * a localised heading, say) and renames are part of the job. Keep the rebuilt
@@ -110,7 +110,7 @@ for (let i = 0; i < SOURCE_PAGE_IDS.length; i++) {
 
     const miss = [], extra = [], notes = [];
     Object.keys(sc).forEach(k => { const d = sc[k] - (rc[k] || 0); if (d <= 0) return;
-      const why = explained(k); if (why) { explainedTotal += d; notes.push(k.slice(0, 28) + " — " + why); }
+      const why = explained(k); if (why) { explainedTotal += d; notes.push(k.slice(0, 28) + ": " + why); }
       else miss.push('"' + k.slice(0, 34) + '"' + (d > 1 ? " ×" + d : "")); });
     Object.keys(rc).forEach(k => { const d = rc[k] - (sc[k] || 0); if (d <= 0) return;
       const why = explained(k); if (why) { explainedTotal += d; return; }
@@ -149,7 +149,7 @@ for (let i = 0; i < SOURCE_PAGE_IDS.length; i++) {
 }
 
 const badOffset = offsets.filter(o => o !== EXPECTED_OFFSET.x + "," + EXPECTED_OFFSET.y);
-if (!screensCompared) throw new Error("fail closed: 0 screens compared — check the page ids");
+if (!screensCompared) throw new Error("fail closed: 0 screens compared, check the page ids");
 
 return {
   screensCompared,

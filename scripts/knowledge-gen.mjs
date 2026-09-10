@@ -1,5 +1,5 @@
 /**
- * knowledge-gen.mjs — the three knowledge axes, written into every agent that reads them.
+ * knowledge-gen.mjs: the three knowledge axes, written into every agent that reads them.
  *
  * Every agent is required to read the sector entry before it starts, and 2.0.0 added two
  * more axes it must also read. Leaving that as prose in six files is how the six drift:
@@ -9,7 +9,7 @@
  * are 26KB. Embedding the entries would make each agent six times the size of all the
  * agents combined, and would load 28 sectors to use one. So what is generated is the
  * REGISTER: every key that exists, one line each, plus how to resolve and when to refuse.
- * That is the half an agent needs before it has read anything — it can refuse an unknown
+ * That is the half an agent needs before it has read anything. It can refuse an unknown
  * field without a file read, and it knows exactly which entry to load. The entry itself
  * is read from the data file, which stays the single source.
  *
@@ -70,18 +70,18 @@ function block() {
   L.push("preference may not go under one. The sector still owns colour meaning, tone and forbidden patterns.");
   L.push("");
   L.push("**Refuse rather than guess.** A field, audience or archetype you cannot resolve to a key below is");
-  L.push("not a thing to approximate — say which of the listed keys it might be, and stop.");
+  L.push("not a thing to approximate. Say which of the listed keys it might be, and stop.");
   L.push("");
 
   const sectors = Object.entries(industries.industries);
   L.push(`### Sector · \`packages/analyst/data/industries.json\` · ${sectors.length} keys`);
   L.push("");
-  for (const [k, v] of sectors) L.push(`- \`${k}\` — ${v.label}`);
+  for (const [k, v] of sectors) L.push(`- \`${k}\` · ${v.label}`);
   L.push("");
   const amb = Object.entries(industries.ambiguous || {});
   if (amb.length) {
     L.push(`**Refused as ambiguous** (${amb.length}): ` +
-      amb.map(([w, o]) => `\`${w}\` → ${o.join(" or ")}`).join(" · "));
+      amb.map(([w, o]) => `\`${w}\` to ${o.join(" or ")}`).join(" · "));
     L.push("");
   }
 
@@ -93,11 +93,11 @@ function block() {
   L.push("");
   for (const [dk, d] of dims) {
     const many = d.multiple ? ", several allowed" : "";
-    L.push(`- **${dk}**${many} — ${d.label}`);
+    L.push(`- **${dk}**${many} · ${d.label}`);
     for (const [vk, v] of Object.entries(d.values)) {
       const f = Object.entries(v.floors || {});
       const fs_ = f.length ? `  · floors: ${f.map(([a, b]) => `${a} ${b}`).join(", ")}` : "";
-      L.push(`  - \`${dk}:${vk}\` — ${v.label}${fs_}`);
+      L.push(`  - \`${dk}:${vk}\` ${v.label}${fs_}`);
     }
   }
   L.push("");
@@ -107,7 +107,7 @@ function block() {
   L.push("");
   L.push("**Per application, not per project.** A product with a client portal and an admin console has two.");
   L.push("");
-  for (const [k, v] of arch) L.push(`- \`${k}\` — ${v.label} · object: ${v.primaryObject.split(" — ")[0].split(",")[0]}`);
+  for (const [k, v] of arch) L.push(`- \`${k}\` · ${v.label} · object: ${v.primaryObject.split(",")[0].split(":")[0]}`);
   L.push("");
   L.push(END);
   return L.join("\n");

@@ -1,5 +1,5 @@
 /**
- * contract-check.mjs — the manifests against each other.
+ * contract-check.mjs: the manifests against each other.
  *
  * Every package declares what it `requires` and what it `produces`, and pica-status.mjs
  * resolves that graph to decide whether a package is READY or BLOCKED. Nothing has ever
@@ -145,7 +145,7 @@ for (const e of manifests) {
 
 /* ---- 5. CHECK PLACED ----------------------------------------------------- *
  * A check that runs somewhere pica cannot invoke declares `runsIn`, and figma's two
- * console scripts already did — the manifests said so and no consumer read it, so
+ * console scripts already did: the manifests said so and no consumer read it, so
  * pica-verify reported them as unplaceable when their placement was never in doubt.
  * Such a check needs no phase and no args; it needs a `passes` line, because an
  * abstention that cannot say what passing looks like is not an abstention, it is a gap. */

@@ -1,5 +1,5 @@
 /**
- * code-tokens-check.mjs — the design-to-code gate. Runs at 7.5, on the front end
+ * code-tokens-check.mjs: the design-to-code gate. Runs at 7.5, on the front end
  * source, after the developers have built from the approved design.
  *
  * This is the cheapest half of step 7.10. The expensive half compares the rendered

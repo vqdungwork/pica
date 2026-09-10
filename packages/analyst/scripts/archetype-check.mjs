@@ -1,9 +1,9 @@
 /**
- * archetype-check.mjs — the third knowledge axis, and the one that decides what to measure.
+ * archetype-check.mjs: the third knowledge axis, and the one that decides what to measure.
  *
  * The sector says how a product should look and speak. The archetype says what shape it is: a CRM
  * means list, detail, pipeline and an activity timeline whether it sells law or cars. Without it
- * the researcher measures products from the right industry and the wrong shape — a family-office
+ * the researcher measures products from the right industry and the wrong shape: a family-office
  * portal compared against retail banks rather than against other wealth portals.
  *
  * PER APPLICATION, NOT PER PROJECT. A product with a client portal and a back-office console has
@@ -108,7 +108,7 @@ if (screens.length) {
       if (have.has(cs.id.toLowerCase()) || excused.has(cs.id.toLowerCase())) continue;
       screensBad++;
       fail("archetype-screens", `"${app.name}" (${a}) has no "${cs.id}" screen`,
-        `${cs.purpose}. Every ${a} has one. Build it, or name it in archetypeExemptions with a reason — ` +
+        `${cs.purpose}. Every ${a} has one. Build it, or name it in archetypeExemptions with a reason: ` +
         "a shape missing a required screen and a shape that deliberately does without look identical otherwise.");
     }
   }

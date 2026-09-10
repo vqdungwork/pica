@@ -1,5 +1,5 @@
 /**
- * proposal-check.mjs — the proposal gate. Runs before each confirmation.
+ * proposal-check.mjs: the proposal gate. Runs before each confirmation.
  *
  * pica decides well and, until 0.9.1, decided almost everything. A client saw the design
  * fully built, in one direction, with the taste question already answered by whoever
@@ -9,9 +9,9 @@
  * The slots are universal and what fills them is derived. That distinction is the whole
  * design and getting it backwards is the obvious mistake: a rule offering "streak, chain
  * or run" is a habit-tracker rule wearing a general one's clothes, and noise on a
- * payments product. So this checks the SHAPE of a proposal — that a slot was addressed,
+ * payments product. So this checks the SHAPE of a proposal: that a slot was addressed,
  * that options carry provenance, that they differ on a stated axis, that a choice was
- * recorded — and never what the options were.
+ * recorded, and never what the options were.
  *
  * Six checks:
  *
@@ -101,7 +101,7 @@ const SLOTS = [
   { id: "S6", name: "what is in the first release", phase: "scope", always: true,
     needs: (s) => (s.useCases || []).length > 0, material: "use cases to price" },
   { id: "S7", name: "where it runs", phase: "scope", always: true,
-    needs: () => true, material: "none — this one always applies" },
+    needs: () => true, material: "none, this one always applies" },
 ];
 
 const proposals = state.proposals;
@@ -142,7 +142,7 @@ if (!key) {
     path.join(here, "..", "..", "analyst", "data", "industries.json"),
     ...(() => {
       /* An install puts each package in pica-<name>/<version>/, so a sibling is two
-       * levels up and one across — the layout that made every cross-package path in
+       * levels up and one across: the layout that made every cross-package path in
        * this repository resolve to nothing until 0.9.0. */
       const cacheRoot = path.join(here, "..", "..", "..");
       try {
