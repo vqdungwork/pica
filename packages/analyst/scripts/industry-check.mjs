@@ -1,5 +1,5 @@
 /**
- * industry-check.mjs — the sector gate. Runs at 2.1b, with the other analysis checks.
+ * industry-check.mjs: the sector gate. Runs at 2.1b, with the other analysis checks.
  *
  * Domain knowledge in this flow used to mean regulation: which standard, which regulator,
  * how long to keep the data. That is the smallest part of it and the easiest to look up.
@@ -461,7 +461,7 @@ for (const f of V.forbidden) {
  * "illustrationled" and matched nothing. The second matched a fixed list of named
  * traditions, which worked for the sectors that rule out glassmorphism by name and did
  * nothing at all for the ones that rule out "business or admin dashboard styling on the
- * learner surface" — half the sectors, silently passing.
+ * learner surface": half the sectors, silently passing.
  *
  * The rule this project keeps rediscovering: a rule with no register is a preference.
  * Prose describing what is ruled out is a preference. `names` is the register.
@@ -503,7 +503,7 @@ if (!anyEv && !said(reg.evidenceNote)) {
 
 /* ---- report ------------------------------------------------------------- */
 console.log(`field:  ${state.field}`);
-console.log(`sector: ${key} — ${V.label}`);
+console.log(`sector: ${key}, ${V.label}`);
 console.log(`        ${V.stakeholders.length} stakeholders known, ${V.forbidden.length} sector defects, ${V.evidence.length} exemplars`);
 console.log("");
 

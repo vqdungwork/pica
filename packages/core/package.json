@@ -11,6 +11,7 @@
       "picaflow.md"
     ],
     "rules": [
+      "intake.md",
       "proposals.md",
       "reference-discipline.md",
       "review-discipline.md"
@@ -44,9 +45,14 @@
       "workPackages",
       "exclusions",
       "flows",
-      "intakeApproved"
+      "intakeApproved",
+      "field",
+      "scopeFrozen",
+      "deadline",
+      "archetype"
     ],
     "artifacts": [
+      "docs/brief.md",
       "docs/contract.md",
       "docs/exclusions.md",
       ".pica/state.json"

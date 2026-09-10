@@ -1,5 +1,5 @@
 /**
- * build-diff.mjs — step 7.10. The built product against the approved design.
+ * build-diff.mjs: step 7.10. The built product against the approved design.
  *
  * This is the check the industry reliably leaves undone: the designer assumes QA covers
  * it, QA assumes the designer does, and the code quietly reinterprets the design in

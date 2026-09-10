@@ -44,18 +44,18 @@ This command **consumes** the measured HTML reference; it never produces one. Th
 asked to approve that package.
 
 **If `.audit/html-reference.json` is absent, the port cannot proceed. Stop and say so.** Tell the human
-to run `/pica-wp <wp>` first — building and measuring this package's HTML is a precondition of porting
+to run `/pica-wp <wp>` first: building and measuring this package's HTML is a precondition of porting
 it, not a step this command can perform on its own. Do not synthesize the artifact and do not fall back
 to eyeballing; that is the failure mode this whole flow exists to prevent.
 
 If the artifact is present, treat it as the measured baseline for this package's HTML for the rest of
-this command. If you have reason to think the HTML changed since its approval — the human mentions an
-edit, or a diff below looks wrong in a way that points at drift rather than at the port — say so and ask
+this command. If you have reason to think the HTML changed since its approval: the human mentions an
+edit, or a diff below looks wrong in a way that points at drift rather than at the port: say so and ask
 whether to re-run `/pica-wp <wp>` before continuing, rather than porting against a stale reference.
 
 The same applies to `.audit/html-reference-forced.json`, the forced-font capture `/pica-wp` produces
 alongside the native one. Use it, not the native reference, when running the font-forced pass in
-`figma-gates.md`'s "Force a common font while diffing layout" — that isolates layout differences from
+`figma-gates.md`'s "Force a common font while diffing layout": that isolates layout differences from
 typeface metrics. If it is absent, stop for the same reason as above: do not synthesize it here.
 
 ## 2. Local components
@@ -148,8 +148,8 @@ immediately after that frame is built, and again after every fix.
 
 Presenting a port as complete on the strength of a spot check is not a lesser version of this; it is a
 different and much weaker claim. On one project two frames were reported as matching on the strength of
-two numbers, and were in fact missing their last 300px of content — a field, a filter group and the
-primary CTA — because **a clipped node still reports its coordinates**, so the position diff called them
+two numbers, and were in fact missing their last 300px of content: a field, a filter group and the
+primary CTA: because **a clipped node still reports its coordinates**, so the position diff called them
 merely "over tolerance".
 
 Re-diffing after *each* fix is what makes a wrong fix cheap. On the same project a fix based on one

@@ -79,7 +79,7 @@ const isAnnotation = (n) => {
  * are legitimately opaque. Element names do not tell you whether something is translucent.
  *
  * The reliable signal is the same-colour child, which proves the element is invisible. Everything else
- * is a candidate for review, not a defect — the real gate on flattening is the baseline diff in
+ * is a candidate for review, not a defect: the real gate on flattening is the baseline diff in
  * capture-baseline.js, because it compares against what the file used to render.
  */
 const OVERLAY_RE = /scrim|overlay|backdrop|buffer/i;
@@ -310,7 +310,7 @@ for (const pg of figma.root.children) {
        * ADVISORY, not a zero-gate. Names do not tell you what should be translucent, so this returns
        * candidates for review. The actual gate is the baseline diff in capture-baseline.js.
        *
-       * The screen frame itself is excluded — a top-level frame is 375x812 and opaque by definition,
+       * The screen frame itself is excluded: a top-level frame is 375x812 and opaque by definition,
        * whereas a full-bleed scrim is a child of one. Without this, every screen containing a white
        * status-bar glyph reported itself.
        */
@@ -334,7 +334,7 @@ for (const pg of figma.root.children) {
 
     // ---- vertical alignment (0.2.0) ---------------------------------------
     /**
-     * A row holding an icon should centre it — unless the icon is wrapped in a *-slot, which is the
+     * A row holding an icon should centre it: unless the icon is wrapped in a *-slot, which is the
      * documented pattern for centring on a field rather than on the whole control. A slot-wrapped row
      * is deliberately MAX-aligned, so flagging it is wrong.
      * Documentation pages are excluded: their label rows are BASELINE or MIN by design.
@@ -358,7 +358,7 @@ for (const pg of figma.root.children) {
      * A row of peers should be one height, achieved with FILL rather than luck.
      *
      * "Three or more children of differing height" alone is far too loose: it flagged 29 rows that were
-     * simply mixed content — a rail of 221px cards beside a 24px label, a top bar of 44px buttons beside
+     * simply mixed content: a rail of 221px cards beside a 24px label, a top bar of 44px buttons beside
      * a 1px divider. Those are not peers.
      *
      * Peers share a name stem: `tab Overview` / `tab Exercises` / `tab TV`, `seg-one` / `seg-two`.
@@ -424,7 +424,7 @@ for (const pg of figma.root.children) {
    *
    * Two changes from 0.1.0. The hug exception is gone, because a missing element reads as an
    * oversight rather than a decision. And a frame is a screen if EITHER dimension is the portrait
-   * width, so landscape and hug frames are both in the population — a filter keyed on 375x812
+   * width, so landscape and hug frames are both in the population: a filter keyed on 375x812
    * silently excluded them and then reported full coverage.
    */
   const frames = pg.children.flatMap(c => c.type === "SECTION" ? c.children : [c])

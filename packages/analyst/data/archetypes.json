@@ -1,0 +1,207 @@
+{
+  "_note": "An archetype attaches to an APPLICATION, not to a project. A product with a client portal and an admin console has two, and they are different shapes with different screens. This file says what shape an application is; industries.json says how it should look and speak; audiences.json sets the floors it may not go below. Colour and tone are deliberately absent here, three axes all asserting colour would conflict, and that argument belongs to the sector.",
+  "archetypes": {
+    "crm": {
+      "label": "Customer relationship management",
+      "aka": ["sales pipeline", "deal tracker", "contact management", "account management"],
+      "primaryObject": "the relationship: a contact, an account or a deal, depending on what the business sells",
+      "coreScreens": [
+        { "id": "list", "purpose": "every record, filtered and sorted", "required": true },
+        { "id": "detail", "purpose": "one record, with its history", "required": true },
+        { "id": "pipeline", "purpose": "records by stage, movement visible", "required": true },
+        { "id": "activity", "purpose": "what happened and when, in time order", "required": true },
+        { "id": "create", "purpose": "a new record with the minimum fields", "required": true }
+      ],
+      "navigationShape": "list to detail, with the pipeline as a second view of the same set. The activity timeline lives inside detail and is the screen people actually read.",
+      "density": "dense: this audience lives in it and scanning many records at once is the job",
+      "antiPatterns": [
+        { "what": "a detail screen that opens in a modal", "why": "the record is the work, and a modal cannot be deep-linked, kept open, or compared against another" },
+        { "what": "requiring every field at creation", "why": "a record captured late is a record lost; creation takes what is known now" }
+      ],
+      "referenceProducts": ["Salesforce", "HubSpot", "Pipedrive", "Attio", "Close"]
+    },
+    "erp": {
+      "label": "Enterprise resource planning, or any module of one",
+      "aka": ["inventory", "procurement", "order management", "back office", "operations system"],
+      "primaryObject": "the transactional document: an order, an invoice, a movement",
+      "coreScreens": [
+        { "id": "list", "purpose": "documents by state", "required": true },
+        { "id": "detail", "purpose": "one document, its lines, its state", "required": true },
+        { "id": "line-editor", "purpose": "the lines within a document", "required": true },
+        { "id": "approval", "purpose": "what is waiting on whom", "required": false },
+        { "id": "master-data", "purpose": "the things documents refer to", "required": true }
+      ],
+      "navigationShape": "documents move through states, and the state is the primary filter everywhere. Master data is a separate area, not a tab of the transaction.",
+      "density": "very dense: tabular figures, many columns, and the row is the unit of work",
+      "antiPatterns": [
+        { "what": "hiding the document state behind a colour", "why": "state drives every downstream permission and it has to be readable as text" },
+        { "what": "a wizard for a document users create fifty times a day", "why": "a wizard is for a first time, and there is no first time here" }
+      ],
+      "referenceProducts": ["SAP Fiori", "Odoo", "NetSuite", "Microsoft Dynamics 365"]
+    },
+    "hrm": {
+      "label": "Human resources management",
+      "aka": ["HRIS", "people system", "personnel", "employee portal"],
+      "primaryObject": "the person, and the events attached to them",
+      "coreScreens": [
+        { "id": "directory", "purpose": "everyone, searchable", "required": true },
+        { "id": "profile", "purpose": "one person, their record and their history", "required": true },
+        { "id": "request", "purpose": "leave, expenses, changes, raised and tracked", "required": true },
+        { "id": "approval-queue", "purpose": "what a manager owes an answer on", "required": true },
+        { "id": "org-view", "purpose": "who reports to whom", "required": false }
+      ],
+      "navigationShape": "two audiences in one application: the employee sees their own record and their own requests, the manager sees a queue. The same screen serves both with different scope, and getting that scope wrong is the sector's signature defect.",
+      "density": "moderate: read more often than edited, and by people who are not in it daily",
+      "antiPatterns": [
+        { "what": "one navigation for employee and manager", "why": "a manager's queue on an employee's home screen is a permission leak that looks like a layout choice" },
+        { "what": "salary visible in a directory", "why": "the directory is the most-opened screen and the least-restricted one" }
+      ],
+      "referenceProducts": ["Workday", "BambooHR", "Personio", "HiBob"]
+    },
+    "portal": {
+      "label": "Client or customer portal",
+      "aka": ["client area", "self-service", "member area", "account portal"],
+      "primaryObject": "the client's own holdings, whatever the business holds on their behalf",
+      "coreScreens": [
+        { "id": "overview", "purpose": "everything at a glance, the number that matters first", "required": true },
+        { "id": "holdings", "purpose": "the list of what they have", "required": true },
+        { "id": "holding-detail", "purpose": "one item, its history and its documents", "required": true },
+        { "id": "documents", "purpose": "the secure archive", "required": true },
+        { "id": "messages", "purpose": "what the business has told them", "required": false },
+        { "id": "contact", "purpose": "how to reach a person", "required": true }
+      ],
+      "navigationShape": "overview leads, and everything else is a drill-down from it. The client sees only their own data and the boundary is absolute, a portal that leaks between clients has no second chance.",
+      "density": "moderate: read occasionally, by people who are not professionals in this domain",
+      "antiPatterns": [
+        { "what": "presenting a figure without saying when it was valued", "why": "an undated number is a claim the business cannot stand behind" },
+        { "what": "blending currencies into one total", "why": "unless conversion is a stated feature, two currencies are two totals" },
+        { "what": "an empty state that only says 'no data'", "why": "a new client's first screen is the empty state, and it is the whole first impression" }
+      ],
+      "referenceProducts": ["Nutmeg", "Coutts online", "Interactive Brokers client portal", "Addepar"]
+    },
+    "admin-console": {
+      "label": "Internal administration console",
+      "aka": ["back office", "admin panel", "operations console", "CMS"],
+      "primaryObject": "every other object in the system, from the operator's side",
+      "coreScreens": [
+        { "id": "entity-list", "purpose": "one per managed entity, filtered", "required": true },
+        { "id": "entity-editor", "purpose": "create and change, with validation visible", "required": true },
+        { "id": "bulk-import", "purpose": "many at once, with a dry run", "required": false },
+        { "id": "audit", "purpose": "who changed what and when", "required": true },
+        { "id": "permissions", "purpose": "who may do what", "required": true }
+      ],
+      "navigationShape": "one section per entity, flat and predictable. The operator learns the pattern once and applies it everywhere, so consistency between entities outranks optimising any single one.",
+      "density": "dense: this is somebody's whole working day",
+      "antiPatterns": [
+        { "what": "designing the admin last, from whatever the client screens left over", "why": "the admin is half the system and the half that gets used every day" },
+        { "what": "destructive actions with the same weight as ordinary ones", "why": "an operator deleting a client at speed is the incident this screen exists to prevent" },
+        { "what": "an import with no dry run", "why": "a bad import is discovered by the people whose data it corrupted" }
+      ],
+      "referenceProducts": ["Retool", "Django admin", "Forest Admin", "Shopify admin"]
+    },
+    "dashboard": {
+      "label": "Analytics or monitoring dashboard",
+      "aka": ["reporting", "BI", "metrics", "monitoring", "observability"],
+      "primaryObject": "the measure, over time",
+      "coreScreens": [
+        { "id": "overview", "purpose": "the headline measures, current against a comparison", "required": true },
+        { "id": "breakdown", "purpose": "one measure, split by a dimension", "required": true },
+        { "id": "detail", "purpose": "the rows behind a figure", "required": true },
+        { "id": "alerts", "purpose": "what crossed a threshold", "required": false }
+      ],
+      "navigationShape": "overview to breakdown to the underlying rows. Every figure must be traceable to the records that produced it, or the dashboard is decoration.",
+      "density": "dense, but a dashboard nobody can read at a glance has failed at its only job",
+      "antiPatterns": [
+        { "what": "a number with no comparison", "why": "42 means nothing without last month, target, or both" },
+        { "what": "a chart type chosen for variety", "why": "the form follows the question, and a pie chart answers almost none of them" },
+        { "what": "no stated freshness", "why": "a stale dashboard is worse than no dashboard because it is acted on" }
+      ],
+      "referenceProducts": ["Metabase", "Looker", "Grafana", "Amplitude"]
+    },
+    "marketplace": {
+      "label": "Two-sided marketplace or catalogue commerce",
+      "aka": ["e-commerce", "storefront", "catalogue", "booking marketplace"],
+      "primaryObject": "the listing",
+      "coreScreens": [
+        { "id": "browse", "purpose": "the catalogue, filtered and sorted", "required": true },
+        { "id": "listing", "purpose": "one item, everything needed to decide", "required": true },
+        { "id": "basket", "purpose": "what is being bought", "required": true },
+        { "id": "checkout", "purpose": "the commitment, in as few steps as it can honestly take", "required": true },
+        { "id": "orders", "purpose": "what was bought and where it is", "required": true },
+        { "id": "seller-console", "purpose": "the other side of the market", "required": false }
+      ],
+      "navigationShape": "browse to listing to basket to checkout, and every step is a place people leave. Search is a first-class surface, not a header icon.",
+      "density": "moderate: the listing carries the decision and crowding it costs conversion",
+      "antiPatterns": [
+        { "what": "cost revealed at the last step", "why": "it is the single largest cause of abandonment and it is a design decision, not a pricing one" },
+        { "what": "requiring an account before checkout", "why": "the account serves the business, and asking for it before the sale trades revenue for a record" }
+      ],
+      "referenceProducts": ["Shopify storefronts", "Etsy", "Airbnb", "Booking.com"]
+    },
+    "booking": {
+      "label": "Scheduling and reservation",
+      "aka": ["appointments", "reservations", "calendar", "resource booking"],
+      "primaryObject": "the reservation, against a resource and a time",
+      "coreScreens": [
+        { "id": "availability", "purpose": "what is free, when", "required": true },
+        { "id": "book", "purpose": "choose, confirm, pay if paying", "required": true },
+        { "id": "confirmation", "purpose": "what was booked, and how to change it", "required": true },
+        { "id": "my-bookings", "purpose": "what is coming, what has passed", "required": true },
+        { "id": "resource-admin", "purpose": "the other side: capacity and rules", "required": false }
+      ],
+      "navigationShape": "availability first and everything else follows from it. Time zone is part of every screen or it is a bug waiting for a customer in another country.",
+      "density": "moderate; the availability view is the exception and can be dense",
+      "antiPatterns": [
+        { "what": "showing times without a zone", "why": "the first cross-border booking exposes it and the cost is a missed appointment" },
+        { "what": "cancellation buried in a policy page", "why": "it is the second most-used flow and hiding it produces support calls, not retention" }
+      ],
+      "referenceProducts": ["Calendly", "OpenTable", "Cal.com", "Resy"]
+    },
+    "workflow-approval": {
+      "label": "Review and approval workflow",
+      "aka": ["case management", "approvals", "review queue", "claims processing"],
+      "primaryObject": "the case, and the state it is in",
+      "coreScreens": [
+        { "id": "queue", "purpose": "what is waiting on me, oldest or most urgent first", "required": true },
+        { "id": "case", "purpose": "everything needed to decide, on one screen", "required": true },
+        { "id": "decide", "purpose": "approve, reject, or return with a reason", "required": true },
+        { "id": "history", "purpose": "who decided what and why", "required": true }
+      ],
+      "navigationShape": "queue to case to decision and back to the queue. The loop is the product, and any step that breaks the return to the queue costs the reviewer their place.",
+      "density": "dense on the queue, focused on the case",
+      "antiPatterns": [
+        { "what": "a decision with no reason field on rejection", "why": "the person receiving it cannot act, and the next reviewer cannot learn" },
+        { "what": "losing queue position after a decision", "why": "a reviewer working a hundred cases restarts their scan every time" }
+      ],
+      "referenceProducts": ["ServiceNow", "Jira Service Management", "Zendesk", "Pega"]
+    },
+    "content-site": {
+      "label": "Content, marketing or publishing site",
+      "aka": ["website", "landing page", "blog", "documentation", "brochure site"],
+      "primaryObject": "the page, and the action it exists to produce",
+      "coreScreens": [
+        { "id": "landing", "purpose": "one proposition, one action", "required": true },
+        { "id": "article", "purpose": "long-form reading", "required": false },
+        { "id": "index", "purpose": "finding the right page", "required": false },
+        { "id": "conversion", "purpose": "the form or the signup", "required": true }
+      ],
+      "navigationShape": "shallow and scannable. Most visitors arrive from search on a deep page, so every page is a landing page.",
+      "density": "sparse: reading is the task and measure line length rather than eyeballing it",
+      "antiPatterns": [
+        { "what": "an interstitial before the content", "why": "the visitor came for the content and the interstitial is the business talking over them" },
+        { "what": "designing only the home page", "why": "most arrivals never see it" }
+      ],
+      "referenceProducts": ["Stripe docs", "Linear marketing site", "GOV.UK", "Vercel"]
+    }
+  },
+  "ambiguous": {
+    "platform": ["marketplace", "portal", "admin-console"],
+    "app": [],
+    "system": ["erp", "admin-console", "workflow-approval"],
+    "management system": ["erp", "hrm", "crm"],
+    "portal": ["portal", "admin-console"],
+    "tool": [],
+    "tracker": ["crm", "workflow-approval", "dashboard"],
+    "site": ["content-site", "marketplace"]
+  }
+}

@@ -1,5 +1,5 @@
 /**
- * pica-status.mjs — what can run now, what is blocked, and why.
+ * pica-status.mjs: what can run now, what is blocked, and why.
  *
  * A report, never a gate: it exits 0 even when everything is blocked, because its job is
  * to explain state, not to enforce it. Enforcement lives in each command's requires check
@@ -138,14 +138,14 @@ if (fs.existsSync(statePath)) {
 
 // NOTHING writes state.gates. What the commands actually write is
 // state.workPackages.<wp>.<key> for a per-package gate (e.g. "htmlApproved") and a
-// top-level state.<key> boolean for a project-level gate (e.g. "intakeApproved") —
+// top-level state.<key> boolean for a project-level gate (e.g. "intakeApproved"):
 // see packages/html/commands/pica-wp.md and packages/core/hooks/gate-figma-write.
 // state.gates is still honoured if present, for forward compatibility with any
 // command that adopts that vocabulary directly, but nothing here depends on it.
 const gates = state.gates || {};
 const workPackages = state.workPackages || {};
 
-// A bare key (no "=want") checks PRESENCE only, not truthiness — a manifest requiring a
+// A bare key (no "=want") checks PRESENCE only, not truthiness: a manifest requiring a
 // bare boolean key would read as satisfied even when that key is explicitly set to
 // `false`. Today's convention is to spell booleans as "key=true" for that reason.
 const stateHas = (expr) => {
@@ -167,7 +167,7 @@ const wpGateGranted = (resolvedName, key, wp) =>
   Boolean(gates[resolvedName]?.granted) || Boolean(workPackages[wp]?.[key]);
 
 // A required gate name may be a template over work packages, e.g. "htmlApproved:<wp>".
-// Resolve it against the real work packages instead of looking it up literally — the
+// Resolve it against the real work packages instead of looking it up literally: the
 // literal string "<wp>" never appears as a real gate key. Returns the list of missing
 // gate names: empty if the requirement is satisfied.
 const resolveGate = (template) => {
@@ -197,7 +197,7 @@ if (stateError) {
   rows.push({
     name: statePath,
     verdict: "UNREADABLE",
-    missing: [`could not parse ${statePath}: ${stateError} — evaluating every package against empty state`],
+    missing: [`could not parse ${statePath}: ${stateError}, evaluating every package against empty state`],
   });
 }
 
@@ -265,7 +265,7 @@ for (const r of rows) {
  *
  * Writing six new manifests broke both at once. `clientApproved` was invented in two of
  * them and granted nowhere, which leaves those packages permanently BLOCKED with no way
- * to unblock them — the deadlock shape this repository has already found twice. And
+ * to unblock them: the deadlock shape this repository has already found twice. And
  * `html` granted the gate the flow says core grants.
  *
  * Neither is expensive to check, and neither was checked. */

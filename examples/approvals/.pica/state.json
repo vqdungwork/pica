@@ -89,6 +89,10 @@
       "notOurTerm": [
         "transaction"
       ]
+    },
+    {
+      "term": "approval",
+      "definition": "the recorded decision of a named approver on a held payment"
     }
   ],
   "businessRules": [
@@ -103,8 +107,19 @@
     {
       "id": "UC-01",
       "name": "Send a payment",
+      "actor": "account holder",
       "tracesTo": [
         "BR-01"
+      ],
+      "touches": [
+        {
+          "entity": "payment",
+          "ops": "cr"
+        },
+        {
+          "entity": "approval",
+          "ops": "cru"
+        }
       ]
     }
   ],
@@ -114,10 +129,91 @@
       "attributes": [
         "payment"
       ]
+    },
+    {
+      "entity": "approval",
+      "attributes": [
+        "approval"
+      ]
     }
   ],
   "asIs": "Payments are approved by email and nobody can tell afterwards who approved which one.",
-  "toBe": "A payment above the limit is held until a second named approver releases it.",
+  "toBe": {
+    "notation": "flowchart",
+    "notationWhy": "one actor raises and amends; the approval decision is a branch in their own path, not a handoff to another lane",
+    "lanes": [
+      {
+        "id": "account holder"
+      }
+    ],
+    "nodes": [
+      {
+        "id": "start",
+        "kind": "start",
+        "lane": "account holder"
+      },
+      {
+        "id": "raise",
+        "kind": "activity",
+        "lane": "account holder",
+        "tracesTo": [
+          "UC-01"
+        ]
+      },
+      {
+        "id": "decide",
+        "kind": "gateway",
+        "lane": "account holder"
+      },
+      {
+        "id": "amend",
+        "kind": "activity",
+        "lane": "account holder",
+        "tracesTo": [
+          "UC-01"
+        ]
+      },
+      {
+        "id": "record",
+        "kind": "activity",
+        "lane": "account holder",
+        "tracesTo": [
+          "UC-01"
+        ]
+      },
+      {
+        "id": "done",
+        "kind": "end",
+        "lane": "account holder"
+      }
+    ],
+    "edges": [
+      {
+        "from": "start",
+        "to": "raise"
+      },
+      {
+        "from": "raise",
+        "to": "decide"
+      },
+      {
+        "from": "decide",
+        "to": "record"
+      },
+      {
+        "from": "decide",
+        "to": "amend"
+      },
+      {
+        "from": "amend",
+        "to": "decide"
+      },
+      {
+        "from": "record",
+        "to": "done"
+      }
+    ]
+  },
   "delta": "Approval moves from email to the product, so who approved what is recorded rather than remembered.",
   "assumptions": [
     {
@@ -647,21 +743,6 @@
     "counterEvidence": "If the audit team already reconstructs approvals from email in under an hour, this is not worth building.",
     "hmw": "How might we make who approved what recoverable after the fact?"
   },
-  "trigger": {
-    "changed": "The regulator published an audit-trail requirement carrying a compliance date.",
-    "when": "2026-06",
-    "ifNothing": "The next inspection repeats the existing finding and the penalty escalates.",
-    "window": "The compliance date is 2027-03, so the window closes in roughly six months."
-  },
-  "commercialConstraint": {
-    "fixed": "date",
-    "by": "the client's compliance director",
-    "consequence": "The regulator's compliance date is 2027-03 and a miss escalates the existing finding.",
-    "variable": [
-      "scope",
-      "resources"
-    ]
-  },
   "workPackages": {
     "approvals": {
       "tier": "complex",
@@ -695,136 +776,10 @@
       ]
     }
   },
-  "stateStrategy": {
-    "server": "every payment and every approval record, fetched per screen and never mirrored into a client store",
-    "url": "the queue filter and the selected payment id, so a link reopens exactly what someone was looking at",
-    "client": "only the collapsed or expanded state of the fee row",
-    "form": "the approval note, held locally until the request succeeds and discarded after"
-  },
-  "apiContract": [
-    {
-      "route": "POST /api/payments/:id/approve",
-      "request": "{ note?: string }",
-      "response": "{ id, status, approvedBy, approvedAt }",
-      "errors": [
-        "409 already approved",
-        "403 not an approver",
-        "422 above the actor's limit"
-      ]
-    }
-  ],
   "scopeFrozen": true,
   "frozenBy": "the client's compliance director",
   "changeControl": "Any addition is priced as a change order and moves the date by the same number of days.",
   "deadline": "2027-01-29",
-  "durationWeeks": 14,
-  "estimate": {
-    "for": "client",
-    "research": {
-      "o": 24,
-      "m": 32,
-      "p": 56,
-      "by": "pica-researcher"
-    },
-    "analysis": {
-      "o": 40,
-      "m": 60,
-      "p": 96,
-      "by": "pica-analyst"
-    },
-    "design": {
-      "o": 60,
-      "m": 90,
-      "p": 140,
-      "by": "pica-designer"
-    },
-    "fe": {
-      "o": 160,
-      "m": 220,
-      "p": 320,
-      "by": "pica-developer"
-    },
-    "be": {
-      "o": 200,
-      "m": 280,
-      "p": 420,
-      "by": "pica-developer"
-    },
-    "qa": {
-      "o": 80,
-      "m": 120,
-      "p": 200,
-      "by": "pica-tester"
-    }
-  },
-  "effortLog": [
-    {
-      "line": "research",
-      "actual": 30
-    },
-    {
-      "line": "analysis",
-      "actual": 58
-    },
-    {
-      "line": "design",
-      "actual": 96
-    },
-    {
-      "line": "fe",
-      "actual": 240
-    },
-    {
-      "line": "be",
-      "actual": 300
-    },
-    {
-      "line": "qa",
-      "actual": 130
-    }
-  ],
-  "roadmap": {
-    "slices": [
-      {
-        "id": "R1",
-        "contains": [
-          "approvals"
-        ],
-        "closes": [
-          "UC-01"
-        ],
-        "moves": "the share of payments with a named approver",
-        "date": "2027-01-29",
-        "dependsOn": []
-      },
-      {
-        "id": "R2",
-        "contains": [
-          "approvals"
-        ],
-        "closes": [
-          "UC-01"
-        ],
-        "moves": "the time taken to answer an audit request",
-        "date": "2027-Q2",
-        "dependsOn": [
-          "R1"
-        ]
-      }
-    ],
-    "criticalPath": [
-      "R1",
-      "R2"
-    ],
-    "capacity": [
-      {
-        "role": "fe",
-        "availablePct": 60,
-        "alsoOn": "the settlement rebuild"
-      }
-    ],
-    "bufferDays": 10
-  },
   "discovery": {
     "segments": [
       {
@@ -941,108 +896,6 @@
       "whyBuyersChange": "an inspection finding, which is what happened here and is the only trigger anyone named"
     }
   },
-  "value": {
-    "for": "client",
-    "currency": "USD",
-    "horizonMonths": 24,
-    "buildCost": {
-      "o": 564,
-      "m": 802,
-      "p": 1232,
-      "from": "estimate",
-      "by": "a human"
-    },
-    "runCost": [
-      {
-        "item": "hosting",
-        "annual": 4800,
-        "basis": "quoted",
-        "source": "the provider's published price list",
-        "by": "pica-architect"
-      },
-      {
-        "item": "payment provider fees",
-        "annual": 9000,
-        "basis": "measured",
-        "source": "last year's settlement reports",
-        "by": "pica-architect"
-      }
-    ],
-    "maintenancePct": 20,
-    "revenue": [
-      {
-        "line": "seats",
-        "model": "per-seat",
-        "o": 42000,
-        "m": 66000,
-        "p": 91000,
-        "by": "a human",
-        "drivers": [
-          {
-            "name": "reachable branches",
-            "value": 220,
-            "from": "docs/research/market.md",
-            "class": "observed"
-          },
-          {
-            "name": "seats per branch",
-            "value": 5,
-            "from": "docs/research/interviews/branch-manager.md",
-            "class": "stated"
-          }
-        ]
-      }
-    ],
-    "pricing": {
-      "model": "tiered",
-      "tiers": [
-        {
-          "name": "Branch",
-          "price": 40,
-          "includes": [
-            "approvals"
-          ],
-          "fence": ""
-        },
-        {
-          "name": "Region",
-          "price": 90,
-          "includes": [
-            "approvals",
-            "audit export"
-          ],
-          "fence": "audit export is the line regional compliance cannot do without"
-        }
-      ]
-    },
-    "breakEvenMonth": 17,
-    "sensitivity": [
-      {
-        "assumption": "reachable branches",
-        "low": 120,
-        "mid": 220,
-        "high": 300,
-        "swings": "breakEvenMonth"
-      },
-      {
-        "assumption": "seats per branch",
-        "low": 3,
-        "mid": 5,
-        "high": 8,
-        "swings": "breakEvenMonth"
-      },
-      {
-        "assumption": "payment provider fees",
-        "low": 6000,
-        "mid": 9000,
-        "high": 15000,
-        "swings": "breakEvenMonth"
-      }
-    ],
-    "doNothing": "Approvals stay in email, and the audit finding that triggered this repeats at the next inspection.",
-    "verdict": "build",
-    "decidedBy": "the client's finance director"
-  },
   "viewports": [
     {
       "name": "desktop",
@@ -1115,176 +968,60 @@
       "hue.count.max": 3,
       "type.roles.max": 5
     },
-    "deviations": []
-  },
-  "stack": {
-    "runtime": "Node",
-    "db": "Postgres"
-  },
-  "risks": [
-    {
-      "id": "R-01",
-      "capability": "hold a payment until a second named approver releases it",
-      "verdict": "possible",
-      "reason": "the settlement API already exposes a hold and a release, both idempotent",
-      "affects": []
+    "deviations": [],
+    "pairs": [
+      {
+        "name": "body on surface",
+        "fg": "#1b1f1d",
+        "bg": "#fbfcfa"
+      },
+      {
+        "name": "muted on surface",
+        "fg": "#525854",
+        "bg": "#fbfcfa"
+      }
+    ],
+    "componentStates": [
+      "default",
+      "hover",
+      "focus",
+      "disabled"
+    ],
+    "components": [
+      {
+        "name": "btn",
+        "states": [
+          "default",
+          "hover",
+          "focus",
+          "disabled"
+        ]
+      }
+    ],
+    "icons": {
+      "name": "Lucide",
+      "licence": "ISC",
+      "strokeWidth": "1.5",
+      "gridSize": "24"
     },
-    {
-      "id": "R-02",
-      "capability": "export the audit trail in the inspector's own format",
-      "verdict": "risky",
-      "reason": "the format is published but no test file exists, so the first real export is the first test",
-      "affects": [
-        "be",
-        "qa"
-      ]
+    "asserts": {
+      "strokeWidth": "1.5"
     },
-    {
-      "id": "R-03",
-      "capability": "release a held payment from a mobile device",
-      "verdict": "not-possible",
-      "reason": "strong customer authentication on this account type is desktop-only until the bank's own roadmap lands",
-      "affects": []
-    }
-  ],
+    "fonts": {
+      "display": "-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif",
+      "body": "-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif"
+    },
+    "fontsWhy": "a system stack is chosen deliberately: the queue is a dense internal surface read all day, the native face is the one these operators already read fastest, and a webfont would be one more thing that can fail on a branch network"
+  },
   "nfr": [
     {
       "id": "N-01",
       "kind": "performance",
       "requirement": "the approval queue renders in 800ms at p95",
-      "condition": "500 held payments, on the shared branch terminal over the branch VPN",
-      "measuredBy": "a synthetic check against staging every five minutes"
-    },
-    {
-      "id": "N-02",
-      "kind": "retention",
-      "requirement": "approval records are kept for 7 years and are not deletable by any product path",
-      "condition": "for every payment above the approval limit",
-      "measuredBy": "a migration test asserting no DELETE grant on the approvals table"
-    },
-    {
-      "id": "N-03",
-      "kind": "audit trail",
-      "requirement": "every state change records an actor id and a timestamp within 1 second of the action",
-      "condition": "on every approval, rejection and release",
-      "measuredBy": "an end-to-end test asserting the row exists with a non-null actor"
+      "condition": "500 held payments, a cold cache, on the office network",
+      "measuredBy": "a synthetic run against the staging queue on every release"
     }
   ],
-  "adr": [
-    {
-      "id": "ADR-01",
-      "title": "PostgreSQL 16 for the approval record",
-      "context": "The approval record has to be queryable by actor and by date for seven years, and must not be deletable by any product path.",
-      "options": [
-        "PostgreSQL 16",
-        "the existing document store",
-        "an append-only log service"
-      ],
-      "decision": "PostgreSQL 16, with no DELETE grant on the approvals table",
-      "consequences": "One more system to operate than the document store, and a migration path for the existing holds. In exchange the retention NFR is enforceable by a grant rather than by a policy."
-    },
-    {
-      "id": "ADR-02",
-      "title": "Node 22 for the service",
-      "context": "The front end is already TypeScript and the team maintains no other runtime.",
-      "options": [
-        "Node 22",
-        "Go",
-        "the existing Java service"
-      ],
-      "decision": "Node 22, so one language covers both halves",
-      "consequences": "Slower on the export path than Go would be. The export is a background job, so the cost lands where nobody waits on it."
-    },
-    {
-      "id": "ADR-03",
-      "title": "No queue: the approval is synchronous",
-      "context": "An approval either succeeds or the approver must see why, immediately, while still on the screen.",
-      "options": [
-        "a queue with a callback",
-        "synchronous",
-        "optimistic with reconciliation"
-      ],
-      "decision": "synchronous, so the approver never has to come back to find out",
-      "consequences": "The request holds a connection for up to 800ms. At 40 approvals a day per branch that is not a capacity problem, and it removes a whole class of reconciliation defect."
-    }
-  ],
-  "perfBudget": [
-    {
-      "nfr": "N-01",
-      "metric": "approval queue render at p95",
-      "budget": 800,
-      "unit": "ms",
-      "condition": "500 held payments, on the shared branch terminal over the branch VPN, cold cache",
-      "measuredBy": "a CI step that fails the build when the synthetic check regresses past the budget"
-    }
-  ],
-  "testStrategy": {
-    "shape": {
-      "unit": 48,
-      "integration": 14,
-      "e2e": 3
-    },
-    "owner": {
-      "unit": "pica-developer",
-      "integration": "pica-developer",
-      "e2e": "pica-tester"
-    },
-    "smoke": "npm run test:smoke"
-  },
-  "defects": [
-    {
-      "id": "D-01",
-      "title": "the queue sorted by reference rather than by age",
-      "severity": "blocker",
-      "test": "UC-01 the oldest held payment is first in the queue",
-      "failedFirst": true
-    },
-    {
-      "id": "D-02",
-      "title": "a released payment showed no actor on the audit row",
-      "severity": "major",
-      "test": "UC-01 an approver releases a held payment and the actor is recorded",
-      "failedFirst": true
-    },
-    {
-      "id": "D-03",
-      "title": "the fee row collapsed at 375px",
-      "severity": "minor",
-      "test": "the fee row has no collapsed state at any viewport",
-      "failedFirst": true
-    },
-    {
-      "id": "D-04",
-      "title": "the empty queue read as a loading state",
-      "severity": "minor",
-      "test": "an empty queue reads as empty and not as loading",
-      "failedFirst": true
-    }
-  ],
-  "testData": {
-    "provenance": "synthetic",
-    "note": "generated from the branch directory's shape, with no real customer or payment record anywhere in it",
-    "method": "names and account numbers from a seeded generator, cross-referenced so no identifier belongs to another row",
-    "edgeCases": [
-      "the longest legal name at 64 characters",
-      "the empty queue",
-      "a duplicate reference on two payments",
-      "a name with an apostrophe in it",
-      "500 held payments",
-      "a fee of zero",
-      "an approver at their own limit"
-    ]
-  },
-  "branchProtection": {
-    "verifiedBy": "the client's platform lead",
-    "on": "2027-01-10",
-    "note": "main refuses direct pushes, requires one review and requires the ci workflow to pass, read from the repository settings page"
-  },
-  "rollbackExecuted": {
-    "on": "2027-01-18",
-    "by": "the client's platform lead",
-    "what": "the approvals release was rolled back on staging in 4 minutes and the held payments reconciled with no manual step"
-  },
   "proposals": [
     {
       "slot": "S1",
@@ -1295,19 +1032,43 @@
           "id": "A",
           "names": "one row per payment, age in the first column",
           "from": "measured on Monzo and Starling, both of which lead with a single scannable column",
-          "costs": "12 rows per screen at 1440x900"
+          "costs": "12 rows per screen at 1440x900",
+          "tradition": "International / Swiss",
+          "isSectorBaseline": false,
+          "asserts": {
+            "radius": 8,
+            "controlHeight": 36,
+            "hueCount": 1,
+            "spacingStep": 8
+          }
         },
         {
           "id": "B",
           "names": "grouped by branch, collapsed by default",
           "from": "measured on the incumbent core-banking module, which groups by originating unit",
-          "costs": "3 groups per screen, one extra click to reach a payment"
+          "costs": "3 groups per screen, one extra click to reach a payment",
+          "tradition": "Material",
+          "isSectorBaseline": false,
+          "asserts": {
+            "radius": 4,
+            "controlHeight": 48,
+            "hueCount": 2,
+            "spacingStep": 4
+          }
         },
         {
           "id": "C",
           "names": "a dense table, 44px rows, no grouping",
           "from": "measured on Wise and Revolut, both of which run 44px rows on ledger surfaces",
-          "costs": "18 rows per screen, and the age column has to earn its width"
+          "costs": "18 rows per screen, and the age column has to earn its width",
+          "tradition": "Minimalism",
+          "isSectorBaseline": true,
+          "asserts": {
+            "radius": 2,
+            "controlHeight": 44,
+            "hueCount": 1,
+            "spacingStep": 12
+          }
         }
       ],
       "chosen": "C",
@@ -1428,6 +1189,244 @@
       "on": "2026-09-05",
       "outcome": "project-exempted",
       "exemptionIn": "discovery.segments[1].shortfallWhy"
+    }
+  ],
+  "applications": [
+    {
+      "name": "approvals",
+      "archetype": "workflow-approval"
+    }
+  ],
+  "archetype": {
+    "approvals": "workflow-approval"
+  },
+  "audience": {
+    "dimensions": {
+      "age": {
+        "value": "working-age",
+        "evidence": "observed: 11 of 11 approvers in the access log are staff on the payments desk"
+      },
+      "region": {
+        "value": "europe-west",
+        "evidence": "stated: the bank operates in the UK and Ireland only, confirmed by the compliance director"
+      },
+      "accessibility": {
+        "value": "baseline",
+        "evidence": "stated: no declared need beyond the bank's own WCAG AA policy"
+      },
+      "literacy": {
+        "value": "expert-daily",
+        "evidence": "observed: approvers open the queue a median of 34 times per working day"
+      },
+      "conditions": {
+        "values": [
+          "desk",
+          "shared-device"
+        ],
+        "evidence": "observed: two approval terminals on the desk, four named approvers per terminal"
+      }
+    },
+    "floors": {
+      "typeSizePx": 14,
+      "contrastRatio": 4.5,
+      "targetSizePx": 44
+    }
+  },
+  "rolesPermissions": {
+    "account holder": {
+      "payment": "cr",
+      "approval": "cru"
+    },
+    "compliance officer": {
+      "payment": "",
+      "approval": ""
+    },
+    "fraud analyst": {
+      "payment": "",
+      "approval": ""
+    },
+    "regulator": {
+      "payment": "",
+      "approval": ""
+    }
+  },
+  "requirements": [
+    {
+      "id": "R-01",
+      "class": "business",
+      "text": "every payment above the threshold carries a named approver"
+    },
+    {
+      "id": "R-02",
+      "class": "functional",
+      "text": "an approver can approve or return a payment with a reason"
+    },
+    {
+      "id": "R-03",
+      "class": "non-functional",
+      "text": "see N-01"
+    },
+    {
+      "id": "R-04",
+      "class": "transition",
+      "text": "import twelve months of historical approvals from the ledger export",
+      "untilWhen": "once the ledger integration is live the import screen is removed"
+    }
+  ],
+  "stateModel": [
+    {
+      "entity": "payment",
+      "states": [
+        {
+          "name": "draft",
+          "to": [
+            "held"
+          ],
+          "by": "payments clerk"
+        },
+        {
+          "name": "held",
+          "to": [
+            "approved",
+            "returned"
+          ],
+          "by": "approver"
+        },
+        {
+          "name": "returned",
+          "to": [
+            "held"
+          ],
+          "by": "payments clerk"
+        },
+        {
+          "name": "approved",
+          "terminal": true
+        }
+      ]
+    },
+    {
+      "entity": "approval",
+      "states": [
+        {
+          "name": "pending",
+          "to": [
+            "recorded"
+          ],
+          "by": "approver"
+        },
+        {
+          "name": "recorded",
+          "terminal": true
+        }
+      ]
+    }
+  ],
+  "journeys": [
+    {
+      "actor": "account holder",
+      "stages": [
+        {
+          "name": "raise it",
+          "from": [
+            "raise"
+          ],
+          "pain": [
+            {
+              "what": "no way to tell whether an approver has even seen it",
+              "nOf": [
+                6,
+                7
+              ],
+              "class": "stated"
+            }
+          ]
+        },
+        {
+          "name": "chase it",
+          "from": [
+            "amend"
+          ],
+          "pain": [
+            {
+              "what": "a return arrives with no reason attached",
+              "nOf": [
+                5,
+                7
+              ],
+              "class": "observed"
+            }
+          ]
+        },
+        {
+          "name": "see it recorded",
+          "from": [
+            "record"
+          ],
+          "pain": [
+            {
+              "what": "the approver is inferred from the session rather than named",
+              "nOf": [
+                2,
+                2
+              ],
+              "class": "observed"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "structureExemptions": [
+    {
+      "state": "approved",
+      "why": "the approved state is the recorded screen seen from the payment's side; one structure screen serves both"
+    },
+    {
+      "state": "pending",
+      "why": "an approval is pending only while the approver is on the decide screen, which has no separate structure"
+    }
+  ],
+  "stateExemptions": [
+    {
+      "state": "draft",
+      "why": "a draft payment lives in the branch system and never reaches this surface; the approvals queue starts at held"
+    },
+    {
+      "state": "returned",
+      "why": "drawn in the structure pass; the fixture is deliberately small and ships one built work package"
+    },
+    {
+      "state": "approved",
+      "why": "drawn in the structure pass as the recorded screen, which serves both sides of the transition"
+    },
+    {
+      "state": "pending",
+      "why": "an approval is pending only while the approver is on the decide screen, which this package does not build"
+    },
+    {
+      "state": "recorded",
+      "why": "drawn in the structure pass; the built package stops at the queue"
+    },
+    {
+      "state": "loading",
+      "why": "shown on design-system.html, which the capture producer deliberately excludes \u2014 a real project builds it per screen"
+    },
+    {
+      "state": "error",
+      "why": "shown on design-system.html, which the capture excludes; the fixture builds no form"
+    },
+    {
+      "state": "disabled",
+      "why": "shown on design-system.html with the button set, which the capture excludes"
+    },
+    {
+      "state": "focus",
+      "why": "shown on design-system.html with the button set, which the capture excludes"
+    },
+    {
+      "state": "keyboard-open",
+      "why": "a desk surface with no text entry; the state has no case here and inventing one would be a screen nobody needs"
     }
   ]
 }

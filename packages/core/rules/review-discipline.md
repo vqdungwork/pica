@@ -79,7 +79,7 @@ An audit is code, so it fails like code. Six rules, each of which has produced a
 
 **1. A filter that narrows the population must report what it excluded.** A screen audit matched frames
 within 3px of 375x812, reported "68 of 68 screens covered", and had silently skipped every hug-height
-frame — which is exactly where the missing element was. Print the population and the exclusions, or the
+frame: which is exactly where the missing element was. Print the population and the exclusions, or the
 denominator is fiction.
 
 **2. Never write an empty `catch {}` in an audit or a fix script.** A swallowed error turns a failed write
@@ -102,7 +102,7 @@ design's own convention, the human.
 **6. Scope token checks to product pages.** A cover's 96px margin, an audit board's 48px gutter and a
 spec table's 12/14 cell padding are not design-system values. Checking them means the audit can never
 return zero, and an audit that always reports something is an audit nobody reads. Declare the
-documentation pages and skip them — the first run of these checks produced roughly 900 findings, **every
+documentation pages and skip them: the first run of these checks produced roughly 900 findings, **every
 one of them** on a cover, an audit board or a handoff table.
 
 **Corollary on false positives.** Structural detectors must exclude documentation. Frames inside an
@@ -217,14 +217,14 @@ The contrast ratio has a `+0.05` flare term on both luminances. Near the ends of
 dominates, so the formula stops discriminating exactly where dark-mode surfaces live.
 
 A bottom sheet painted the same colour as the page under it measured **1.03:1**. Lifting it one step up
-the neutral scale — a change a designer sees instantly — moved it to **1.13:1**. Ten hundredths, on a
+the neutral scale, a change a designer sees instantly, moved it to **1.13:1**. Ten hundredths, on a
 fix that solved the complaint. Reading only that number, you would conclude nothing had happened.
 
 For **surface against surface**, use perceptual lightness instead: `ΔL*` in CIELAB. The same change
 reads **1.3 → 6.2**, which is the size of the effect. A rough scale: under 2 is invisible, 4 to 6 is a
 clear step, 12 or more is a strong lift.
 
-Keep WCAG for what it was built for — **text against its background** — where both colours are usually
+Keep WCAG for what it was built for, **text against its background**, where both colours are usually
 far enough apart for the flare term not to dominate. Using one instrument for both jobs is how a real
 defect passes a contrast check.
 
@@ -233,19 +233,19 @@ defect passes a contrast check.
 Checking that each role carries the right VALUE is not the same as checking that two roles are still
 telling apart. A palette can be reproduced perfectly and still collapse: on the project this comes from,
 `surface/page` and `surface/primary` are both `#0A0A0A` in the client's own inverse palette, so in dark
-mode the screen ground and every card were the same colour — `ΔL* = 0.0`.
+mode the screen ground and every card were the same colour: `ΔL* = 0.0`.
 
 That is not automatically a defect. Cards there separate with a stroke, which is a legitimate answer.
 It becomes a defect the moment something relies on **fill alone**, which is what happened to the sheet.
 
 So the check is a pair:
 
-1. **Value parity** — each role equals what the reference uses for that role.
-2. **Role separation** — for each adjacent pair in one theme, either `ΔL*` clears a floor, or the
+1. **Value parity**: each role equals what the reference uses for that role.
+2. **Role separation**: for each adjacent pair in one theme, either `ΔL*` clears a floor, or the
    nearer surface carries a stroke or a shadow. Sweep every panel whose fill equals its background and
    has neither; the ones that remain must be ground **by design** and named as such.
 
-And the rule dark mode forces: **an elevated surface steps UP the scale.** A scrim cannot substitute —
+And the rule dark mode forces: **an elevated surface steps UP the scale.** A scrim cannot substitute,
 darkening a near-black page moves it *towards* a near-black sheet, not away from it.
 
 ## Pixel sampling: only near native resolution
@@ -316,8 +316,8 @@ Both print the same reassuring number. Through 0.3.0 the capture script's frame 
 `.phone`, from the mobile-only era: any project whose frames were not called `.phone` captured nothing,
 logged "0 frames" as ordinary output, and passed every downstream check.
 
-**A green check is not evidence the check works.** Before trusting a new check, make it fail on purpose —
-break one frame, delete one row — and confirm it reports. A check never seen to fail has not been tested.
+**A green check is not evidence the check works.** Before trusting a new check, make it fail on purpose:
+break one frame, delete one row, and confirm it reports. A check never seen to fail has not been tested.
 
 ## Every named check must ship
 
@@ -326,7 +326,7 @@ criterion. 0.3.0 violated this: it documented the parity check and the geometry 
 with tolerances and two-pass structure, while both existed only inside the project they were derived
 from. Anyone installing the plugin read a rule telling them to run something that was not there.
 
-A coverage audit that greps for concepts cannot catch this — the concept is present and well described.
+A coverage audit that greps for concepts cannot catch this: the concept is present and well described.
 Audit for **executability**: for each named check, does the file exist, does it run, and does the rule
 state what passing means?
 
@@ -338,7 +338,7 @@ produced evidence for it and for its converse in the same afternoon:
 - An 83px horizontal overflow, invisible because the frame's `overflow: hidden` clipped it. Found by
   measurement, impossible to see.
 - A checkbox with no tick, a control whose labels did not fit, and a card missing its last 300px of
-  content. Found by looking. **Four automated passes ran clean over exactly those frames** — verified
+  content. Found by looking. **Four automated passes ran clean over exactly those frames**: verified
   by re-introducing the defect and measuring 0px of clipping.
 
 Measurement finds clipping, overflow, misalignment and drift: defects with a numeric signature. It is
@@ -355,8 +355,8 @@ It could not have failed meaningfully: it read one node on the current page and 
 **different** page, and `findAll` under-reports instance children on any page that is not current. Run
 from the other side, every number reversed.
 
-**Assert a check against a known bad case before trusting a pass.** This is rule 4 above — *assert the
-intended value, not "different from broken"* — turned on the audit itself.
+**Assert a check against a known bad case before trusting a pass.** This is rule 4 above: *assert the
+intended value, not "different from broken"*: turned on the audit itself.
 
 And its corollary for any tool that returns a status object: a plausible success value is not evidence
 of a correct result. On one project a write API returned `{variantCount: 9}` with all nine variants
@@ -372,12 +372,12 @@ of them were believed long enough to act on.
 
 - **A paint's variable binding lives on the paint.** `setBoundVariableForPaint` writes
   `paint.boundVariables.color`; it does **not** extend `node.boundVariables.fills`. A check reading only
-  the node-level array reports a correctly bound paint as unbound forever, and — worse — reports an
+  the node-level array reports a correctly bound paint as unbound forever, and, worse, reports an
   unbound paint as bound whenever the array indices happen to line up. Eight fixes were re-reported as
   failures before the lens was corrected.
 - **Absence from a convenience listing is not evidence.** A binding was flagged foreign because its id
   was missing from `getLocalVariablesAsync()`. Resolved directly, it is `radius/xl`, `remote === false`,
-  in a local collection — and the collections' `variableIds` sum to exactly the count that function
+  in a local collection, and the collections' `variableIds` sum to exactly the count that function
   reports. 129 findings, all false. Resolve the id and read `remote`.
 - **A text's backdrop is not its ancestor's fill.** Walking up for the first solid fill finds nothing for
   white text over a badge, a map pin or an avatar, because the backing is a **sibling** drawn just before
@@ -390,22 +390,22 @@ is a deduction, the check is measuring the deduction.
 
 ## A clip-aware check cannot see a frame overflowing itself
 
-Excluding clipped subtrees from an overflow metric is correct — content deliberately scrolled out of view
-is not a defect — and it has a blind spot shaped exactly like a fixed-width bar. The bar is 984 wide, its
+Excluding clipped subtrees from an overflow metric is correct: content deliberately scrolled out of view
+is not a defect, and it has a blind spot shaped exactly like a fixed-width bar. The bar is 984 wide, its
 children need 1,363, nothing sticks out of any *parent*, and the parent clips, so the whole subtree is
 dropped before it is measured. A tab bar clipped its last tab on eight screens through every audit round
 at zero findings.
 
 The lens that sees it asks a different question: for a container with a fixed main axis, does
 `sum(children) + gaps + padding` exceed the container on that axis? That is the `Auto-layout overflow`
-row the Figma audit has always carried — the point is that the clip-aware metric **looks like a superset
+row the Figma audit has always carried: the point is that the clip-aware metric **looks like a superset
 of it and is not**. Keep both, and do not widen the clip-aware one, whose exclusion is right.
 
 ## A number without a baseline is unreadable
 
 Any new lens run for the first time on mature work will return a large number, and you will not know
-whether it found a problem or a normal property of the medium. Run it against the reference too —
-the client's original, the previous release, the untouched control — and **publish the pair**.
+whether it found a problem or a normal property of the medium. Run it against the reference too:
+the client's original, the previous release, the untouched control, and **publish the pair**.
 
 One lens returned 356 on the rebuild. The same lens on the untouched source returned 268, with the same
 top offenders. Most of both numbers is scroll regions and horizontally scrollable strips: not defects in
@@ -420,8 +420,8 @@ criterion nobody can ever close.** Register the pair.
 Defensive guards around a mutation are right. Guards that respond to a mismatch by *quietly doing
 nothing* are how a mutation half-lands.
 
-A restore step checked `if (textCount !== captured) skip this instance`. The counts differed — 11 against
-12, because the source hid a slot and the target did not — so every one of eight cards took the skip
+A restore step checked `if (textCount !== captured) skip this instance`. The counts differed: 11 against
+12, because the source hid a slot and the target did not, so every one of eight cards took the skip
 branch, kept the master's placeholder content, and reported a diff instead of an error. The count
 mismatch was the thing to **normalise** (hide the slot first, then restore), not a reason to abandon the
 restore.

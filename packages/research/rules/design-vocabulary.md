@@ -14,8 +14,8 @@ There is a real difference between two things that look similar:
 
 | | |
 |---|---|
-| **A prescription** — "banking means 4px radius" | Refuse it. Taste wearing a lab coat, indefensible in a review, wrong the moment a field moves |
-| **A vocabulary** — what Neobrutalism is, and how to recognise it by measuring | **This is knowledge, and it is what was missing** |
+| **A prescription**: "banking means 4px radius" | Refuse it. Taste wearing a lab coat, indefensible in a review, wrong the moment a field moves |
+| **A vocabulary**: what Neobrutalism is, and how to recognise it by measuring | **This is knowledge, and it is what was missing** |
 
 A vocabulary does not decide anything. It lets you **name what you measured** and **propose in words a
 client can look up, check, and disagree with on the merits**.
@@ -139,8 +139,8 @@ A declared style adds checks to `direction.assert`. Declare neobrutalism and a b
 a violation, in exactly the way a radius cap already is.
 
 **`verify-html` enforces two halves of that, and deliberately not a third.** It reports a `style` whose
-assertions say the opposite of what the style means — `neobrutalism` with `shadow.blur.max: 12`, a
-`minimalism` capped at nine hues, a `maximalism` capped at two — and it reports a `style` naming no
+assertions say the opposite of what the style means: `neobrutalism` with `shadow.blur.max: 12`, a
+`minimalism` capped at nine hues, a `maximalism` capped at two, and it reports a `style` naming no
 tradition in the table below, because a name nobody can look up cannot be compared to anything or
 measured against.
 

@@ -1,12 +1,12 @@
 /**
- * validate-packages.mjs — the restructure's own check.
+ * validate-packages.mjs: the restructure's own check.
  *
  * Asserts six things, each of which was a real failure mode in earlier pica releases:
- *   1. every package.json parses and has the required fields, each with a real shape —
+ *   1. every package.json parses and has the required fields, each with a real shape:
  *      a null or empty contract field passes an `in` check while asserting nothing. This
  *      includes "requires" and "produces": both must be objects, and "requires" must have
  *      "state", "artifacts" and "gates" as arrays while "produces" must have "state" and
- *      "artifacts" as arrays — these are the two fields pica-status.mjs reads, and
+ *      "artifacts" as arrays: these are the two fields pica-status.mjs reads, and
  *      `"requires":null,"produces":null` used to pass this check while asserting nothing.
  *   2. every package has its plugin manifest at .claude-plugin/plugin.json, the
  *      location Claude Code actually reads, and that manifest parses and has a "name"
@@ -15,8 +15,8 @@
  *   5. every declared check resolves to a script that exists
  *   6. every definitionOfDone entry has a valid type, and a "human" entry names no script
  *   7. every relative markdown link in a rule or a skill resolves to a file that exists.
- *      0.6.0 shipped 26 broken links out of the design-flow skill — every rule reference in
- *      the map — because moving the skill into pica-core changed its depth and nothing
+ *      0.6.0 shipped 26 broken links out of the design-flow skill: every rule reference in
+ *      the map: because moving the skill into pica-core changed its depth and nothing
  *      checked. Ownership validation cannot see this: the files were all present and all
  *      owned. Links out of a skill are resolved against the SHIPPED layout, where
  *      packages/core/skills/<s> is installed at <root>/skills/<s>, not against the repo.
@@ -54,7 +54,7 @@ for (const name of dirs) {
 
   let m;
   try { m = JSON.parse(fs.readFileSync(manifestPath, "utf8")); }
-  catch (e) { findings.push(`${name}: package.json does not parse — ${e.message}`); continue; }
+  catch (e) { findings.push(`${name}: package.json does not parse, ${e.message}`); continue; }
 
   for (const f of REQUIRED) if (!(f in m)) findings.push(`${name}: missing required field "${f}"`);
 
@@ -72,7 +72,7 @@ for (const name of dirs) {
 
   /* "requires" and "produces" are the two fields pica-status.mjs actually reads to decide
      whether a package is READY or BLOCKED. A null (or otherwise shapeless) value passed the
-     `in` check above while asserting nothing — pica-status.mjs would then read `undefined`
+     `in` check above while asserting nothing: pica-status.mjs would then read `undefined`
      off it and treat every requirement as vacuously satisfied. Each must be an object, and
      each of its own array-valued sub-fields must actually be an array. */
   if (m.requires !== undefined) {
@@ -102,14 +102,14 @@ for (const name of dirs) {
      plugin.json in the right place is a package Claude Code cannot actually install. */
   const pluginManifest = path.join(PKG_DIR, name, ".claude-plugin", "plugin.json");
   if (!fs.existsSync(pluginManifest)) {
-    findings.push(`${name}: no .claude-plugin/plugin.json — Claude Code will not find this package's manifest`);
+    findings.push(`${name}: no .claude-plugin/plugin.json, Claude Code will not find this package's manifest`);
   } else {
     try {
       const pm = JSON.parse(fs.readFileSync(pluginManifest, "utf8"));
       if (!pm || typeof pm !== "object" || Array.isArray(pm) || !pm.name)
         findings.push(`${name}: .claude-plugin/plugin.json has no "name" field`);
     } catch (e) {
-      findings.push(`${name}: .claude-plugin/plugin.json does not parse — ${e.message}`);
+      findings.push(`${name}: .claude-plugin/plugin.json does not parse, ${e.message}`);
     }
   }
 
@@ -122,7 +122,7 @@ for (const name of dirs) {
     }
   }
 
-  /* A skill is a DIRECTORY containing SKILL.md, not a file — `owns.skills` names the
+  /* A skill is a DIRECTORY containing SKILL.md, not a file: `owns.skills` names the
      directory, and existence means packages/<pkg>/skills/<name>/SKILL.md is present. */
   for (const skill of (m.owns?.skills || [])) {
     const rel = path.join("packages", name, "skills", skill);
@@ -142,12 +142,12 @@ for (const name of dirs) {
     if (!["check", "human", "gate", "artifact"].includes(d.type))
       findings.push(`${name}: definitionOfDone entry has invalid type "${d.type}"`);
     if (d.type === "human" && d.run)
-      findings.push(`${name}: a "human" definition-of-done item must not name a script — that is the point of the type`);
+      findings.push(`${name}: a "human" definition-of-done item must not name a script, that is the point of the type`);
   }
 }
 
 /* Every shipped file must be owned. An orphan means a rule nobody is responsible for.
-   hooks/ is included alongside commands/rules/scripts — core's hook files went
+   hooks/ is included alongside commands/rules/scripts: core's hook files went
    unvalidated and unowned until this scan reached them too.
 
    agents/ joined them for the same reason and one worse: nine agent files shipped with
@@ -165,7 +165,7 @@ for (const name of dirs) {
   }
 
   /* skills/ holds directories, each a skill named by its own directory (containing
-     SKILL.md), not files — scanned the same way but by directory name. */
+     SKILL.md), not files: scanned the same way but by directory name. */
   const skillsDir = path.join(PKG_DIR, name, "skills");
   if (fs.existsSync(skillsDir)) {
     for (const f of fs.readdirSync(skillsDir, { withFileTypes: true })) {
@@ -180,7 +180,7 @@ for (const name of dirs) {
 
    Two files carried a description for the same plugin and nothing compared them. Six
    packages were listed in the marketplace with NO description at all, four more had a
-   stale one, and the bundle advertised a check count two releases old — which is the first
+   stale one, and the bundle advertised a check count two releases old: which is the first
    sentence anyone reads before installing.
 
    plugin.json is the source. The marketplace mirrors it, and here that mirroring is
@@ -247,7 +247,7 @@ for (const name of dirs) {
         mdFiles.push({ file: f, base: path.join(skillsDir, d.name) });
     }
 }
-if (!mdFiles.length) findings.push("no rule or skill markdown found — the link check validated nothing");
+if (!mdFiles.length) findings.push("no rule or skill markdown found: the link check validated nothing");
 let linksChecked = 0;
 for (const { file, base } of mdFiles) {
   const text = fs.readFileSync(file, "utf8");
@@ -268,7 +268,7 @@ for (const { file, base } of mdFiles) {
         `A single-package install has no sibling to resolve it against: name it as a repo path instead`);
   }
 }
-if (!linksChecked) findings.push("0 markdown links checked — the link check did nothing");
+if (!linksChecked) findings.push("0 markdown links checked: the link check did nothing");
 
 console.log(`packages: ${dirs.join(", ")}`);
 console.log(`markdown links checked: ${linksChecked}`);

@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Approvals · structure</title>
+<style>
+  /* Greyscale only. A hue here moves the review from layout to palette, and the palette is
+     not what is being approved at this gate. */
+  :root { --g0:#ffffff; --g1:#f4f4f4; --g2:#e2e2e2; --g3:#9a9a9a; --g4:#3a3a3a; }
+  body { margin:0; font:14px system-ui, sans-serif; color:var(--g4); background:var(--g1); }
+  .lofi { max-width:900px; margin:24px auto; background:var(--g0); border:1px solid var(--g2); padding:20px; }
+  h1 { font-size:18px; margin:0 0 4px; }
+  .sub { color:var(--g3); margin:0 0 16px; }
+  .row { display:flex; gap:12px; padding:12px 0; border-bottom:1px solid var(--g2); }
+  .row > * { flex:1; }
+  .amount { text-align:right; }
+  .box { background:var(--g1); border:1px dashed var(--g2); padding:28px; text-align:center; color:var(--g3); }
+</style>
+</head>
+<body>
+
+<section class="lofi" data-scr="held-queue" data-uc="UC-01" data-state="held">
+  <h1>Payments held for approval</h1>
+  <p class="sub">Eleven payments are waiting. The oldest has been held for two working days.</p>
+  <div class="row"><span>Beneficiary and reference</span><span>Raised by</span><span>Held for</span><span class="amount">Amount</span></div>
+  <div class="row"><span>Fairhurst Logistics Ltd: invoice FL-2291</span><span>Marta Kowalska, branch 14</span><span>2 days, 4 hours</span><span class="amount">48,120.00</span></div>
+  <div class="row"><span>Ambleside Property Services: retention release</span><span>Dev Sharma, treasury</span><span>1 day, 6 hours</span><span class="amount">7,450.00</span></div>
+  <div class="row"><span>Coastline Marine Supplies: quarterly settlement</span><span>Marta Kowalska, branch 14</span><span>11 hours</span><span class="amount">132,900.00</span></div>
+</section>
+
+<section class="lofi" data-scr="held-queue-empty" data-uc="UC-01" data-state="draft">
+  <h1>Payments held for approval</h1>
+  <p class="sub">Nothing is waiting on you right now.</p>
+  <div class="box">The next payment raised above the approval threshold will appear here, with who raised it and how long it has been waiting.</div>
+</section>
+
+<section class="lofi" data-scr="returned" data-uc="UC-01" data-state="returned">
+  <h1>Returned to the branch</h1>
+  <p class="sub">Three payments were returned this week, each with a reason the branch can act on.</p>
+  <div class="row"><span>Fairhurst Logistics Ltd: invoice FL-2291</span><span>Returned by Priya Anand</span><span>Beneficiary account does not match the invoice</span></div>
+</section>
+
+<section class="lofi" data-scr="recorded" data-uc="UC-01" data-state="recorded">
+  <h1>Approval recorded</h1>
+  <p class="sub">Approved by Priya Anand at 14:32 on 9 September, and written to the audit trail.</p>
+  <div class="row"><span>Coastline Marine Supplies: quarterly settlement</span><span>Priya Anand, approver</span><span class="amount">132,900.00</span></div>
+</section>
+
+</body>
+</html>

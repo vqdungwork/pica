@@ -35,7 +35,7 @@ tokens/        tokens.json, tokens.css
 
 If a `<wp>.html` is generated, **every change goes in the generator.** Editing the output is not a
 shortcut, it is a mine: the file looks right, the gates pass, and the work is destroyed the next time
-anyone runs the script — which may be weeks later, by someone who did not make the edit.
+anyone runs the script: which may be weeks later, by someone who did not make the edit.
 
 This is not hypothetical. On one afternoon a single project lost three things this way:
 
@@ -48,7 +48,7 @@ The second one is the instructive case, because the gate caught it and the eye d
 failed closed with *"no HTML frame for &lt;screen&gt;"* rather than quietly comparing 42 frames where it
 had compared 46. **A frame count that drops silently is worse than a red build.**
 
-Two habits. **After running any generator, diff its output against what was there** — file size and
+Two habits. **After running any generator, diff its output against what was there**: file size and
 frame count are enough to notice a screen vanishing. And when a screen is added by hand under time
 pressure, that is a debt with a due date: put it in the builder before the day ends, or it will be
 collected at the worst moment.
@@ -299,11 +299,11 @@ rule with nothing behind it until 0.8.0, and the cost of that was invisible: a p
 
 When more than one viewport is declared, **every viewport renders in the same browser window**. A
 width-based `@media` rule therefore fires for every column at once and renders the narrow column as
-the wide one — and that column is what gets ported. Verified: with a 1440 frame and a 375 frame side
+the wide one, and that column is what gets ported. Verified: with a 1440 frame and a 375 frame side
 by side, every `@container` rule resolved against its own frame.
 
 Each frame declares `container-type: inline-size`. That contains the **inline axis only**, so frame
-height stays content-driven — which is what keeps the tall-screen hug pair working.
+height stays content-driven: which is what keeps the tall-screen hug pair working.
 
 Hover cannot use `@media (hover)` either: one window cannot distinguish the columns. Key it off the
 frame class.
@@ -315,12 +315,12 @@ equal specificity, so the container rule silently loses:
 .top-nav__burger { display: inline-flex; }
 @container frame (min-width: 1024px) { .top-nav__burger { display: none; } }
 /* ... 200 lines later ... */
-.btn { display: inline-flex; }        /* equal specificity, declared later — wins */
+.btn { display: inline-flex; }        /* equal specificity, declared later, wins */
 ```
 
 The burger rendered on the desktop frame. Every `@container` block that overrides a property also set
 by a component base class must be declared **after** that class; keeping them in one trailing section
-makes the ordering a visible convention. This trap was hit **three times** in one stylesheet — the
+makes the ordering a visible convention. This trap was hit **three times** in one stylesheet: the
 third time it made an icon button 32×40 instead of square and dragged every row it sat in 8px taller.
 
 ## Prefer CSS Grid with named areas for anything that reflows
@@ -329,7 +329,7 @@ A flex row cannot promote a nested child to full width. One mobile card ran to *
 chip row was a grandchild inside a squeezed column; no amount of flex tuning could fix it, because the
 reflow was structurally impossible without changing the DOM.
 
-Grid changes order *and* span from CSS alone, so both viewports keep **identical markup** — which is
+Grid changes order *and* span from CSS alone, so both viewports keep **identical markup**: which is
 what keeps a structural parity check meaningful. Reaching for flex first tends to force either a markup
 fork per viewport (which parity then reports forever) or a compromise layout. After the restructure:
 550px → 170px, wide viewport unchanged.
@@ -341,14 +341,14 @@ overflowed by 83px and 34px with nothing to see: no scrollbar, no cut glyph, jus
 a void.
 
 Cause both times: grid items default to `min-width: auto` and refuse to shrink below their min-content
-width, so one unbreakable string — a 38-character filename — pushed the column past the frame edge.
+width, so one unbreakable string, a 38-character filename, pushed the column past the frame edge.
 `.grid > * { min-width: 0 }` fixes it; **the finding is that nothing would have caught it.** The capture
 script already walks every element box and knows each frame's rect, so the check is nearly free.
 
 ## Single-line controls must truncate, not wrap
 
 An `<input>` is single-line by definition: the value scrolls and never lays out on a second line. A
-design-tool text node wraps as soon as the string exceeds the width — correct for a paragraph, wrong for
+design-tool text node wraps as soon as the string exceeds the width: correct for a paragraph, wrong for
 a form control. Set `maxLines: 1` with ellipsis truncation **on the component**, so every instance
 inherits and any instance added later cannot revert.
 
@@ -366,7 +366,7 @@ A screen taller than the viewport ships as **two versions**, side by side:
    **still carries the declared chrome**, bottom-pinned like every other frame.
 
    *Corrected in 0.3.0.* This rule previously said a hug frame carries no home indicator "because it is
-   a board rather than a viewport" — which contradicted figma-screens.md, where 0.2.0 had already
+   a board rather than a viewport": which contradicted figma-screens.md, where 0.2.0 had already
    reversed it. A missing element reads as an oversight rather than a decision, and it also removes a
    per-frame judgement call from the audit.
 
@@ -383,7 +383,7 @@ Two implementation details that matter:
 - **Threshold the overflow at ~24px.** A twin generated for a 10px overflow is rounding noise and makes
   the pair read as mechanical rather than considered.
 - **Generate the twin by cloning the interactive frame**, not by copying its markup. The two cannot then
-  drift — which is the exact failure the pair exists to expose.
+  drift: which is the exact failure the pair exists to expose.
 - A hug twin is **not a separate screen** for parity purposes. Its existence depends on content height at
   that viewport, so it is legitimately asymmetric between viewports.
 
@@ -467,7 +467,7 @@ happen to be 328px wide are not one component. A kit class created on a guess is
 reads as the current plan, and every later variation arrives as a modifier nobody asked for.
 
 **Every value is a custom property on first use.** Colour, spacing, radius, border width, font size,
-line height, weight. No threshold, no "this one is a one-off" — a literal in a rule has no second
+line height, weight. No threshold, no "this one is a one-off": a literal in a rule has no second
 occurrence to justify it, and it is exactly what will fail to port. The only escape is a
 `rawValueExemptions` entry.
 

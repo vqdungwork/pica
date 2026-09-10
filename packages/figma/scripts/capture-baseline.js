@@ -1,7 +1,7 @@
 /**
  * Appearance baseline. Paste as the `code` argument of a single use_figma call.
  *
- * Run it BEFORE any bulk mutation — token binding, colour snapping, value rounding — and again after,
+ * Run it BEFORE any bulk mutation, token binding, colour snapping, value rounding, and again after,
  * then diff. A pass that changes what a node renders is a defect even when every structural check
  * still returns zero.
  *

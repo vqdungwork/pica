@@ -15,7 +15,7 @@ build; this covers *how the tooling behaves*.
 
 # Part 1: The call budget is a real constraint
 
-Reads are rate-limited. On a small plan you will run out mid-task, and it does not fail gracefully — it
+Reads are rate-limited. On a small plan you will run out mid-task, and it does not fail gracefully: it
 returns a paywall message where you expected data.
 
 | Seat and plan | Limit |
@@ -35,7 +35,7 @@ avoidable.
 
 ## Establish the budget at intake
 
-Run `whoami` — it is free — and record the seat and plan in `.pica/state.json`. It returns every plan the
+Run `whoami`, it is free, and record the seat and plan in `.pica/state.json`. It returns every plan the
 user belongs to with the seat on each, so check the seat on the team that **owns the file**, not the first
 one listed.
 
@@ -63,7 +63,7 @@ Retry once after a short pause to tell them apart. If the retry succeeds it was 
 ## Do not fan out in parallel
 
 Parallel `use_figma` calls are the fastest way to trip the per-minute limit, and the per-minute limit is
-the one that stops work mid-thought. Batch **within** one call instead of across several — see Part 2.
+the one that stops work mid-thought. Batch **within** one call instead of across several: see Part 2.
 
 Sequential calls also keep the failure attributable. Four parallel writes that partly fail leave you
 guessing which; four sequential ones do not.
@@ -74,7 +74,7 @@ guessing which; four sequential ones do not.
 
 ## `page.loadAsync()` reads every page in one call
 
-The rule in [figma-screens.md](figma-screens.md) API trap 1 — switch to a page before traversing it — is
+The rule in [figma-screens.md](figma-screens.md) API trap 1, switch to a page before traversing it, is
 about correctness, and it is right: an unloaded page silently skips instance children. But
 `setCurrentPageAsync` can only be called **once per script**, which historically forced one call per page
 and made a ten-page audit cost ten calls.
@@ -117,7 +117,7 @@ sibling.
 ## Every `use_figma` call needs the skill loaded
 
 `figma-use` must be loaded and passed as `skillNames: "figma-use"` on every call. The write gate enforces
-it. It owns the API contract — colour ranges, read-only arrays, the font-load recipe, page switching — and
+it. It owns the API contract, colour ranges, read-only arrays, the font-load recipe, page switching, and
 this workflow does not restate it.
 
 ## Scripts are atomic

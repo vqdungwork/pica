@@ -8,8 +8,9 @@ argument-hint: "[the brief, or a path to it]"
 Runs steps 1 to 4: intake, research and tokens, the HTML UI kit, and if Figma is in scope, the
 foundations port. These happen in one sitting. Steps 5 onward have their own commands.
 
-Load the research package's `research.md` before anything else. If the research package is not
-installed, stop and say so rather than proceeding without it.
+Load `packages/core/rules/intake.md` before anything else. It is core's own rule now, so intake runs
+with core alone: a project that arrives with its own PRD and wants design only no longer drags in a
+package it will never use.
 
 `$ARGUMENTS` may contain the brief or a path to it. If it is empty, ask for the intake packet.
 
@@ -19,41 +20,35 @@ installed, stop and say so rather than proceeding without it.
 
 ### 1a. Collect the packet
 
-**Refuse to proceed without the first five.** The Figma declaration is the exception: nothing before
-phase 7 depends on it, so an unknown answer is recorded as an assumption rather than treated as a
-blocker. Figma is a developer handoff artefact, and who builds is often not settled until the contract.
-
-For the rest, refuse. List what is missing rather than filling gaps with assumptions.
+**Refuse to proceed without all five.** List what is missing rather than filling gaps with
+assumptions.
 
 | Input | Ask for |
 |---|---|
-| The brief | Raw and unedited. Not a summary |
-| Sources | Every file, URL and capture, each labelled `use` or `ignore` |
-| Commercial constraint | Hours or days, fixed-scope or T&M, any existing estimate, and **anything the client must not be told** |
-| Environment | Fonts installed, tools live, and **what only the human can do** |
-| Figma declaration | Is Figma a deliverable, yes or no. **Ask it now because it is free; it does not bind until the contract** |
-| Field and use | The field named **narrowly**, who uses it and how often, and the conditions of use: desk, outdoors, one-handed, gloved, shared device |
-| The trigger | What changed, when, what happens if nobody acts, and when the window closes |
+| The brief | Raw and unedited. Not a summary. `briefPath` is a **list**: an RFP with an annex is one brief in three documents, and any format is fine |
+| Sources | Every file, URL and capture, each with its **authority**: `authoritative`, `reference`, `historical`, `ignore`. One that is not `ignore` and cannot be opened **stops intake** |
+| Environment | Which MCP servers and tools are live, and **what only the human can do**. pica checks `playwright`, node, a package manager and a free port itself |
+| Field | The field named **narrowly**, resolved against `industries.json`. Refused rather than approximated when it is ambiguous |
+| Archetype | What shape each application is, **one per application**, resolved against `archetypes.json` |
 
-Ask for all seven in one message. Do not interrogate one at a time.
+Ask for all five in one message. Do not interrogate one at a time.
 
-The trigger is the cheapest of the seven and the one most often absent. If nothing changed, the
-product is being built because it can be, which is the commonest root cause of a product nobody
-wanted. It is also what makes a break-even month mean anything: a figure with no window against it
-cannot be prioritised against anything else.
+**Derive the last two where the brief states them.** Mark each value as derived with the section it
+came from, and confirm rather than re-ask. Confirm with the **consequences**, not just the label:
+*"finance → red means overdrawn, high density, a regulator applies."* A wrong classification is
+invisible as a name and obvious as a consequence.
 
-And **write down which of scope, date and resources is actually fixed**, and who fixed it. The
-deadline is almost never something you derive: it arrives from a funding round, a trade show, a
-regulatory date or a competitor. If all three are claimed fixed, record that as the top project
-risk and get it acknowledged, because it is the precise condition under which projects fail and it
-is nearly always survivable said early and fatal said late.
+**Three things intake no longer asks.** The audience is researched by `pica-discoverer`, because most
+briefs cannot answer it and a researched profile beats a guessed one. Whether Figma is a deliverable is
+asked at the port decision, after the freeze. Fonts are not a constraint at all: the family is
+declared in the tokens and verified at handoff.
 
 **Write the brief to `docs/brief.md` the moment it arrives, verbatim.** Not after the contract, not at
-the end of intake — the moment it arrives, before you have had a chance to tidy it. It is a reference,
+the end of intake: the moment it arrives, before you have had a chance to tidy it. It is a reference,
 so `reference-discipline.md` governs it: never edit it, and never regenerate it from the contract.
 
 Step 9 re-reads it cold and is forbidden from reading the contract instead, so a brief that lives only
-in a chat window makes closeout impossible on any project long enough to span sessions — which is every
+in a chat window makes closeout impossible on any project long enough to span sessions: which is every
 project past Phase A.
 
 The last row is the one that gets skipped and the one that most often invalidates a design after it is
@@ -86,15 +81,10 @@ Write `docs/exclusions.md`: everything the brief rules out, **quoted from the br
 human what else to add, and **set `exclusionsConfirmed` to true in state once you have asked.**
 
 This is the single highest-value artefact here, and it is weakest exactly where it is needed most. A
-one-line brief rules nothing out, so the quoted half comes back empty — on the projects with the least
+one-line brief rules nothing out, so the quoted half comes back empty: on the projects with the least
 defined scope, which are the ones where scope grows. The ask is what fills that gap, and until it is
 recorded, an empty `exclusions` means two different things: nobody was asked, or they were asked and
 there is genuinely nothing. GATE 1 cannot tell those apart, and neither can you in week three.
-
-### 1d. Cost the options
-
-Two or three delivery approaches in **one table with comparable totals**. Two options that cannot be
-compared are not a choice. Recommend one and say why.
 
 ### 1e. Tier the packages
 
@@ -125,10 +115,11 @@ Write `.pica/state.json`:
     { "name": "mobile",  "w": 375,  "h": 812,  "idiom": "mobile web in a device frame",
       "pointer": false, "breakpoints": [],     "chrome": [ ... ], "grid": null }
   ],
-  "briefPath": "docs/brief.md",
-  "trigger": { "changed": "", "when": "", "ifNothing": "", "window": "" },
-  "commercialConstraint": { "fixed": "", "by": "", "consequence": "", "variable": [] },
+  "briefPath": ["docs/brief.md"],
+  "briefAbsent": "",
   "field": "",
+  "archetype": {},
+  "disclosure": [],
   "measured": [],
   "targets": [
     { "kind": "web",     "viewports": ["desktop", "tablet", "mobile"], "stack": "react" },
@@ -165,56 +156,48 @@ than a habit. A single-application project declares one entry.
 The rest are **registers**, and they are what make later judgement calls checkable rather than
 aspirational. Four are filled now, two accumulate:
 
-- **`exclusions`** — a short matchable name for each thing the brief rules out, alongside the prose in
+- **`exclusions`**: a short matchable name for each thing the brief rules out, alongside the prose in
   `docs/exclusions.md`. `["settings", "profile", "onboarding video"]`. The audit compares frame names
   against these, because a ruled-out screen got designed anyway and was only caught
   two days later by a human re-reading the brief.
-- **`bannedChars`** — declared here rather than buried in the audit script's config, since it is a project
+- **`bannedChars`**: declared here rather than buried in the audit script's config, since it is a project
   fact established at intake.
-- **`copyRules`** — the client's house conventions on wording and punctuation, each with the check that
+- **`copyRules`**: the client's house conventions on wording and punctuation, each with the check that
   enforces it. A punctuation ban and a mixed-case wordmark both arrived as asides,
   and both had to be enforced mechanically afterwards. Ask for them at intake; a copy rule that lives only
   in conversation lasts about a day.
-- **`dataOwnership`** — per entity, who owns it and what this surface may do with it:
+- **`dataOwnership`**: per entity, who owns it and what this surface may do with it:
   `{entity, ownedBy, thisSurface, why}`. Read-only is never a blanket. An instruction
   that the user's data could not be changed on mobile was first applied to everything and disabled the
   request and approval flows the product exists for. What was meant was the **person's own record**, while
   everything a person *does* stays interactive. Per entity, that distinction is designable and checkable.
-- **`targets`** — the implementation targets, and **which viewports each one consumes**. One design at
+- **`targets`**: the implementation targets, and **which viewports each one consumes**. One design at
   three viewports; a responsive website takes all three, a native app takes tablet and mobile and never
   desktop. The surface is a property of the target, not of the viewport, which keeps parity a
   single-design question and lets the target decide only what gets built. `coverage-check` fails a
   target that names a viewport the design never produced, so "we cannot build iOS, nobody drew tablet"
   is found in Phase 3 rather than in Phase 7.
-- **`trigger`** what changed in the world, when, and the window it opens. `problem-check` reads it,
-  and `value-check` reads it again for a client case. Collected at 1a because it costs one question
-  and because a business case with no trigger is a solution hunting a problem.
-- **`commercialConstraint`** which of `scope`, `date` or `resources` is fixed by the outside world,
-  **who fixed it**, and what happens if it is missed. Named at length rather than `constraint`
-  because this project already carries `domainConstraints` and `constraintsNotApplicable`, and the
-  barest of four similar names is the one a reader resolves wrongly. For nine versions the
-  commercial constraint was collected here and read by nothing.
-- **`briefPath`** — where the verbatim brief was written at 1a. Step 9 reads it and is forbidden from
+- **`briefPath`**: a **list** of the documents the brief arrived as, written at 1a. Step 9 reads it and is forbidden from
   substituting the contract, so this is the one path that must survive the whole project. A rule that
   says "write it down" with nothing naming where is a preference; this is the name.
-- **`exclusionsConfirmed`** — false until the human has been asked what to exclude **beyond** what the
+- **`exclusionsConfirmed`**: false until the human has been asked what to exclude **beyond** what the
   brief quotes. Distinguishes an empty `exclusions` that was checked from one that was never asked about.
-- **`direction`** — starts `null`, filled at step 2c with the design direction and the assertions
+- **`direction`**: starts `null`, filled at step 2c with the design direction and the assertions
   `verify-html` holds every package to. A project may finish without one; a project may not have one that
   asserts nothing.
-- **`rawValueExemptions`** — starts empty, grows during the port when a value genuinely has no token.
-- **`deviations`** — starts empty, grows when the human approves Figma differing from the HTML.
+- **`rawValueExemptions`**: starts empty, grows during the port when a value genuinely has no token.
+- **`deviations`**: starts empty, grows when the human approves Figma differing from the HTML.
 
   **Ask this as S7 in `proposals.md`, in consequences rather than platforms.** *"Only on a phone, or on
   a laptop too?"* is answerable by anyone; *"iOS native or React Native?"* is answerable by about four
-  per cent of clients and is the wrong question anyway — the platform follows from the answer. State
+  per cent of clients and is the wrong question anyway: the platform follows from the answer. State
   what each target buys: a native build is two release pipelines, one of which cannot be rolled back the
   way the web can.
 
 A register with no entries is a valid state and means something: nothing has been excused yet.
 
 **Chrome is declared, never defaulted.** Each `chrome` entry carries a name, `required` (must be on
-every frame at that viewport) or optional (may appear; if it does, it must match), and `pinH`/`pinV` —
+every frame at that viewport) or optional (may appear; if it does, it must match), and `pinH`/`pinV`:
 two axes, because a sidebar pins horizontally and stretches vertically. Record **who** declared it: a
 rule that says "declare X" is violated just as much by the assistant quietly declaring X as by nobody
 declaring it.
@@ -232,12 +215,13 @@ Open three artefacts that run for the life of the project, and say they exist:
 
 ### GATE 1
 
-Present the contract, the exclusions, the costed options and the tiers. **Stop. Wait for approval of
-all four.** Do not begin research.
+Present the contract, the exclusions and the tiers. **Stop. Wait for approval of all three.** Do not
+begin research.
 
-**Refuse to pass this gate while `exclusionsConfirmed` is false, while `docs/brief.md` does not
-exist, or while `commercialConstraint.fixed` names none of scope, date or resources.** Both are one question and one file, and both are unrecoverable later: the brief because the
-session that carried it will be gone, the ask because nobody remembers whether it happened.
+**Refuse to pass this gate while `exclusionsConfirmed` is false, or while no path in `briefPath`
+exists and `briefAbsent` does not say why.** Both are one question and one file, and both are
+unrecoverable later: the brief because the session that carried it will be gone, the ask because
+nobody remembers whether it happened.
 
 ---
 
@@ -310,7 +294,7 @@ nothing wrote it, so the evidence check had nothing to find.
 
 **`assert` is the whole point.** A direction recorded as prose lasts about a day, exactly like a copy
 rule. `verify-html` reads `assert` and fails any package that breaches it, so the direction is still in
-force at package eleven. Do not write a direction with an empty `assert` — the check reports that as a
+force at package eleven. Do not write a direction with an empty `assert`: the check reports that as a
 finding, because a direction nothing can breach passes every screen by default.
 
 ### 2d. Extract tokens
@@ -334,7 +318,7 @@ found**. Name products and conventions. Quote platform guidelines where they app
 ### GATE 2
 
 Present the audit, the direction and the tokens together. **Stop. Wait for approval.** Everything
-downstream consumes these, so a late change is expensive — and the direction is the most expensive of the
+downstream consumes these, so a late change is expensive, and the direction is the most expensive of the
 three to change, because every screen built after it inherits it.
 
 ---
@@ -355,11 +339,11 @@ Present the kit. **Stop. Wait for confirmation.**
 
 ---
 
-## Step 4: Foundations into Figma — Phase C, optional
+## Step 4: Foundations into Figma, Phase C, optional
 
 **Skip this step entirely if `figmaInScope` is false.** Say so and finish: the project is HTML-only and
 the next thing to run is `/pica-wp <name>`. An HTML-only project is a complete pica project, not a
-truncated one — it is verified by the measured gate in `/pica-wp`, which is where the checks live.
+truncated one: it is verified by the measured gate in `/pica-wp`, which is where the checks live.
 
 **This step is not required before the first work package, and running it early is usually wrong.** It
 belongs to the optional Figma phase. Building the kit in HTML (step 3) is what every screen consumes;

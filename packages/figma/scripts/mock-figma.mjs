@@ -1,5 +1,5 @@
 /**
- * mock-figma.mjs — run the three in-Figma scripts outside Figma.
+ * mock-figma.mjs: run the three in-Figma scripts outside Figma.
  *
  * `figma-audit.js`, `capture-baseline.js` and `source-parity.js` are pasted as the `code`
  * argument of a `use_figma` call, so for three releases the only way to find out whether
@@ -7,7 +7,7 @@
  * lines of audit logic with no way to run it is 542 lines nobody dares edit.
  *
  * They do not need Figma. They need the small part of its API they call, and everything
- * that matters in them — traversal, counting, pairing, comparison — is ordinary
+ * that matters in them, traversal, counting, pairing, comparison, is ordinary
  * JavaScript once that surface exists.
  *
  * This is NOT a Figma emulator and must never grow into one. It implements exactly what
@@ -158,7 +158,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
 
   /* Node opacity is a separate channel from paint alpha and a bulk pass hits both. The
    * first version of this self-test only asserted the paint, so removing the opacity
-   * capture entirely still reported "all pass" — a test that could not see the thing it
+   * capture entirely still reported "all pass": a test that could not see the thing it
    * was watching, which is the failure this whole repository keeps finding in itself. */
   const dim = (op) => makeNode({ id: "p", name: "P", type: "PAGE", children: [
     makeNode({ id: "f", name: "Home", type: "FRAME", width: 375, height: 812, fills: [P([1,1,1])], children: [

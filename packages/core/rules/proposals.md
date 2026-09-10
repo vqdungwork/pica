@@ -12,9 +12,9 @@ pica's to make**, and how to hand those back without handing back a questionnair
 > **Propose where the decision is the client's AND they can judge it by looking.
 > Decide silently where it is craft AND looking would not help them.**
 
-Both halves matter. A decision that is theirs but unjudgeable — "Postgres or MySQL" — is not a
+Both halves matter. A decision that is theirs but unjudgeable, "Postgres or MySQL", is not a
 question, it is a transfer of risk to someone with no instrument to carry it. A decision that is
-judgeable but not theirs — which easing curve a sheet uses — is a question that costs their attention
+judgeable but not theirs, which easing curve a sheet uses, is a question that costs their attention
 and buys nothing.
 
 **The failure this prevents runs both ways.** A flow that asks nothing produces a design the client
@@ -31,7 +31,7 @@ streak, chain or run as the name"* is a habit-tracker rule wearing a general one
 noise on a payments product.
 
 **Every slot below exists on every project.** What goes in it comes from the sector entry, the
-measurement and the analysis — never from a list in this file. A slot whose material this project does
+measurement and the analysis: never from a list in this file. A slot whose material this project does
 not have is **skipped with a reason recorded**, the same way every other absence in pica is, because a
 question nobody asked and a question with no answer look identical afterwards.
 
@@ -59,7 +59,7 @@ Each option carries:
 
 - **the tradition it names**, from the ten in `design-vocabulary.md`
 - **the measured product it argues from**, and the numbers that make the argument
-- **what it costs** — a denser direction fits more and reads slower; a warmer one reads faster and fits
+- **what it costs**: a denser direction fits more and reads slower; a warmer one reads faster and fits
   less
 - **why the sector might refuse it**, when `style.notThis` rules it out
 
@@ -75,7 +75,7 @@ choice, it is a rendering of a decision already made, and the client can feel it
 
 Two questions that look like taste and are conditions of use.
 
-**Mode.** The sector says which is normal — `colour.leads` carries it, and for several sectors dark is
+**Mode.** The sector says which is normal: `colour.leads` carries it, and for several sectors dark is
 the default rather than the alternative. The client knows something the sector does not: when and where
 they will actually use it. Ask in those terms. *"Early mornings and a dim room"* is an answer; *"dark
 mode?"* invites a preference and gets one.
@@ -96,7 +96,7 @@ others. Pharmacy: the look-alike name.
 does not look like a design question. It looks like an edge case, gets built the obvious way, and the
 obvious way is the one the sector base says causes the damage.
 
-The slot is universal. The moment is read from the sector — never invented here, and never carried over
+The slot is universal. The moment is read from the sector: never invented here, and never carried over
 from the last project.
 
 **Offer how the product behaves at that moment, not how it looks.** Three plausible behaviours, each
@@ -114,7 +114,7 @@ Offer the alternatives **with what each implies**, not as a vocabulary preferenc
 a streak of days differently is a different promise about what happens when it ends; a word that
 describes a payment state differently is a different promise about whether it can be undone.
 
-**Skip this slot when the delta turns on no term** — a rebuild with the same vocabulary, a product whose
+**Skip this slot when the delta turns on no term**: a rebuild with the same vocabulary, a product whose
 words the client already owns. Skipping is normal. Skipping silently is not.
 
 ---
@@ -125,7 +125,7 @@ Runs only when the analysis found two or more human actors with anything shared 
 most products and not all of them.
 
 **Default visibility is a product decision with a legal edge**, and several sectors list a default in
-their `forbidden` entries — default-public sharing of health or location data is one. Those constraints
+their `forbidden` entries: default-public sharing of health or location data is one. Those constraints
 bound the options; they do not replace the question.
 
 Offer it as **what each person sees of the other**, in their own words, with a worked example. Not as a
@@ -139,7 +139,7 @@ without reading.
 **Every use case, with what it costs, and a line the client draws.**
 
 The estimate exists by phase 5 and the use cases by 2.7, so this is the one proposal that can be priced
-rather than argued. It runs at CONFIRM 2, where scope is being frozen anyway — the difference is that
+rather than argued. It runs at CONFIRM 2, where scope is being frozen anyway: the difference is that
 the client sees the price of each thing they are freezing rather than the total of all of them.
 
 **Show hours or days, never story points.** A unit the client cannot convert is a unit that hides the
@@ -175,8 +175,8 @@ preference wearing a rationale, and it does not become a choice by having two si
 ## Options in a slot differ on one stated axis
 
 Three options that differ on everything are not comparable, and the client picks the one that renders
-best rather than the one that fits. Name the axis — density, warmth, how much the product says when
-something goes wrong — and hold the rest constant.
+best rather than the one that fits. Name the axis: density, warmth, how much the product says when
+something goes wrong, and hold the rest constant.
 
 **A slot with one option is not a proposal.** It is a decision being shown, and it should be reported as
 one rather than presented as a choice.
@@ -191,9 +191,9 @@ one rather than presented as a choice.
 "proposals": [
   { "slot": "S1", "presented": true, "axis": "how much the product says at a glance",
     "options": [
-      { "id": "A", "names": "flat",     "from": "measured: Streaks — 2 hues, 1 radius, no motion",
+      { "id": "A", "names": "flat",     "from": "measured: Streaks, 2 hues, 1 radius, no motion",
         "costs": "fits less on a screen, reads faster" },
-      { "id": "B", "names": "editorial", "from": "measured: <product> — 5 hues, serif display",
+      { "id": "B", "names": "editorial", "from": "measured: <product>, 5 hues, serif display",
         "costs": "slower to scan, stronger identity" },
       { "id": "C", "names": "material",  "from": "sector tradition, the baseline",
         "costs": "familiar, and familiar to a fault" }
@@ -229,7 +229,7 @@ answerable by looking, and the expensive ones asked first.
 
 - [ ] Every slot is either presented or skipped with a reason in `state.proposals`
 - [ ] Every presented slot names the axis its options differ on
-- [ ] Every option names its provenance — a measured product, a sector field, or a use case with a cost
+- [ ] Every option names its provenance: a measured product, a sector field, or a use case with a cost
 - [ ] No option violates the sector's `forbidden` list
 - [ ] Every presented slot records a choice, who made it, when, and their own words
 - [ ] S1 rendered the same screen three times, with the same content

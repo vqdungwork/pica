@@ -16,7 +16,9 @@
     ]
   },
   "requires": {
-    "state": [],
+    "state": [
+      "audience"
+    ],
     "artifacts": [
       "docs/contract.md"
     ],
@@ -25,7 +27,9 @@
     ]
   },
   "produces": {
-    "state": [],
+    "state": [
+      "measured"
+    ],
     "artifacts": [
       "tokens/tokens.json",
       "tokens/tokens.css"

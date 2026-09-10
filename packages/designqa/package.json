@@ -34,12 +34,12 @@
   "checks": [
     {
       "run": "build-diff.mjs",
-      "passes": "0 findings, at 7.10 only",
+      "passes": "0 findings, the React demo against the approved reference",
       "args": "<ref> <state>",
-      "phase": "build",
+      "phase": "design",
       "needs": [
         "@.audit/html-reference.json",
-        "@.audit/build-reference.json"
+        "@.audit/demo-reference.json"
       ]
     }
   ],

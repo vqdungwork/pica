@@ -52,30 +52,30 @@ entirely a forced-font artifact.
 ## Both sides must name their font, and it must be the same one
 
 Forcing a common family is not enough on its own, because nothing checks that it happened. Text
-position depends on the family — a swap moved hug-width nodes **2 to 5 percent** on one project, several
-times the tolerance — so a capture in one family diffed against a dump in another reports typeface as
+position depends on the family: a swap moved hug-width nodes **2 to 5 percent** on one project, several
+times the tolerance, so a capture in one family diffed against a dump in another reports typeface as
 layout, and the report reads like a broken design.
 
 The dangerous case is not disagreement, it is **silence**. Through 0.7.0 the dump recorded no font at
 all, so a dump taken in the handover font was indistinguishable from one taken in the working font. A
-team that flips between the two — designing in one, handing over in another — hits this every other run
+team that flips between the two, designing in one, handing over in another, hits this every other run
 and has no way to tell.
 
 So:
 
 - the **capture** records the family the browser actually resolved, forced or not, in `meta.font`
-- the **dump** carries `font` on **every frame** — a partly labelled dump is not a labelled dump, and
+- the **dump** carries `font` on **every frame**: a partly labelled dump is not a labelled dump, and
   accepting one lets the unlabelled frames through unchecked, which is the failure the guard exists to
   prevent, reintroduced by the guard's own leniency
 - `geometry-diff` refuses to run when either is missing or they differ. Unknown is not a pass.
 
 **Pick one diff font and stay in it.** The handover font is a different question, answered by the checks
 that do not depend on position: overflow, truncation, whether a hug label still fits its fixed parent,
-contrast. Those hold across families, so flipping the font costs nothing and needs no re-dump — the dump
+contrast. Those hold across families, so flipping the font costs nothing and needs no re-dump: the dump
 is only retaken when the *design* changes.
 
 And wire it end to end. On the project this comes from, the harness captured with a forced font, wrote
-the artefact, and **then diffed the native one** — the two sides shared a family only by luck. The same
+the artefact, and **then diffed the native one**: the two sides shared a family only by luck. The same
 harness read geometry-diff's stdout and ignored its **exit code and stderr**, so a script that refused
 to run looked exactly like one that passed. **A wrapper that cannot see its tool fail is not a check.**
 
@@ -85,7 +85,7 @@ Every check in this file verifies a binding **exists**. None of them verifies th
 gap let a token-binding pass flatten 38 translucent surfaces while reporting "0 remaining unbound, all
 verified" on every page.
 
-So before any bulk mutation — binding, snapping, rounding — **capture a baseline**, and diff after:
+So before any bulk mutation, binding, snapping, rounding, **capture a baseline**, and diff after:
 
 ```js
 // per SOLID paint, resolved through the alias chain, alpha included
@@ -112,7 +112,7 @@ Two checks close that gap, and both are cheap:
 
 1. **Per-frame text-run counts.** Count visible runs in the design, count them in the HTML reference,
    flag any delta beyond a calibrated tolerance. On one project this flagged 8 frames and **every flag
-   was real** — including an invisible stray text node on every instance of a component, where a
+   was real**: including an invisible stray text node on every instance of a component, where a
    button label had been clipped by resizing rather than removed.
 2. **Content height vs container height.** For every vertical auto-layout node, compare
    `lastChild.y + lastChild.height + paddingBottom` against the node's own height. Anything over is
@@ -131,18 +131,18 @@ between HTML and a design tool are permanent, not defects:
 
 The HTML capture records the run's glyph **ink** rect. The design tool records the text node's
 **layout box**. For left-aligned text those share a left edge, so comparing `x` to `x` is sound.
-For anything else it is not, and the failure is not noise — it is a comparison of two unrelated
+For anything else it is not, and the failure is not noise: it is a comparison of two unrelated
 numbers:
 
-- **right-aligned FILL text** — the box starts at the container's left while the ink ends at the
+- **right-aligned FILL text**: the box starts at the container's left while the ink ends at the
   container's right, so `dx` is the container's width minus the string. That number is neither a
   defect nor a pass.
-- **centred text** — the box spans the container, the ink sits in the middle, and the error scales
+- **centred text**: the box spans the container, the ink sits in the middle, and the error scales
   with the string, so a long label fails while being perfectly placed.
 
 Through 0.7.0 the answer here was to tolerate it: annotate centred findings, and ask the project to
 write a `deviations` entry per run. On the project that produced this rule that meant **eleven
-hand-written exemptions**, and one of them hid a real **258px** error for days — because the exemption
+hand-written exemptions**, and one of them hid a real **258px** error for days: because the exemption
 removed the very run that would have caught it. **An exemption that exists to paper over a measurement
 bug is a place for defects to live.**
 
@@ -164,7 +164,7 @@ so the note is the difference between a gate that passes and a gate that has an 
 ## Deviating from the HTML
 
 The HTML wins by default. Two cases where it does not, and both go in the **`deviations` register** in
-`.pica/state.json` — not into prose, because a deviation recorded only in a review document cannot be
+`.pica/state.json`: not into prose, because a deviation recorded only in a review document cannot be
 distinguished from a defect on the next run:
 
 ```json
@@ -186,7 +186,7 @@ The geometry diff reads it: a delta above tolerance that **is** registered is re
 one that is not is reported as a finding. Without the register the definition of done below is
 unfalsifiable, because "recorded as a decision" has nowhere to be recorded.
 
-Two rules on entries. `why` names the **person or the reason**, never "intentional" — the point is that a
+Two rules on entries. `why` names the **person or the reason**, never "intentional": the point is that a
 stranger can audit it. And `by: "html-fix-pending"` is a promise: the HTML gets corrected, the entry gets
 deleted. A register that only grows is a backlog pretending to be documentation.
 
@@ -203,18 +203,18 @@ Never silently split the difference.
 ### An exemption is a claim, and claims age
 
 Every entry asserts something about the file at the moment it was written. Nothing re-reads it, and the
-diff *drops the exempted run* rather than comparing it — so a stale entry does not merely go out of
+diff *drops the exempted run* rather than comparing it, so a stale entry does not merely go out of
 date, it **blinds the check at exactly the point it was pointed**.
 
 On the project this rule comes from, an entry written on 28/08 said the node was `FILL`, box `48..359`.
 By 04/09 forty-six such nodes had become `layoutGrow 0`, `FIXED`, `w=231`. Figma sat at `x=72`, the HTML
-at `x=330.4` — **258px apart** — and the diff reported zero findings, because the run it would have
+at `x=330.4`, **258px apart**, and the diff reported zero findings, because the run it would have
 caught was the run the exemption removed. A human opened the frame and saw it.
 
 Two habits follow.
 
 **Write the exemption on the invariant, not on a sample.** For a right-aligned label the invariant is
-the right edge — `375-16` and `768-24` — which holds whatever the lead slot contains. The left edge
+the right edge, `375-16` and `768-24`, which holds whatever the lead slot contains. The left edge
 legitimately varies, so an entry that asserts it is wrong the first time the layout changes.
 
 **Give every exemption whose premise is measurable a lens that re-measures it.** If the entry says "all
@@ -259,7 +259,7 @@ A prototype check that counts links, or proves both viewports are wired identica
 dangling destination, can pass while whole arms of the flow float off the graph. All three were true of
 a file where `Notifications Intro` and `Notification Settings` pointed only at each other: nothing
 outside reached either, and **17 of 25 screens per lane** could not be opened by clicking. One missing
-reaction did it — a primary CTA with no link — and every gate was green.
+reaction did it, a primary CTA with no link, and every gate was green.
 
 **Walk it breadth-first from the entry frame, once per lane**, where a lane is one viewport in one
 theme. Report an unreached screen only when it is in no register, so deliberate cases stay quiet and
@@ -332,7 +332,7 @@ Everything must return zero. `scripts/figma-audit.js` runs it as one call.
 - [ ] Text-run counts match the HTML reference within the calibrated tolerance
 - [ ] Every screen taller than its viewport has its hug twin
 - [ ] Prototype clones re-synced after the last frame-level fix, audited by **measuring** a property
-      that changed — not by remembering the re-sync
+      that changed: not by remembering the re-sync
 - [ ] Baseline diff is empty, or every resolved RGBA delta is a recorded decision
 - [ ] Every screen frame carries a bottom-pinned home indicator, hug frames included
 - [ ] Zero detached instances; zero raw shapes in screens beyond images, scrims and indicators

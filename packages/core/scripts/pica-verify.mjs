@@ -23,8 +23,8 @@
  * Usage:
  *   node pica-verify.mjs [state.json] [--phase <name>] [--adopt] [--evidence] [--json]
  *
- *   --phase <name>   only this phase: intake, discover, research, value, analyse,
- *                    design, scope, estimate, architect, build, close
+ *   --phase <name>   only this phase: intake, discover, research, analyse,
+ *                    design, scope, close
  *   --adopt          print what a project would have to record to stop abstaining,
  *                    in the order the chain would ask for it
  *   --evidence       print every assertion that passed, not only the count. This is what
@@ -98,8 +98,10 @@ catch (e) {
 }
 
 const PROJECT = path.dirname(path.dirname(path.resolve(statePath)));
-const PHASES = ["intake", "discover", "research", "value", "analyse", "design",
-  "scope", "estimate", "architect", "build", "close"];
+/* 2.0.0 deleted four: value, estimate, architect and build. A phase nothing can be in is a
+ * lane --phase still accepts and a heading the table still prints empty, which reads as
+ * "nothing to do here" rather than "this no longer exists". */
+const PHASES = ["intake", "discover", "research", "analyse", "design", "scope", "close"];
 
 /* ---- collect the checks the packages declare ---------------------------- */
 const checks = [];

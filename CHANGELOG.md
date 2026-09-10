@@ -1,19 +1,105 @@
 # Changelog
 
+## 2.0.0
+
+### The build half goes, and everything that was asked for and never checked
+
+pica took a brief to a released product. It now takes a brief to a **confirmed PRD, an agreed scope of
+work, and a working interactive demo**, and stops. What it costs to build from there is the
+operator's estimate to make, outside pica.
+
+Six packages deleted: `developer`, `qa`, `impl`, `architect`, `estimate`, and `model`, whose entire
+content was ROI costing built on the estimate it can no longer have. `packages/_planned` went with
+them; all four contracts it held were implementation packages for a product pica no longer builds.
+Fourteen packages become eight, ten agents become seven, eleven phases become seven, four
+confirmations become three hard stops and three soft checkpoints.
+
+**Uninstall the six.** They are removed from the marketplace, so `update` will not take them off a
+machine that already has them:
+
+```
+claude plugin uninstall pica-developer@pica pica-qa@pica pica-impl@pica \
+                        pica-architect@pica pica-estimate@pica pica-model@pica
+```
+
+### The manifests describe a graph, and nothing had ever read it
+
+`pica-status` has resolved `requires`/`produces` since the packages split and the graph itself was
+never checked, so the declarations drifted from the chain and from each other. `contract-check`
+returns twelve findings against 1.2.4. `docs/contract.md` had two producers, which is not a tie the
+resolver reports but one it silently breaks: inventing an edge from research to analyst that
+reverses the documented order. `state.field` was required by two packages and produced by none: the
+main thread writes it at intake and never said so.
+
+### Four rules that asked for something and no check enforced
+
+Each of these was written down, believed, and unverified. The pattern is the one this repository
+keeps finding in itself, and three of the four say so in their own words.
+
+- **The storybook.** `html-prototype.md`: *"No check reads this file… the storybook is a rule with no
+  executable behind it."* It also said exactly what would close it. `foundations-check` is written to
+  that specification.
+- **The state matrix.** Eight minimum states named, and *"the cheapest possible way to avoid finding
+  a missing state during handoff"*: read by nothing. A happy-path screen at every viewport was green
+  with seven states missing.
+- **Frame inventory.** `geometry-diff` documents that it cannot detect absence and hands the job to
+  `parity-check`, which states outright that it does not do it. A port dropping five frames passed
+  everything. A check delegating to a check that does not accept the job is worse than a rule with no
+  executable, because the delegation reads as coverage.
+- **Process modelling.** AS-IS and TO-BE were four sentences of prose, no notation named anywhere in
+  the repository, and `trace-check` asserting that a non-empty string existed.
+
+### Three knowledge axes instead of one
+
+`industries.json` answered one question, what field is this, and it was never the only one that
+shapes a screen. `audiences.json` adds five composable dimensions whose numeric floors merge by
+maximum, which is what turns "audience floors override sector density" into arithmetic.
+`archetypes.json` attaches per application and says what shape it is. Every agent carries a generated
+register of all three, and `knowledge-gen --check` fails when a copy goes stale.
+
+The audience is **researched, not declared**. Most briefs cannot answer it, and a guessed band
+silently removes the floors that protect the people who need them.
+
+### The demo is React, and the port did not have to change
+
+Boards stay static: the rule now reads *no build step to view a **board***. The flow becomes
+`demo.html`, served, with every state addressable by URL. The port never read HTML: it reads the
+capture, and `capture-html-reference` has had `--url` since it was written.
+
+Three new guards for the three ways a React capture can be silently wrong: `capture-settled` refuses
+to write a reference taken mid-render, `font-check` catches a webfont that fell back, and
+`state-coverage-check` catches a state nobody built: which in static HTML is a missing file you can
+see and in React is a branch nobody wrote.
+
+### Fonts stop being a constraint
+
+Intake asked which fonts were installed. That existed only because Figma's plugin runtime cannot load
+a font installed during a session: Figma's limit, applied to the source of truth, inverting the rule
+that where the two disagree Figma is wrong. Design is font-free; the family is declared in the tokens
+and on the kit page; the port resolves it and reports substitutions.
+
+### Counts
+
+154 assertions across 24 check scripts becomes **156 across 32**, and every number in the README
+and the banner is recounted by `count-test` rather than remembered. Two more checks run inside a
+Figma session and node cannot invoke them, so `pica-verify` reports them separately rather than
+counting them in either direction. The flow diagram is generated from the manifests
+by `scripts/flow-diagram.mjs`, so the picture cannot disagree with the code.
+
 ## 1.2.4
 
 ### The counts, recounted by something that does not forget
 
 Four releases running shipped a wrong number about this repository. 1.2.1 fixed the check count in two
 places and missed four. 1.2.2 found six more, including a banner claiming 8 specialists and 116 checks.
-1.2.3 bumped thirty manifests and left the version badge reading **1.2.2** — the same defect, one
+1.2.3 bumped thirty manifests and left the version badge reading **1.2.2**: the same defect, one
 release after the release that was about that defect.
 
 The counts were never hard to get right. Nothing recomputed them, so each was a sentence somebody had
 to remember to edit.
 
 `scripts/count-test.mjs` derives every number from code and asserts it wherever the repository states
-it — four badges, the `What ships` table, the prose, and `assets/banner.svg`. The check count comes
+it: four badges, the `What ships` table, the prose, and `assets/banner.svg`. The check count comes
 from summing the README's own enumeration table, the one headed *"Listed so the number can be
 recounted rather than trusted"*: it is the register, and this is what recounts it.
 
@@ -47,7 +133,7 @@ Two failures the pipeline found on itself, in its first two runs:
 
 **It went green having proved 85 of 89.** `mutate.mjs` produces the fixture's capture with
 playwright, which is installed on the machine this was written on and absent from a runner. Four
-capture-reading mutations reported SKIPPED and the suite exited 0 regardless — a green tick over four
+capture-reading mutations reported SKIPPED and the suite exited 0 regardless: a green tick over four
 unproven checks, which is the failure the pipeline exists to end. Chromium is installed now, and a
 skipped mutation fails the build.
 
@@ -59,8 +145,8 @@ on purpose, per the rule at the top of that file.
 git discovers a repository by walking **up** from the working directory, so `rev-parse --git-dir`
 succeeds from any subdirectory of any repository. `impl-check` tested reachability and therefore
 accepted a directory that was not a repository at all, then answered about whichever one enclosed it.
-Every git call inherited that directory: branch age, branch protection — which resolved `owner/repo`
-from the wrong remote and queried it over the network — and both `git ls-files` scans.
+Every git call inherited that directory: branch age, branch protection, which resolved `owner/repo`
+from the wrong remote and queried it over the network, and both `git ls-files` scans.
 
 The credential scan is why this was urgent rather than merely wrong. Pointed at an uncommitted
 directory, `git ls-files` returned nothing and `secrets` reported **"0 tracked files"** as a pass. A
@@ -73,7 +159,7 @@ something else.
 
 Identity, not reachability: the directory must **be** the repository root, and is refused with a
 message naming the repository it sits inside. `scripts/scope-test.mjs` asserts the property in both
-directions — a non-root directory refused, a genuine root untouched — and was watched failing against
+directions, a non-root directory refused, a genuine root untouched, and was watched failing against
 the pre-fix code in the same topology before it was believed.
 
 ## 1.2.2
@@ -82,7 +168,7 @@ the pre-fix code in the same topology before it was believed.
 
 1.2.1 corrected the check count "in the two places I fixed earlier and not in the four I missed".
 There were six. The version badge still read **0.9.5**, the checks badge **116**, the specialists
-badge **8** — and `assets/banner.svg`, the image at the top of the README, said 8 specialists and 116
+badge **8**, and `assets/banner.svg`, the image at the top of the README, said 8 specialists and 116
 checks in the first thing anyone sees.
 
 Recounted from the code rather than from prose: **154 check ids across 24 scripts**, 10 agents, 19
@@ -93,7 +179,7 @@ Three defects in the table headed *"Listed so the number can be recounted rather
 is the one place a wrong number is not a typo but a broken promise:
 
 - It totalled **116** under a summary claiming 154, because it was the 0.9.5 table. `problem-check`,
-  `discover-check`, `value-check`, `close-check` and `concept-check` — 40 check ids — were missing.
+  `discover-check`, `value-check`, `close-check` and `concept-check`, 40 check ids, were missing.
 - `contrast-check` had **no description at all**: its four items had landed in `spacing-check`'s row
   as a stray extra column, so one check was undocumented and the other described someone else's work.
   Both counts were wrong too; they are 2 and 3.
@@ -104,14 +190,14 @@ is the one place a wrong number is not a typo but a broken promise:
 
 `SKILL.md` and the 1.2.1 notes both claimed **26 of 28 checks and 161 assertions**. It reproduces as
 **25 of 28 and 153, 0 failures**. The difference is `impl-check`, which abstains for want of a
-repository of its own, and 8 assertions is exactly its weight — a number carried forward from a run
+repository of its own, and 8 assertions is exactly its weight: a number carried forward from a run
 where it found one. And `.audit/` is gitignored, so on a fresh clone **9 checks abstain rather than 3**
 until the capture is generated. Both facts are now in the README next to the command.
 
 ### `mutate.mjs` refused the invocation the README documents
 
 Every check runs with `cwd: DIR` and is handed a state path built from the same `DIR`, so a relative
-directory made the two disagree. `node scripts/mutate.mjs examples/approvals` — the documented shape —
+directory made the two disagree. `node scripts/mutate.mjs examples/approvals`: the documented shape,
 reported all 19 state-reading checks `FAIL` on a missing state file and then refused to run at all as
 a failing baseline. Resolved absolute. **The suite was fine; the argument was**, which is the failure
 mode that looks most like a broken product.
@@ -119,12 +205,12 @@ mode that looks most like a broken product.
 `--fixture` is now documented as the invocation that self-tests pica, because it builds the example
 with the two things it cannot carry in this repository: a git repository of its own and a fresh
 capture. Pointed at `examples/approvals` in place, `impl-check` reads *this* repository instead and
-reports it not ready to release — correctly. pica still has no CI pipeline of its own.
+reports it not ready to release: correctly. pica still has no CI pipeline of its own.
 
 ### Six shipped checks were absent from the index a session reads
 
 `arch-check`, `contrast-check`, `spacing-check`, `shell-check`, `dev-check` and `qa-check` ship, are
-declared in their manifests, and run under `pica-verify` — and appeared nowhere in `SKILL.md`'s
+declared in their manifests, and run under `pica-verify`, and appeared nowhere in `SKILL.md`'s
 Scripts section, which is what a session reads to know what exists. `trace-check`, `verify-html` and
 `estimate-check` listed fewer ids than they emit (6 of 7, 5 of 7, 6 of 10).
 
@@ -143,15 +229,15 @@ the flow table, the two new packages, the line saying `pica-verify` runs everyth
 table of the five new checks with the gap each closed, the dispute register, and a pointer to the
 example.
 
-`CHANGELOG` had stopped at 0.9.5 with nine releases behind it. Recorded — except for 1.2.1 itself,
+`CHANGELOG` had stopped at 0.9.5 with nine releases behind it. Recorded: except for 1.2.1 itself,
 which is this entry, written in 1.2.2.
 
 `design-system.html`. `pica.md` has asked for the storybook since step 3 and `html-prototype.md`
 names it, and **no check reads it**: the only script that mentions the file is the capture producer,
 which excludes it. So it was a rule with no executable behind it, the class of gap 0.3.0 shipped
-three of. The example now ships a complete one, including the states that matter — a 64-character
+three of. The example now ships a complete one, including the states that matter: a 64-character
 payee that wraps rather than truncating, a fee of zero rendered as `0.00`, an empty state that does
-not read as loading — and both the rule and the page itself say plainly that nothing checks them.
+not read as loading, and both the rule and the page itself say plainly that nothing checks them.
 
 What would close it: a check that every token in `tokens.json` appears on the page and every class a
 screen uses appears there with a variant. Recorded rather than built, because a check invented at the
@@ -467,7 +553,7 @@ distinction: **the slots are universal, and what fills them is derived.**
 Getting that backwards is the obvious mistake. A rule that offered "streak, chain or run"
 as the name would be a habit-tracker rule wearing a general one's clothes, and noise on a
 payments product. So the file names seven slots that exist on every project, and every one
-of them is filled from the sector entry, the measurement and the analysis — never from a
+of them is filled from the sector entry, the measurement and the analysis: never from a
 list in the file:
 
 | | Slot | Fills from |
@@ -484,7 +570,7 @@ The material was already in the base and nothing read it that way. The same slot
 differently per field: fitness names the broken streak, finance the silently failed
 transfer, education being shown you are behind in front of others, pharmacy the look-alike
 name. **S3 is the highest-value question in the flow and the one nobody thinks to ask**,
-because it does not look like a design question — it looks like an edge case, gets built
+because it does not look like a design question: it looks like an edge case, gets built
 the obvious way, and the obvious way is the one the field already knows causes the damage.
 
 ### The law, and both halves of it
@@ -492,7 +578,7 @@ the obvious way, and the obvious way is the one the field already knows causes t
 > Propose where the decision is the client's AND they can judge it by looking.
 > Decide silently where it is craft AND looking would not help them.
 
-A decision that is theirs but unjudgeable — "Postgres or MySQL" — is not a question, it is
+A decision that is theirs but unjudgeable, "Postgres or MySQL", is not a question, it is
 a transfer of risk to someone with no instrument to carry it. A decision that is judgeable
 but not theirs costs their attention and buys nothing. **A flow that asks everything
 produces a client who stops reading by the fourth question and approves the rest, which is
@@ -503,7 +589,7 @@ worse than not asking: it looks like consent.**
 `proposal-check.mjs` verifies the SHAPE of a proposal and never the content: a slot
 addressed or skipped with a reason, an axis its options differ on, provenance per option,
 two or more options, nothing the sector's own forbidden list names, and a choice recorded
-with who, when and **the client's own words** — because a paraphrase is a second decision
+with who, when and **the client's own words**: because a paraphrase is a second decision
 wearing the first one's authority.
 
 It refuses to run at all on a project with no register. Reporting zero findings there
@@ -542,18 +628,18 @@ package was right**, and the gap was found by running the flow rather than by re
 
 Two packages close it:
 
-**`pica-developer`** — the code. The API contract as a seam with mandatory `errors`, the four places
+**`pica-developer`**: the code. The API contract as a seam with mandatory `errors`, the four places
 state is allowed to live and why each is wrong for the other three, the four kinds of failure and the
 shape each needs so the copy can reach it, components before screens, a performance budget with the
 condition it holds under, accessibility written in rather than retrofitted, and security at the
 boundary. `dev-check.mjs` decides seven of those from the source.
 
-**`pica-qa`** — the tests. The pyramid with an owner per layer, one end-to-end test per use case rather
+**`pica-qa`**: the tests. The pyramid with an owner per layer, one end-to-end test per use case rather
 than per screen, every business rule asserted somewhere, a regression test that failed before it passed,
 four severity levels with a release gate that reads severity rather than a count, and test data that is
 never real. `qa-check.mjs` decides seven of those.
 
-`pica-impl` keeps the repository — pipeline, branches, environments, secrets — and its "what this is
+`pica-impl` keeps the repository, pipeline, branches, environments, secrets, and its "what this is
 not" section now names the split instead of denying the capability.
 
 ### Nine role agents, and none of them were loading
@@ -591,15 +677,15 @@ labelled assumption carrying a confidence and a blast radius, surfaced beside th
 
 ### Eight defects the flow found in itself, by being run
 
-The chain was run end to end on a real product — a community-pharmacy dispensing queue,
-brief to released code, Figma skipped — and it found more in pica than pica found in it.
+The chain was run end to end on a real product: a community-pharmacy dispensing queue,
+brief to released code, Figma skipped, and it found more in pica than pica found in it.
 Every fix below is a check that could not have bitten before, and every one was
 mutation-tested in both directions afterwards: the defect is caught, no other check
 co-fires, and the legitimate artefact still passes clean.
 
 **`copy-check` printed a pass over a state it never looked at.** Its error-state scan
 matched "error", "failed" and "offline", and the product's refusal screens were captioned
-"refused" — so it reported `0 findings (0 error frames)`. Now it also matches refused,
+"refused", so it reported `0 findings (0 error frames)`. Now it also matches refused,
 denied, blocked, rejected and unavailable.
 
 **And then it passed a dead end anyway.** With the frames finally in scope, a refusal
@@ -614,7 +700,7 @@ alone saw the label and not the sentence beneath it. Text runs now carry the nea
 classed ancestor at index 11, appended so every existing consumer keeps its positions.
 
 **`dev-check` crashed on the documented shape.** `enforcedBy` is a string in
-`business-analysis.md` and in `trace-check`, and `dev-check` read it as an array —
+`business-analysis.md` and in `trace-check`, and `dev-check` read it as an array:
 `TypeError: (r.enforcedBy || []).map is not a function` on the first project that
 followed the documentation.
 
@@ -624,7 +710,7 @@ because the word list had "database" and not "table" or "grant".
 
 **And it had no way to say a rule is presentational.** "A drug name is never truncated"
 is a rendering guarantee no API can hold. `presentationOnly` plus `presentationWhy` is
-now the register — declared, reasoned, counted in the report — because every other
+now the register, declared, reasoned, counted in the report, because every other
 deliberate exception in this repository has one.
 
 **`impl-check` could not see Postgres.** The stack alias map held one needle per
@@ -634,8 +720,8 @@ four characters so `pg` does not match `jpg`.
 
 **It also reported someone else's test fixture as your credential.** A tracked
 `node_modules` flooded the secrets scan; the one finding was a credential-shaped string
-in a vendored type definition. Vendored paths are still scanned — a real secret vendored
-in is real — and a finding inside one says so, while the tracked dependency directory is
+in a vendored type definition. Vendored paths are still scanned: a real secret vendored
+in is real, and a finding inside one says so, while the tracked dependency directory is
 reported as the defect to fix first.
 
 **`branch-protect` told you how to satisfy it and then ignored the answer.** Its message
@@ -656,7 +742,7 @@ one that says nothing is refused.
 Three defects in the product itself came from steps no script performs, and they are
 worth naming because they are the argument for those steps existing:
 
-- **Two tall-man forms were wrong** — `ceftAZIDime` for `cefTAZidime`, and `morphINE`,
+- **Two tall-man forms were wrong**: `ceftAZIDime` for `cefTAZidime`, and `morphINE`,
   which is not on the ISMP list at all. A patient-safety error in a pharmacy product that
   all eleven design gates passed. Found by rendering the screen and reading it.
 - **Every queue row opened the clinical screen** whatever stage its item was at, so a
@@ -675,7 +761,7 @@ where six invented drug names had all fitted.
 sit side by side under `packages/`, so a sibling is `${CLAUDE_PLUGIN_ROOT}/../<name>`.
 Installed, each package has its own versioned directory as `pica-<name>/<version>`, and
 that path resolves to nothing. Seven commands and all nine agents carried it. `/picaflow`
-therefore reported **every one of its measured checks as SKIPPED on every real install** —
+therefore reported **every one of its measured checks as SKIPPED on every real install**:
 honest, and the whole chain silently unavailable. The agents were worse: they used
 repo-relative paths, which resolve only when the project being worked on *is* the pica
 repository.
@@ -686,8 +772,8 @@ apart: "pica-html is not installed" sent someone to install a package they alrea
 when what was missing was one script that version does not ship.
 
 **The delivery freeze could be turned off by a typo.** `gate-figma-write` checked
-`delivered is True`, so `"delivered": "true"` — a plausible hand-edit of a file anyone can
-edit — read as not-delivered and let writes through. A non-boolean is now refused as
+`delivered is True`, so `"delivered": "true"`, a plausible hand-edit of a file anyone can
+edit: read as not-delivered and let writes through. A non-boolean is now refused as
 malformed. This is the same fail-open the file's own closing comment exists to prevent, in
 the one gate nobody would think to re-test, because the project it protects is already
 handed over.
@@ -775,8 +861,8 @@ alongside `fields`.
 
 `reference-discipline.md` and `review-discipline.md` carry the discipline every other rule depends on,
 and neither ended in a checklist, so what they require could be agreed to and never checked against.
-`research.md` had none either, and its criteria — the intake packet, token provenance, `copyRules`,
-`dataOwnership` — appeared in no other rule's. `figma-rebuild.md` replaces several of the port's gates
+`research.md` had none either, and its criteria: the intake packet, token provenance, `copyRules`,
+`dataOwnership`: appeared in no other rule's. `figma-rebuild.md` replaces several of the port's gates
 and had no checklist of its own.
 
 All four now have one, written from what those files already say rather than from new criteria. The three
@@ -810,7 +896,7 @@ about what goes in one is a command nobody can follow. Both documented, with the
 pica measures geometry to a tenth of a pixel. Until 0.8.0 it never measured **contrast**, which is the
 one accessibility property that is objective, computable, and in one sector legally binding: the
 knowledge base records WCAG 2.2 AA as a statutory floor for public-sector services, and four more sectors
-call contrast functional rather than aesthetic — a handheld in sunlight, a plant screen behind
+call contrast functional rather than aesthetic: a handheld in sunlight, a plant screen behind
 polycarbonate, a clinician's monitor under theatre lighting, a phone in a tractor cab.
 
 `evaluation.md` has required "contrast computed from tokens" since 0.5.0 and **nothing computed it**. The
@@ -856,7 +942,7 @@ are honest, whether a screen's named data source is real, and whether the decisi
 that pretended to judge those would be worse than no check.
 
 **Two defects surfaced while building it, both familiar shapes.** The eight-character floor on a written
-answer reported `"decision": "react"` as no decision at all — the same false positive fixed on `source`
+answer reported `"decision": "react"` as no decision at all, the same false positive fixed on `source`
 earlier in this release, recurring because the helper was duplicated with its default. And the check read
 `domainConstraints` without reading `industry.constraintsNotApplicable`, so a waiver a named human had
 signed in one register was invisible to a check reading the other, and the project was told to write an
@@ -867,7 +953,7 @@ NFR for an obligation already recorded as inapplicable.
 `figma-gates.md` says a deviation must be recorded in state "because a deviation recorded only in a
 review document cannot be distinguished from a defect on the next run", and that **without the register
 the definition of done is unfalsifiable**. Its worked example was
-`{"node": "29:119", "prop": "y"}` — a Figma node id and a property name.
+`{"node": "29:119", "prop": "y"}`, a Figma node id and a property name.
 
 `geometry-diff` matches on **screen plus text run**, and it has to: it pairs runs by text content and
 the dump carries no node ids, so a node id matches nothing whatever it names. **An entry written exactly
@@ -875,7 +961,7 @@ as documented could never suppress anything**, in the one register that file cal
 spellings are accepted now so an existing register keeps working, and the example is the one that does
 something. Verified by registering a real deviation: seven findings become six.
 
-`figma-audit.js` declared a `DEVIATIONS` config block at the top and **never read it** — a control anyone
+`figma-audit.js` declared a `DEVIATIONS` config block at the top and **never read it**: a control anyone
 could fill in with no effect, which is worse than an absent one because it reads as working. Removed,
 with a pointer to where the register actually lives.
 
@@ -906,8 +992,8 @@ list that repeats itself or is too short to characterise anything, a name that m
 being recorded as ambiguous.
 
 **The most-repeated piece of sector knowledge was the least checkable.** Seven sectors say some version of
-"this hue already means something, do not spend it elsewhere" — red is overdrawn in finance, clinical
-emergency in healthcare, the stop signal on a factory floor — and every one of them said it in a
+"this hue already means something, do not spend it elsewhere": red is overdrawn in finance, clinical
+emergency in healthcare, the stop signal on a factory floor, and every one of them said it in a
 different sentence. `colour.reserved` now records it as data: **22 hues across 14 sectors**, each with
 what it already means. The other 14 carry a note saying no hue is load-bearing there, because silence and
 "none" look identical.
@@ -951,7 +1037,7 @@ with no listing, or a listing with no plugin.
 
 `scripts/validate-packages.mjs` lives at the repo root, outside `packages/`, and every sweep this release
 globbed `packages/*/scripts/*`. So the one check whose entire job is to verify the manifests was the one
-check never run — through an audit that spent a full round fixing those manifests by hand.
+check never run: through an audit that spent a full round fixing those manifests by hand.
 
 It reported 61 findings, and every one was real:
 
@@ -1010,7 +1096,7 @@ the remaining failures are the genuine work of the step, which is what a skeleto
 ### Five manifests promised files nothing writes
 
 `produces` had drifted the way `owns` had. `analyst` promised `docs/prd.md`, and `pica-analyse` assembles
-the PRD into `docs/contract.md` — a path no command writes means every run puts it somewhere different.
+the PRD into `docs/contract.md`: a path no command writes means every run puts it somewhere different.
 `architect` promised `docs/architecture.md` and `docs/adr/`; it writes risks, NFRs and ADRs to state and
 no file at all. `estimate` promised `docs/work-order.md`; 5.2 presents the work order and writes nothing.
 Two state keys, `packages.figma.annotated` and `packages.research.tokensDerived`, were written by nobody
@@ -1027,7 +1113,7 @@ noticed:
 
 - **`clientApproved` was required by two packages and granted by none**, which leaves them permanently
   BLOCKED with no way to unblock them. That is the deadlock shape this repository has now found three
-  times — `scopeFrozen`, then `exclusionsConfirmed`, now this. Both packages require the state their own
+  times: `scopeFrozen`, then `exclusionsConfirmed`, now this. Both packages require the state their own
   scripts actually read instead
 - **`html` granted `htmlApproved:<wp>`**, which the flow says core grants on human approval. The manifest
   and the architecture disagreed about who holds the gate that stops every Figma write
@@ -1037,8 +1123,8 @@ sentence this release has had to write about a dozen different things.
 
 ### The port never named the script that verifies the port
 
-`/pica-port` described the geometry comparison in prose — "diff geometry against the captured reference,
-match by text content, compare position only, tolerance roughly 3px" — and **named no script and showed
+`/pica-port` described the geometry comparison in prose: "diff geometry against the captured reference,
+match by text content, compare position only, tolerance roughly 3px", and **named no script and showed
 no command**, for three releases. `geometry-diff.mjs` ships, does exactly that, and every port
 reconstructed the comparison by hand instead.
 
@@ -1057,7 +1143,7 @@ every check completes in under a tenth of a second; the capture takes 23 seconds
 rendering 240 frames and is inherent.
 
 Running each check three times on identical input returns byte-identical output. The capture differs in
-exactly one field across runs, `meta.capturedAt`, out of 1,188 — which is provenance, and correct.
+exactly one field across runs, `meta.capturedAt`, out of 1,188: which is provenance, and correct.
 
 ### The three in-Figma scripts had never been executed anywhere
 
@@ -1067,7 +1153,7 @@ one still worked was to paste it into a paid Figma session against a real file.*
 cannot run, and this release had been calling them untestable.
 
 They do not need Figma. They need the small part of its API they call, and everything that matters in
-them — traversal, counting, pairing, comparison — is ordinary JavaScript once that surface exists.
+them, traversal, counting, pairing, comparison, is ordinary JavaScript once that surface exists.
 `mock-figma.mjs` provides it, and `node packages/figma/scripts/mock-figma.mjs` asserts each still reports
 the defect it exists for. It is not a Figma emulator and must never become one.
 
@@ -1076,7 +1162,7 @@ was rounded to opaque, `figma-audit` reports an oval and correctly does **not** 
 `source-parity` sees a dropped string. Every claim they make about themselves held.
 
 **The self-test needed the same treatment as everything else.** Its first version asserted only the paint
-channel, so deleting `capture-baseline`'s node-opacity capture entirely still printed "all pass" — a test
+channel, so deleting `capture-baseline`'s node-opacity capture entirely still printed "all pass": a test
 that could not see the thing it was watching. Both channels are asserted now, and both were verified by
 breaking the script and confirming the test fails.
 
@@ -1084,7 +1170,7 @@ breaking the script and confirming the test fails.
 
 Given a state file with the right keys and the wrong types, six of nine check scripts exited on an
 uncaught `TypeError`: `glossary.map is not a function`. They still failed closed, so no gate was let
-through — but the person running one got a stack trace instead of a sentence naming the field, and a tool
+through, but the person running one got a stack trace instead of a sentence naming the field, and a tool
 that answers a bad input that way reads as a broken tool. The next thing that happens is that somebody
 stops running it.
 
@@ -1144,8 +1230,8 @@ directory and reports the drift, because the comparison is free and nothing was 
 ### Four scripts had never been run, and running them found five defects
 
 `flow-check`, `build-diff`, `impl-check` and `code-tokens-check` were not in any test path. Building the
-fixtures they need — interactive prototypes with routers, review shells, built variants, git repositories
-with CI, and front-end source with a token file — surfaced:
+fixtures they need: interactive prototypes with routers, review shells, built variants, git repositories
+with CI, and front-end source with a token file: surfaced:
 
 - **`code-tokens-check` reported "border-radius 1px" from `border: 1px solid`.** Both the spacing and the
   radius checks gated on whether a LINE mentioned the property and then scanned every px on it.
@@ -1170,7 +1256,7 @@ with CI, and front-end source with a token file — surfaced:
 `build-diff` treated a frame with no `census` as a frame with an empty one: every radius and control
 height read as "dropped by the build", and a build identical to the design reported ten divergences. That
 happens whenever the approved capture and the build capture came from different versions of the harness,
-which is the normal case for an approval in one month and a build in the next — and it happened in this
+which is the normal case for an approval in one month and a build in the next, and it happened in this
 session, when the capture gained a field. Now reported as paired-but-not-measurable.
 
 ### Two rules with a register and no executable
@@ -1179,7 +1265,7 @@ session, when the capture gained a field. Now reported as paired-but-not-measura
   "no editable control inside the declared read-only regions". Nothing enforced it, and nothing could:
   the register named an entity in prose, and prose is not a region. It now carries `region`, and
   `verify-html` checks it. That required the capture to record tag names, and then to record controls at
-  all — `boxes` holds only classed elements, and an `<input>` frequently has none, so the first working
+  all: `boxes` holds only classed elements, and an `<input>` frequently has none, so the first working
   version of the check found nothing on a page that had one
 - **`exclusionsConfirmed`** had a register, a command saying "refuse to pass GATE 1 while it is false",
   and a definition-of-done line. Nothing read it. `trace-check` does now: an empty `exclusions` means
@@ -1210,9 +1296,9 @@ checked.
 project with voided convention notes, voided preventions and ten unsigned stakeholder waivers passed all
 seven checks with **zero findings**. Probing for the same shape found it in three more scripts:
 
-- **`domain-check`** — a constraint whose `source` read `"n/a"` was traceable to nothing and passed
-- **`trace-check`** — a business rule's source, the same way
-- **`estimate-check`** — a **sixty per cent effort variance "explained" with `"n/a"`** passed the closeout
+- **`domain-check`**: a constraint whose `source` read `"n/a"` was traceable to nothing and passed
+- **`trace-check`**: a business rule's source, the same way
+- **`estimate-check`**: a **sixty per cent effort variance "explained" with `"n/a"`** passed the closeout
   gate, and the effort log is the one artefact that makes the next estimate better than a guess
 
 **The first fix was wrong and had to be replaced.** A twenty-character floor rejected `"Dark by
@@ -1354,7 +1440,7 @@ targets and the header did not. Corrected, and counted rather than described.
 The rules and scripts refer to work by decimal id: `2.1b`, `3.7`, `4.6`, `7.10`. The skill's flow table
 matched them. The README's flow table did not: it carried **its own flat sequence from 0 to 14**, so the
 work a rule called `7.10` appeared there as "step 12", and the dependency tables in both files carried a
-**fourth** sequence left over from 0.2.0 — under which they promised that Figma was required for "steps 4,
+**fourth** sequence left over from 0.2.0: under which they promised that Figma was required for "steps 4,
 6" while step 4 is now the client approval gate.
 
 The README table is renumbered to the ids everything else uses, and both dependency tables now name the
@@ -1381,7 +1467,7 @@ they serve with `data-uc`, tagged rather than inferred, for the same reason `dat
 
 **`build-diff`** is step 7.10, the check the industry reliably leaves undone: the designer assumes QA
 covers it, QA assumes the designer does, and the code quietly reinterprets the design in between.
-Everything needed already existed — the approved capture is the reference, and `--url` points the same
+Everything needed already existed: the approved capture is the reference, and `--url` points the same
 harness at a running build. Only the comparison was missing. Pairing is by `data-uc` plus viewport,
 **never by caption**, because a build's captions come from its own markup.
 
@@ -1441,16 +1527,16 @@ obstacle.
 Every product has a house style its field already expects, and a brief almost never states it. Until now
 pica had no step that proposed one: `research.md` could **derive** tokens from a client's sources and it
 explicitly refused to invent, which is right, but it left greenfield work with nothing between the audit
-and the UI kit. The palette got chosen anyway — silently, by whoever built the kit first.
+and the UI kit. The palette got chosen anyway: silently, by whoever built the kit first.
 
 Step **2c** now settles it. Intake gains a sixth input (the field named narrowly, the audience, and the
 conditions of use), and step 2c proposes two or three named directions from **three to five real products
-in that field that were measured** — radius, control height, hue count, tabular figures, spacing. Same
+in that field that were measured**: radius, control height, hue count, tabular figures, spacing. Same
 shape as `1d`: options that cannot be compared are not a choice. GATE 2 approves the direction alongside
 the audit and the tokens, so no new gate and no renumbering.
 
 **pica ships no table of what a field looks like.** No "banking means small radii". Such a table is
-precisely what this flow already refuses — *"best practice suggests" is not research* — it cannot be
+precisely what this flow already refuses, *"best practice suggests" is not research*, it cannot be
 defended in a client review, and it is wrong the moment a field moves. What ships is the method, and the
 method does not go out of date. A precedent with no measurement is not a precedent: "Stripe feels clean"
 cites nothing.
@@ -1460,7 +1546,7 @@ brand already exists: the direction is then the client's own system, scored agai
 and the gaps are presented as questions rather than corrections. The brand still wins; each accepted gap
 lands in `deviations` with its reason, because an accepted gap and an unnoticed one look identical three
 weeks later. Tokens with no client source take a third origin, `proposed`, naming the direction and the
-measured precedent — `taken` and `derived` claim a client source, and the separate word is what stops a
+measured precedent: `taken` and `derived` claim a client source, and the separate word is what stops a
 greenfield palette from later reading as reuse.
 
 ### A direction is written as numbers or it is not written
@@ -1471,7 +1557,7 @@ this changelog's own history puts at about a day.
 
 So `state.direction.assert` is machine-checkable, and **`verify-html` gains a fifth check**. The capture
 artefact gains a per-frame `census`: corner radii with counts, control heights, non-neutral hues in 30°
-buckets, and how many numeric runs render with tabular figures. Aggregated per frame, never per element —
+buckets, and how many numeric runs render with tabular figures. Aggregated per frame, never per element:
 a direction is a property of the kit, and recording it per node would multiply the file by the node count
 to say the same thing.
 
@@ -1505,7 +1591,7 @@ automatically, so manifest.hooks should only reference additional hook files.
 
 `manifest.hooks` is for **additional** hook files only. One line deleted. Reproduced from a clean install
 of the published marketplace, and verified fixed by a second clean install: all five plugins load, and
-`pica-core` still registers both hooks — SessionStart and the PreToolUse Figma write gate — because the
+`pica-core` still registers both hooks, SessionStart and the PreToolUse Figma write gate, because the
 conventional path was always the one doing the work.
 
 `claude plugin validate` does not catch this. It passed `packages/core` before the fix and after it,
@@ -1513,8 +1599,8 @@ which is why the manifest survived three releases.
 
 ### The brief was demanded, never stored, and required again at the end
 
-Intake input 1 asks for the brief raw and unedited. Step 1 then wrote five files — `contract`,
-`exclusions`, `effort-log`, `rationale`, `annotations` — and **none of them was the brief**. `state.json`
+Intake input 1 asks for the brief raw and unedited. Step 1 then wrote five files: `contract`,
+`exclusions`, `effort-log`, `rationale`, `annotations`, and **none of them was the brief**. `state.json`
 carried 33 keys and none held it either.
 
 Closeout opens with *"Re-read the original brief. Cold. The brief. Not `docs/contract.md`, not the plan,
@@ -1523,23 +1609,23 @@ deliverable that the plan had dropped entirely. But this flow also says **no ses
 multi-day project**, and Phase B is measured in days. So on every project long enough to need closeout,
 the brief existed only in a chat window that was gone by the time the step ran.
 
-By this flow's own standard — *a rule with no register is a preference* — input 1 was not a rule. It
+By this flow's own standard, *a rule with no register is a preference*, input 1 was not a rule. It
 demanded something be written down, had a later step read it, and named no place for it to live.
 
 Fixed at all three points: 1a writes `docs/brief.md` verbatim **the moment the brief arrives**, state
 gains `briefPath`, and closeout reads that path and **fails loudly** if it is gone rather than silently
-reading the contract instead — which is the exact substitution the step exists to prevent.
+reading the contract instead: which is the exact substitution the step exists to prevent.
 
 ### An empty exclusions list meant two different things
 
 `docs/exclusions.md` is *"the single highest-value artefact in the whole flow"*, and it is weakest
 exactly where it is needed most. Its first half is quoted from the brief, so a one-line brief rules
-nothing out and produces nothing — on the projects with the least defined scope, which are the ones
+nothing out and produces nothing: on the projects with the least defined scope, which are the ones
 whose scope grows. The second half, *"then ask the human what else to add"*, was the entire defence and
 had no register behind it.
 
 So an empty `exclusions` could mean the human was asked and there is genuinely nothing, or that nobody
-asked. Nothing could tell those apart, including the author three weeks later — in the one register
+asked. Nothing could tell those apart, including the author three weeks later: in the one register
 whose whole purpose is separating a decision from an oversight.
 
 `exclusionsConfirmed` now records the ask, and **GATE 1 refuses to pass while it is false** or while
@@ -1547,14 +1633,14 @@ whose whole purpose is separating a decision from an oversight.
 
 ### GATE 7 did not exist
 
-The gates run 1 to 9, one per step, and the sequence skipped 7. Step 7 is `/pica-review` — the one step
-that can **write** to a delivered file, via `--fix` — and it was the only step with no gate at the end of
+The gates run 1 to 9, one per step, and the sequence skipped 7. Step 7 is `/pica-review`: the one step
+that can **write** to a delivered file, via `--fix`, and it was the only step with no gate at the end of
 it. The write hook still held (report mode denies every mutation), so nothing was unsafe; what was
 missing was the stop that hands the findings to a human and ends there.
 
 It is deliberately not shaped like the others. Every gate before it asks for approval of finished work;
 this one hands over a list and asks which of it is worth doing, because the right fix is frequently a
-design decision rather than a repair — a contrast failure is solved by darkening the scrim or by changing
+design decision rather than a repair: a contrast failure is solved by darkening the scrim or by changing
 the text colour, and that is not the flow's to pick. Zero findings still passes through it, since a review
 that found nothing and a review that never ran look identical in a transcript.
 
@@ -1565,8 +1651,8 @@ had disagreed for three releases. Neither was right, and the reason is that the 
 while calling them checks: 0.7.0 added `source-parity.js` and bumped 7 to 8 in one file and not the other.
 Two of those eight are captures that check nothing.
 
-Both were corrected to **fifteen** at the time, and the README gained the table that derives it — `verify-html` 5,
-`parity-check` 2, `flow-check` 7, `geometry-diff` 1 — with the definition it is counted under: a named
+Both were corrected to **fifteen** at the time, and the README gained the table that derives it: `verify-html` 5,
+`parity-check` 2, `flow-check` 7, `geometry-diff` 1: with the definition it is counted under: a named
 criterion with a stated pass condition that returns non-zero and stops the step. An undefined number is
 what let this drift; a number with its working shown next to it can be recounted by anyone who doubts it.
 
@@ -1588,7 +1674,7 @@ All seven command files had no frontmatter, so every `/pica…` command installe
 
 The diff compared the HTML's glyph **ink** left edge against Figma's **layout box** left edge. Those
 share an edge only for left-aligned text. For a right-aligned FILL label the box starts at the
-container's left while the ink ends at its right, so `dx` was the container's width minus the string —
+container's left while the ink ends at its right, so `dx` was the container's width minus the string:
 a number that is neither a defect nor a pass. Centred text had the same problem, scaling with the
 string.
 
@@ -1603,13 +1689,13 @@ case that motivated it: the same design that produced a phantom `-258.4` now pas
 and a genuinely 56px-short right edge is caught as `dR=-56`.
 
 **The dump contract gains two optional fields**: `texts: [[string, x, y, w, align], ...]`. A three-field
-dump still runs and falls back to left-edge comparison, but **says so in the output** — because a gate
+dump still runs and falls back to left-edge comparison, but **says so in the output**: because a gate
 that silently cannot check right-aligned text is worse than one that admits it.
 
 ### Both sides must name their font
 
 `capture-html-reference.mjs` now records the family the browser actually resolved in `meta.font`,
-forced or not — `forcedFont` only ever said what was *asked for*, and was null on a native run.
+forced or not: `forcedFont` only ever said what was *asked for*, and was null on a native run.
 
 The Figma dump gains a `font` field per frame, and `geometry-diff` refuses to run unless every frame
 carries one and they all match the capture. Unknown is not a pass, and a partly labelled dump is
@@ -1617,22 +1703,22 @@ rejected: accepting one lets the unlabelled frames through in whatever family th
 is the failure the guard exists to prevent.
 
 This came from a team that designs in one font and hands over in another, flipping constantly. Position
-depends on the family — the swap moved hug-width nodes 2 to 5 percent, several times the tolerance — so
+depends on the family, the swap moved hug-width nodes 2 to 5 percent, several times the tolerance, so
 without the guard every other run silently attributes typeface to layout.
 
 ### Rules the same project paid for
 
-- **figma-gates** — an exemption is a claim, and claims age. A stale entry does not just go out of date,
+- **figma-gates**: an exemption is a claim, and claims age. A stale entry does not just go out of date,
   it blinds the check at the point it was aimed. Write it on the invariant, and give any measurable
   premise a lens that re-measures it. First ask whether it excuses a decision or a measurement bug.
-- **figma-gates** — reachability is a walk, not a count. Breadth-first from the entry, once per lane,
+- **figma-gates**: reachability is a walk, not a count. Breadth-first from the entry, once per lane,
   plus an assertion that no edge crosses viewport or theme.
-- **review-discipline** — WCAG is the wrong instrument near black; use `ΔL*` for surface against
+- **review-discipline**: WCAG is the wrong instrument near black; use `ΔL*` for surface against
   surface. A change that took a sheet from invisible to clearly separated moved WCAG from 1.03 to 1.13.
-- **review-discipline** — a surface role must stay distinguishable from its neighbours. Value parity and
+- **review-discipline**: a surface role must stay distinguishable from its neighbours. Value parity and
   role separation are two different checks, and a palette can be reproduced perfectly while two roles
   collapse into one colour.
-- **html-prototype** — the builder is the source of the file it builds. Editing generated output is a
+- **html-prototype**: the builder is the source of the file it builds. Editing generated output is a
   mine that goes off the next time anyone runs the script.
 
 ## 0.7.0
@@ -1668,46 +1754,46 @@ core rather than restating it.
 
 Ten findings.
 
-- **F50 — pica had no flow for rebuilding an existing Figma file.** Every rule assumed Figma is
+- **F50: pica had no flow for rebuilding an existing Figma file.** Every rule assumed Figma is
   downstream of approved HTML. New `figma-rebuild.md`, and a variant table in the skill: the arbiter is
   the client's untouched pages, there is no approval gate because the design is already approved by
   existing, and `geometry-diff.mjs` is replaced by a new `source-parity.js`.
 
-- **F51 — structure at zero says nothing about content.** *(now core: content parity is a criterion of
+- **F51: structure at zero says nothing about content.** *(now core: content parity is a criterion of
   its own, and the HTML gates say a text-run count is not a content diff)* A file passed seventeen structural criteria at
   zero while showing six filter rows with the wrong labels, an entirely wrong product on one screen, a
   stepper reading the master's placeholder, four cards in the wrong language, and a keypad missing its
   delete key. Every node was present, bound, on-grid, inside its parent and sensibly named. **Content
   parity is a separate criterion and only the source can score it.**
 
-- **F52 — the coordinate system is a tool.** *(now core: names are not identity — declare a channel per
+- **F52, the coordinate system is a tool.** *(now core: names are not identity, declare a channel per
   medium, `data-viewport` for HTML, the frame map for a port, canvas position for a rebuild)* Keeping rebuilt screens at the source's canvas coordinates
   makes pairing a dictionary lookup, which survives duplicate screen names and renames. It also lets any
   node be paired by position: a distance of 0 with different strings is *right place, wrong words*, which
   is what three of the five defects above turned out to be. Now a rule, and the basis of `source-parity.js`.
 
-- **F53 — three lenses inferred a property instead of reading it.** A paint's binding lives on the paint,
+- **F53: three lenses inferred a property instead of reading it.** A paint's binding lives on the paint,
   not on `node.boundVariables.fills`. Absence from `getLocalVariablesAsync()` is not evidence of
-  foreignness — 129 false findings. A text's backdrop is the last node in paint order that contains it,
+  foreignness: 129 false findings. A text's backdrop is the last node in paint order that contains it,
   not the nearest ancestor with a fill; correcting that surfaced an entire keypad rendering white on
   white. New section in `review-discipline.md`: *ask the object, not the index*.
 
-- **F54 — a clip-aware overflow metric does not subsume the auto-layout one.** The audit has carried
+- **F54: a clip-aware overflow metric does not subsume the auto-layout one.** The audit has carried
   `Auto-layout overflow` since 0.3.0. Writing a second, clip-aware metric for nodes escaping their parent
   looks like a superset and is not: it excludes clipped subtrees, which is correct, and a fixed-width bar
   whose children need 380px more than it has is entirely inside a clipping parent. Eight screens clipped a
   tab through every round of *that* check at zero. Both metrics are needed, and the rule now says so
   rather than leaving the next person to discover it by writing the wrong one.
 
-- **F55 — a number with no baseline is unreadable.** A new lens returned 356 on the rebuild and 268 on
+- **F55: a number with no baseline is unreadable.** A new lens returned 356 on the rebuild and 268 on
   the untouched source, most of both being scroll regions. Run every lens against the reference and
   publish the pair; new `lensBaselines` register. A criterion targeting 0 where the source scores 247 is
   one nobody can close.
 
-- **F56 — component granularity had no rule, and the two "make it reusable" instincts pull opposite
+- **F56: component granularity had no rule, and the two "make it reusable" instincts pull opposite
   ways.** Componentising is a bet and the default must be *no*: a library reached 147 components of
   which 36 were arrangements and 9 were duplicates, 30% wrong, every one created by reflex rather than
-  decision. Tokenising has no default and no threshold — every colour, gap, radius, stroke and type
+  decision. Tokenising has no default and no threshold: every colour, gap, radius, stroke and type
   value is bound on first appearance, and the only escape is a signed register entry. Part 3 now opens
   with that asymmetry, pointing at core, and `html-prototype.md` carries the CSS form of it: a shared
   class is a promotion, a custom property is not. A component is a thing, not an arrangement of things.
@@ -1716,26 +1802,26 @@ Ten findings.
   human had already judged correct, so `granularityExemptions` joins the registers. Reconciled with "never detach":
   never detach so an instance can differ, do detach to delete a component that should not exist.
 
-- **F57 — moving a component out of its set wipes every instance override.** Not just the swapped ones.
+- **F57: moving a component out of its set wipes every instance override.** Not just the swapped ones.
   Twenty-nine chips silently reverted to the master's string, nothing threw, and the audit stayed at
   zero. Caught only by comparing a tally to the source. New rules: capture-mutate-restore inside one
   script, write masters before instances, and `swapComponent` keeps overrides only where the layer path
   matches.
 
-- **F58 — a guard that skips is worse than a guard that fails.** `if (count !== expected) skip` left
+- **F58: a guard that skips is worse than a guard that fails.** `if (count !== expected) skip` left
   eight cards holding placeholder content and reported a diff instead of an error. Fix the precondition
   or throw; never continue past it with the work undone.
 
-- **F59 — 0.6.0 shipped every rule link in the skill broken.** Moving design-flow into `pica-core`
+- **F59: 0.6.0 shipped every rule link in the skill broken.** Moving design-flow into `pica-core`
   changed its depth; the 26 links out of the map were left at `../../../packages/`, which resolves in
-  neither the repo nor the installed layout. The package validator could not see it — every file was
+  neither the repo nor the installed layout. The package validator could not see it: every file was
   present and correctly owned. `validate-packages.mjs` now has a seventh assertion that resolves every
   relative markdown link in a rule or a skill, from the place that file is actually read from: a skill
   under `packages/core/skills/<s>` ships at `<root>/skills/<s>`, so its links resolve against the repo
   root, not against its position in the source tree. Verified by reintroducing the defect: 29 findings
   with the old paths, 0 with the new. Found while adding this release's own rule to the map.
 
-Also: naming by role rather than measurement, including inside variant axes — 58 components, 95 variant
+Also: naming by role rather than measurement, including inside variant axes, 58 components, 95 variant
 values and 13 effect styles renamed in one file, and the observation that when a size scale cannot
 name an axis's members uniquely, it is not a size axis. Four new Plugin API traps in `figma-screens.md`
 (`return` inside a traversal exits the script; property references cannot be set on an instance sublayer;
@@ -1753,13 +1839,13 @@ name an axis's members uniquely, it is not a size axis. Four new Plugin API trap
 
 ## 0.6.0
 
-pica becomes four packages — `core`, `research`, `html`, `figma` — plus a bundle that
+pica becomes four packages, `core`, `research`, `html`, `figma`, plus a bundle that
 installs all of them, so an existing install keeps working unchanged.
 
 Each package declares what it requires, what it produces, which checks it owns and what
 done means for it. `requires` is what makes omitting a package safe: a package refuses to
 start when its inputs are missing and names which. `definitionOfDone` items are typed,
-and a `human` item cannot be satisfied by any script — the schema rejects one that names
+and a `human` item cannot be satisfied by any script: the schema rejects one that names
 a script, because ten green harnesses and four screenshot-obvious defects on the fourth
 one place is what that type exists to prevent.
 
@@ -1777,7 +1863,7 @@ Those packages are planned, not built, and are shown as `PLANNED` everywhere the
 ### Known limits
 
 - No package has been exercised as a separate install on a real project yet. The split is
-  verified structurally — the validator returns zero, every script still fails closed —
+  verified structurally: the validator returns zero, every script still fails closed,
   not by having run a project through four separately installed plugins.
 - `annotation-check.mjs`, required by the spec's D2, is not built. The Figma package
   declares no check for annotations, so a missing annotation is currently invisible.
@@ -1792,42 +1878,42 @@ drove this release.
 
 Seven findings.
 
-- **F43 — a package could ship option boards and no usable flow.** Nothing in the flow said a work package
+- **F43: a package could ship option boards and no usable flow.** Nothing in the flow said a work package
   produces an interactive prototype, so the deliverable drifted toward boards, which are the part every
   check can see. Meanwhile **every defect the human found by using the prototype was a navigation defect**
   with no geometric signature: a home row that opened another role's screen, an entry point that lit the
   tab it came from, a shared screen whose back control left the application, a deep link that went via the
   launcher. A package now ships **boards and the interactive main flow**, one prototype per application,
   linked to each other for real. It is rule 7 in the session dispatcher.
-- **F44 — nothing checked the wiring.** New `flow-check.mjs`: dangling targets, dangling cross-application
+- **F44: nothing checked the wiring.** New `flow-check.mjs`: dangling targets, dangling cross-application
   links, the router's own root and tab set, unreachable screens, dead ends, a prototype the review shell
   cannot open, and `flows` entries that do not resolve. All seven negative-tested by breaking the source
   project on purpose. It fails closed on zero screens or zero links, and `--allow-none` is the explicit
   escape hatch for a boards-only package.
-- **F45 — ten green harnesses, four screenshot-obvious defects.** Duplicated sheet rows, a 16px spacer
+- **F45: ten green harnesses, four screenshot-obvious defects.** Duplicated sheet rows, a 16px spacer
   orphaned between two dividers, an open sheet leaving the sticky header undimmed, a collapsed header
   leaving a 20px white strip on every screen. The pattern has a shape worth naming: **a harness is good at
   properties of elements that exist and blind to space that should not be there.** The fixes are counting
   assertions rather than property assertions, and "render every screen and look at it" is now qualified as
   **after** the last change.
-- **F46 — six checks returned zero because their sample excluded the case.** A type sweep that measured
+- **F46: six checks returned zero because their sample excluded the case.** A type sweep that measured
   only the visible tab (122 headers unmeasured), a spacing check comparing direct siblings only, a font
   check that only looked at the declared family, an icon check that printed without counting, a
   floating-button sweep that forced an app bar onto the one screen that never has one, a contrast probe
   sampling where the gradient ramps into white. 0.4.0 said report what your filter excluded; 0.5.0 adds
   **report the state you measured in**, and: an advisory that prints without counting is not an assertion.
-- **F47 — a check has to be seen to fail on the defect it was written for.** Two were not: a group-header
+- **F47: a check has to be seen to fail on the defect it was written for.** Two were not: a group-header
   check exempted the exact pair that was broken, and a mock-data check asserted roster *membership*, so it
   passed on an identifier belonging to a different person in the roster. Both were fixed only after the
   defect was put back and the check was watched failing. And grepping for your own failure string proves
   nothing: a suite that crashed before reaching a check prints the same nothing as a check that passed.
-- **F48 — real-looking mock data is self-certifying.** A real name under someone else's title, one person's
+- **F48: real-looking mock data is self-certifying.** A real name under someone else's title, one person's
   real identifier invented onto another person's row, a feed older than the screen's own today, a
   notification crediting the wrong author. New rule: mock data gets **provenance like tokens do**,
   cross-referenced against the source data, asserting **ownership by nearest name** rather than membership,
   with relationship fields stripped first. Identify a row by the name beside it, never by initials: 14
   initial forms were ambiguous in a roster of 32.
-- **F49 — the client's own rules had nowhere to live.** A punctuation ban in product copy, a mixed-case
+- **F49: the client's own rules had nowhere to live.** A punctuation ban in product copy, a mixed-case
   wordmark, and a read-only rule on one entity all arrived as asides. Two new registers: **`copyRules`**
   with the check that enforces each, and **`dataOwnership`** per entity. The second one earned itself: a
   blanket reading of "the user's data cannot be changed on mobile" disabled the request and approval flows
@@ -1878,48 +1964,48 @@ Seven findings.
 
 **The checks 0.3.0 documented now exist, and they run before the human is asked to approve anything.**
 
-0.3.0 described a viewport parity check and a geometry diff in full — two passes, subtree pruning,
+0.3.0 described a viewport parity check and a geometry diff in full: two passes, subtree pruning,
 tolerance calibration, pass criteria. Neither shipped. Both existed only inside the project the rules were
 derived from, so anyone installing the plugin read a rule instructing them to run something that was not
 there. The 0.3.0 coverage audit did not catch this because it graded whether concepts were *documented*.
 
 Six findings, all of the same shape: **a rule that names a check, with nothing behind it.**
 
-- **F37 — the parity check and geometry diff did not ship.** Now in `skills/design-flow/scripts/`,
+- **F37: the parity check and geometry diff did not ship.** Now in `skills/design-flow/scripts/`,
   generalized rather than hardcoded. `geometry-diff.mjs` takes its Figma-to-HTML frame mapping from
   `frameMap` in state rather than a hardcoded table.
-- **F38 — the HTML was never measured.** `/pica-wp` ran no check at all; measurement began at
+- **F38: the HTML was never measured.** `/pica-wp` ran no check at all; measurement began at
   `/pica-port`. An HTML-only project (`figmaInScope: false`) therefore received *no* verification, while
   "HTML is the source of truth" remained the first rule in the skill. New `verify-html.mjs` runs inside
   `/pica-wp` before GATE 5, checking viewport tagging, horizontal overflow, the tall-screen pair and
   viewport coverage. It is the gate an HTML-only project ends on.
-- **F39 — the capture script's frame selector defaulted to `.phone`.** A mobile-only holdover. Any
+- **F39: the capture script's frame selector defaulted to `.phone`.** A mobile-only holdover. Any
   project whose frames were not called `.phone` captured **zero frames**, logged it as ordinary output,
   wrote a well-formed empty artefact, and passed every downstream check. The default is now
   `[data-viewport]`, so one attribute both locates the frame and names its viewport, and the capture
   **refuses to write** an empty reference.
-- **F40 — the geometry diff reported success for work it had not done.** An unmapped frame was a `SKIP`,
+- **F40: the geometry diff reported success for work it had not done.** An unmapped frame was a `SKIP`,
   not a finding, so a project with no frame map compared zero runs, printed "0 over tolerance" and exited
   0. Unmapped is now a finding, an empty `frameMap` refuses to start, and zero comparisons is a failure.
-- **F41 — `viewport` was captured but inert.** The tag was implemented in 0.3.0 and never used: no HTML
+- **F41: `viewport` was captured but inert.** The tag was implemented in 0.3.0 and never used: no HTML
   carried it, every consumer fell back to matching frame width, and nothing complained. A fallback that
   always fires makes the tag decorative. Untagged is now a finding.
-- **F42 — a contradiction survived in a second file.** `pica-wp.md` still said a full-height frame
+- **F42: a contradiction survived in a second file.** `pica-wp.md` still said a full-height frame
   carries "no home indicator", reversed by 0.2.0 and corrected in `html-prototype.md` for 0.3.0. Five
   files said present, one said absent. A concept-grep audit cannot find a contradiction, because both
   sides of it are on-topic.
 
 ### Every check now fails closed
 
-A selector matching nothing, an empty frame map, a comparison of zero nodes — each exits non-zero rather
+A selector matching nothing, an empty frame map, a comparison of zero nodes: each exits non-zero rather
 than printing a reassuring number. All three paths are negative-tested: broken on purpose, confirmed to
 report. A check never seen to fail has not been tested.
 
 ### The flow says what it always meant
 
-Restructured into three phases. **A — establish** (contract, tokens, HTML kit). **B — design and verify**
-(build, measure, look, approve) — this phase is the deliverable and an HTML-only project ends here, fully
-verified. **C — Figma, optional**, entirely downstream of an approved package. Foundations-into-Figma moved
+Restructured into three phases. **A, establish** (contract, tokens, HTML kit). **B, design and verify**
+(build, measure, look, approve): this phase is the deliverable and an HTML-only project ends here, fully
+verified. **C: Figma, optional**, entirely downstream of an approved package. Foundations-into-Figma moved
 from step 4 into Phase C: it sat ahead of every HTML approval gate, which made the optional phase read as
 mandatory.
 
@@ -1927,7 +2013,7 @@ mandatory.
 
 - `parity-check.mjs`: the "registered reflow" counter was never incremented and always printed 0 despite
   49 active notes; it now reports boxes pruned. Text parity is documented as **advisory by design** rather
-  than pending implementation — owner attribution works, and what remains is copy that differs between
+  than pending implementation: owner attribution works, and what remains is copy that differs between
   viewports, which nothing measurable can adjudicate.
 - `geometry-diff.mjs`: `text-align: start` and `end` are no longer flagged as needing tolerance review.
   They are the computed values of left and right in an LTR document and carry no extra error; flagging
@@ -1949,7 +2035,7 @@ found by a human looking at a rendered frame after every automated check had ret
 `frameSize` becomes **`viewports`**, an ordered list. One entry means byte-identical behaviour to 0.2.0;
 two or more activates sections per viewport, a prototype page per viewport, and the parity check.
 
-Each viewport declares its **`idiom`** — native app, mobile web bare, or mobile web in a device frame —
+Each viewport declares its **`idiom`**: native app, mobile web bare, or mobile web in a device frame,
 and its own `chrome`, `pointer`, `breakpoints` and `grid`.
 
 **Chrome is declared, never defaulted.** 0.2.0's list was not "the mobile contract", it was *the
@@ -1961,12 +2047,12 @@ quietly declaring X as by nobody declaring it.** The register records who declar
 
 ### Responsive prototypes
 
-`@container`, never a width `@media` — every viewport renders in one browser window, so a width media
+`@container`, never a width `@media`: every viewport renders in one browser window, so a width media
 query fires for all columns at once and the narrow column ports as the wide one. `container-type:
 inline-size` contains the inline axis only, so the tall-screen hug pair still works.
 
 `@container` carries **no specificity**: a component base class declared later wins. Hit three times in
-one stylesheet. Prefer **CSS Grid with named areas** for anything that reflows — a flex row cannot promote
+one stylesheet. Prefer **CSS Grid with named areas** for anything that reflows: a flex row cannot promote
 a nested child to full width, and grid keeps both viewports on identical markup.
 
 ### The tall-screen pair, enforced
@@ -1984,11 +2070,11 @@ produced evidence for it *and its converse* in one afternoon.
   geometry diff called a frame "over tolerance" while a third of its content was missing.
 - Two cheap checks close the gap: per-frame **text-run counts** against the reference, and **content
   height vs container height** on every vertical auto-layout node. The count check flagged 8 frames and
-  every flag was real — including an invisible stray text node on every instance of a component.
+  every flag was real: including an invisible stray text node on every instance of a component.
 - **Calibrate the tolerance.** The HTML capture cannot see `<input>` values, and inline `<strong>` splits
   one line into three runs. Uncalibrated, the check fires forever on correct frames.
 - **A green check is not evidence the check works.** A clone-integrity check compared counts across pages,
-  where `findAll` under-reports — it could not fail meaningfully *or* pass meaningfully. Assert a check
+  where `findAll` under-reports: it could not fail meaningfully *or* pass meaningfully. Assert a check
   against a known bad case first.
 - Definition of done now includes **every frame rendered and looked at, per viewport**, as a line separate
   from "audit returns zero".
@@ -1996,7 +2082,7 @@ produced evidence for it *and its converse* in one afternoon.
 ### Plugin API traps that return success and a wrong result
 
 `findAll` under-reports instance children on a non-current page **and on a node created in the same call**
-— so clone in one call and wire in the next. Node identity is not stable across lookups, so `===` on nodes
+so clone in one call and wire in the next. Node identity is not stable across lookups, so `===` on nodes
 silently matches nothing. `layoutGrow` is primary-axis relative, so re-parenting reinterprets it, and
 removing it yields `FIXED` not `HUG`. `vectorPaths` takes no arcs and **scales geometry to the node box**,
 so icons sized to their CSS box come out twice too heavy. `reactions` needs the plural `actions`.
@@ -2007,13 +2093,13 @@ so icons sized to their CSS box come out twice too heavy. `reactions` needs the 
 the caption; `contentH` and `overflowX` so clipped content is measurable; each text run's **owning
 element and text-align**; and each box's **depth and nearest classed parent**.
 
-Those last two are not polish — without the owner, text inside a registered reflow reports as drift
+Those last two are not polish: without the owner, text inside a registered reflow reports as drift
 forever; without the parent chain, excusing a component cannot excuse its descendants. With them the
 parity check went from **305 raw deltas to 0 findings** in one implementation. It also skips the
 storybook, which is a documentation board and yields no frames.
 
 One subtlety worth the comment it carries: the parent must be the nearest **classed** ancestor.
-Unclassed elements are not recorded, so an unclassed wrapper — a `<td>` around a score pill — silently
+Unclassed elements are not recorded, so an unclassed wrapper, a `<td>` around a score pill, silently
 breaks the chain and defeats the pruning.
 
 ### Known limits
@@ -2032,7 +2118,7 @@ the ones it fixed. Both facts drove this release.
 
 ### The two items raised, and why they were missed
 
-**Incomplete variable bindings** — all four corner radii, horizontal and vertical padding, border width,
+**Incomplete variable bindings**: all four corner radii, horizontal and vertical padding, border width,
 fills and strokes. 0.1.0 bound type thoroughly and geometry not at all: the 17-check audit had nothing for
 radius, padding or stroke weight. Worse, the prescribed primitives were `Colors`, `Spacing`, `Radius`,
 `Typography` with **no `Border` collection**, so there was nothing to bind a border width to. Pica's own
@@ -2053,7 +2139,7 @@ horizontally and said nothing about vertical centring anywhere.
 - **Alpha belongs in the token.** `setBoundVariableForPaint` makes the variable's RGBA authoritative and
   **overwrites `paint.opacity`**: a paint at 0.30 bound to an opaque token returns 1.0. A colour matcher
   keyed on RGB cannot see this, so a bulk binding pass flattened six full-screen scrims to solid black and
-  hid the content behind every bottom sheet — while every existence check returned zero. Prescribes
+  hid the content behind every bottom sheet: while every existence check returned zero. Prescribes
   `scrim`, `overlay/pill`, `overlay/control`, `overlay/track` as alpha-bearing tokens, because a manual
   opacity on a bound paint is an override that re-resolves away.
 - **`scripts/capture-baseline.js`** and the rule behind it: capture resolved RGBA before any bulk
@@ -2065,7 +2151,7 @@ horizontally and said nothing about vertical centring anywhere.
 - **`page.loadAsync()`** for whole-file reads: a ten-page audit in one call instead of ten. Works for
   writes too. `setCurrentPageAsync` is still required where deep instance traversal matters.
 - **Vertical alignment rules.** Icons centre on the **control**, not the component, because an input is
-  label plus field plus error and its centre is nowhere near the field's — with a field-height slot bound
+  label plus field plus error and its centre is nowhere near the field's: with a field-height slot bound
   to `input/height`. A trailing icon belongs **inside** the component: the reported eye icon was positioned
   absolutely on the screen, so it sat 4px low on four screens and 16px high on the fifth where the error
   state pushes the field down 20px. Centring a text box is not centring its glyphs. Siblings that must
@@ -2111,7 +2197,7 @@ horizontally and said nothing about vertical centring anywhere.
 - The claim that locally installed fonts are invisible to the runtime is split into two cases: installed
   **during** the session, which a Figma relaunch fixes, and genuinely unreachable, which it does not.
 - Font guidance extended with package forensics. Static desktop OTFs from some foundries register **one
-  family per weight** — `Chillax`, `Chillax Medium`, `Chillax Semibold` — so a single family variable
+  family per weight**, `Chillax`, `Chillax Medium`, `Chillax Semibold`, so a single family variable
   reaches only 400 and 700 and the middle weights collapse with no error. The variable build is a third
   family name again. Includes a dependency-free `name`-table dumper, because the answer is in the font
   file, not in Figma.

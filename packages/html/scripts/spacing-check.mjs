@@ -1,5 +1,5 @@
 /**
- * spacing-check.mjs — the gaps. Runs with the HTML gate, before approval.
+ * spacing-check.mjs: the gaps. Runs with the HTML gate, before approval.
  *
  * pica measured overflow, and it measured spacing LITERALS in source text, and between
  * those two it never measured the thing a person actually sees: how far the content sits

@@ -7,7 +7,7 @@ not current.** Do not read it as guidance.
 By 0.9.0 the divergence is large: four packages became twelve, six rule modules became twenty-two, and the flow
 now runs from a brief to a released product rather than to an approved design. The `state.json` schema
 below predates every register added since. **Its step numbers are the 0.1.0 sequence and do not match the
-ids the rules and scripts use today** — a rule that says 7.10 has no counterpart in this document.
+ids the rules and scripts use today**: a rule that says 7.10 has no counterpart in this document.
 
 See `CHANGELOG.md` for what moved and why.
 Provenance: extracted from one real client design pilot (24h fixed-scope mobile redesign, Jul 2026)

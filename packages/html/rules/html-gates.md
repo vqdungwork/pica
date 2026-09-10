@@ -32,16 +32,16 @@ It cannot tell you a gap is the RIGHT size. 24px where the design wanted 32px is
 `scripts/verify-html.mjs <html-reference.json> <state.json>`. **Pass: 0 findings on all five checks.**
 
 Runs in `/pica-wp` before the human is asked to approve anything, and again at the start of a port. For a
-project with `figmaInScope: false` it is the **only** verification the work ever receives — which is why
+project with `figmaInScope: false` it is the **only** verification the work ever receives, which is why
 it cannot live in the Figma half of the flow, where it sat through 0.3.0.
 
 | Check | Detects | Pass |
 |---|---|---|
 | `viewport-tagged` | a frame with no `data-viewport`, or one naming an undeclared viewport | 0 |
-| `overflow` | content past the frame's right edge — the frame clips it, so no screenshot shows it | 0 |
+| `overflow` | content past the frame's right edge: the frame clips it, so no screenshot shows it | 0 |
 | `tall-screen-pair` | content exceeding its viewport by >24px with no `· hug` twin, so the remainder is unreviewable | 0 |
 | `viewport-coverage` | a declared viewport that produced no frames at all | 0 |
-| `direction` | a screen that breaches the design direction chosen at step 2c — radius, control height, hue budget, tabular figures | 0 |
+| `direction` | a screen that breaches the design direction chosen at step 2c: radius, control height, hue budget, tabular figures | 0 |
 
 ### The direction check measures a different kind of wrong
 
@@ -50,7 +50,7 @@ the design system that was chosen, and nothing else here can see that: a screen 
 paired and covered, and still spend eight hues on a product whose direction budgeted three.
 
 It is only checkable because step 2c wrote the direction down **as numbers**. A direction recorded as
-prose — "clean, trustworthy, modern" — is not a constraint and the check says so rather than passing it.
+prose, "clean, trustworthy, modern", is not a constraint and the check says so rather than passing it.
 
 Two data rules, both of which cost something to learn elsewhere:
 
@@ -64,7 +64,7 @@ Both bounds on control height exist because the directions that care about densi
 a field tool needs a floor under its touch targets, a dense console needs a ceiling on its rows.
 
 **A declared direction with a pre-0.8.0 capture is a FAIL, not a skip.** The capture carries the census
-the check reads; without it nothing can be measured, and that is the `geometry-diff` lesson from 0.7.1 —
+the check reads; without it nothing can be measured, and that is the `geometry-diff` lesson from 0.7.1:
 a gate that silently cannot check is worse than one that admits it. Re-capture. A project that declares
 no direction at all is a different case and reports as not applicable.
 
@@ -98,7 +98,7 @@ target, not of the viewport, which keeps parity a single-design question.
 
 `data-uc` and `data-viewport` are not enough on their own: a screen and its empty state serve the same
 use case at the same size. Running the build comparison on a real project with that shape broke it
-three ways at once — the empty state paired against the populated one and produced four false findings,
+three ways at once: the empty state paired against the populated one and produced four false findings,
 and a screen deliberately deleted from the build was never reported, because its sibling absorbed the
 pairing. **The check said "0 findings" on the exact defect it was written to catch.**
 
@@ -156,38 +156,38 @@ tuning per screen.
 Only with two or more declared viewports; with one it says so and exits 0. It answers one question: **do
 the viewports of a screen say the same thing, apart from the differences we declared?**
 
-**Compare per-class COUNTS, not sets — a set comparison misses count drift.** A set comparison reported zero findings on every screen of a
+**Compare per-class COUNTS, not sets: a set comparison misses count drift.** A set comparison reported zero findings on every screen of a
 project while missing real drift: delete one of five candidate rows from one column and the class *set*
-is unchanged — `.cand` is still present — so the check passes on a screen that lost content. Since
+is unchanged, `.cand` is still present, so the check passes on a screen that lost content. Since
 hand-copied columns are where drift lives and a dropped row is the likeliest copy error, set comparison
 fails at exactly the job it was added for.
 
 Two passes, and they answer different questions:
 
-1. **Nominal** — is the screen present at every declared viewport? Cheap, catches a whole screen
+1. **Nominal**: is the screen present at every declared viewport? Cheap, catches a whole screen
    missing. An absence is a finding unless `parityExemptions` records it as a decision. A tall-screen
    **hug twin is not a separate screen** here; fold it into its base.
-2. **Structural** — per-class counts, **subtree-pruned**, plus text attributed to its owning element.
+2. **Structural**: per-class counts, **subtree-pruned**, plus text attributed to its owning element.
 
 Three things it needs to avoid firing forever on correct work:
 
 - **Prune the subtree of an excused component.** Excusing `cand__actions` must excuse the
   `btn--secondary` inside it, or the descendant leaks a count gap the register does not cover. And the
-  parent link must be the nearest **classed** ancestor — an unclassed wrapper such as a `<td>` around a
+  parent link must be the nearest **classed** ancestor: an unclassed wrapper such as a `<td>` around a
   pill silently breaks the chain and defeats the pruning.
 - **Attribute text to its owner.** Otherwise every legitimately reflowing component reports its own
   labels as drift.
 - **Scope the register.** See `reflowNotes` in SKILL.md: `scope` is required.
 
 Correctly built, this returns **zero** on a correct two-viewport project. One implementation went
-from 305 raw deltas to 0 findings once subtree pruning and owner attribution were in place — and the
+from 305 raw deltas to 0 findings once subtree pruning and owner attribution were in place, and the
 remaining text differences were the calibration artefacts described in the figma package's
 `figma-gates.md` ("Calibrate the tolerance, or the check fires forever"), not defects.
 
 ## A structural check is only as good as its model of legitimate difference
 
 Three times on one project a check was arithmetically right and conceptually wrong, and each time the
-fix was to teach it a distinction the design already made — **never to loosen the tolerance**:
+fix was to teach it a distinction the design already made: **never to loosen the tolerance**:
 
 | Check | What it got wrong |
 |---|---|
@@ -222,13 +222,13 @@ Repeat until the pass returns nothing.
 ## The approved HTML is a reference, and references are read-only
 
 Once a package passes its gate, its HTML is frozen. See
-`packages/core/rules/reference-discipline.md` — the rule that matters here is the
+`packages/core/rules/reference-discipline.md`: the rule that matters here is the
 one that costs a keystroke to break: when `geometry-diff` fails on the Figma side, the cheapest way to
 make it pass is to edit the HTML, and doing so destroys the only thing that could have settled the
 disagreement.
 
 A failing diff is a Figma finding or a registered deviation. If the HTML is genuinely wrong, it goes back
-through the gate — re-measured, re-rendered, re-approved — and the deviation register records why.
+through the gate, re-measured, re-rendered, re-approved, and the deviation register records why.
 
 ## Content parity is not a text-run count
 
@@ -236,8 +236,8 @@ through the gate — re-measured, re-rendered, re-approved — and the deviation
 proves the screen **says the right thing**, and neither does a per-frame count on the Figma side: a wrong
 string counts exactly as much as the right one.
 
-Where the package has a reference for its copy — the client's own file, a source app, a supplied copy
-deck — diff the strings, not the totals: which are missing, which are extra, per screen. Then, for each
+Where the package has a reference for its copy: the client's own file, a source app, a supplied copy
+deck: diff the strings, not the totals: which are missing, which are extra, per screen. Then, for each
 mismatch, find the nearest counterpart by position; **distance 0 with different text is right place,
 wrong words**, and it is invisible to every other check here.
 

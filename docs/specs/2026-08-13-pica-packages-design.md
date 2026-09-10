@@ -1,4 +1,4 @@
-# pica as packages — design
+# pica as packages: design
 
 **Status:** **implemented in 0.6.0 and extended since. Kept as the design record, not as outstanding
 work.** By 0.9.0 the four packages it describes are twelve, and the flow reaches past Figma to build and
@@ -20,8 +20,8 @@ and an extension of scope, not a loosening of gates.
 
 Three problems, one structural cause.
 
-**pica stops too early.** It ends at a verified Figma file. The path it does not cover —
-implementation for web, iOS and Android, then end-to-end and usability testing — is
+**pica stops too early.** It ends at a verified Figma file. The path it does not cover:
+implementation for web, iOS and Android, then end-to-end and usability testing: is
 where the design either survives or quietly stops being the thing that was approved.
 
 **Everything is coupled to everything.** `review-gates.md` is loaded by five of seven
@@ -33,27 +33,27 @@ reads the whole Figma half. A project that needs iOS has nowhere to put it.
 
 ## Decisions
 
-### D1 — HTML verifies, Figma hands off
+### D1: HTML verifies, Figma hands off
 
 Authority over the design transfers from HTML to Figma at the gate where
 `geometry-diff` returns zero and the package closes. Before that gate HTML is
 authoritative and Figma is a candidate rendering; after it, Figma is what implementation
 reads.
 
-*Why not keep HTML authoritative throughout.* HTML is web-shaped — divs, flexbox,
+*Why not keep HTML authoritative throughout.* HTML is web-shaped: divs, flexbox,
 cascade. Translating it literally into SwiftUI or Compose produces code that fights the
 platform. Figma describes what a screen looks like without prescribing how it is built,
 which is what a native implementer needs.
 
 *Why the transfer must be earned rather than declared.* The port is lossy; every serious
 defect in one implementations appeared during or after it. Authority passes only on
-proof — a measured diff of zero — never on the port having been performed.
+proof, a measured diff of zero, never on the port having been performed.
 
 *What remains true.* HTML stays the verification baseline. It is executable, so its
 checks re-run at any time; Figma requires a dump to compare at all. If Figma changes
 after handoff it must re-verify against HTML, or HTML must be updated to match.
 
-### D2 — the behavioural contract is written into Figma
+### D2: the behavioural contract is written into Figma
 
 Devs work in Figma and do not leave it. Three classes of fact cannot be seen in a frame:
 
@@ -61,14 +61,14 @@ Devs work in Figma and do not leave it. Three classes of fact cannot be seen in 
 |---|---|
 | Reflow rules between breakpoints | Figma holds two or three fixed frames; the rule connecting them is `reflowNotes` |
 | Flows and routing | Prototype links cannot distinguish "screen in this app" from "different app" |
-| Registers — chrome, `copyRules`, `dataOwnership`, `parityExemptions` | No Figma primitive expresses "this entity is read-only" |
+| Registers: chrome, `copyRules`, `dataOwnership`, `parityExemptions` | No Figma primitive expresses "this entity is read-only" |
 
 The port therefore writes an annotation frame beside each screen carrying these, and the
 review gains `annotation-check`: every screen has an annotation and it matches
 `state.json`. An annotation that drifts from the contract is a finding, not a surprise
 found later in code review.
 
-### D3 — hybrid packaging: one repo, real plugins
+### D3: hybrid packaging: one repo, real plugins
 
 One repository, `packages/*` subdirectories, each a genuine installable plugin listed in
 `marketplace.json`, each declaring `dependencies` on the packages it needs.
@@ -81,20 +81,20 @@ would have to be duplicated. That belief was wrong.
 
 **Known constraint: there is no runtime enable/disable.** Once a package is installed its
 commands are always visible. "Omitting" a package is therefore an install-time choice,
-and a package whose inputs are absent must refuse to run and say why — which is what
+and a package whose inputs are absent must refuse to run and say why: which is what
 `requires` does.
 
-### D4 — pica owns the full path, and says what it has not built
+### D4: pica owns the full path, and says what it has not built
 
 Implementation and test packages are declared now and built later. They appear in the
-graph, in `/pica status`, and in the banner — drawn dashed and labelled `PLANNED`.
+graph, in `/pica status`, and in the banner: drawn dashed and labelled `PLANNED`.
 Declaring the contract early is the point: when the work starts, the interface is
 already agreed.
 
 ## The package contract
 
 Every package ships a `package.json` at its root, alongside the plugin manifest, which lives at
-`.claude-plugin/plugin.json` — the location Claude Code actually reads:
+`.claude-plugin/plugin.json`: the location Claude Code actually reads:
 
 ```json
 {
@@ -145,8 +145,8 @@ BLOCKED  package "figma" cannot run
   Run /pica-wp search and get HTML approval first.
 ```
 
-Carrying `passes` in the manifest makes the `0.3.0` failure — rules naming checks that
-nothing could run — structurally impossible: a declared check with no executable is a
+Carrying `passes` in the manifest makes the `0.3.0` failure: rules naming checks that
+nothing could run: structurally impossible: a declared check with no executable is a
 manifest error.
 
 ## The packages
@@ -159,7 +159,7 @@ manifest error.
 
 | Package | Owns | Requires | Produces |
 |---|---|---|---|
-| **core** | `/pica`, `/pica-close`, `/pica-feedback`, session hook, write gate, state schema and registers, `pica-status.mjs` | — | contract, exclusions, `state.json`, all gates |
+| **core** | `/pica`, `/pica-close`, `/pica-feedback`, session hook, write gate, state schema and registers, `pica-status.mjs` |: | contract, exclusions, `state.json`, all gates |
 | **research** | `research.md`, token provenance | core | `tokens.json`, `tokens.css`, audit findings |
 | **html** | `/pica-wp`, `html-prototype.md`, `capture-html-reference`, `verify-html`, `parity-check`, `flow-check` | core, tokens | UI kit, screens, prototypes, `htmlApproved:<wp>` |
 | **figma** | `/pica-port`, `/pica-prototype`, `figma-*.md`, `geometry-diff`, `figma-audit`, `capture-baseline`, `annotation-check` | core, html, `figmaInScope` | verified frames and annotations, `ported:<wp>` |
@@ -173,8 +173,8 @@ framework. `html` takes the measured HTML gate and parity. `figma` takes the geo
 diff, tolerance calibration and annotation rules.
 
 `/pica-close` and `/pica-feedback` stay in core. Both are project-level and
-medium-independent: closeout freezes whatever was delivered, and feedback triage —
-verify every claim before accepting it — applies whether the claim concerns HTML, Figma
+medium-independent: closeout freezes whatever was delivered, and feedback triage,
+verify every claim before accepting it: applies whether the claim concerns HTML, Figma
 or shipped code.
 
 `e2e` lives per platform rather than as one package, because Playwright, XCUITest and
@@ -208,10 +208,10 @@ prevent.
 
 Each item is typed, so `/pica status` can report what is satisfied:
 
-- `check` — an executable and its pass criterion
-- `human` — a person must do it; **no script can satisfy it, and the schema enforces that**
-- `gate` — the human approval this package requests on completion
-- `artifact` — a file that must exist
+- `check`: an executable and its pass criterion
+- `human`: a person must do it; **no script can satisfy it, and the schema enforces that**
+- `gate`: the human approval this package requests on completion
+- `artifact`: a file that must exist
 
 The `human` type is load-bearing. Ten harnesses once ran green
 three times and a human found four defects in a screenshot the same afternoon. Encoding
@@ -223,7 +223,7 @@ Each package may declare reviewers that run against its own outputs.
 
 | Package | Reviewer | Looks for |
 |---|---|---|
-| html | screenshot reviewer | what measurement is blind to — duplicated rows, orphaned spacing, an undimmed header |
+| html | screenshot reviewer | what measurement is blind to: duplicated rows, orphaned spacing, an undimmed header |
 | figma | visual parity reviewer | Figma frames against HTML screenshots, beyond what `geometry-diff` sees |
 | figma | rule reviewer | naming, variable binding, chrome pinning, annotation completeness |
 | impl-* | e2e and usability | *coming-soon* |
@@ -273,6 +273,6 @@ things.
 - **A declared package must not read as a built one.** The mitigation is presentation,
   never removal: `coming-soon` packages stay in the graph, in `/pica status` and in the
   banner, drawn dashed and labelled `PLANNED`. They are work in progress, and deleting a
-  roadmap entry because it has not shipped yet would lose the agreed contract — which is
+  roadmap entry because it has not shipped yet would lose the agreed contract: which is
   the whole reason for declaring it early. **Nothing is removed from the roadmap
   automatically.** If a package should go, that is the author's explicit call.

@@ -1,5 +1,5 @@
 /**
- * mutate.mjs — this repository proving its own claim.
+ * mutate.mjs: this repository proving its own claim.
  *
  * The README says "every one has been seen to fail on the defect it was written for", and
  * until 0.9.5 that was true and unverifiable: the suites were run ad hoc in a scratch
@@ -64,8 +64,9 @@ function makeFixture() {
   const d = fs.mkdtempSync(path.join(process.env.TMPDIR || "/tmp", "pica-mutate-"));
   execFileSync("rsync", ["-a", "--exclude", ".git", "--exclude", "node_modules", src + "/", d + "/"]);
 
-  /* impl-check refuses a directory that is not a git repository, correctly: branch age
-   * and branch protection are properties of a repository and not of a folder. */
+  /* The fixture gets a repository of its own. No surviving check reads git: impl-check
+   * did and went with the build half, but a project directory that is not a repository
+   * is not a shape pica should be proven against. */
   try {
     const q = { cwd: d, stdio: "ignore" };
     const who = ["-c", "user.email=fixture@example.invalid", "-c", "user.name=pica fixture"];
@@ -100,8 +101,8 @@ if (FIXTURE || !DIR) {
   DIR = makeFixture();
 }
 /* Absolute, because every check runs with cwd: DIR and is handed a path built from it.
- * A relative directory made those two disagree, so `mutate.mjs examples/approvals` — the
- * invocation the README documents — reported every check FAIL on a missing state file and
+ * A relative directory made those two disagree, so `mutate.mjs examples/approvals`: the
+ * invocation the README documents: reported every check FAIL on a missing state file and
  * refused as a failing baseline. The suite was fine; the argument was. */
 DIR = path.resolve(DIR);
 const S = path.join(DIR, ".pica", "state.json");
@@ -141,6 +142,47 @@ const M = [
   ["exclusions-asked", "analyst/scripts/trace-check.mjs", [S], null, (s) => s.exclusionsConfirmed = false],
   // industry-check
   ["industry-known",   "analyst/scripts/industry-check.mjs", [S], null, (s) => { s.field = "assorted things"; delete s.industry.key; }],
+
+  // archetype-check
+  ["archetype-declared", "analyst/scripts/archetype-check.mjs", [S], "applications", (s) => { delete s.applications[0].archetype; delete s.archetype; }],
+  ["archetype-resolved", "analyst/scripts/archetype-check.mjs", [S], "applications", (s) => { s.applications[0].archetype = "widget-thing"; }],
+  ["archetype-ambiguous","analyst/scripts/archetype-check.mjs", [S], "applications", (s) => { s.applications[0].archetype = "platform"; }],
+
+  // audience-check
+  ["audience-resolved",  "analyst/scripts/audience-check.mjs", [S], "audience", (s) => { s.audience.dimensions.age.value = "middle-aged"; }],
+  ["audience-dimensions","analyst/scripts/audience-check.mjs", [S], "audience", (s) => { delete s.audience.dimensions.literacy; }],
+  ["audience-floors",    "analyst/scripts/audience-check.mjs", [S], "audience", (s) => { s.audience.dimensions.age.value = "older-adults"; }],
+  ["audience-evidence",  "analyst/scripts/audience-check.mjs", [S], "audience", (s) => { delete s.audience.dimensions.region.evidence; }],
+  ["audience-ambiguous", "analyst/scripts/audience-check.mjs", [S], "audience", (s) => { s.audience.dimensions.region.value = "asia"; }],
+
+  // process-check
+  ["notation-named",   "analyst/scripts/process-check.mjs", [S], "toBe", (s) => { s.toBe.notation = "uml-activity"; }],
+  ["notation-named",   "analyst/scripts/process-check.mjs", [S], "toBe", (s) => { delete s.toBe.notationWhy; }],
+  ["activity-laned",   "analyst/scripts/process-check.mjs", [S], "toBe", (s) => { delete s.toBe.nodes.find((n) => n.id === "raise").lane; }],
+  ["gateway-forks",    "analyst/scripts/process-check.mjs", [S], "toBe", (s) => { s.toBe.edges = s.toBe.edges.filter((e) => !(e.from === "decide" && e.to === "amend")); }],
+  ["no-dead-end",      "analyst/scripts/process-check.mjs", [S], "toBe", (s) => { s.toBe.edges = s.toBe.edges.filter((e) => e.from !== "record"); }],
+  ["activity-traced",  "analyst/scripts/process-check.mjs", [S], "toBe", (s) => { delete s.toBe.nodes.find((n) => n.id === "raise").tracesTo; }],
+
+  // permissions-check
+  ["cell-answered",    "analyst/scripts/permissions-check.mjs", [S], "rolesPermissions", (s) => { delete s.rolesPermissions["account holder"].payment; }],
+  ["entity-owned",     "analyst/scripts/permissions-check.mjs", [S], "rolesPermissions", (s) => { s.rolesPermissions["account holder"].payment = "r"; }],
+  ["role-known",       "analyst/scripts/permissions-check.mjs", [S], "rolesPermissions", (s) => { s.rolesPermissions["shadow admin"] = { payment: "crud", approval: "crud" }; }],
+  ["use-case-backs",   "analyst/scripts/permissions-check.mjs", [S], "rolesPermissions", (s) => { s.rolesPermissions["compliance officer"].payment = "rd"; }],
+
+  // requirements-check
+  ["nfr-measured",     "analyst/scripts/requirements-check.mjs", [S], "nfr", (s) => { s.nfr[0].requirement = "the approval queue is fast"; }],
+  ["nfr-measured",     "analyst/scripts/requirements-check.mjs", [S], "nfr", (s) => { delete s.nfr[0].measuredBy; }],
+  ["classified",       "analyst/scripts/requirements-check.mjs", [S], "requirements", (s) => { delete s.requirements[0].class; }],
+  ["transition-flagged","analyst/scripts/requirements-check.mjs", [S], "requirements", (s) => { delete s.requirements.find((r) => r.class === "transition").untilWhen; }],
+  ["state-closed",     "analyst/scripts/requirements-check.mjs", [S], "stateModel", (s) => { delete s.stateModel[0].states.find((x) => x.name === "held").to; }],
+  ["state-closed",     "analyst/scripts/requirements-check.mjs", [S], "stateModel", (s) => { s.stateModel[0].states.find((x) => x.name === "approved").terminal = false; }],
+
+  // journey-check
+  ["lane-covered",     "analyst/scripts/journey-check.mjs", [S], "journeys", (s) => { s.journeys[0].actor = "somebody with no lane"; }],
+  ["stage-derived",    "analyst/scripts/journey-check.mjs", [S], "journeys", (s) => { s.journeys[0].stages[0].from = ["a step that is not in the lane"]; }],
+  ["pain-sourced",     "analyst/scripts/journey-check.mjs", [S], "journeys", (s) => { delete s.journeys[0].stages[0].pain[0].nOf; }],
+  ["pain-sourced",     "analyst/scripts/journey-check.mjs", [S], "journeys", (s) => { delete s.journeys[0].stages[0].pain[0].class; }],
+  ["delta-stated",     "analyst/scripts/journey-check.mjs", [S], "journeys", (s) => { delete s.delta; }],
   ["conventions",      "analyst/scripts/industry-check.mjs", [S], "industry", (s) => s.industry.conventions.pop()],
   ["stakeholders",     "analyst/scripts/industry-check.mjs", [S], "stakeholders", (s) => s.stakeholders = []],
   // domain-check
@@ -157,22 +199,11 @@ const M = [
   ["guardrail",           "analyst/scripts/problem-check.mjs", [S], "problem", (s) => s.problem.guardrails = []],
   ["counter-evidence",    "analyst/scripts/problem-check.mjs", [S], "problem", (s) => s.problem.counterEvidence = "n/a"],
   ["hmw-generative",      "analyst/scripts/problem-check.mjs", [S], "problem", (s) => s.problem.hmw = "How might we build an approvals dashboard?"],
-  ["trigger-complete",    "analyst/scripts/problem-check.mjs", [S], "trigger", (s) => delete s.trigger.window],
-  ["constraint-declared", "analyst/scripts/problem-check.mjs", [S], "commercialConstraint", (s) => delete s.commercialConstraint.by],
   ["tier-declared",       "analyst/scripts/problem-check.mjs", [S], "workPackages", (s) => delete s.workPackages.approvals.tier],
   ["freeze-attributed",   "analyst/scripts/problem-check.mjs", [S, "--freeze"], "workPackages", (s) => delete s.frozenBy],
   // schema-check
   ["sample-size",      "research/scripts/schema-check.mjs", [S], "measured", (s) => s.measured = s.measured.slice(0, 2)],
   ["provenance",       "research/scripts/schema-check.mjs", [S], "measured", (s) => delete s.measured[0].method],
-  // arch-check
-  ["feasibility",      "architect/scripts/arch-check.mjs", [S, "--feasibility"], "risks", (s) => delete s.risks[0].verdict],
-  ["nfr-complete",     "architect/scripts/arch-check.mjs", [S], "nfr", (s) => delete s.nfr[0].measuredBy],
-  ["adr-complete",     "architect/scripts/arch-check.mjs", [S], "adr", (s) => delete s.adr[0].consequences],
-  ["tech-has-adr",     "architect/scripts/arch-check.mjs", [S], "adr", (s) => s.stack = { ...(s.stack || {}), cache: "Memcached" }],
-  // estimate-check
-  ["preconditions",    "estimate/scripts/estimate-check.mjs", [S], "estimate", (s) => { delete s.scopeFrozen; s.estimate.for = "client"; }],
-  ["estimated-by-doer","estimate/scripts/estimate-check.mjs", [S], "estimate", (s) => { for (const v of Object.values(s.estimate)) if (v && v.o !== undefined) delete v.by; }],
-  ["three-points",     "estimate/scripts/estimate-check.mjs", [S], "estimate", (s) => { const k = Object.keys(s.estimate).find((x) => s.estimate[x] && s.estimate[x].o !== undefined); s.estimate[k] = { o: 1, m: 1, p: 1, by: s.estimate[k].by }; }],
   // discover-check
   ["segment-defined",    "discover/scripts/discover-check.mjs", [S], "discovery", (s) => delete s.discovery.segments[0].context],
   ["users-sample-size",  "discover/scripts/discover-check.mjs", [S], "discovery", (s) => { s.discovery.segments[0].interviews = 2; }],
@@ -184,32 +215,14 @@ const M = [
   ["competitor-pricing", "discover/scripts/discover-check.mjs", [S], "discovery", (s) => { s.discovery.competitors[1].pricing = "unknown"; }],
   ["market-bottom-up",   "discover/scripts/discover-check.mjs", [S], "discovery", (s) => { s.discovery.market.size = 950000; }],
   ["users-provenance",   "discover/scripts/discover-check.mjs", [S], "discovery", (s) => delete s.discovery.painPoints[1].source],
-  // value-check
-  ["value-declared",       "model/scripts/value-check.mjs", [S], "value", (s) => delete s.value.for],
-  ["value-attribution",    "model/scripts/value-check.mjs", [S], "value", (s) => delete s.value.revenue[0].by],
-  ["run-cost",             "model/scripts/value-check.mjs", [S], "value", (s) => delete s.value.runCost[0].basis],
-  ["run-cost",             "model/scripts/value-check.mjs", [S], "value", (s) => delete s.value.maintenancePct],
-  ["value-horizon",        "model/scripts/value-check.mjs", [S], "value", (s) => s.value.horizonMonths = 12],
-  ["value-trigger",        "model/scripts/value-check.mjs", [S], "trigger", (s) => delete s.trigger.changed],
-  ["revenue-three-points", "model/scripts/value-check.mjs", [S], "value", (s) => { const r = s.value.revenue[0]; r.o = r.m = r.p = 66000; }],
-  ["revenue-three-points", "model/scripts/value-check.mjs", [S], "value", (s) => { s.value.revenue[0].o = 120000; }],
   /* Strip the PROVENANCE from a driver rather than deleting the driver. Deleting it also
    * orphaned the sensitivity entry naming it, so one missing driver reported as two
    * findings and sent the reader in two directions. An unsourced driver is the defect
    * this check is actually written for. */
-  ["bottom-up",            "model/scripts/value-check.mjs", [S], "value", (s) => delete s.value.revenue[0].drivers[1].from],
-  ["tier-fence",           "model/scripts/value-check.mjs", [S], "value", (s) => { s.value.pricing.tiers[1].fence = ""; }],
-  ["sensitivity",          "model/scripts/value-check.mjs", [S], "value", (s) => { s.value.sensitivity[0].assumption = "the phase of the moon"; }],
-  ["do-nothing",           "model/scripts/value-check.mjs", [S], "value", (s) => delete s.value.doNothing],
-  ["value-verdict",        "model/scripts/value-check.mjs", [S, "--gate"], "value", (s) => delete s.value.verdict],
   // concept-check  (state only: divergence happens before any screen exists)
   ["concepts-diverged", "html/scripts/concept-check.mjs", [S], "workPackages", (s) => { s.workPackages.approvals.concepts = s.workPackages.approvals.concepts.slice(0, 1); }],
   ["concepts-diverged", "html/scripts/concept-check.mjs", [S], "workPackages", (s) => { for (const c of s.workPackages.approvals.concepts) c.servesBadly = []; }],
   ["concepts-diverged", "html/scripts/concept-check.mjs", [S], "workPackages", (s) => { for (const c of s.workPackages.approvals.concepts) c.dropped = false; }],
-  // roadmap, inside estimate-check
-  ["slice-releasable", "estimate/scripts/estimate-check.mjs", [S], "roadmap", (s) => { s.roadmap.slices[0].closes = []; }],
-  ["critical-path",    "estimate/scripts/estimate-check.mjs", [S], "roadmap", (s) => { s.roadmap.criticalPath = ["R1", "R9"]; }],
-  ["buffer-stated",    "estimate/scripts/estimate-check.mjs", [S], "roadmap", (s) => delete s.roadmap.bufferDays],
   // proposal-check
   ["slot-addressed",   "core/scripts/proposal-check.mjs", [S], "proposals", (s) => s.proposals = s.proposals.filter((p) => p.slot !== "S1")],
   ["axis-named",       "core/scripts/proposal-check.mjs", [S], "proposals", (s) => delete s.proposals.find((p) => p.presented)?.axis],
@@ -228,25 +241,12 @@ const M = [
   /* Wrong WITHOUT a cost, not merely wrong. What it cost is the whole value of having
    * written the assumption down, and it is the first thing dropped in a hurried closeout. */
   ["assumption-outcome", "core/scripts/close-check.mjs", [S], "assumptions", (s) => { s.assumptions[0].outcome = "wrong"; }],
-  ["effort-logged",      "core/scripts/close-check.mjs", [S], "effortLog", (s) => { s.effortLog = s.effortLog.slice(1); }],
   /* Exempted and pointing at no register. A dispute that excuses a check without naming
    * where the exemption lives IS the ignored finding it was built to prevent, wearing
    * better paperwork. */
   ["check-disputed",     "core/scripts/close-check.mjs", [S], "checkDisputes", (s) => delete s.checkDisputes[0].exemptionIn],
   ["check-disputed",     "core/scripts/close-check.mjs", [S], "checkDisputes", (s) => { s.checkDisputes[0].argument = "we disagreed"; }],
   ["delivered-frozen",   "core/scripts/close-check.mjs", [S], "closeout", (s) => { s.delivered = true; s.workPackages.approvals.htmlApproved = false; }],
-  // dev-check
-  ["api-contract",     "developer/scripts/dev-check.mjs", ["src", S], "apiContract", (s) => delete s.apiContract[0].errors],
-  ["state-strategy",   "developer/scripts/dev-check.mjs", ["src", S], "stateStrategy", (s) => delete s.stateStrategy.url],
-  ["server-guard",     "developer/scripts/dev-check.mjs", ["src", S], "businessRules", (s) => s.businessRules[0].enforcedBy = "the button is hidden in the interface"],
-  // qa-check
-  ["pyramid",          "qa/scripts/qa-check.mjs", [".", S], "testStrategy", (s) => s.testStrategy.shape = { unit: 4, integration: 9, e2e: 60 }],
-  ["regression",       "qa/scripts/qa-check.mjs", [".", S], "defects", (s) => s.defects[0].failedFirst = false],
-  ["test-data",        "qa/scripts/qa-check.mjs", [".", S], "testData", (s) => s.testData.provenance = "production export"],
-  ["release",          "qa/scripts/qa-check.mjs", [".", S], "rollbackExecuted", (s) => delete s.rollbackExecuted],
-  // impl-check
-  ["nfr-measured",     "impl/scripts/impl-check.mjs", [".", S], "nfr", (s) => delete s.nfr[0].measuredBy],
-  ["stack-declared",   "impl/scripts/impl-check.mjs", [".", S], "stack", (s) => s.stack = { ...s.stack, search: "Elasticsearch" }],
   // capture-reading checks
   ["direction",        "html/scripts/verify-html.mjs", [REF, S], "capture+direction", (s) => s.direction.assert["type.roles.max"] = 1],
   ["exemption-used",   "html/scripts/contrast-check.mjs", [REF, S], "capture", (s) => s.contrastExemptions = [{ where: "nothing here", why: "a stale exemption nobody removed", by: "somebody" }]],
@@ -254,6 +254,33 @@ const M = [
     /* spacing-check reads the TOKEN FILE first and falls back to state.spacingScale, so
    * mutating the fallback did nothing on any project that has tokens. Redirect the path
    * at a scale on which no real gap lands. */
+  // font-check
+  ["family-declared",  "html/scripts/font-check.mjs", [REF, S], "capture", (s) => { delete s.direction.fontsWhy; }],
+  ["family-resolved",  "html/scripts/font-check.mjs", [REF, S], "capture", (s) => { s.direction.fonts.display = "Archivo, Helvetica, sans-serif"; }],
+  ["fallback-stated",  "html/scripts/font-check.mjs", [REF, S], "capture", (s) => { s.direction.fonts.body = "Archivo"; }],
+
+  // state-coverage-check
+  ["state-captured",   "html/scripts/state-coverage-check.mjs", [REF, S], "capture", (s) => { s.stateExemptions = s.stateExemptions.filter((x) => x.state !== "returned"); }],
+  ["minimum-present",  "html/scripts/state-coverage-check.mjs", [REF, S], "capture", (s) => { s.stateExemptions = s.stateExemptions.filter((x) => x.state !== "error"); }],
+  ["excused-named",    "html/scripts/state-coverage-check.mjs", [REF, S], "capture", (s) => { s.stateExemptions.find((x) => x.state === "draft").why = "n/a"; }],
+  ["stale-exemption",  "html/scripts/state-coverage-check.mjs", [REF, S], "capture", (s) => { s.stateExemptions.push({ state: "a state the model never had", why: "a stale exemption nobody removed" }); }],
+
+  // direction-spread-check
+  ["three-offered",     "html/scripts/direction-spread-check.mjs", [S], "proposals", (s) => { const p = s.proposals.find((x) => x.slot === "S1"); p.options = p.options.slice(0, 2); }],
+  ["traditions-differ", "html/scripts/direction-spread-check.mjs", [S], "proposals", (s) => { const p = s.proposals.find((x) => x.slot === "S1"); p.options[1].tradition = p.options[0].tradition; }],
+  ["baseline-present",  "html/scripts/direction-spread-check.mjs", [S], "proposals", (s) => { for (const o of s.proposals.find((x) => x.slot === "S1").options) o.isSectorBaseline = false; }],
+  ["numbers-differ",    "html/scripts/direction-spread-check.mjs", [S], "proposals", (s) => { for (const o of s.proposals.find((x) => x.slot === "S1").options) o.asserts.radius = 8; }],
+
+  // structure-check
+  ["lofi-traced",     "html/scripts/structure-check.mjs", ["html/structure", S], "@html/structure", (s) => { s.useCases = s.useCases.filter((u) => u.id !== "UC-01"); s.useCases.push({ id: "UC-77", name: "something else", actor: "account holder", tracesTo: ["BR-01"], touches: [{ entity: "payment", ops: "cr" }, { entity: "approval", ops: "cru" }] }); }],
+  ["lofi-states",     "html/scripts/structure-check.mjs", ["html/structure", S], "@html/structure", (s) => { s.structureExemptions = []; }],
+
+  // foundations-check
+  ["contrast-floor",    "html/scripts/foundations-check.mjs", ["html/design-system.html", "tokens/tokens.json", S], "direction", (s) => { s.audience.floors.contrastRatio = 21; }],
+  ["state-covered",     "html/scripts/foundations-check.mjs", ["html/design-system.html", "tokens/tokens.json", S], "direction", (s) => { s.direction.components[0].states.push("pressed"); }],
+  ["icon-set",          "html/scripts/foundations-check.mjs", ["html/design-system.html", "tokens/tokens.json", S], "direction", (s) => { delete s.direction.icons.licence; }],
+  ["icon-set",          "html/scripts/foundations-check.mjs", ["html/design-system.html", "tokens/tokens.json", S], "direction", (s) => { s.direction.icons.strokeWidth = "2"; }],
+
   ["off-scale",        "html/scripts/spacing-check.mjs", [REF, S], "capture", (s) => {
     s.tokensPath = ".pica/mutant-tokens.json";
     /* A scale on which the EDGES still land and the gaps do not. A file with only
@@ -279,6 +306,10 @@ const have = (need) => {
   if (!need) return true;
   if (need === "capture") return hasCapture;
   if (need === "capture+direction") return hasCapture && baseState.direction && baseState.direction.assert;
+  /* `@path` is a path on disk, the same convention pica-verify's `needs` uses. Without it a
+     mutation on a check that reads a directory rather than state was skipped for want of a
+     state key it never wanted, and a skip reads as "no material" rather than as a bug here. */
+  if (need.startsWith("@")) return fs.existsSync(path.join(DIR, need.slice(1)));
   const v = baseState[need];
   return Array.isArray(v) ? v.length > 0 : v !== undefined && v !== null;
 };

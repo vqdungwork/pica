@@ -41,7 +41,7 @@ A screen taller than the viewport ships as **two frames**:
    something was removed.
 
 *Changed in 0.2.0.* Earlier guidance omitted the indicator on hug frames on the grounds that a content
-board is not a viewport. In review that read as an oversight rather than a decision — a reviewer scanning
+board is not a viewport. In review that read as an oversight rather than a decision: a reviewer scanning
 for consistency sees a missing element, not a rationale. Every screen frame now carries it, which also
 removes a per-frame judgement call from the audit.
 
@@ -56,10 +56,10 @@ Three things a reviewer notices before any of the design, and all three were rev
 
 - **Local components must not overlap the screen sections.** Left at the page origin they float over
   the frames, and a reviewer cannot tell a component from a screen. Put them in their own band above
-  the sections and assert no overlap by comparing bounding boxes — a name check proves nothing.
+  the sections and assert no overlap by comparing bounding boxes: a name check proves nothing.
 - **A section's background must differ from the frame's.** Sections default to near-white, which is
   the same value as a typical page background, so the frame has no visible edge. Bind the section
-  fill to a distinct token — the same value the HTML review page uses on `body`, for the same reason.
+  fill to a distinct token: the same value the HTML review page uses on `body`, for the same reason.
 - **A tall-screen pair sits side by side, on one row.** Stacked vertically the two halves read as two
   unrelated screens; beside each other they read as one decision, and the difference between them is
   the information a reviewer is there to judge.
@@ -86,17 +86,17 @@ glyph for it and it falls back visibly.
 Each of these was hit on a real port. None throws. All return a plausible value.
 
 **`findAll` under-reports instance children in two situations, not one.** The documented case is a node
-whose page is not current. The second is a node **created in the current call** — a freshly cloned
+whose page is not current. The second is a node **created in the current call**: a freshly cloned
 frame does not expose its nested instances until the next call. Consequences:
 
 - Clone in one call, wire the prototype in the next. Wiring in the same call silently missed 11 of 16
-  triggers — every one that lived inside an instance, none that lived on a plain frame.
+  triggers: every one that lived inside an instance, none that lived on a plain frame.
 - **Never compare descendant counts across pages.** The non-current side always under-reports, so the
   comparison can never pass. Split it into two reads, each taken while its own page is current, and
   compare outside the plugin.
 
 **Node object identity is not stable across lookups.** Two lookups of the same node return different
-proxy wrappers, so `node.parent === someNode` silently matches nothing — and *inconsistently*, so the
+proxy wrappers, so `node.parent === someNode` silently matches nothing, and *inconsistently*, so the
 same code works in one place and fails in another. Compare `.id`, or avoid the comparison by walking
 `.children` directly.
 
@@ -108,12 +108,12 @@ the child's sizing rather than assuming it survived.
 **Removing `layoutGrow` converts `FILL` to `FIXED`, not `HUG`.** The clip persists at exactly the same
 height, and a repair that tests for `FILL` stops matching. Set `HUG` unconditionally.
 
-**`vectorPaths` accepts `M`/`L`/`C`/`Z` only.** No arcs — `A` throws *"Invalid command at A"*. Draw
+**`vectorPaths` accepts `M`/`L`/`C`/`Z` only.** No arcs: `A` throws *"Invalid command at A"*. Draw
 circles as four cubic béziers with control offset `0.5523 × r`.
 
 **`vectorPaths` geometry is scaled to fit the node's box.** A path spanning 8 units in a node resized
 to 16 renders at 16px, not 8. Size the node to the artwork's **visible** size, not to the box size the
-CSS uses — otherwise every icon comes out one to two times too heavy.
+CSS uses: otherwise every icon comes out one to two times too heavy.
 
 **`reactions` requires the plural `actions` array.** The singular `action` throws *"Please update the
 `actions` field … to prevent data loss"*.
@@ -133,13 +133,13 @@ wrapping auto-layout after combining.
 
 ## Re-sync prototype clones after every frame-level fix
 
-Component-level fixes propagate to clones. **Frame-level fixes do not** — content alignment, a wrapper
+Component-level fixes propagate to clones. **Frame-level fixes do not**: content alignment, a wrapper
 frame, a sizing mode, an instance colour override, a divider. On one project the prototypes were a full
 day stale: a client clicking through would have seen the left-aligned, clipped versions of screens that
 had already been fixed.
 
 When the drift is structural, **delete the clones and re-clone** rather than patching. Then audit by
-**measuring a property that changed** — names and child counts match while geometry diverges, which is
+**measuring a property that changed**: names and child counts match while geometry diverges, which is
 exactly why comparing names proves nothing.
 
 ## Prototype links cannot cross pages
@@ -159,8 +159,8 @@ It bit one project twice: the clones missed a whole token-binding pass, and late
 that re-centred two controls, so the prototype still showed a 10px misalignment the source had lost.
 
 Component-level fixes **do** propagate, because the clones hold instances. Frame-level fixes do not.
-Anything you fix by editing a screen frame — a wrapper, a constraint, a position, a paint on a local shape
-— needs doing twice.
+Anything you fix by editing a screen frame: a wrapper, a constraint, a position, a paint on a local shape
+needs doing twice.
 
 Audit it by measuring, not by remembering: pick the property you changed and compare each clone against
 its source. Do not compare names or child counts, which match while the geometry diverges.
@@ -267,8 +267,8 @@ looked wrong.
 Horizontal centring gets a rule and vertical centring gets forgotten, so vertical is what clients find.
 The example that came back from a real review: **the eye toggle in a password field.**
 
-Any icon sharing a row with text inside a control — a trailing eye, a clear button, a chevron, a unit
-toggle — sits in a horizontal auto-layout with `counterAxisAlignItems = "CENTER"`. Audit it: for every
+Any icon sharing a row with text inside a control: a trailing eye, a clear button, a chevron, a unit
+toggle: sits in a horizontal auto-layout with `counterAxisAlignItems = "CENTER"`. Audit it: for every
 horizontal frame containing an icon child, flag `counterAxisAlignItems !== "CENTER"`.
 
 **Centre on the field, not on the component.** An `input` is usually label + field + error message
@@ -294,7 +294,7 @@ slot.setBoundVariable('height', inputHeightVar);  // tracks the field if it ever
 
 **Give the trailing icon a gap.** A field row whose value text is `FILL` puts the text box flush against
 the icon at `itemSpacing: 0`, which looks fine with a short placeholder and collides the moment the value
-is long. Bind the row's `itemSpacing` to a token — `input/gap` aliasing the spacing scale, alongside
+is long. Bind the row's `itemSpacing` to a token: `input/gap` aliasing the spacing scale, alongside
 `input/height` and `input/padding-x`. Note that you cannot verify this by measuring the component while
 the icon is hidden: a hidden child does not participate in auto-layout, so its box overlaps the FILL text
 and the measured gap comes back negative. Measure a live instance with the icon switched on.
@@ -330,13 +330,13 @@ n.textAutoResize === 'NONE' && n.textAlignVertical === 'TOP' && (n.height % line
 ```
 
 A non-zero remainder means the box does not hold a whole number of lines, so there is slack, so the
-alignment matters. `HEIGHT` auto-resize with TOP is fine — the box hugs, so there is no slack.
+alignment matters. `HEIGHT` auto-resize with TOP is fine: the box hugs, so there is no slack.
 
 ## Siblings that must match height use FILL
 
 Nav tabs, segmented options, stat tiles: anything read as a row of equals. If they `HUG`, any child-count
 difference changes their height. A `bottom-nav` measured 38px on inactive tabs and 44 or 45 on active
-ones, because the active tab carries a dot the others lack — and the two active variants disagreed with
+ones, because the active tab carries a dot the others lack, and the two active variants disagreed with
 each other by a pixel.
 
 Set `layoutSizingVertical = "FILL"` on each sibling so all take the container's inner height.
@@ -359,7 +359,7 @@ if (parent.layoutMode !== 'NONE') hi.layoutPositioning = 'ABSOLUTE';   // requir
 instead of overlaying the nav's safe-area padding. It is also the reason the hug exception existed at all,
 and why it is no longer needed.
 
-All 68 home indicators in one file sat at `MIN/MIN` — pinned to the **top**. They looked correct only
+All 68 home indicators in one file sat at `MIN/MIN`: pinned to the **top**. They looked correct only
 because every frame happened to be 812 tall. Audit `constraints.vertical === 'MAX'` on bottom chrome, and
 check the bottom gap is zero rather than trusting the y value.
 
@@ -595,14 +595,14 @@ component. If it lives inside a nested **instance**, `componentPropertyReference
 `Cannot set component property references on instance sublayer`.
 
 The chain has to be built inward-out: the inner component defines the property, then the outer maps to
-it. Before building any of that, check whether the inner component already exposes what you need — on
+it. Before building any of that, check whether the inner component already exposes what you need: on
 one merge the nested card already carried the boolean, so the outer needed no property at all.
 
 ## 15. `figma.mixed` is not only `cornerRadius`
 
 Trap 5 names `cornerRadius`. The same symbol comes back from `strokeWeight`, `fontName`, `fontSize`,
 `lineHeight`, `letterSpacing`, `textDecoration` and `fills` on any node with mixed values, and
-concatenating it into a string throws `TypeError: cannot convert symbol to string` — which, because
+concatenating it into a string throws `TypeError: cannot convert symbol to string`, which, because
 scripts are atomic, discards a whole read. Coerce once at the top of every dump helper:
 
 ```js

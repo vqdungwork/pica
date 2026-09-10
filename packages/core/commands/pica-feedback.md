@@ -1,11 +1,11 @@
 ---
-description: Triage feedback from a client or reviewer — verify every claim before accepting it
+description: Triage feedback from a client or reviewer, verify every claim before accepting it
 argument-hint: "[the feedback, or a path to it]"
 ---
 
 # pica-feedback: triage feedback from someone else
 
-Third-party feedback has arrived — client, reviewer, stakeholder. `$ARGUMENTS` is the feedback itself, or
+Third-party feedback has arrived: client, reviewer, stakeholder. `$ARGUMENTS` is the feedback itself, or
 a path to it. Screenshots usually come with it.
 
 Load `${CLAUDE_PLUGIN_ROOT}/rules/review-discipline.md` and the figma package's
@@ -59,7 +59,7 @@ have been wrong.
 
 ## 3. Generalise the class, not the scope
 
-If a reviewer found one instance, find them all — that is the job. Their screenshot is a sample.
+If a reviewer found one instance, find them all: that is the job. Their screenshot is a sample.
 
 But keep two lists apart:
 
@@ -81,7 +81,7 @@ client costs credibility. Three real ones from one session:
 - a regex for a sticker's copy matched ordinary body text that happened to contain the same letters
 
 Corroborate before reporting: two independent signals, or one measurement you can state as a number. And
-if three detectors in a row come back mostly noise, stop writing detectors and find ground truth — a
+if three detectors in a row come back mostly noise, stop writing detectors and find ground truth: a
 surviving correct example, the design's own convention, or the human. See `review-discipline.md`, Audit
 integrity.
 
@@ -90,7 +90,7 @@ integrity.
 Before inventing a value, look for the same element done correctly somewhere else. The file usually
 answers the question.
 
-Dark pills over media on one project were flattened to opaque by an earlier pass — but three of them had
+Dark pills over media on one project were flattened to opaque by an earlier pass, but three of them had
 been skipped, and those three still carried the project's real convention: bound to a `scrim` token at
 0.68. That is a measured answer, not a guess, and it beats any value you would have picked.
 

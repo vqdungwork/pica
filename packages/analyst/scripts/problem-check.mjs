@@ -8,12 +8,19 @@
  * it existed. A rule stated in prose lasts about a day; this is the file that makes it
  * last to package eleven.
  *
- * It also covers the two decisions that belong to a human and were therefore unchecked:
- * the commercial constraint at intake, and the freeze. It does NOT check that an agent
- * made them, because an agent must not. It checks the decision was recorded and
- * attributed, which is the only part a script can know and exactly what was missing.
+ * It also covers the freeze, a decision that belongs to a human and was therefore
+ * unchecked. It does NOT check that an agent made it, because an agent must not. It
+ * checks the decision was recorded and attributed, which is the only part a script can
+ * know and exactly what was missing.
  *
- * Ten checks:
+ * 2.0.0 removed two of the ten. TRIGGER asked what changed and when the window closes;
+ * intake no longer asks, because most briefs cannot answer it and discovery researches
+ * the same thing better as "why buyers change". CONSTRAINT read commercialConstraint,
+ * which left intake with input 3: only its disclosure half reached a client-facing
+ * artefact, and that is enforced by disclosure-check instead. A check that outlives the
+ * field it reads is the fail-open shape this file exists to argue against.
+ *
+ * Eight checks:
  *
  *   1. METRIC          one metric, named, with a unit, a statement and whose it is.
  *   2. TARGET          differs from the baseline, and the direction is stated.
@@ -21,10 +28,8 @@
  *   4. GUARDRAIL       at least one thing that must not get worse, with a threshold.
  *   5. COUNTER         what result would prove the problem is not real.
  *   6. HMW             a question that does not already name the answer.
- *   7. TRIGGER         what changed, what happens otherwise, and the window.
- *   8. CONSTRAINT      which of scope, date, resources is fixed, and who fixed it.
- *   9. TIER            every work package is standard or complex.
- *  10. FREEZE          with --freeze: attributed, and over packages that were approved.
+ *   7. TIER            every work package is standard or complex.
+ *   8. FREEZE          with --freeze: attributed, and over packages that were approved.
  *
  * Usage: node problem-check.mjs <state.json> [--freeze]
  */
@@ -66,9 +71,8 @@ const said = (x, min = 8) => {
  * findings is a worse answer than one sentence. It reported exactly that on eight of nine
  * real projects. If ANY of the four blocks is present, check them all properly: a
  * half-recorded problem statement is the thing worth finding. */
-if (!state.problem && !state.trigger && !state.commercialConstraint
-    && !Object.keys(state.workPackages || {}).length) {
-  console.error("FAIL  state carries no problem, trigger, commercialConstraint or workPackages.");
+if (!state.problem && !Object.keys(state.workPackages || {}).length) {
+  console.error("FAIL  state carries no problem and no workPackages.");
   console.error("      Nothing to check, and a list of findings against nothing would say the project");
   console.error("      is broken when it has simply not reached 1.2 yet. Run /pica then /pica-analyse.");
   process.exit(2);
@@ -206,56 +210,6 @@ if (!said(hmw, 20)) {
   }
 }
 
-/* ---- 7. TRIGGER ---------------------------------------------------------- *
- * Written at intake. If nothing changed, the product is being built because it can be,
- * which is the commonest root cause of a product nobody wanted. Checked here rather than
- * only in value-check, so it holds on a project that has no value case. */
-let triggerBad = 0;
-const tr = state.trigger || {};
-for (const [k, why] of [
-  ["changed", "if nothing changed, this is being built because it can be, which is the commonest root cause of a product nobody wanted"],
-  ["ifNothing", "without it there is no cost to not doing this, and every project beats nothing"],
-  ["window", "a trigger with no window cannot be prioritised against anything else"],
-]) {
-  if (!said(tr[k], 12)) {
-    triggerBad++;
-    fail("trigger-complete", `trigger.${k}`, `absent or void: ${why}.`);
-  }
-}
-
-/* ---- 8. CONSTRAINT ------------------------------------------------------- *
- * Step 06 is a human's decision and stays one, so this does not check that an agent made
- * it. It checks it was recorded and attributed, which is all a script can know and is
- * exactly what was missing: nothing in this repository read the commercial constraint.
- *
- * Named commercialConstraint rather than constraint: the repository already carries
- * domainConstraints and constraintsNotApplicable, and giving the fourth concept the
- * barest of the four names is how a reader resolves the wrong one. It is also intake
- * input 3's own wording.
- *
- * All three fixed is the condition under which projects fail. It is not rejected here,
- * because sometimes it is the truth. It is reported, so that it cannot go unsaid. */
-const AXES = ["scope", "date", "resources"];
-let conBad = 0;
-const con = state.commercialConstraint || {};
-const fixed = String(con.fixed || "").toLowerCase();
-if (!AXES.includes(fixed) && fixed !== "all") {
-  conBad++;
-  fail("constraint-declared", "commercialConstraint.fixed",
-    `"${con.fixed ?? "absent"}" is not one of scope, date, resources, all. One of the three is fixed by the outside world and the job is knowing which.`);
-}
-if (!said(con.by, 4)) {
-  conBad++;
-  fail("constraint-declared", "commercialConstraint.by",
-    "nobody named. A constraint with no name against it is a rumour, and it will be renegotiated by whoever remembers it differently.");
-}
-if (!said(con.consequence, 15)) {
-  conBad++;
-  fail("constraint-declared", "commercialConstraint.consequence",
-    "absent. A date with no consequence is not a date, and a fixed scope with no consequence is a preference.");
-}
-const allFixed = fixed === "all";
-
 /* ---- 9. TIER ------------------------------------------------------------- *
  * estimate-check's tier-spread compares complex against standard and reports when every
  * package is one tier. It cannot see a package with NO tier, which then silently joins
@@ -307,8 +261,6 @@ const table = [
   ["guardrail", guardBad, `${guards.length} guardrail(s)`],
   ["counter-evidence", counterBad, said(p.counterEvidence, 25) ? "stated" : "absent"],
   ["hmw-generative", hmwBad, hmw ? `"${hmw.slice(0, 38)}${hmw.length > 38 ? "..." : ""}"` : "absent"],
-  ["trigger-complete", triggerBad, said(tr.changed, 12) ? "recorded" : "absent"],
-  ["constraint-declared", conBad, fixed ? `${fixed} is fixed` : "undeclared"],
   ["tier-declared", tierBad, `${wps.length} package(s)`],
   ["freeze-attributed", freezeBad, FREEZE ? (state.frozenBy || "unattributed") : "not checked, run with --freeze"],
 ];
@@ -320,19 +272,11 @@ for (const [name, n, scope] of table)
  * to fill, but the reader is told which situation they are in first: seven of nine real
  * projects hit exactly this, and a list that long reads as a broken artefact rather than
  * as an absent one. */
-if (!state.problem && !state.trigger && !state.commercialConstraint) {
+if (!state.problem) {
   console.log("");
-  console.log("NOTE  none of problem, trigger or commercialConstraint exists. The findings below are not");
+  console.log("NOTE  no problem statement exists. The findings below are not");
   console.log("      eighteen separate defects, they are one absence itemised: this project has never");
   console.log("      recorded what number would move if it worked. Run /pica intake and /pica-analyse 1.2.");
-}
-
-if (allFixed) {
-  console.log("");
-  console.log("NOTE  scope, date and resources are all recorded as fixed. That is not a plan, and it is");
-  console.log("      the precise condition under which projects fail. It is reported rather than rejected");
-  console.log("      because sometimes it is the truth. Get it acknowledged in writing and name it on day");
-  console.log("      one: it is nearly always survivable said early and fatal said late.");
 }
 
 if (findings.length) {

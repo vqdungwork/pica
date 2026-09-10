@@ -1,0 +1,329 @@
+{
+  "_note": "Dimensions, not personas. A project selects one value per dimension and the constraints merge: numeric floors take the MAXIMUM across selected values, forbidden lists concatenate. That is what makes 'audience floors override sector density' a computation rather than an opinion. Floors are floors: a sector may go denser than a floor allows only by declaring a deviation with a reason, the same discipline tokens use for provenance.",
+  "dimensions": {
+    "age": {
+      "label": "Age band of the primary user",
+      "values": {
+        "children": {
+          "label": "Children, under about 13",
+          "aka": ["kids", "primary school", "under-13"],
+          "floors": { "typeSizePx": 18, "contrastRatio": 4.5, "targetSizePx": 48, "readingGradeMax": 5 },
+          "forbidden": [
+            { "what": "text-only affordances", "why": "an unread label is an invisible control" },
+            { "what": "irreversible actions without confirmation", "why": "exploration is how this audience learns, and it will find every destructive path" }
+          ],
+          "designImplication": [
+            "icons carry meaning, labels confirm it, and neither works alone",
+            "one decision per screen; a screen with three choices gets answered by whichever is largest"
+          ],
+          "evidence": "reading grade is the hard constraint; everything else follows from it"
+        },
+        "teens": {
+          "label": "Teenagers, roughly 13 to 19",
+          "aka": ["adolescent", "secondary school", "gen-z"],
+          "floors": { "typeSizePx": 15, "contrastRatio": 4.5, "targetSizePx": 44 },
+          "forbidden": [
+            { "what": "patronising tone", "why": "it is detected instantly and costs the whole product's credibility" }
+          ],
+          "designImplication": [
+            "platform conventions can be assumed; this audience knows them better than the designer",
+            "speed of interaction outranks explicitness"
+          ],
+          "evidence": "the only audience where under-explaining is safer than over-explaining"
+        },
+        "working-age": {
+          "label": "Working-age adults, roughly 20 to 64",
+          "aka": ["adults", "general adult", "professional"],
+          "floors": { "typeSizePx": 14, "contrastRatio": 4.5, "targetSizePx": 44 },
+          "forbidden": [],
+          "designImplication": [
+            "the default assumption, and the one worth stating rather than defaulting to silently"
+          ],
+          "evidence": "WCAG AA minimums with no additional band-specific floor"
+        },
+        "older-adults": {
+          "label": "Older adults, roughly 65 and above",
+          "aka": ["seniors", "elderly", "retirees", "65+"],
+          "floors": { "typeSizePx": 16, "contrastRatio": 7.0, "targetSizePx": 48, "targetSpacingPx": 12 },
+          "forbidden": [
+            { "what": "gesture-only actions", "why": "swipe-to-reveal and long-press have no discoverable affordance and are the commonest total blocker for this band" },
+            { "what": "auto-dismissing messages", "why": "a toast that clears in four seconds is a message that was never delivered" },
+            { "what": "time-limited interactions", "why": "a session that expires mid-form loses work the user cannot reconstruct" },
+            { "what": "low-contrast placeholder text as the only label", "why": "the label disappears exactly when it is needed" }
+          ],
+          "designImplication": [
+            "every gesture has a visible control that does the same thing",
+            "errors state what to do next, not only what went wrong",
+            "motion is reduced by default rather than on request"
+          ],
+          "evidence": "contrast floor is raised to WCAG AAA because age-related contrast sensitivity loss is the most reliable of the band's changes"
+        }
+      }
+    },
+    "region": {
+      "label": "Region and cultural context of the primary user",
+      "_note": "textExpansion is the multiplier against English at the same content. It is a layout constraint, not a translation note: a button sized to its English label breaks at 1.3.",
+      "values": {
+        "europe-west": {
+          "label": "Western Europe",
+          "aka": ["UK", "Ireland", "France", "Germany", "Netherlands", "Nordics", "Iberia"],
+          "readingOrder": "ltr",
+          "densityExpectation": "moderate",
+          "textExpansion": 1.3,
+          "formats": { "date": "DD/MM/YYYY", "decimal": "comma in most, point in UK and Ireland", "name": "given then family", "address": "street then number in DE/NL, number then street in UK/FR" },
+          "formality": "German, French and Dutch carry a formal register that has to be chosen deliberately; English does not",
+          "designImplication": [
+            "German at 1.3 is the layout stress case for this region; size controls to it, not to English",
+            "GDPR consent is a design surface, not a footer link"
+          ]
+        },
+        "europe-central": {
+          "label": "Central and Eastern Europe",
+          "aka": ["Czech", "Slovak", "Poland", "Hungary", "Romania", "Baltics"],
+          "readingOrder": "ltr",
+          "densityExpectation": "moderate to dense",
+          "textExpansion": 1.25,
+          "formats": { "date": "DD.MM.YYYY", "decimal": "comma", "name": "given then family", "address": "street then number" },
+          "formality": "Czech, Slovak and Polish distinguish formal and informal address; the formal is correct for financial and public services",
+          "designImplication": [
+            "diacritics are load-bearing: a typeface missing them is unusable, and stripping them changes meaning",
+            "multi-currency is common and users expect currencies held apart rather than converted"
+          ]
+        },
+        "north-america": {
+          "label": "United States and Canada",
+          "aka": ["US", "USA", "Canada", "NA"],
+          "readingOrder": "ltr",
+          "densityExpectation": "moderate",
+          "textExpansion": 1.0,
+          "formats": { "date": "MM/DD/YYYY", "decimal": "point", "name": "given then family", "address": "number then street" },
+          "formality": "informal by default across almost every sector",
+          "designImplication": ["accessibility is a legal exposure, not only a quality bar"]
+        },
+        "east-asia": {
+          "label": "East Asia",
+          "aka": ["China", "Japan", "Korea", "Taiwan", "Hong Kong"],
+          "readingOrder": "ltr",
+          "densityExpectation": "dense",
+          "textExpansion": 0.6,
+          "formats": { "date": "YYYY-MM-DD", "decimal": "point", "name": "family then given", "address": "largest unit first" },
+          "formality": "Japanese and Korean encode social distance grammatically; the register is a product decision",
+          "colourDeparture": [
+            { "what": "red", "means": "fortune and gain, not danger", "where": "China, and financial markets across the region where red is up" },
+            { "what": "white", "means": "mourning in several contexts", "where": "regionally variable, worth confirming" }
+          ],
+          "designImplication": [
+            "information density expectations are materially higher; a Western-spaced layout reads as empty and unfinished",
+            "market colour convention is inverted from Western defaults and getting it wrong reverses the meaning of every figure"
+          ]
+        },
+        "southeast-asia": {
+          "label": "Southeast Asia",
+          "aka": ["Vietnam", "Thailand", "Indonesia", "Philippines", "Malaysia", "Singapore"],
+          "readingOrder": "ltr",
+          "densityExpectation": "dense",
+          "textExpansion": 1.15,
+          "formats": { "date": "DD/MM/YYYY", "decimal": "comma or point, varies by country", "name": "varies: Vietnamese is family first, Indonesian may be a single name", "address": "smallest unit first" },
+          "formality": "Vietnamese pronouns encode relative age and status and have no neutral default",
+          "designImplication": [
+            "a single-name user is valid and a form requiring two names will exclude real people",
+            "mobile-first is not a preference here, it is the only surface for much of the audience"
+          ]
+        },
+        "south-asia": {
+          "label": "South Asia",
+          "aka": ["India", "Pakistan", "Bangladesh", "Sri Lanka"],
+          "readingOrder": "ltr",
+          "densityExpectation": "dense",
+          "textExpansion": 1.2,
+          "formats": { "date": "DD/MM/YYYY", "decimal": "point, with lakh and crore grouping", "name": "highly variable; patronymics and single names both common", "address": "smallest unit first" },
+          "formality": "English is often the interface language regardless of first language",
+          "designImplication": [
+            "number grouping is 2,2,3 not 3,3,3: ₹12,34,567 is correct and a thousands separator every three digits reads as wrong",
+            "multilingual switching mid-session is normal"
+          ]
+        },
+        "mena": {
+          "label": "Middle East and North Africa",
+          "aka": ["Arabic", "Gulf", "GCC", "UAE", "Saudi", "Egypt"],
+          "readingOrder": "rtl",
+          "densityExpectation": "moderate",
+          "textExpansion": 1.25,
+          "formats": { "date": "DD/MM/YYYY, sometimes alongside Hijri", "decimal": "point or Arabic decimal separator", "name": "given, patronymic chain, family", "address": "varies widely" },
+          "formality": "formal register is the default in institutional contexts",
+          "designImplication": [
+            "RTL mirrors the entire layout, not the text: navigation, icons with direction, progress, and every chart axis",
+            "a layout built LTR and flipped by a stylesheet gets the icons wrong; direction has to be a design decision per element"
+          ]
+        },
+        "latin-america": {
+          "label": "Latin America",
+          "aka": ["Brazil", "Mexico", "Argentina", "Colombia", "Chile", "LATAM"],
+          "readingOrder": "ltr",
+          "densityExpectation": "moderate",
+          "textExpansion": 1.25,
+          "formats": { "date": "DD/MM/YYYY", "decimal": "comma", "name": "given, then two family names", "address": "street then number" },
+          "formality": "Spanish and Portuguese both carry a formal register; usage varies sharply by country",
+          "designImplication": [
+            "two family names is the norm and a single family-name field truncates real identities",
+            "Brazilian Portuguese and Spanish are not interchangeable and treating them as one locale is visible"
+          ]
+        }
+      }
+    },
+    "accessibility": {
+      "label": "Declared accessibility needs beyond the age-band baseline",
+      "values": {
+        "baseline": {
+          "label": "No declared need beyond WCAG AA",
+          "floors": { "contrastRatio": 4.5, "targetSizePx": 44 },
+          "forbidden": [{ "what": "colour as the only channel for meaning", "why": "it fails for eight percent of men regardless of anything the project declares" }],
+          "designImplication": ["AA is the floor for every project, declared or not"]
+        },
+        "low-vision": {
+          "label": "Low vision",
+          "floors": { "contrastRatio": 7.0, "typeSizePx": 16, "zoomSupportPct": 200 },
+          "forbidden": [
+            { "what": "text baked into images", "why": "it does not scale and it does not reflow" },
+            { "what": "fixed-height containers holding text", "why": "at 200% zoom the content is clipped and nothing says so" }
+          ],
+          "designImplication": ["reflow at 200% is a layout requirement, not a browser feature"]
+        },
+        "colour-blind": {
+          "label": "Colour vision deficiency",
+          "floors": { "contrastRatio": 4.5, "nonColourChannels": 2 },
+          "forbidden": [
+            { "what": "red and green as the only distinction", "why": "the commonest deficiency makes them the same colour" },
+            { "what": "a categorical palette above five hues", "why": "adjacent categories become indistinguishable before the sixth" }
+          ],
+          "designImplication": ["every state carries shape, position or text alongside its colour"]
+        },
+        "motor": {
+          "label": "Motor impairment",
+          "floors": { "targetSizePx": 48, "targetSpacingPx": 12, "dragAlternatives": 1 },
+          "forbidden": [
+            { "what": "drag as the only way to do something", "why": "sustained precise movement is the exact capability in question" },
+            { "what": "hover-only disclosure", "why": "it does not exist for touch or for switch access" }
+          ],
+          "designImplication": ["every drag has a non-drag equivalent, and every hover has a focus equivalent"]
+        },
+        "cognitive": {
+          "label": "Cognitive load sensitivity",
+          "floors": { "readingGradeMax": 8, "stepsPerScreenMax": 1 },
+          "forbidden": [
+            { "what": "time limits", "why": "they convert a difficulty into a failure" },
+            { "what": "unannounced context change", "why": "a screen that changes under the reader loses them completely" }
+          ],
+          "designImplication": ["progress is visible and reversible; every step says where it sits in the whole"]
+        },
+        "screen-reader": {
+          "label": "Screen reader user",
+          "floors": { "landmarkRegions": 1, "focusVisible": 1 },
+          "forbidden": [
+            { "what": "meaning carried only by visual position", "why": "the reading order is the only order that exists" },
+            { "what": "an icon control with no accessible name", "why": "it is announced as 'button' and nothing else" }
+          ],
+          "designImplication": ["the DOM order is the design; a visual reorder that leaves it behind is a defect"]
+        }
+      }
+    },
+    "literacy": {
+      "label": "Digital literacy of the primary user",
+      "values": {
+        "expert-daily": {
+          "label": "Expert, in the product every working day",
+          "floors": {},
+          "designImplication": [
+            "density and shortcuts outrank explicitness; this audience resents guidance",
+            "recognition over recall stops applying, they have the recall"
+          ]
+        },
+        "competent": {
+          "label": "Competent, uses comparable products regularly",
+          "floors": {},
+          "designImplication": ["platform conventions can be assumed and departing from them costs something"]
+        },
+        "occasional": {
+          "label": "Occasional, weeks or months between sessions",
+          "floors": {},
+          "designImplication": [
+            "every session is effectively a first session; nothing may depend on remembering last time",
+            "the main action is visible without scrolling on the screen that opens"
+          ]
+        },
+        "low-digital-literacy": {
+          "label": "Low digital literacy",
+          "floors": { "readingGradeMax": 6, "stepsPerScreenMax": 1 },
+          "forbidden": [
+            { "what": "conventions that are learned rather than seen", "why": "a hamburger menu is not discoverable to someone who has not been taught it" },
+            { "what": "jargon from the business's own vocabulary", "why": "the glossary is for the business, not for the screen" }
+          ],
+          "designImplication": ["affordances are explicit: a button looks pressable, a link looks like a link"]
+        }
+      }
+    },
+    "conditions": {
+      "label": "Conditions the product is actually used in",
+      "_note": "This dimension accepts several values at once. A warehouse handheld is gloved AND noisy AND one-handed.",
+      "multiple": true,
+      "values": {
+        "desk": {
+          "label": "At a desk, seated, two hands, a large screen",
+          "floors": {},
+          "designImplication": ["the only condition where density is genuinely free"]
+        },
+        "one-handed": {
+          "label": "One-handed, on the move",
+          "floors": { "targetSizePx": 48, "thumbReachZone": 1 },
+          "forbidden": [{ "what": "primary actions in the top corners", "why": "they are unreachable one-handed on a modern phone" }],
+          "designImplication": ["the primary action sits in the lower third"]
+        },
+        "outdoors-bright": {
+          "label": "Outdoors, in direct sunlight",
+          "floors": { "contrastRatio": 7.0 },
+          "forbidden": [{ "what": "subtle greys as a meaning channel", "why": "they are invisible at 100000 lux" }],
+          "designImplication": ["the palette is tested at maximum brightness, not at a desk"]
+        },
+        "gloved": {
+          "label": "Wearing gloves",
+          "floors": { "targetSizePx": 64, "targetSpacingPx": 16 },
+          "forbidden": [{ "what": "precise gestures", "why": "pinch and multi-touch do not survive a glove" }],
+          "designImplication": ["nothing smaller than a fingertip through fabric"]
+        },
+        "noisy": {
+          "label": "In a noisy environment",
+          "floors": {},
+          "forbidden": [{ "what": "sound as the only confirmation", "why": "it is not heard" }],
+          "designImplication": ["every audible signal has a visible twin"]
+        },
+        "shared-device": {
+          "label": "A device several people use",
+          "floors": {},
+          "forbidden": [{ "what": "personal data visible on an idle screen", "why": "the next person sees it" }],
+          "designImplication": [
+            "session end is a designed screen, not a timeout nobody sees",
+            "who is signed in is visible at all times"
+          ]
+        },
+        "safety-critical": {
+          "label": "Where a mistake causes physical harm",
+          "floors": { "contrastRatio": 7.0, "confirmDestructive": 1 },
+          "forbidden": [
+            { "what": "decorative use of red, amber or green", "why": "those hues are inherited from site signage and spending them on decoration removes a safety channel" }
+          ],
+          "designImplication": ["the dangerous action is never adjacent to the common one"]
+        }
+      }
+    }
+  },
+  "ambiguous": {
+    "everyone": ["age:working-age", "literacy:competent"],
+    "general public": ["literacy:occasional", "literacy:low-digital-literacy"],
+    "users": [],
+    "asia": ["region:east-asia", "region:southeast-asia", "region:south-asia"],
+    "europe": ["region:europe-west", "region:europe-central"],
+    "elderly": ["age:older-adults"],
+    "accessible": ["accessibility:baseline", "accessibility:low-vision", "accessibility:screen-reader"],
+    "mobile users": ["conditions:one-handed"]
+  }
+}

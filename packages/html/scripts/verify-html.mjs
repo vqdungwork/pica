@@ -1,5 +1,5 @@
 /**
- * verify-html.mjs — the measured HTML gate. Runs BEFORE the human is asked to
+ * verify-html.mjs: the measured HTML gate. Runs BEFORE the human is asked to
  * approve a work package, and it is the only verification an HTML-only project
  * (`figmaInScope: false`) ever gets.
  *
@@ -29,7 +29,7 @@
  * output was two vocabularies for one check.
  *
  * Exit 0 only when every check passes. A check that could not run is a failure, not
- * a pass — see the "green check" rule in the core package's review-discipline.md.
+ * a pass: see the "green check" rule in the core package's review-discipline.md.
  *
  * Usage: node verify-html.mjs <html-reference.json> <state.json>
  */
@@ -190,7 +190,7 @@ for (const v of VIEWPORTS) {
  * direction budgeted three.
  *
  * A direction is only checkable because it was written down as numbers at step
- * 2c. Findings are reported ONE PER VIOLATING VALUE, not one per frame — a single
+ * 2c. Findings are reported ONE PER VIOLATING VALUE, not one per frame: a single
  * wrong token appears on every screen that uses it, and forty identical lines bury
  * the one value anybody has to change.
  *
@@ -218,7 +218,7 @@ if (!DIRECTION) {
   findings.push({ check: "direction", where: "the capture",
     detail: `state.json declares direction "${DIRECTION.name || "(unnamed)"}" but ${stale} frame(s) ` +
             `were captured without a census, so nothing about it can be measured. Re-run ` +
-            `capture-html-reference.mjs — a direction cannot be verified from a pre-0.8.0 capture.` });
+            `capture-html-reference.mjs: a direction cannot be verified from a pre-0.8.0 capture.` });
 } else {
   /* ---- a declared style must not contradict its own signature ----------------
    * design-vocabulary.md says "a declared style adds checks to direction.assert.
@@ -226,7 +226,7 @@ if (!DIRECTION) {
    * and nothing compared the two: `style: "neobrutalism"` with `shadow.blur.max: 12` was
    * a direction contradicting its own name, and every screen passed it.
    *
-   * This does not GENERATE the assertions — that would put the check in the business of
+   * This does not GENERATE the assertions: that would put the check in the business of
    * choosing, and the vocabulary file is explicit that the table is for recognising and
    * naming, never for choosing. It reports a declared style whose assertions say the
    * opposite of what the style means, and a style name that belongs to no tradition.
@@ -282,7 +282,7 @@ if (!DIRECTION) {
     : `direction "${label}" asserts nothing measurable`) + styleNote;
 
   /* A direction that declares no assertions is a paragraph, not a constraint. It
-   * is not a failure — some projects genuinely settle only on tone — but it must
+   * is not a failure, some projects genuinely settle only on tone, but it must
    * not read as a green check either, so it reports as a finding of its own. */
   if (!asserted) {
     dirFindings++;
@@ -291,7 +291,7 @@ if (!DIRECTION) {
               `passes it by default. Give it the numbers it was chosen for, or drop it.` });
   }
 
-  /* radius.max — the single value that most decides whether a product reads as a
+  /* radius.max: the single value that most decides whether a product reads as a
    * bank or as a toy, and the easiest to leak past a kit via a hardcoded corner. */
   if (typeof A["radius.max"] === "number") {
     const bad = new Map();
@@ -356,8 +356,8 @@ if (!DIRECTION) {
     }
   }
 
-  /* Tabular figures. Only asserted true is meaningful — no direction requires that
-   * numbers must NOT align — so a false or absent value simply does not check. */
+  /* Tabular figures. Only asserted true is meaningful: no direction requires that
+   * numbers must NOT align, so a false or absent value simply does not check. */
   /* shadow.blur.max, type.roles.max and motion.easing.linear were declarable, named in the
    * style signature table, and evaluated by NOTHING: the census carried no shadow, no
    * easing, and nobody counted type roles. `shadow.blur.max: 0` beside a blurred shadow

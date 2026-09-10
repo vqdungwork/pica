@@ -20,7 +20,8 @@
       "figma-audit.js",
       "geometry-diff.mjs",
       "mock-figma.mjs",
-      "source-parity.js"
+      "source-parity.js",
+      "frame-inventory-check.mjs"
     ]
   },
   "requires": {
@@ -48,6 +49,16 @@
     {
       "run": "geometry-diff.mjs",
       "passes": "0 findings above tolerance AND more than 0 text runs compared",
+      "args": "<ref> .audit/figma-dump.json <state>",
+      "phase": "design",
+      "needs": [
+        "@.audit/html-reference.json",
+        "@.audit/figma-dump.json"
+      ]
+    },
+    {
+      "run": "frame-inventory-check.mjs",
+      "passes": "0 findings",
       "args": "<ref> .audit/figma-dump.json <state>",
       "phase": "design",
       "needs": [

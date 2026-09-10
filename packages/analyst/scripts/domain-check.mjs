@@ -1,5 +1,5 @@
 /**
- * domain-check.mjs — makes domainConstraints a register instead of a note.
+ * domain-check.mjs: makes domainConstraints a register instead of a note.
  *
  * This script exists because the register was added without a reader, which this
  * project has a rule against: a register nothing reads is noise, in the same way a

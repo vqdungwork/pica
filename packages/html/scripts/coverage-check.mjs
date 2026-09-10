@@ -1,5 +1,5 @@
 /**
- * coverage-check.mjs — the Analyst-to-Designer link.
+ * coverage-check.mjs: the Analyst-to-Designer link.
  *
  * This check exists because testing the flow on a real project found that the boundary
  * between analysis and design was the one boundary nothing verified. The Analyst

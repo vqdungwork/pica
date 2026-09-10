@@ -25,7 +25,7 @@ These eight rules hold for the whole session. They are not suggestions and they 
 6. **Never claim a state you have not verified in a separate call.** Same-call read-back returns the
    in-memory value, which may never reach the document.
 
-7. **Offer before you assert.** Seven slots in `proposals.md` are the client's decisions, not yours —
+7. **Offer before you assert.** Seven slots in `proposals.md` are the client's decisions, not yours:
    the direction above all, built as the same screen three times. The slots are universal; what fills
    them comes from the sector, the measurement and the analysis. A client who first sees the design
    fully built, in one direction, was never offered the decision that was theirs.
@@ -52,14 +52,8 @@ Or run the steps yourself:
 | `/pica` | intake, the contract, exclusions |
 | `/pica-discover` | who uses it and what hurts, who can veto it, what the field charges |
 | `/pica-analyse` | glossary, AS-IS, TO-BE, business rules, domain model, PRD |
-| `/pica-architect` | feasibility before anything is promised, then C4 and ADRs |
-| `/pica-model` | cost to build, cost to run, plausible return, and the price fence |
 | `/pica-wp <name>` | one work package in HTML at every viewport, measured |
 | `/pica-copy` | the words, every state, bound to the glossary |
 | `/pica-evaluate` | 3 to 5 independent evaluators, walkthrough, build vs design |
-| `/pica-estimate` | three-point effort by role, work order, effort logged back |
-| `/pica-develop` | the code: the API contract, where state lives, how failure is shaped |
-| `/pica-test` | the shape of the suite, one end-to-end test per use case, the release gate |
-| `/pica-build` | the repository: pipeline, branches, environments, secrets |
 | `/pica-port` · `/pica-review` · `/pica-prototype` | the Figma half, optional |
 | `/pica-close` · `/pica-feedback` | handover, and triaging someone else's review |
