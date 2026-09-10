@@ -3,6 +3,18 @@
  * flow-check.mjs — the interactive flow is wired, and wired to the right place.
  *
  *   node flow-check.mjs --dir html [--state .pica/state.json] [--allow-none]
+ *   node flow-check.mjs --url <u> [--url <another>] [--state .pica/state.json]
+ *
+ * --url reads the RENDERED DOM instead of the source files, which is what a React demo
+ * needs. The vocabulary does not change: this file's own rule is "a link built in
+ * JavaScript is invisible to it, keep targets in markup", and in JSX the data-* attributes
+ * still are — they land in the DOM, and this is where they get read. What changes is where
+ * the check looks, not what it looks for.
+ *
+ * Losing this check is the one thing a React demo could genuinely cost. It catches the
+ * class of defect with NO geometric signature: a row on one role's home screen that opens
+ * another role's screen. Every screenshot correct, every measured check green, the wiring
+ * wrong.
  *
  * A work package ships option boards AND an interactive prototype of its main
  * flow (html-prototype.md, "Options decide, the flow is the deliverable"). The
@@ -61,10 +73,36 @@ if (!existsSync(DIR)) {
   process.exit(2);
 }
 
-const files = readdirSync(DIR).filter((f) => f.endsWith(".html"));
-if (!files.length) {
-  console.error(`flow-check: no .html files in ${DIR}`);
-  process.exit(2);
+const URLS = process.argv.filter((a, i) => process.argv[i - 1] === "--url");
+
+/* Sources are { name, src } either way, so everything below parses identically. */
+let sources = [];
+if (URLS.length) {
+  let chromium;
+  try { ({ chromium } = await import("playwright")); }
+  catch {
+    console.error("flow-check: --url needs playwright, and it is not resolvable from here.");
+    console.error("            Nothing was checked, and that is not a pass.");
+    process.exit(2);
+  }
+  const browser = await chromium.launch();
+  const page = await browser.newPage();
+  for (const u of URLS) {
+    await page.goto(u, { waitUntil: "networkidle" });
+    /* The router may mount asynchronously. A target that is not in the DOM yet reads as a
+       dangling link, which is the same false finding as measuring before the page settles. */
+    await page.waitForTimeout(400);
+    const src = await page.evaluate(() => document.documentElement.outerHTML);
+    sources.push({ name: u.replace(/^https?:\/\//, "").slice(0, 60), src });
+  }
+  await browser.close();
+} else {
+  const files = readdirSync(DIR).filter((f) => f.endsWith(".html"));
+  if (!files.length) {
+    console.error(`flow-check: no .html files in ${DIR}`);
+    process.exit(2);
+  }
+  sources = files.map((f) => ({ name: f, src: readFileSync(join(DIR, f), "utf8") }));
 }
 
 const all = (src, re) => [...src.matchAll(re)].map((m) => m[1]);
@@ -72,9 +110,17 @@ const all = (src, re) => [...src.matchAll(re)].map((m) => m[1]);
 // One record per file. `screens` are the destinations that exist; the rest are
 // the destinations something asks for.
 const doc = new Map();
-for (const f of files) {
-  const src = readFileSync(join(DIR, f), "utf8");
-  const nav = /data-nav='([^']*)'/.exec(src);
+for (const { name: f, src } of sources) {
+  /* Either quote style. In source the JSON is single-quoted so its own double quotes survive;
+     in a rendered DOM outerHTML normalises attribute quotes to double and escapes the inner
+     ones as &quot;. Matching only the source form made --url find zero screens on a demo that
+     carried twelve links — the vocabulary was there and the regex was looking for the wrong
+     punctuation. */
+  const nav = /data-nav='([^']*)'/.exec(src)
+    || (() => {
+      const m = /data-nav="([^"]*)"/.exec(src);
+      return m ? [m[0], m[1].replace(/&quot;/g, '"')] : null;
+    })();
   let tabs = [];
   if (nav) {
     try {
@@ -119,7 +165,7 @@ const interactive = [...doc].filter(([, d]) => d.router);
 // finding stays advisory-strict and rendering every screen remains the real
 // check.
 const routerNames = new Set();
-for (const j of readdirSync(DIR).filter((f) => f.endsWith(".js")))
+for (const j of URLS.length ? [] : readdirSync(DIR).filter((f) => f.endsWith(".js")))
   for (const m of readFileSync(join(DIR, j), "utf8").matchAll(/["'`]([a-z][a-z0-9-]{2,})["'`]/g))
     routerNames.add(m[1]);
 const findings = [];
@@ -242,9 +288,9 @@ function section(src, id) {
 }
 
 // ---- report -------------------------------------------------------------
-console.log(`flow-check: ${files.length} file(s) in ${DIR}, ` +
+console.log(`flow-check: ${sources.length} ${URLS.length ? "route(s)" : "file(s)"} in ${URLS.length ? "the running demo" : DIR}, ` +
   `${interactive.length} interactive (${interactive.map(([f]) => f).join(", ") || "none"}), ` +
-  `${files.length - interactive.length} board(s)`);
+  `${sources.length - interactive.length} board(s)`);
 console.log(`  ${screens} screen(s), ${links} link(s) checked` +
   (FLOWS.length ? `, ${FLOWS.length} declared flow(s)` : ", no flows declared in state"));
 

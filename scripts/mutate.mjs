@@ -254,6 +254,12 @@ const M = [
     /* spacing-check reads the TOKEN FILE first and falls back to state.spacingScale, so
    * mutating the fallback did nothing on any project that has tokens. Redirect the path
    * at a scale on which no real gap lands. */
+  // state-coverage-check
+  ["state-captured",   "html/scripts/state-coverage-check.mjs", [REF, S], "capture", (s) => { s.stateExemptions = s.stateExemptions.filter((x) => x.state !== "returned"); }],
+  ["minimum-present",  "html/scripts/state-coverage-check.mjs", [REF, S], "capture", (s) => { s.stateExemptions = s.stateExemptions.filter((x) => x.state !== "error"); }],
+  ["excused-named",    "html/scripts/state-coverage-check.mjs", [REF, S], "capture", (s) => { s.stateExemptions.find((x) => x.state === "draft").why = "n/a"; }],
+  ["stale-exemption",  "html/scripts/state-coverage-check.mjs", [REF, S], "capture", (s) => { s.stateExemptions.push({ state: "a state the model never had", why: "a stale exemption nobody removed" }); }],
+
   // direction-spread-check
   ["three-offered",     "html/scripts/direction-spread-check.mjs", [S], "proposals", (s) => { const p = s.proposals.find((x) => x.slot === "S1"); p.options = p.options.slice(0, 2); }],
   ["traditions-differ", "html/scripts/direction-spread-check.mjs", [S], "proposals", (s) => { const p = s.proposals.find((x) => x.slot === "S1"); p.options[1].tradition = p.options[0].tradition; }],

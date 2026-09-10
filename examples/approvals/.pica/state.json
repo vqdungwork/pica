@@ -1381,5 +1381,47 @@
       "state": "pending",
       "why": "an approval is pending only while the approver is on the decide screen, which has no separate structure"
     }
+  ],
+  "stateExemptions": [
+    {
+      "state": "draft",
+      "why": "a draft payment lives in the branch system and never reaches this surface; the approvals queue starts at held"
+    },
+    {
+      "state": "returned",
+      "why": "drawn in the structure pass; the fixture is deliberately small and ships one built work package"
+    },
+    {
+      "state": "approved",
+      "why": "drawn in the structure pass as the recorded screen, which serves both sides of the transition"
+    },
+    {
+      "state": "pending",
+      "why": "an approval is pending only while the approver is on the decide screen, which this package does not build"
+    },
+    {
+      "state": "recorded",
+      "why": "drawn in the structure pass; the built package stops at the queue"
+    },
+    {
+      "state": "loading",
+      "why": "shown on design-system.html, which the capture producer deliberately excludes \u2014 a real project builds it per screen"
+    },
+    {
+      "state": "error",
+      "why": "shown on design-system.html, which the capture excludes; the fixture builds no form"
+    },
+    {
+      "state": "disabled",
+      "why": "shown on design-system.html with the button set, which the capture excludes"
+    },
+    {
+      "state": "focus",
+      "why": "shown on design-system.html with the button set, which the capture excludes"
+    },
+    {
+      "state": "keyboard-open",
+      "why": "a desk surface with no text entry; the state has no case here and inventing one would be a screen nobody needs"
+    }
   ]
 }

@@ -120,6 +120,7 @@ const PAGE_W = Math.max(1400, Number(get("--pagewidth", 0)) || 0);
 const page = await browser.newPage({ viewport: { width: PAGE_W, height: 1000 }, deviceScaleFactor: 2 });
 const all = {};
 const widthMedia = [];
+const settled = [], unsettled = [];
 let resolvedFont = null;
 
 const sources = LIVE
@@ -167,6 +168,35 @@ for (const src of sources) {
   }
   if (FONT) await page.addStyleTag({ content: `:root{--font-family:"${FONT}",sans-serif !important}` });
   await page.waitForTimeout(1200);
+
+  /* ---- capture-settled ----------------------------------------------------
+   * A route measured mid-render produces geometry for a layout that existed for 200ms, and
+   * says nothing: no error, a page that looks right, every number wrong. It is the same
+   * failure shape as a webfont silently falling back, and it arrived with --url — a
+   * directory of static files has nothing to wait for.
+   *
+   * Sample the layout twice and require the two to agree. Not a timeout: a longer wait is a
+   * guess that the page finished, and this is the assertion that it did. */
+  const sample = () => page.evaluate(() => {
+    const d = document.documentElement;
+    const boxes = [...document.querySelectorAll("[data-scr], [data-viewport], section, main")]
+      .slice(0, 200)
+      .map((e) => { const r = e.getBoundingClientRect(); return [r.x | 0, r.y | 0, r.width | 0, r.height | 0]; });
+    return JSON.stringify([d.scrollWidth, d.scrollHeight, boxes]);
+  });
+  let a = await sample();
+  let stable = false;
+  for (let i = 0; i < 6 && !stable; i++) {
+    await page.waitForTimeout(250);
+    const b = await sample();
+    stable = a === b;
+    a = b;
+  }
+  if (!stable) {
+    unsettled.push(name);
+  } else {
+    settled.push(name);
+  }
 
   /* Record the family the browser ACTUALLY resolved, forced or not. `forcedFont` only
    * says what was asked for; when nothing is forced it is null and the artefact carries
@@ -528,11 +558,25 @@ if (!totalFrames) {
   process.exit(1);
 }
 
+/* An unsettled route is refused rather than written. A reference taken mid-render is worse
+ * than no reference: every downstream check runs, every one passes, and every number in it
+ * describes a layout that existed for a fraction of a second. */
+if (unsettled.length) {
+  console.error(`\nFAIL  ${unsettled.length} of ${settled.length + unsettled.length} source(s) never settled:`);
+  for (const n of unsettled) console.error(`        ${n}`);
+  console.error(`      Layout was still changing after six samples over 1.5s. Nothing was written.`);
+  console.error(`      A capture taken mid-render measures a layout that existed for 200ms and says`);
+  console.error(`      nothing: no error, a page that looks right, and every number wrong.`);
+  await browser.close();
+  process.exit(1);
+}
+
 const meta = { capturedAt: new Date().toISOString(), forcedFont: FONT,
-               font: resolvedFont, dir: DIR };
+               font: resolvedFont, dir: DIR, settled: settled.length };
 fs.writeFileSync(path.join(OUT, "html-reference.json"), JSON.stringify({ meta, widthMedia, frames: all }));
 console.log("\nwrote " + path.join(OUT, "html-reference.json"));
 console.log(FONT ? `font forced to ${FONT}, re-run without --font once Figma uses the same family`
                  : "rendered native");
+console.log(`settled: ${settled.length} source(s) reached a stable layout before measurement`);
 console.log(`resolved font family: ${resolvedFont ?? "unknown"} — the design dump must be taken in the same one`);
 await browser.close();

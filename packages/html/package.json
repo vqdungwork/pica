@@ -9,7 +9,8 @@
     "rules": [
       "html-gates.md",
       "html-prototype.md",
-      "native-mobile.md"
+      "native-mobile.md",
+      "react-demo.md"
     ],
     "scripts": [
       "capture-html-reference.mjs",
@@ -24,7 +25,8 @@
       "concept-check.mjs",
       "structure-check.mjs",
       "direction-spread-check.mjs",
-      "foundations-check.mjs"
+      "foundations-check.mjs",
+      "state-coverage-check.mjs"
     ],
     "agents": [
       "pica-designer.md"
@@ -163,6 +165,16 @@
       "needs": [
         "@html/design-system.html",
         "@tokens/tokens.json"
+      ]
+    },
+    {
+      "run": "state-coverage-check.mjs",
+      "passes": "0 findings",
+      "args": "<ref> <state>",
+      "phase": "design",
+      "needs": [
+        "@.audit/html-reference.json",
+        "stateModel"
       ]
     }
   ],
