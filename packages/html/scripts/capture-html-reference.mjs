@@ -612,10 +612,20 @@ for (const src of sources) {
   all[name] = data;
 
   const wraps = await page.$$(WRAP);
+  let shot = 0, skipped = 0;
   for (const [i, w] of wraps.entries()) {
     const f = await w.$(FRAME);
-    if (f) await f.screenshot({ path: path.join(OUT, `html__${name}__${i}.png`) });
+    if (!f) continue;
+    /* A hidden wrap has no box and screenshotting it hangs for the full 30s timeout and
+     * then kills the run. An interactive prototype hides all but one screen by
+     * definition, so a route capture of one hits four hidden wraps before it reaches the
+     * visible one — which read as "the capture is broken" rather than "these are hidden".
+     * Skipped and counted, never waited on. */
+    if (!(await f.isVisible().catch(() => false))) { skipped++; continue; }
+    await f.screenshot({ path: path.join(OUT, `html__${name}__${i}.png`) });
+    shot++;
   }
+  if (skipped) console.log(`  ${skipped} hidden frame(s) not screenshotted (${shot} captured)`);
   console.log(`${name}: ${data.length} frames, ${data.reduce((a, d) => a + d.texts.length, 0)} text runs`);
 }
 
