@@ -79,6 +79,21 @@ jobs:
       - name: flow diagram
         run: node scripts/flow-diagram.mjs --check
 
+      # pica's rules are good and most of them have no executable behind them. Until the
+      # markers landed, a reader could not tell which third the gate was actually holding,
+      # because the green table looks identical either way.
+      #
+      # This does NOT require every rule to be enforced: some are judgement and should stay
+      # judgement, and they say so. It requires every rule to SAY, and every marker to name
+      # a check that still exists. A marker pointing at a renamed check is worse than no
+      # marker, because it claims cover that is gone.
+      #
+      # It ratchets. Today's backlog is recorded per file in rule-coverage-baseline.json
+      # and only a number that gets worse fails, because a suite that is red from the day
+      # it lands teaches everyone to ignore the red.
+      - name: rule coverage
+        run: node scripts/rule-coverage-check.mjs
+
       # The gate is folded into the run rather than repeating it: mutate.mjs exits 0 with
       # mutations SKIPPED, so a green tick alone does not mean every check was proven.
       - name: mutation suite

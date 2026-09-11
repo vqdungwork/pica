@@ -13,21 +13,22 @@
       "react-demo.md"
     ],
     "scripts": [
+      "a11y-check.mjs",
       "capture-html-reference.mjs",
       "code-tokens-check.mjs",
+      "concept-check.mjs",
       "contrast-check.mjs",
       "coverage-check.mjs",
+      "direction-spread-check.mjs",
       "flow-check.mjs",
+      "font-check.mjs",
+      "foundations-check.mjs",
       "parity-check.mjs",
       "shell-check.mjs",
       "spacing-check.mjs",
-      "verify-html.mjs",
-      "concept-check.mjs",
-      "structure-check.mjs",
-      "direction-spread-check.mjs",
-      "foundations-check.mjs",
       "state-coverage-check.mjs",
-      "font-check.mjs"
+      "structure-check.mjs",
+      "verify-html.mjs"
     ],
     "agents": [
       "pica-designer.md"

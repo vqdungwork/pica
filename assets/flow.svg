@@ -47,7 +47,7 @@
 <text x="514" y="515" fill="#7d8590" font-size="11">main thread · 2 checks</text>
 <rect x="664" y="476" width="150" height="52" rx="4" fill="#161b22" stroke="#30363d"/>
 <text x="678" y="497" fill="#e6edf3" font-size="13" font-weight="600">html</text>
-<text x="678" y="515" fill="#7d8590" font-size="11">designer · 12 checks</text>
+<text x="678" y="515" fill="#7d8590" font-size="11">designer · 13 checks</text>
 <rect x="908" y="478" width="232" height="48" rx="4" fill="#2d1618" stroke="#8b3a3a"/>
 <text x="920" y="497" fill="#f0857d" font-size="11" font-weight="600">⏸ STOPS HERE</text>
 <text x="920" y="515" fill="#8b949e" font-size="11">the design system</text>
