@@ -85,6 +85,13 @@
       "needs": [
         "proposals"
       ]
+    },
+    {
+      "run": "rule-coverage-check.mjs",
+      "passes": "0 findings",
+      "args": "<repo>",
+      "phase": "close",
+      "needs": []
     }
   ],
   "definitionOfDone": [

@@ -9,6 +9,7 @@ The cheap medium, and the one that stays authoritative. Load this for steps 3 an
 ---
 
 ## Why HTML first
+<!-- enforced-by: none — the reasoning behind the approach, not a constraint on an artefact -->
 
 Figma is slow to iterate in and easy to declare finished by eye. HTML is fast to change, trivial to
 view as a whole flow, and can be measured by a script.
@@ -18,6 +19,7 @@ than being the place exploration happens. And once both exist, **HTML remains th
 because it is the one a machine can check.
 
 ## Project layout
+<!-- enforced-by: none — a convention; no check reads the directory shape -->
 
 ```
 docs/          contract, exclusions, findings, state matrices, reviews, rationale
@@ -32,6 +34,7 @@ tokens/        tokens.json, tokens.css
 ```
 
 ## The builder is the source of the file it builds
+<!-- enforced-by: none — not decidable from the output. The generated file and a hand-edited one are identical on disk -->
 
 If a `<wp>.html` is generated, **every change goes in the generator.** Editing the output is not a
 shortcut, it is a mine: the file looks right, the gates pass, and the work is destroyed the next time
@@ -59,8 +62,10 @@ reported `MISSING` and carried on. **A matcher over generated HTML is coupled to
 one, re-run the other.**
 
 ## One tabbed review page, always
+<!-- enforced-by: meta-line, flow-first, zoom, tabs-in-place, group-order, frame-inset -->
 
 ## Concepts before screens, on a complex package
+<!-- enforced-by: concepts-diverged -->
 
 A complex package widens before it narrows. Two or three approaches, **different in approach and
 not in styling**, each naming the use cases it serves well and the ones it serves badly, then one
@@ -202,6 +207,7 @@ demo being mistaken for a product, and both were written after somebody made tha
 ---
 
 ## Options decide. The interactive flow is the deliverable.
+<!-- enforced-by: dangling-target, dangling-href, nav-target, unreachable, dead-end, orphan-prototype, flow-declared -->
 
 A work package ships **both**: option boards, which settle a decision, and **one interactive prototype
 of its main flow**, which is the thing the human uses. Boards alone are not a package.
@@ -269,6 +275,7 @@ ends, the router's own root and tab set, and any prototype the review shell cann
 whether a link goes somewhere *sensible*: that is what clicking is for.
 
 ## Three tags identify a frame
+<!-- enforced-by: viewport-tagged, uc-exists, state-captured -->
 
 ```html
 <div data-viewport="mobile" data-uc="UC-03" data-state="empty">
@@ -283,6 +290,7 @@ control deliberately.
 state and the build comparison silently pairs the wrong frames.
 
 ## The frame size is declared once, and the frame is fluid up to it
+<!-- enforced-by: viewport-coverage, dead-breakpoint -->
 
 Set it at intake and hold it for the whole project. The default is **375 x 812**, the iOS idiom,
 because it is the tighter constraint.
@@ -308,6 +316,7 @@ Whatever it is, **the HTML viewport matches the Figma frame exactly**, or the ge
 compares two different things and every finding is noise.
 
 ## Responsive is `@container`, never a width `@media`
+<!-- enforced-by: width-media, dead-breakpoint -->
 
 **A `@container` rule whose container cannot change size is dead configuration**, and
 `verify-html`'s `dead-breakpoint` check reports it. Writing the query is not the same as being
@@ -344,7 +353,35 @@ by a component base class must be declared **after** that class; keeping them in
 makes the ordering a visible convention. This trap was hit **three times** in one stylesheet: the
 third time it made an icon button 32×40 instead of square and dragged every row it sat in 8px taller.
 
+## Navigation has to reflow too, and pica used to say nothing about it
+<!-- enforced-by: none — the pattern is a human decision; flow-reachable catches a section unreachable at a viewport, not a bad choice of pattern -->
+
+A sidebar is the most common navigation pattern in the archetypes pica ships — `erp`,
+`admin-console`, `crm` and `hrm` all assume one — and until now nothing here said what happens to it
+on a narrow surface. The result on the project that found this: a 232px sidebar at 320, 390, 768, 900,
+1024, 1440 and 1600, and a mobile screen whose only exit was a button reading *"Back to the desktop
+dashboard"* pointing at a desktop-only frame, which `flow-check` accepted as a valid link.
+
+**Decide the narrow-width behaviour when you declare the viewports, not when you notice.** Three
+patterns, and the choice follows from what the navigation is for:
+
+| Pattern | Use when | Cost |
+|---|---|---|
+| **Collapse to a bar** — the sections become a bottom or top bar | 3–5 sections, all equally important, and the user moves between them constantly | a bar eats 56px of height forever, and it caps you at about five |
+| **Collapse to a drawer** — a button opens the full list over the content | more than five sections, or the user settles into one and stays | every navigation is now two taps, and the current section must be named in the header or the user is lost |
+| **Promote one, demote the rest** — the primary task is full-width, everything else behind a menu | one section is the reason the product exists on a phone at all | honest about priority, and the demoted sections get noticeably less use |
+
+**A phone screen must be able to reach every section its role can see.** A dead end at one viewport is
+a dead end, and `flow-check` cannot see it: a link to a screen that exists only at another viewport
+resolves perfectly and strands the user. State the pattern in `state.viewports[].nav` so the decision
+is recorded where the idiom is.
+
+**The chrome list in `state.viewports[].chrome` is where this becomes checkable.** A viewport that
+declares a `nav-sidebar` as required and a narrower one that declares a `nav-bar` or `nav-drawer` have
+said what reflows into what.
+
 ## Prefer CSS Grid with named areas for anything that reflows
+<!-- enforced-by: none — an implementation preference, not a property of the result -->
 
 A flex row cannot promote a nested child to full width. One mobile card ran to **550px** because its
 chip row was a grandchild inside a squeezed column; no amount of flex tuning could fix it, because the
@@ -356,6 +393,7 @@ fork per viewport (which parity then reports forever) or a compromise layout. Af
 550px → 170px, wide viewport unchanged.
 
 ## Check for overflow. The frame hides it.
+<!-- enforced-by: overflow -->
 
 Frames carry `overflow: hidden`, so content that spills is **clipped, not visible**. Two mobile frames
 overflowed by 83px and 34px with nothing to see: no scrollbar, no cut glyph, just content rendered into
@@ -367,6 +405,7 @@ width, so one unbreakable string, a 38-character filename, pushed the column pas
 script already walks every element box and knows each frame's rect, so the check is nearly free.
 
 ## Single-line controls must truncate, not wrap
+<!-- enforced-by: none — not distinguishable in the capture from a value that simply fits -->
 
 An `<input>` is single-line by definition: the value scrolls and never lays out on a second line. A
 design-tool text node wraps as soon as the string exceeds the width: correct for a paragraph, wrong for
@@ -378,6 +417,7 @@ overflow with no ellipsis. A static frame cannot scroll, so without it a truncat
 complete value and a developer builds the wrong field width. Record it as a deviation.
 
 ## The tall-screen pair
+<!-- enforced-by: tall-screen-pair -->
 
 A screen taller than the viewport ships as **two versions**, side by side:
 
@@ -411,6 +451,7 @@ Two implementation details that matter:
 This pair maps directly onto Figma's interactive and hug frames, which is why it exists in this form.
 
 ## Real assets, or none
+<!-- enforced-by: icon-set -->
 
 - **No emoji standing in for icons.** Use a real icon set. Fifteen emoji and glyph
   placeholders had reached the component library before anyone noticed, and every one had to be
@@ -438,6 +479,7 @@ image area is undesigned, and they stop reading it. Keep it in the repository at
 renders, not linked from a service that can go away.
 
 ## The state matrix comes before the screens
+<!-- enforced-by: state-captured, minimum-present, excused-named -->
 
 Write the matrix first: every screen against every state. It is the cheapest possible way to avoid
 finding a missing state during handoff.
@@ -457,6 +499,7 @@ Minimum states, and the ones most often missing:
 Video or live surfaces add: buffering, connection lost, casting, and the fullscreen orientation pair.
 
 ## Everything consumes the kit
+<!-- enforced-by: class-documented, token-shown -->
 
 `design-system.html` is built first, as a storybook: every token and every component with all variants
 and states, single file, no build step.
@@ -478,6 +521,7 @@ When a pattern repeats within a screen family, promote it. When it repeats acros
 in the kit.
 
 ## Promote slowly, bind always
+<!-- enforced-by: raw-colour, raw-radius, raw-spacing, linear-easing -->
 
 The flow-wide statement is in
 `packages/core/rules/reference-discipline.md`. In HTML it reads:
@@ -495,6 +539,7 @@ occurrence to justify it, and it is exactly what will fail to port. The only esc
 The two decisions arrive in the same moment and feel like the same instinct. They are opposite.
 
 ## A trap documented beside the code is not a rule
+<!-- enforced-by: none — a rule about how to write rules -->
 
 `box-sizing` contains padding and border and **not margin**, so `width: 100%` plus a horizontal margin
 overflows its parent. That trap was written out as a comment on one component, and
@@ -511,6 +556,7 @@ eventually be claimed by something else and the second one silently inherits the
 Name for the slot it fills, and when two candidates collide, rename before building on either.
 
 ## Check the reference against its own grid
+<!-- enforced-by: edge-inset, edge-scale, off-scale -->
 
 Pick one content-edge inset and hold every row to it.
 
@@ -523,6 +569,7 @@ Where the HTML is accidentally off-token, a missing `line-height` falling back t
 height where siblings use a token, fix the HTML. Do not carry it into the design system.
 
 ## Length-realistic copy
+<!-- enforced-by: length-realism -->
 
 Mock strings should be realistic for the shipping locale. If the product ships in a language that runs
 15 to 25 percent longer than your working language, draw at least one screen in it as a length check,
@@ -532,6 +579,7 @@ When you replace mock data later, **match the character count** so nothing reflo
 email swapped for a 27-character one can overflow a field that was already signed off.
 
 ## No build step
+<!-- enforced-by: none — a project property nothing inspects; react-demo.md narrows it to boards -->
 
 Plain HTML and CSS, one `shared.css` carrying the tokens and the phone chrome. No bundler, no framework,
 no npm install to view a screen.
