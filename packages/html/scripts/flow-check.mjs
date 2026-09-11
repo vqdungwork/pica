@@ -158,30 +158,51 @@ for (const { name: f, src } of sources) {
    * and checks it properly. */
   const csr = /data-csr\b/.test(src) || (/<script[^>]+type=["']module["']/.test(src)
     && !/data-scr=/.test(src) && /data-nav\s*=/.test(src));
+  /* MERGE, never overwrite. In --url mode every route of one demo shares a basename, and
+   * a demo puts ONE screen in the DOM at a time. Keyed by basename and set, the last
+   * route silently replaced the other eighteen: the record held one screen, so the home
+   * and every nav tab "resolved to no data-scr" and the flow's own home was reported
+   * missing from the file that renders it. The union across routes is the app's screen
+   * set, which is what each of those checks is actually asking about. */
+  const prev = doc.get(f);
+  const merge = (a, b) => prev ? [...new Set([...a, ...b])] : b;
+  const mergeSet = (a, b) => prev ? new Set([...a, ...b]) : b;
   doc.set(f, {
     csr,
     src,
-    screens: new Set(all(src, /data-scr="([^"]+)"/g)),
-    sheets: new Set(all(src, /data-sheetwrap="([^"]+)"/g)),
-    go: all(src, /data-go="([^"]+)"/g),
-    tab: all(src, /data-tab="([^"]+)"/g),
-    sheet: all(src, /data-sheet="([^"]+)"/g),
-    href: all(src, /data-href="([^"]+)"/g),
-    tabs, declared,
-    router: !!nav,
-    home: (/data-home="([^"]+)"/.exec(src) || [])[1],
+    screens: mergeSet(prev && prev.screens || [], new Set(all(src, /data-scr="([^"]+)"/g))),
+    sheets: mergeSet(prev && prev.sheets || [], new Set(all(src, /data-sheetwrap="([^"]+)"/g))),
+    go: merge(prev && prev.go || [], all(src, /data-go="([^"]+)"/g)),
+    tab: merge(prev && prev.tab || [], all(src, /data-tab="([^"]+)"/g)),
+    sheet: merge(prev && prev.sheet || [], all(src, /data-sheet="([^"]+)"/g)),
+    href: merge(prev && prev.href || [], all(src, /data-href="([^"]+)"/g)),
+    tabs: prev && prev.tabs && prev.tabs.length ? prev.tabs : tabs,
+    declared: mergeSet(prev && prev.declared || [], declared),
+    router: !!nav || !!(prev && prev.router),
+    home: (/data-home="([^"]+)"/.exec(src) || [])[1] || (prev && prev.home),
     // A tab in the review shell is a lazily-loaded iframe, so the target sits on
     // the button as data-src, not on an <iframe src>. Read both: one project
     // reported every prototype orphaned because only the second form was read.
-    iframes: [...all(src, /<iframe[^>]+src="([^"?#]+)/g), ...all(src, /data-src="([^"?#]+)/g)],
+    iframes: merge(prev && prev.iframes || [],
+      [...all(src, /<iframe[^>]+src="([^"?#]+)/g), ...all(src, /data-src="([^"?#]+)/g)]),
   });
 }
 
 /* A client-rendered source is set aside BEFORE any check reads it, not after. Placed
  * later it was named in the report while every check had already run against an empty
  * shell and reported its screens missing. */
+/* What actually exists in the directory, independent of what was parsed. --url parses
+ * routes; --dir parses files; file EXISTENCE is a question about neither. */
+const onDisk = new Set(
+  existsSync(DIR) ? readdirSync(DIR).filter((f) => f.endsWith(".html")) : []);
 const unresolved = [];
-const csrFiles = [...doc.entries()].filter(([, d]) => d.csr).map(([f]) => f);
+/* ...but ONLY when reading from disk. In --url mode the page HAS been rendered, so its
+ * data-scr sections are present in the DOM this just read. Setting it aside there would
+ * disable the one mode written to check it: --url would report 19 routes, 0 screens and
+ * 0 links on a demo that is entirely there, which is the pass-over-nothing these rules
+ * exist to end — reached, absurdly, through the marker that exists to prevent it. */
+const csrFiles = URLS.length ? []
+  : [...doc.entries()].filter(([, d]) => d.csr).map(([f]) => f);
 /* Set aside from being CHECKED, not from EXISTING. Removing them outright made every
  * other file's link to the demo dangle and the declared flow read as missing — trading
  * one false report for another. They stay in the file set as known-present, with an
@@ -248,6 +269,12 @@ for (const [f, d] of interactive) {
     links++;
     const [file, query] = h.split("?");
     if (!doc.has(basename(file))) {
+      /* In --url mode `doc` holds the routes that were passed, not the directory, so a
+       * cross-application link read as "a file that is not in html" while the file was
+       * sitting right there. One application's routes are checked at a time by design,
+       * so the other app's file will never be among them — the check was asking the
+       * wrong collection. Ask the directory, which is what the question is about. */
+      if (onDisk.has(basename(file))) continue;
       add("dangling-href", f, `data-href="${h}" names a file that is not in ${DIR}`);
       continue;
     }
