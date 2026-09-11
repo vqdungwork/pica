@@ -216,8 +216,13 @@ for (const src of sources) {
     // role-based and class-based buttons: a prototype's primary action is very
     // often a styled <div>, and a density rule that only sees real <button>s
     // would report a clean pass on the screen it most needed to measure.
-    const CONTROL_SEL = "button, input:not([type=hidden]), select, textarea, " +
-      "[role=button], [role=tab], [role=switch], .btn, .button";
+    /* Everything a user can reach or operate. It listed only things that LOOK like
+     * controls, so a <div data-go> promoted to a button by a router, or an <a> with no
+     * href pretending to be navigation, was invisible — which is exactly the shape of
+     * defect that shipped a product unusable by keyboard while every gate was green. */
+    const CONTROL_SEL = "button, input:not([type=hidden]), select, textarea, a, summary, " +
+      "[role], [tabindex], [onclick], [data-go], [data-tab], [data-sheet], [data-pane], " +
+      "[data-popback], [data-href], .btn, .button, .navitem, .tile, .key, .chip, .swatch";
     document.querySelectorAll(WRAP).forEach((wrap, i) => {
       const cap = wrap.querySelector(".frame-cap");
       const frame = wrap.querySelector(FRAME);
@@ -440,7 +445,13 @@ for (const src of sources) {
        * reads boxes positionally and compares its structure, and quietly adding unclassed
        * nodes to it would move counts in checks that have nothing to do with this. */
       const CONTROL_TAGS = new Set(["input", "textarea", "select", "button"]);
-      frame.querySelectorAll("input, textarea, select, button, [contenteditable=true]").forEach(el => {
+      /* CONTROL_SEL, not the four native tags. The narrow list meant a <div> or <a>
+       * acting as a control was never captured, so a11y-check could not see the exact
+       * defect it exists to find: convert 68 <button> to <div> and the controls array
+       * went from 125 entries to 5, and the check reported a clean run over what was
+       * left. data-ownership filters this array by tag through EDITABLE, so widening it
+       * cannot change that check's behaviour. */
+      frame.querySelectorAll(CONTROL_SEL + ", [contenteditable=true]").forEach(el => {
         const r = el.getBoundingClientRect();
         if (r.width < 1 || r.height < 1) return;
         let pa = el.parentElement, parentIdx = -1;
@@ -448,10 +459,62 @@ for (const src of sources) {
           if (idxOf.has(pa)) { parentIdx = idxOf.get(pa); break; }
           pa = pa.parentElement;
         }
-        controls.push([el.tagName.toLowerCase(),
+        /* THE INTERACTION RECORD.
+         * Until now a control was [tag, x, y, w, h, parent, class] — geometry and
+         * nothing else. Every accessibility property was absent from the artefact, so
+         * no accessibility check could be WRITTEN, not merely none had been: converting
+         * all 68 buttons in a board to divs produced byte-identical output from
+         * verify-html and contrast-check.
+         * These are a few more reads on a walk the capture already performs. */
+        const cs2 = getComputedStyle(el);
+        const tag = el.tagName.toLowerCase();
+        const focusable = el.matches("a[href], button, input:not([type=hidden]), select, textarea, summary, [tabindex]")
+          && !el.hasAttribute("disabled") && cs2.visibility !== "hidden" && cs2.display !== "none"
+          && el.getAttribute("tabindex") !== "-1";
+        /* the accessible name, in the order a screen reader resolves it */
+        let name = el.getAttribute("aria-label") || "";
+        if (!name && el.getAttribute("aria-labelledby")) {
+          name = (el.getAttribute("aria-labelledby").split(/\s+/)
+            .map((id) => (frame.querySelector("#" + CSS.escape(id)) || {}).textContent || "")
+            .join(" ")).trim();
+        }
+        if (!name && tag === "img") name = el.getAttribute("alt") || "";
+        if (!name) name = (el.textContent || "").trim();
+        controls.push([tag,
           Math.round((r.x - fr.x) * 10) / 10, Math.round((r.y - fr.y) * 10) / 10,
           Math.round(r.width * 10) / 10, Math.round(r.height * 10) / 10,
-          parentIdx, (typeof el.className === "string" ? el.className : "").trim().slice(0, 44)]);
+          parentIdx, (typeof el.className === "string" ? el.className : "").trim().slice(0, 44),
+          {
+            role: el.getAttribute("role") || null,
+            tabindex: el.getAttribute("tabindex"),
+            href: el.getAttribute("href"),
+            disabled: el.hasAttribute("disabled") || el.getAttribute("aria-disabled") === "true",
+            hidden: el.hasAttribute("hidden") || cs2.display === "none" || cs2.visibility === "hidden",
+            name: name.replace(/\s+/g, " ").slice(0, 60),
+            focusable,
+            /* A control with no visible focus style is one a keyboard user loses.
+             * MEASURED BY FOCUSING IT, not by reading the resting style: :focus-visible
+             * does not apply until the element is focused, so the resting outline is
+             * "none" on almost everything and reading it reported 122 of 122 controls
+             * as unfocusable. A check that fires on everything is worth the same as one
+             * that fires on nothing. preventScroll keeps the measurement from moving the
+             * layout underneath the rest of the capture. */
+            focusOutline: (() => {
+              if (!focusable) return null;
+              const prev = document.activeElement;
+              try {
+                el.focus({ preventScroll: true });
+                const fs2 = getComputedStyle(el);
+                const w2 = parseFloat(fs2.outlineWidth) || 0;
+                const shadow = fs2.boxShadow && fs2.boxShadow !== "none";
+                const out = (fs2.outlineStyle !== "none" && w2 > 0) ? fs2.outlineWidth
+                          : shadow ? "box-shadow" : null;
+                return out;
+              } catch (e) { return null; }
+              finally { try { el.blur(); if (prev && prev.focus) prev.focus({ preventScroll: true }); } catch (e) {} }
+            })(),
+            type: el.getAttribute("type") || null,
+          }]);
       });
 
 

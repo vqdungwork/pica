@@ -187,6 +187,15 @@
         "@.audit/html-reference.json",
         "direction"
       ]
+    },
+    {
+      "run": "a11y-check.mjs",
+      "passes": "0 findings",
+      "args": "<ref> <state>",
+      "phase": "design",
+      "needs": [
+        "@.audit/html-reference.json"
+      ]
     }
   ],
   "definitionOfDone": [
