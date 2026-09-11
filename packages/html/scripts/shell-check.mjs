@@ -30,6 +30,7 @@
  * Usage: node shell-check.mjs <review.html> [state.json]
  */
 import fs from "fs";
+import path from "path";
 
 const [, , shellPath, statePath] = process.argv;
 if (!shellPath) {
@@ -69,6 +70,10 @@ for (const m of html.matchAll(/<(button|a|div|li)\b([^>]*(?:role=["']tab["']|dat
     tag: m[1].toLowerCase(),
     selected: /aria-selected=["']true["']|class=["'][^"']*\b(is-)?(active|selected|current)\b/i.test(attrs),
     href: (/href=["']([^"']+)["']/.exec(attrs) || [])[1] || null,
+    /* what this tab actually opens, so the flow test can read the file rather than
+       guess from the label */
+    src: (/data-src=["']([^"']+)["']/.exec(attrs) || [])[1]
+      || (/data-(?:panel|pane|target)=["']([^"']+)["']/.exec(attrs) || [])[1] || null,
     attrs,
   });
 }
@@ -102,8 +107,29 @@ for (const [what, re] of META) {
 
 /* ---- 2. the interactive flow leads ---------------------------------------- */
 let flowGaps = 0;
-const FLOW = /\binteractive\b|\bflow\b|\bprototype\b|\bclickable\b/i;
-const flowAt = tabs.findIndex((t) => FLOW.test(t.label));
+/* A TAB IS A FLOW IF IT POINTS AT A FILE THAT CARRIES A ROUTER — not if its label
+ * happens to contain the word "flow".
+ *
+ * This was a regex over tab text. Rename a board tab "Operations · interactive flow"
+ * and the shell passed; ship the real React demo labelled "POS · app" and it failed
+ * with "no tab names the interactive flow". The check enforcing "a shell of boards is
+ * not a package" could not tell a board from a package, and 2.0.0 never added a React
+ * term to its vocabulary.
+ *
+ * flow-check already determines this from the markup: a file with data-nav/data-home,
+ * or a <script> router. The same test is applied here, to the file each tab points at. */
+const ROUTER = /data-nav\s*=|data-home\s*=|src=["'][^"']*proto\.js/i;
+const dirOf = (p2) => path.dirname(path.resolve(p2));
+const carriesRouter = (src2) => {
+  if (!src2) return false;
+  try { return ROUTER.test(fs.readFileSync(path.join(dirOf(shellPath), src2.split("?")[0]), "utf8")); }
+  catch { return false; }
+};
+const FLOW_LABEL = /\binteractive\b|\bflow\b|\bprototype\b|\bclickable\b|\breact\b|\bdemo\b|\bapp\b/i;
+const FLOW = { test: (t) => FLOW_LABEL.test(t) };
+/* markup first, label only as a fallback for a tab whose target cannot be read */
+const isFlowTab = (t) => carriesRouter(t.src) || (!t.src && FLOW.test(t.label));
+const flowAt = tabs.findIndex(isFlowTab);
 if (flowAt < 0) {
   flowGaps++;
   fail("flow-first", "the tab bar",
@@ -116,7 +142,7 @@ if (flowAt < 0) {
       `is tab ${flowAt + 1}. Tab order reads as priority order whatever you intended, and the ` +
       `first thing a refresh shows is the argument the shell makes about what the deliverable is`);
   }
-  if (!tabs.some((t) => FLOW.test(t.label) && t.selected)) {
+  if (!tabs.some((t) => isFlowTab(t) && t.selected)) {
     flowGaps++;
     fail("flow-first", "the default tab",
       `no interactive tab is marked selected, so the shell opens on whatever the markup lists first`);

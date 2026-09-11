@@ -93,7 +93,15 @@ if (URLS.length) {
        dangling link, which is the same false finding as measuring before the page settles. */
     await page.waitForTimeout(400);
     const src = await page.evaluate(() => document.documentElement.outerHTML);
-    sources.push({ name: u.replace(/^https?:\/\//, "").slice(0, 60), src });
+    /* Named by BASENAME, not by URL. state.flows names files and data-href names files,
+     * because --dir needs them to. Naming a route "localhost:8000/app-pos-react.html"
+     * meant neither could ever match: app-ops.html, present in html/, was reported as a
+     * file that does not exist, and the running demo was reported as an undeclared
+     * prototype while state.flows declared it by name. A project that follows
+     * react-demo.md could satisfy neither mode. The full URL is kept for the header. */
+    let base = u;
+    try { base = new URL(u).pathname.split("/").filter(Boolean).pop() || u; } catch {}
+    sources.push({ name: base, url: u, src });
   }
   await browser.close();
 } else {
@@ -131,7 +139,18 @@ for (const { name: f, src } of sources) {
       tabs = { error: e.message };
     }
   }
+  /* CLIENT-RENDERED FILES CANNOT BE CHECKED FROM DISK.
+   * A React flow's data-scr, data-go and data-tab exist only after the script runs, so
+   * reading the file reports an interactive prototype with zero screens and every nav
+   * target dangling — true of the file and false of the product. react-demo.md requires
+   * the flow to BE React and flow-check is a textual parse by design; the two compose
+   * only if a file can say so. It declares itself with data-csr on the router tag, and
+   * --dir then reports it as not checkable here rather than as broken. --url renders it
+   * and checks it properly. */
+  const csr = /data-csr\b/.test(src) || (/<script[^>]+type=["']module["']/.test(src)
+    && !/data-scr=/.test(src) && /data-nav\s*=/.test(src));
   doc.set(f, {
+    csr,
     src,
     screens: new Set(all(src, /data-scr="([^"]+)"/g)),
     sheets: new Set(all(src, /data-sheetwrap="([^"]+)"/g)),
@@ -148,6 +167,18 @@ for (const { name: f, src } of sources) {
     iframes: [...all(src, /<iframe[^>]+src="([^"?#]+)/g), ...all(src, /data-src="([^"?#]+)/g)],
   });
 }
+
+/* A client-rendered source is set aside BEFORE any check reads it, not after. Placed
+ * later it was named in the report while every check had already run against an empty
+ * shell and reported its screens missing. */
+const csrFiles = [...doc.entries()].filter(([, d]) => d.csr).map(([f]) => f);
+/* Set aside from being CHECKED, not from EXISTING. Removing them outright made every
+ * other file's link to the demo dangle and the declared flow read as missing — trading
+ * one false report for another. They stay in the file set as known-present, with an
+ * empty screen list, and no check reads their contents. */
+for (const f of csrFiles) doc.set(f, { src: "", csr: true, setAside: true,
+  screens: new Set(), sheets: new Set(), go: [], tab: [], sheet: [], pane: [],
+  href: [], popback: 0, tabs: [], home: null, router: false });
 
 // Interactive files are the ones that declare a router. Everything else is a
 // board, and a board has no flow to check.
@@ -255,10 +286,23 @@ if (shell) {
 
 // 7. Declared flows exist. This is what makes "one interactive prototype per
 //    application" checkable rather than aspirational.
+const partialUrlRun = URLS.length > 0;
+let notCaptured = 0, homeUnverified = 0;
 for (const fl of FLOWS) {
-  if (!doc.has(basename(fl.entry || "")))
+  if (!doc.has(basename(fl.entry || ""))) {
+    /* In --url mode you legitimately check one application's routes at a time, so a
+     * flow that is simply not among the routes you passed is a NOTE, not a defect —
+     * otherwise checking the POS reports Operations and Management as missing and the
+     * mode can never return zero. In --dir mode every flow's file should be present,
+     * so it stays a finding. */
+    if (partialUrlRun) { notCaptured++; continue; }
     add("flow-declared", STATE, `flow "${fl.app}" names entry ${fl.entry}, which is not in ${DIR}`);
-  else if (fl.home && !doc.get(basename(fl.entry)).screens.has(fl.home))
+  }
+  else if (doc.get(basename(fl.entry)).setAside) {
+    /* Its screens exist only after the script runs, so "does not have" would be a claim
+     * about an empty shell. --url verifies the home for real. */
+    homeUnverified++;
+  } else if (fl.home && !doc.get(basename(fl.entry)).screens.has(fl.home))
     add("flow-declared", STATE, `flow "${fl.app}" names home "${fl.home}", which ${fl.entry} does not have`);
 }
 
@@ -288,9 +332,23 @@ function section(src, id) {
 }
 
 // ---- report -------------------------------------------------------------
+if (URLS.length) {
+  const uniq = [...new Set(sources.map((s2) => s2.name))];
+  console.log(`routes resolved to ${uniq.length} file name(s): ${uniq.join(", ")}`);
+}
 console.log(`flow-check: ${sources.length} ${URLS.length ? "route(s)" : "file(s)"} in ${URLS.length ? "the running demo" : DIR}, ` +
   `${interactive.length} interactive (${interactive.map(([f]) => f).join(", ") || "none"}), ` +
   `${sources.length - interactive.length} board(s)`);
+if (homeUnverified)
+  console.log(`  ${homeUnverified} declared home(s) not verified here: their file is client-rendered. --url checks them.`);
+if (csrFiles.length && !URLS.length) {
+  console.log(`  ${csrFiles.length} client-rendered file(s) set aside: ${csrFiles.join(", ")}`);
+  console.log(`  Their markup exists only after the script runs, so reading them from disk would report`);
+  console.log(`  every screen missing. Check them with --url <route>, one per addressable state.`);
+}
+if (notCaptured)
+  console.log(`  note: ${notCaptured} declared flow(s) are not among the routes passed. Pass their routes too `
+            + `to check them; they are not reported as missing.`);
 console.log(`  ${screens} screen(s), ${links} link(s) checked` +
   (FLOWS.length ? `, ${FLOWS.length} declared flow(s)` : ", no flows declared in state"));
 
