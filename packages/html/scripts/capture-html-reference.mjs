@@ -120,6 +120,7 @@ const PAGE_W = Math.max(1400, Number(get("--pagewidth", 0)) || 0);
 const page = await browser.newPage({ viewport: { width: PAGE_W, height: 1000 }, deviceScaleFactor: 2 });
 const all = {};
 const widthMedia = [];
+const containerQueries = [];
 const settled = [], unsettled = [];
 let resolvedFont = null;
 
@@ -154,6 +155,13 @@ for (const src of sources) {
         const t = m[1].trim().slice(0, 80);
         if (!/\b(min|max)-(width|height)\b/i.test(t)) continue;
         if (!widthMedia.includes(t)) widthMedia.push(t);
+      }
+      /* Container queries are counted so verify-html can tell a stylesheet that is
+       * responsive from one that only looks it. A @container rule against a container
+       * that cannot change size never fires. */
+      for (const m of css.matchAll(/@container([^{]*)\{/g)) {
+        const t = m[1].trim().slice(0, 80);
+        if (t && !containerQueries.includes(t)) containerQueries.push(t);
       }
     };
     let html = "";
@@ -681,7 +689,7 @@ if (unsettled.length) {
 
 const meta = { capturedAt: new Date().toISOString(), forcedFont: FONT,
                font: resolvedFont, dir: DIR, settled: settled.length };
-fs.writeFileSync(path.join(OUT, "html-reference.json"), JSON.stringify({ meta, widthMedia, frames: all }));
+fs.writeFileSync(path.join(OUT, "html-reference.json"), JSON.stringify({ meta, widthMedia, containerQueries, frames: all }));
 console.log("\nwrote " + path.join(OUT, "html-reference.json"));
 console.log(FONT ? `font forced to ${FONT}, re-run without --font once Figma uses the same family`
                  : "rendered native");

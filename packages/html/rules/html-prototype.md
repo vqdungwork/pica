@@ -282,15 +282,36 @@ control deliberately.
 `data-state` defaults to `default`. Omit it and nothing breaks; omit it on a project that has an empty
 state and the build comparison silently pairs the wrong frames.
 
-## The frame size is declared once
+## The frame size is declared once, and the frame is fluid up to it
 
 Set it at intake and hold it for the whole project. The default is **375 x 812**, the iOS idiom,
 because it is the tighter constraint.
+
+**Declare it as a maximum, not a fixed width:**
+
+```css
+.frame { container-type: inline-size; width: min(var(--frame-w), 100%); }
+```
+
+This rule previously said *fixed*, and that single word made responsive design impossible while
+`@container` was mandatory below. A container query resolves against its container; a fixed-width
+container never changes size; so every `@container` rule in the project evaluated once per frame class
+and never again. It looked like responsive CSS and behaved like a hard-coded value. On the project
+that found this the sidebar measured 232px at 320, 390, 768, 900, 1024, 1440 and 1600, and the phone
+frame overflowed the window by 634px.
+
+`min()` costs nothing and fixes it. At or above the declared width the frame is **exactly** the
+declared width, so the capture, the geometry diff and the Figma frame are unaffected. Below it the
+frame narrows, container queries fire, and the product is testable at any width.
 
 Whatever it is, **the HTML viewport matches the Figma frame exactly**, or the geometry diff in step 7
 compares two different things and every finding is noise.
 
 ## Responsive is `@container`, never a width `@media`
+
+**A `@container` rule whose container cannot change size is dead configuration**, and
+`verify-html`'s `dead-breakpoint` check reports it. Writing the query is not the same as being
+responsive: see the frame rule above.
 
 **Enforced by `verify-html`'s `width-media` check**, which reads the stylesheets from disk. It was a
 rule with nothing behind it until 0.8.0, and the cost of that was invisible: a prototype using a width

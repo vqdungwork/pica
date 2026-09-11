@@ -510,6 +510,47 @@ for (const t of WM || []) {
             "Use @container, which resolves against the frame" });
 }
 
+/* ---- dead breakpoints ----------------------------------------------------
+ * A @container rule against a container that cannot change size evaluates once and
+ * never again. It reads as responsive CSS and behaves as a constant. On the project
+ * that found this, every container query in the stylesheet had never executed, the
+ * sidebar was 232px at every width from 320 to 1600, and the phone frame overflowed
+ * its window by 634px — while width-media passed, because the rules were written
+ * exactly as pica asked.
+ *
+ * Detected from the capture: a frame whose width is identical at every viewport it
+ * appears at, in a project that declares more than one viewport and ships container
+ * queries. */
+let deadBreakpoints = 0;
+const CQ = (ref.containerQueries || []).length;
+if (CQ && VIEWPORTS.length > 1) {
+  const byCap = new Map();
+  for (const f of frames) {
+    if (!byCap.has(f.cap)) byCap.set(f.cap, new Set());
+    byCap.get(f.cap).add(`${f.viewport}:${f.w}`);
+  }
+  const widthsPerViewport = new Map();
+  for (const f of frames) {
+    if (!widthsPerViewport.has(f.viewport)) widthsPerViewport.set(f.viewport, new Set());
+    widthsPerViewport.get(f.viewport).add(f.w);
+  }
+  /* every frame at a viewport is exactly the declared width and nothing else: the
+   * frames are fixed, so the queries below them cannot fire */
+  const allFixed = [...widthsPerViewport.entries()].every(([vp, ws]) => {
+    const decl = (VIEWPORTS.find((v) => v.name === vp) || {}).w;
+    return ws.size === 1 && decl && [...ws][0] === decl;
+  });
+  if (allFixed) {
+    deadBreakpoints = CQ;
+    findings.push({ check: "dead-breakpoint", where: `${CQ} @container rule(s)`,
+      detail: "every frame is exactly its declared width at every viewport, so the container never " +
+        "changes size and no @container rule below it can ever fire. The stylesheet looks responsive " +
+        "and behaves as a constant. Declare the frame as `width: min(var(--frame-w), 100%)`: at or " +
+        "above the declared width it is still exactly that width, so the capture and the geometry " +
+        "diff are unaffected" });
+  }
+}
+
 /* ---- report ------------------------------------------------------------- */
 console.log(`frames captured:    ${frames.length} across ${Object.keys(ref.frames).length} package(s)`);
 console.log(`viewports declared: ${VIEWPORTS.map((v) => `${v.name} ${v.w}x${v.h}`).join(", ")}`);
@@ -533,6 +574,10 @@ const table = [
   ["data-ownership", ownViolations + ownUncheckable,
       OWN.length ? (ownRegions ? `${ownRegions} read-only region(s)` : "declared, none locatable") : "not declared, so not checked. That is not the same as passing it"],
   ["direction", dirFindings, dirScope],
+  ["dead-breakpoint", deadBreakpoints,
+    CQ === 0 ? "no @container rules in the stylesheets"
+      : VIEWPORTS.length < 2 ? "one viewport, so nothing to reflow between"
+      : `${CQ} @container rule(s) against ${VIEWPORTS.length} viewport(s)`],
 ];
 for (const [name, n, scope] of table)
   console.log(`${n ? "FAIL" : "pass"}  ${name.padEnd(18)} ${String(n).padStart(3)} finding(s)   (${scope})`);
