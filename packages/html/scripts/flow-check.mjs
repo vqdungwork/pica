@@ -129,10 +129,19 @@ for (const { name: f, src } of sources) {
       const m = /data-nav="([^"]*)"/.exec(src);
       return m ? [m[0], m[1].replace(/&quot;/g, '"')] : null;
     })();
-  let tabs = [];
+  let tabs = [], declared = new Set();
   if (nav) {
     try {
-      tabs = JSON.parse(nav[1]).map((t) => t.id);
+      const parsed = JSON.parse(nav[1]);
+      tabs = parsed.map((t) => t.id);
+      /* What the router SAYS it owns. For a server-rendered file this is redundant with
+         the data-scr sections; for a client-rendered one it is the only screen list that
+         exists before the script runs, and it is in markup precisely so it can be read
+         here. */
+      for (const t of parsed) {
+        if (t && t.id) declared.add(t.id);
+        for (const o of (t && Array.isArray(t.owns) ? t.owns : [])) declared.add(o);
+      }
     } catch (e) {
       // A malformed tab set is a finding, not something to shrug at: the router
       // throws on load and the whole prototype renders blank.
@@ -158,7 +167,7 @@ for (const { name: f, src } of sources) {
     tab: all(src, /data-tab="([^"]+)"/g),
     sheet: all(src, /data-sheet="([^"]+)"/g),
     href: all(src, /data-href="([^"]+)"/g),
-    tabs,
+    tabs, declared,
     router: !!nav,
     home: (/data-home="([^"]+)"/.exec(src) || [])[1],
     // A tab in the review shell is a lazily-loaded iframe, so the target sits on
@@ -171,14 +180,24 @@ for (const { name: f, src } of sources) {
 /* A client-rendered source is set aside BEFORE any check reads it, not after. Placed
  * later it was named in the report while every check had already run against an empty
  * shell and reported its screens missing. */
+const unresolved = [];
 const csrFiles = [...doc.entries()].filter(([, d]) => d.csr).map(([f]) => f);
 /* Set aside from being CHECKED, not from EXISTING. Removing them outright made every
  * other file's link to the demo dangle and the declared flow read as missing — trading
  * one false report for another. They stay in the file set as known-present, with an
  * empty screen list, and no check reads their contents. */
-for (const f of csrFiles) doc.set(f, { src: "", csr: true, setAside: true,
-  screens: new Set(), sheets: new Set(), go: [], tab: [], sheet: [], pane: [],
-  href: [], popback: 0, tabs: [], home: null, router: false });
+for (const f of csrFiles) {
+  /* Keep what the MARKUP still says. Blanking `declared` too made every deep link into
+     the demo dangle: the file was excused from having its screens counted and then held
+     to having them anyway, which is the same file judged two ways. data-nav is in the
+     markup and survives the script not having run, so it is what deep links resolve
+     against until --url can do better. */
+  const was = doc.get(f);
+  doc.set(f, { src: "", csr: true, setAside: true,
+    screens: new Set(), declared: was ? was.declared : new Set(),
+    sheets: new Set(), go: [], tab: [], sheet: [], pane: [],
+    href: [], popback: 0, tabs: [], home: null, router: false });
+}
 
 // Interactive files are the ones that declare a router. Everything else is a
 // board, and a board has no flow to check.
@@ -233,8 +252,19 @@ for (const [f, d] of interactive) {
       continue;
     }
     const scr = /(?:^|&)scr=([^&]+)/.exec(query || "");
-    if (scr && !doc.get(basename(file)).screens.has(scr[1]))
-      add("dangling-href", f, `data-href="${h}" deep-links to a screen ${basename(file)} does not have`);
+    if (scr) {
+      const t = doc.get(basename(file));
+      /* A set-aside file has no rendered screens to compare against, so its declaration
+         is the best available truth. If it declares nothing either, say the link was not
+         adjudicated rather than calling it dangling or calling it fine. */
+      const known = t.setAside ? (t.declared || new Set()) : t.screens;
+      if (t.setAside && !known.size) {
+        unresolved.push(`${f} → ${h}`);
+      } else if (!known.has(scr[1])) {
+        add("dangling-href", f, `data-href="${h}" deep-links to a screen ${basename(file)} ` +
+          (t.setAside ? "does not declare in its data-nav" : "does not have"));
+      }
+    }
   }
 
   // 3. The router's own two references.
@@ -341,6 +371,11 @@ console.log(`flow-check: ${sources.length} ${URLS.length ? "route(s)" : "file(s)
   `${sources.length - interactive.length} board(s)`);
 if (homeUnverified)
   console.log(`  ${homeUnverified} declared home(s) not verified here: their file is client-rendered. --url checks them.`);
+if (unresolved.length) {
+  console.log(`  ${unresolved.length} deep link(s) NOT adjudicated: ${unresolved.join(", ")}`);
+  console.log("  Their target is client-rendered and declares no owns in data-nav, so neither");
+  console.log("  'dangling' nor 'fine' would have been measured. Check them with --url.");
+}
 if (csrFiles.length && !URLS.length) {
   console.log(`  ${csrFiles.length} client-rendered file(s) set aside: ${csrFiles.join(", ")}`);
   console.log(`  Their markup exists only after the script runs, so reading them from disk would report`);
