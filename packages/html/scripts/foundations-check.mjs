@@ -62,8 +62,29 @@ const said = (x, min = 3) => String(x || "").trim().length >= min;
 const SHELL = new Set(["frame", "frame-wrap", "scr", "sheetwrap", "sheet", "viewport", "tabbar",
   "tab", "frame-cap", "chrome", "statusbar", "homeindicator", "notch", "zoom", "meta", "shell", "stack"]);
 
-/* tokens.json is a flat map of dotted names to { value, source, origin } */
-const tokenNames = Object.keys(tokens).filter((k) => !k.startsWith("_"));
+/* TOKENS ARE TIERED, and this read the file as flat.
+ *
+ * research.md requires three tiers, so a conforming tokens.json is
+ * { tier1_primitive: {...}, tier2_semantic: {...}, tier3_component: {...} } — often with
+ * a flat `--css-var: value` mirror alongside for convenience. Reading only the top level
+ * counted the three tier CONTAINERS as tokens and demanded the storybook show a token
+ * called "tier1_primitive", while never looking at the 151 real tokens inside them. It
+ * then reported the flat CSS mirror as 64 further undocumented tokens, which are the same
+ * tier-1 values under their generated names.
+ *
+ * 53 of 53 findings on this project were one of those two. A check that misreads the
+ * shape of its own input does not report less, it reports confidently and wrongly. */
+const TIERS = Object.keys(tokens).filter((k) => /^tier\d/.test(k)
+  && tokens[k] && typeof tokens[k] === "object" && !Array.isArray(tokens[k]));
+const tokenNames = TIERS.length
+  ? TIERS.flatMap((t) => Object.keys(tokens[t]).filter((k) => !k.startsWith("_")))
+  : Object.keys(tokens).filter((k) => !k.startsWith("_"));
+if (!tokenNames.length) {
+  console.error("FAIL  tokens.json holds no tokens this check can read. Expected three tiers");
+  console.error("      (tier1_primitive / tier2_semantic / tier3_component) or a flat map.");
+  console.error("      Reporting zero over an unreadable file would be a pass over nothing.");
+  process.exit(2);
+}
 
 /* ---- 1. TOKEN SHOWN ------------------------------------------------------ */
 let tokenBad = 0;
@@ -84,14 +105,42 @@ for (const dir of ["html"]) {
   for (const f of fs.readdirSync(dir)) {
     if (!f.endsWith(".html") || f === "design-system.html" || f === "review.html") continue;
     const src = fs.readFileSync(`${dir}/${f}`, "utf8");
+    /* A SCREEN FILE CARRIES FRAMES. This scanned every .html in the directory and called
+     * all of them screens, so it demanded the storybook document the layout scaffolding
+     * of things that are not screens: an A/B/C decision board's .win/.lose/.trad, the
+     * token reference page's .tk, and the review shell's .grp/.topbar/.z — which the
+     * exclusion above missed only because the source file is review.shell.html and the
+     * output is review.html. 25 of 58 findings on this project were those.
+     *
+     * Documenting them would be worse than ignoring them: it would put .lose beside .btn
+     * in the component library and claim a one-off comparison layout as a kit component.
+     * A decision board stops being a deliverable the moment the decision is made.
+     *
+     * data-viewport is the signal, and it is the same one the capture pairs on. */
+    if (!/data-viewport\s*=/.test(src)) continue;
     for (const m of src.matchAll(/class="([^"]+)"/g))
       for (const c of m[1].split(/\s+/))
         if (c && !/^(is|has|js)-/.test(c) && !SHELL.has(c)) screenClasses.add(c);
   }
 }
 classesSeen = screenClasses.size;
+/* THE CLASSES THE STORYBOOK ACTUALLY SHOWS, read as classes rather than as substrings.
+ * The old test was `ds.includes('"' + c + '"') || ds.includes(c + ' ') || ds.includes('.' + c)`,
+ * which cannot see a class in the LAST position of a multi-class attribute: in
+ * `class="banner banner--alert"` the name is followed by a quote, not a space, and the
+ * stylesheet is linked rather than inlined so `.banner--alert` is not in the file either.
+ * Every modifier in the library is written that way, so the check reported 28 components
+ * as undocumented while the storybook rendered all 28 of them.
+ *
+ * That is the worst kind of finding: it is about correct work, it is bulk, and the only
+ * way to "fix" it is to add noise to the very file it is complaining about. */
+const dsClasses = new Set();
+for (const m of ds.matchAll(/class="([^"]+)"/g))
+  for (const c of m[1].split(/\s+/)) if (c) dsClasses.add(c);
+
 for (const c of screenClasses) {
-  if (ds.includes(`"${c}"`) || ds.includes(`${c} `) || ds.includes(`.${c}`)) continue;
+  /* shown in the storybook, or named in its prose or code samples */
+  if (dsClasses.has(c) || ds.includes(`"${c}"`) || ds.includes(`.${c}`)) continue;
   classBad++;
   fail("class-documented", `.${c}`,
     "is used on a screen and appears nowhere on the foundations page. A component that enters the " +
