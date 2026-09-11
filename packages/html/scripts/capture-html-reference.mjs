@@ -487,6 +487,22 @@ for (const src of sources) {
             .join(" ")).trim();
         }
         if (!name && tag === "img") name = el.getAttribute("alt") || "";
+        /* <label for> IS the primary way an input is named in HTML, and this resolver
+         * skipped it entirely: an input has no textContent, so every correctly labelled
+         * field reported "no accessible name" and the check advised adding an aria-label
+         * to markup that was already right. Advice that is wrong about correct code is
+         * how a check gets ignored. Both associations, explicit and implicit. */
+        if (!name && el.id) {
+          const lab = frame.querySelector(`label[for="${CSS.escape(el.id)}"]`);
+          if (lab) name = (lab.textContent || "").trim();
+        }
+        if (!name) {
+          const wrapLab = el.closest("label");
+          if (wrapLab) name = (wrapLab.textContent || "").trim();
+        }
+        if (!name) name = el.getAttribute("title") || "";
+        /* placeholder is deliberately NOT a name: it disappears on the first keystroke,
+         * so a field named only by one is unnamed exactly when the user needs it. */
         if (!name) name = (el.textContent || "").trim();
         controls.push([tag,
           Math.round((r.x - fr.x) * 10) / 10, Math.round((r.y - fr.y) * 10) / 10,
@@ -499,6 +515,14 @@ for (const src of sources) {
             disabled: el.hasAttribute("disabled") || el.getAttribute("aria-disabled") === "true",
             hidden: el.hasAttribute("hidden") || cs2.display === "none" || cs2.visibility === "hidden",
             name: name.replace(/\s+/g, " ").slice(0, 60),
+            /* Does this element actually DO anything, or does it merely wear a control's
+             * class? CONTROL_SEL matches .chip and .btn on purpose, to catch a <div>
+             * acting as a button — but the same net catches a <span class="chip"> used as
+             * a status label, and reporting those as unreachable controls is how a check
+             * teaches people to skim past it. The class is the guess; this is the
+             * evidence, and a11y-check requires the two together. */
+            verb: !!(el.onclick || el.getAttribute("onclick")
+              || el.matches("[data-go],[data-tab],[data-sheet],[data-pane],[data-popback],[data-href],[data-sheetclose],[data-scr]")),
             focusable,
             /* A control with no visible focus style is one a keyboard user loses.
              * MEASURED BY FOCUSING IT, not by reading the resting style: :focus-visible

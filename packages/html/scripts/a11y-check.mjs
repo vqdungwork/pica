@@ -82,15 +82,31 @@ for (const { f, c, m } of withMeta) {
   /* Does this thing behave like a control? A click target, a declared role, or a
    * native control. An <a> with no href is neither a link nor a button. */
   const nativeCtl = ["button", "input", "select", "textarea", "summary"].includes(tag);
-  const clickish = /\b(btn|button|navitem|tile|key|chip|swatch)\b/.test(cls || "")
+  /* A control's CLASS is a guess and the guess needs corroborating. `.chip` is worn by
+   * filter controls and by static status labels alike, so class alone reported ten
+   * decorative spans per screen as pointer-operable and keyboard-unreachable. A check
+   * that cries wolf on correct markup gets skimmed past, and then it is worth nothing on
+   * the day it is right. Class PLUS evidence: a handler, a nav verb, a role, or a
+   * tabindex. Older captures carry no `verb` field, so they fall back to the class alone
+   * rather than silently reporting nothing. */
+  const hasVerb = m.verb === undefined ? true : !!m.verb;
+  const clickish = (/\b(btn|button|navitem|tile|key|chip|swatch)\b/.test(cls || "")
+      && (hasVerb || m.tabindex != null))
     || (m.role && /button|tab|switch|link|menuitem|option/.test(m.role));
   const looksInteractive = nativeCtl || clickish || (tag === "a");
   if (!looksInteractive) continue;
   interactive++;
   if (exempt.has(key) || exempt.has(where)) continue;
 
-  /* 1. keyboard reach */
-  if (!m.focusable) {
+  /* 1. keyboard reach.
+   * A DISABLED control is not a defect here. `disabled` removes an element from the tab
+   * order by definition, so flagging it reports the platform behaving correctly — and
+   * this check said so about every disabled primary action on a form, which is the one
+   * place a disabled control is most likely to be right. target-size already excluded
+   * them; this did not, and the two disagreed about the same element.
+   * (A team that wants disabled controls announced uses aria-disabled on a focusable
+   * control, which stays focusable and so never reaches this branch.) */
+  if (!m.focusable && !m.disabled) {
     unreachable++;
     fail("keyboard-reach", where,
       `is operable by pointer and unreachable by keyboard${tag === "a" && !m.href ? " (an <a> with no href is not focusable)" : ""}. ` +
@@ -98,8 +114,13 @@ for (const { f, c, m } of withMeta) {
     continue;                       /* the rest are moot until it can be reached */
   }
 
-  /* 2. focus visible */
-  if (!m.focusOutline) {
+  /* 2. focus visible.
+   * Same exclusion, for the same reason: a control that cannot be focused cannot show a
+   * focus outline, so measuring one on a disabled button reports the absence of something
+   * that could not exist. Excluding it from keyboard-reach and then failing it here would
+   * move the false finding rather than fix it.
+   * The accessible-name check below still applies — a disabled control IS announced. */
+  if (!m.focusOutline && !m.disabled) {
     noFocus++;
     fail("focus-visible", where,
       "is focusable and has no focus outline. A keyboard user reaches it and nothing on screen says so");
@@ -118,7 +139,7 @@ for (const { f, c, m } of withMeta) {
     unnamed++;
     fail("accessible-name", where,
       'has no accessible name: a screen reader announces it as "button" and nothing else. ' +
-      "Give it text, an aria-label, or an aria-labelledby");
+      "Give it text, a <label for>, an aria-label, or an aria-labelledby");
   }
 
   /* 5. a click target that is not a control to assistive technology */
