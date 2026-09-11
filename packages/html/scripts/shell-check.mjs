@@ -130,11 +130,54 @@ const FLOW = { test: (t) => FLOW_LABEL.test(t) };
 /* markup first, label only as a fallback for a tab whose target cannot be read */
 const isFlowTab = (t) => carriesRouter(t.src) || (!t.src && FLOW.test(t.label));
 const flowAt = tabs.findIndex(isFlowTab);
-if (flowAt < 0) {
+
+/* A DECLARED DEMO IS A FLOW THAT IS NOT A FILE.
+ *
+ * `state.flows` assumes the flow is a file in html/, which was true while everything was
+ * static. Since 2.0.0 the flow is React and what the client receives is "a hosted URL,
+ * never a repository" — so on those projects there is no file for a tab to point at, and
+ * requiring one forced the demo to be embedded in an iframe inside the shell. That is the
+ * arrangement that produced the double scrollbar and the 6%-zoom "fit screen": the shell
+ * froze the iframe at its load height while the demo kept growing inside it.
+ *
+ * So `state.demo = { url, routes }` is declared separately, and a boards-only shell is a
+ * complete deliverable when it LINKS to the demo rather than containing it. The link is
+ * the thing checked, because a declaration nothing points at leaves the reviewer with a
+ * shell of boards and no way to reach the half they were meant to use. */
+const demo = state.demo && typeof state.demo === "object" ? state.demo : null;
+const demoUrl = demo && typeof demo.url === "string" ? demo.url.trim() : "";
+const demoLinked = demoUrl && (html.includes(demoUrl) ||
+  /* a shell may link the origin and route on its own */
+  (() => { try { return html.includes(new URL(demoUrl).origin); } catch { return false; } })());
+
+if (demo && !demoUrl) {
+  flowGaps++;
+  fail("flow-first", "state.demo",
+    "is declared with no `url`. A demo the reviewer cannot open is not a deliverable, and a " +
+    "declaration with an empty url reads as one that was set up and never finished");
+} else if (demoUrl && flowAt < 0) {
+  /* boards-only shell, demo declared elsewhere: the valid arrangement */
+  if (!demoLinked) {
+    flowGaps++;
+    fail("flow-first", "the tab bar",
+      `state.demo declares ${demoUrl} and nothing in this shell links to it. The boards settle a ` +
+      `decision and the flow is what the reviewer uses: a shell that mentions neither leaves them ` +
+      `with half the package and no way to find the other half`);
+  }
+  if (!Array.isArray(demo.routes) || !demo.routes.length) {
+    flowGaps++;
+    fail("flow-first", "state.demo.routes",
+      "lists no routes. Every screen, viewport and state must be reachable by its own URL — that is " +
+      "what lets the capture measure the demo and what lets a reviewer be sent to one state. An " +
+      "unlisted route set means state-coverage-check has nothing to multiply against");
+  }
+} else if (flowAt < 0) {
   flowGaps++;
   fail("flow-first", "the tab bar",
-    `no tab names the interactive flow. A shell of boards is not a package: the boards settle a ` +
-    `decision and the flow is what the reviewer uses. Tabs found: ${tabs.slice(0, 6).map((t) => t.label).join(", ")}`);
+    `no tab names the interactive flow, and state.demo declares no hosted one. A shell of boards is ` +
+    `not a package: the boards settle a decision and the flow is what the reviewer uses. Either ship ` +
+    `the flow as a tab, or declare state.demo = { url, routes } and link it. ` +
+    `Tabs found: ${tabs.slice(0, 6).map((t) => t.label).join(", ")}`);
 } else {
   if (flowAt > 1) {
     flowGaps++;

@@ -47,7 +47,8 @@
   },
   "produces": {
     "state": [
-      "packages.html.built"
+      "packages.html.built",
+      "demo"
     ],
     "artifacts": [
       "html/",

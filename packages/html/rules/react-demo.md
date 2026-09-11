@@ -92,6 +92,35 @@ is a fallback rather than the declared face. It runs as a **handoff gate**, not 
 iteration a fallback is noise, at handoff it is the difference between a measured reference and a
 meaningless one.
 
+## The shell links the demo. It does not contain it.
+
+<!-- enforced-by: flow-first -->
+
+`state.flows` assumes a flow is a file in `html/`, which was true while everything was static.
+It is not true of a demo the client reaches at a URL, and forcing one into that shape is what
+put the demo in an iframe inside `review.html`.
+
+That arrangement fails in a specific way, and it failed on a real project: the shell sizes the
+iframe at load and the demo keeps growing inside it, so the page gets a second vertical
+scrollbar inside the first, and the shell's own "fit screen" control solves against the frozen
+height — on a 12,500px document it resolved to **6%**. Neither symptom is visible to a check
+that reads the shell, because both live in the relationship between two documents.
+
+So declare the demo separately:
+
+```json
+"demo": { "url": "https://…/pos", "routes": ["/pos?vp=desktop&state=default", "…"] }
+```
+
+A boards-only `review.html` is then a complete deliverable, **provided it links to that URL**.
+`shell-check` requires the link rather than the declaration, because a declaration nothing
+points at leaves the reviewer holding the boards with no way to reach the half they were meant
+to use — and the boards are the half that stops being a deliverable once the decision is made.
+
+`routes` is not decoration. It is what `state-coverage-check` multiplies against and what lets
+a reviewer be sent to one state instead of told which four things to click, so a demo declared
+with an empty `routes` is reported rather than accepted.
+
 ## What the client receives
 
 **A hosted URL, never a repository.** The toolchain is verified at intake and lives on your machine;
