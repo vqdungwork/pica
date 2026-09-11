@@ -7,6 +7,34 @@ file covers only what is specific to evaluating a built interface.
 
 ---
 
+## One lens runs before the gate, not all five after it
+
+<!-- enforced-by: pre-gate-lens -->
+
+Everything below describes evaluation as a phase that follows approval. That ordering is wrong, and it
+was wrong in a way the reports themselves could not show: every finding was real, every finding arrived
+too late to be cheap.
+
+On the project this rule came from, the fan-out found **all eight blockers** after all seven packages
+were already marked `htmlApproved`. **Five of the eight shared one cause, visible on a single screen.**
+Seventeen minutes of evaluation, scheduled so that acting on any of it meant re-opening a closed gate.
+
+So `/pica-wp` runs **one** lens before GATE 5 — by default *error prevention, recovery and undo*, which
+is where the defects live that measurement cannot see and a screenshot does not show — and records it in
+`workPackages.<wp>.preGateLens` with the date, the lens, the count and a report path.
+
+The date is the load-bearing part. A lens run after approval and a lens run before it are the same three
+keys, and only the date separates them. `pre-gate-lens-check` compares it against `approvedOn` and fails
+a package where the lens came second.
+
+The check does **not** require findings above zero. An evaluator who finds nothing on a genuinely clean
+package is the outcome worth having, and a check that rewarded findings would reward inventing them. It
+requires the report to exist, which is a different thing: a lens that found nothing still wrote down
+where it looked.
+
+The fan-out is not replaced. It still runs, with the remaining lenses, against a package whose obvious
+defects are already gone — which is what the other four lenses are for.
+
 ## Three evaluators is not a preference, it is the coverage threshold
 
 **Heuristic evaluation performed by three to five evaluators recognises up to 80% of usability

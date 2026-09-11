@@ -10,7 +10,8 @@
       "evaluation.md"
     ],
     "scripts": [
-      "build-diff.mjs"
+      "build-diff.mjs",
+      "pre-gate-lens-check.mjs"
     ],
     "agents": [
       "pica-evaluator.md"
@@ -26,7 +27,9 @@
     "gates": []
   },
   "produces": {
-    "state": [],
+    "state": [
+      "workPackages.<wp>.preGateLens"
+    ],
     "artifacts": [
       "docs/reviews/"
     ]
@@ -41,9 +44,23 @@
         "@.audit/html-reference.json",
         "@.audit/demo-reference.json"
       ]
+    },
+    {
+      "run": "pre-gate-lens-check.mjs",
+      "passes": "0 findings: every approved package was seen by one evaluator lens before the gate, with a report on disk",
+      "args": "<state>",
+      "phase": "design",
+      "needs": [
+        "workPackages"
+      ]
     }
   ],
   "definitionOfDone": [
+    {
+      "type": "check",
+      "run": "pre-gate-lens-check.mjs",
+      "passes": "0 findings, one lens before every approval"
+    },
     {
       "type": "human",
       "says": "three to five evaluators ran with different lenses, none seeing another's findings"

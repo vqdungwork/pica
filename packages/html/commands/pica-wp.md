@@ -191,6 +191,37 @@ resolves; only clicking proves it goes somewhere sensible.
 acceptance criteria for this package in `docs/contract.md`. Report the check output: the actual counts,
 not "checks pass". State findings, including "none". Never report complete on work you have not verified.
 
+**6. One evaluator lens, before you present.** Not the fan-out: **one** lens, on this package's
+screens, written up in `docs/reviews/<wp>-pre-gate.md`.
+
+Evaluation runs after approval by construction, and on the project that produced this step it found
+**all eight blockers** — after all seven packages were already `htmlApproved`. Five of the eight shared
+one cause, visible on a single screen. The full five-lens fan-out took seventeen minutes. **The cheapest
+step in the flow was scheduled last**, so everything it found had to be re-opened through a gate that had
+already closed.
+
+Default to **lens 3, error prevention, recovery and undo**, unless something about this package points
+elsewhere. It is the lens that catches the defects measurement is blind to and screenshots do not show:
+a destructive action with no confirmation, an invalid entry that cannot be corrected, a "return with a
+reason" that captures no reason. All three shipped past green checks on that project.
+
+Record it alongside the approval, so the ordering is a fact rather than a habit:
+
+```json
+"workPackages": { "<wp>": {
+  "htmlApproved": true, "approvedOn": "<date>",
+  "preGateLens": { "lens": "Error prevention, recovery, undo", "on": "<date>",
+                   "findings": 6, "report": "docs/reviews/<wp>-pre-gate.md" } } }
+```
+
+`pre-gate-lens-check` reads it and asserts the date is on or before the approval, because a lens run
+afterwards is the old ordering under a new key and the two read identically in the state file. A lens
+that found nothing still writes the report: zero findings with nothing behind it is a number nobody can
+check.
+
+This does not replace `/pica-evaluate`. The fan-out still runs, with the other lenses, on a package
+whose obvious defects are already gone.
+
 ---
 
 ## GATE 5
@@ -209,8 +240,11 @@ known findings asks the human to arbitrate something a script already decided.
 Only when the human approves, set in `.pica/state.json`:
 
 ```json
-"workPackages": { "<wp>": { "htmlApproved": true } }
+"workPackages": { "<wp>": { "htmlApproved": true, "approvedOn": "<today>" } }
 ```
+
+`approvedOn` is not bookkeeping. It is the only thing that distinguishes a lens run before this gate
+from one run after it, and `pre-gate-lens-check` fails an approved package without it.
 
 Approval means they said so. Not that they went quiet, not that they moved on to another topic, not that
 it looks finished to you. If you are unsure whether a message was approval, ask.
