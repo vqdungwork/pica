@@ -150,6 +150,7 @@ up while sub-pixel scroll-region noise never exceeded 8px. A threshold in that g
 tuning per screen.
 
 ## The viewport parity check
+<!-- enforced-by: parity-nominal, parity-structural -->
 
 `scripts/parity-check.mjs <html-reference.json> <state.json>`. **Pass: 0 findings.**
 
