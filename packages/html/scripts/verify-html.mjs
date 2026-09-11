@@ -150,9 +150,16 @@ for (const f of frames) {
  * Fold hug twins onto their base screen first, then ask of each base frame:
  * does its content exceed the viewport, and if so does a twin exist at the same
  * viewport? A twin is not a separate screen and must not be counted as coverage. */
+/* Pair on the DOCUMENT, not the source name. A board holds both frames in one file, so
+ * pkg worked; a React demo cannot — a twin is a different height of the same screen and
+ * therefore a different route, so its source name differs from its base's by definition.
+ * Keyed on pkg, a demo could never pair and the rule was unsatisfiable in the mode
+ * react-demo.md prescribes. Route names are the flattened URL, so the document is the
+ * part before the query. */
+const docOf = (pkg) => { const i = String(pkg).indexOf("-scr-"); return i < 0 ? pkg : pkg.slice(0, i); };
 const twins = new Set();
 for (const f of frames) {
-  if (HUG.test(f.cap)) twins.add(`${f.pkg} :: ${f.cap.replace(HUG, "").trim()} @ ${f.viewport}`);
+  if (HUG.test(f.cap)) twins.add(`${docOf(f.pkg)} :: ${f.cap.replace(HUG, "").trim()} @ ${f.viewport}`);
 }
 let unpaired = 0, tall = 0, tallUnmeasurable = 0;
 for (const f of frames) {
@@ -163,7 +170,7 @@ for (const f of frames) {
   const over = f.contentH - vpH;
   if (over <= HUG_THRESHOLD) continue;
   tall++;
-  if (!twins.has(`${f.pkg} :: ${f.cap.trim()} @ ${f.viewport}`)) {
+  if (!twins.has(`${docOf(f.pkg)} :: ${f.cap.trim()} @ ${f.viewport}`)) {
     unpaired++;
     fail("tall-screen-pair", f,
       `content is ${f.contentH}px against a ${vpH}px viewport (+${over}px clipped) and has no "· hug" twin`);
