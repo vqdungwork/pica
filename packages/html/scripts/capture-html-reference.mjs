@@ -652,7 +652,12 @@ for (const src of sources) {
       const sr = frame.querySelector(".scroll-region");
       /* An unwrapped frame names itself from the vocabulary it already carries, so the
          report says "manage-alerts · desktop" rather than "frame0". */
-      const selfCap = [frame.getAttribute("data-scr"), frame.getAttribute("data-viewport")]
+      /* data-scr may sit on the frame or on the section AROUND it — the static apps put
+         it on the section and the viewport on the frame inside. Naming from the frame
+         alone made every route of one app read as "desktop", so parity-check saw one
+         screen called "desktop" instead of four screens with names. */
+      const scrHost = frame.closest("[data-scr]") || frame;
+      const selfCap = [scrHost.getAttribute("data-scr"), frame.getAttribute("data-viewport")]
         .filter(Boolean).join(" · ");
       out.push({ idx: i, layout,
         cap: cap ? cap.textContent.trim() : (selfCap || "frame" + i),

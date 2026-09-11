@@ -161,6 +161,7 @@ const textsOf = (frame, screen) => {
 
 const diff = (a, b) => [...a].filter((x) => !b.has(x));
 
+let nominalFindings = 0, structuralFindings = 0;
 let findings = 0, advisory = 0, exempt = 0;
 let comparisonsMade = 0, screensCompared = 0;
 const screens = new Map();
@@ -213,7 +214,7 @@ for (const [key, byVp] of screens) {
     console.log(`FINDING  ${key}`);
     console.log(`         absent at: ${missing.join(", ")}`
               + `${ex ? " (parityExemptions entry does not cover this)" : " (no parityExemptions entry)"}`);
-    findings++;
+    findings++; nominalFindings++;
     continue;
   }
   if (present.length < 2) continue;
@@ -259,8 +260,20 @@ for (const [key, byVp] of screens) {
   }
   console.log(`FINDING  ${key}`);
   for (const m of mismatched) console.log(`         count mismatch, unregistered: ${m}`);
-  findings++;
+  findings++; structuralFindings++;
 }
+
+/* THE STANDARD DIALECT. This printed `ok` and `FINDING` lines and a prose summary, and
+ * never a row the runner could parse — so pica-verify reported "FAIL parity-check
+ * 0 finding(s) across 0 check(s)" while the check had found seven. A check whose output
+ * the runner cannot read is a check whose result nobody sees, and the runner's own
+ * honesty assertion is what caught it. Same shape as flow-check's drift, same fix:
+ * `pass|FAIL  <id>  N finding(s)   (scope)`, one row per check, with its denominator. */
+console.log("");
+for (const [n, c, scope] of [
+  ["parity-nominal", nominalFindings, `${screens.size} screen(s) across ${VIEWPORTS.length} declared viewport(s)`],
+  ["parity-structural", structuralFindings, `${comparisonsMade} viewport-pair comparison(s) across ${screensCompared} screen(s)`],
+]) console.log(`${c ? "FAIL" : "pass"}  ${String(n).padEnd(18)} ${String(c).padStart(3)} finding(s)   (${scope})`);
 
 /* THE DENOMINATOR. This printed "0 finding(s)" on a project where every screen was
  * excused at pass 1, so the structural pass ran ZERO comparisons — indistinguishable
