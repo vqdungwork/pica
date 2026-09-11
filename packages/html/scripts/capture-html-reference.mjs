@@ -516,7 +516,14 @@ for (const src of sources) {
       out.push({ idx: i, layout, cap: cap ? cap.textContent.trim() : "frame" + i,
         viewport: vp, hug, uc, state: st,
         w: Math.round(fr.width), h: Math.round(fr.height),
-        contentH: sr ? sr.scrollHeight : null,
+        /* Falls back to the frame's own scroll height when no .scroll-region is
+         * present. It was null otherwise, and verify-html's tall-screen-pair skips a
+         * null — so on a project with no .scroll-region anywhere, that check reported
+         * a pass having measured zero of seventeen frames. `.scroll-region` is
+         * documented in no rule and absent from pica's own example project, so "no
+         * scroll region" is the normal case, not the exception. */
+        contentH: sr ? sr.scrollHeight : (frame.scrollHeight || null),
+        contentHFrom: sr ? "scroll-region" : (frame.scrollHeight ? "frame" : null),
         overflowX: overflow > 1 ? { px: overflow, node: overflowBy } : null,
         census: {
           radii: [...radii].sort((a, b) => a[0] - b[0]),

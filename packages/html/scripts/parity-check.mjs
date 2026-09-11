@@ -162,6 +162,7 @@ const textsOf = (frame, screen) => {
 const diff = (a, b) => [...a].filter((x) => !b.has(x));
 
 let findings = 0, advisory = 0, exempt = 0;
+let comparisonsMade = 0, screensCompared = 0;
 const screens = new Map();
 
 /* The tall-screen pair is NOT two screens.
@@ -216,16 +217,32 @@ for (const [key, byVp] of screens) {
     continue;
   }
   if (present.length < 2) continue;
+  screensCompared++;
 
-  /* ---- pass 2: structural parity ---- */
-  const [a, b] = VIEWPORTS;
-  const ca = classesOf(byVp[a], screenName), cb = classesOf(byVp[b], screenName);
-  const ta = textsOf(byVp[a], screenName), tb = textsOf(byVp[b], screenName);
-
+  /* ---- pass 2: structural parity ----
+   * EVERY PAIR OF PRESENT VIEWPORTS, not the first two declared.
+   * This read `const [a, b] = VIEWPORTS`, so with three viewports it compared
+   * viewport 1 against viewport 2 and never looked at the third — and because it
+   * indexed the DECLARED list rather than the ones this screen is actually present
+   * at, a screen present at only the second and third was compared using a viewport
+   * it does not have. Reproduced: a screen losing its entire sidebar at mobile passed
+   * with viewports [desktop, pos, mobile] and failed with [desktop, mobile, pos].
+   * Pass or fail was decided by the order of a JSON array. */
   const mismatched = [];
-  for (const c of new Set([...ca.keys(), ...cb.keys()])) {
-    const na = ca.get(c) || 0, nb = cb.get(c) || 0;
-    if (na !== nb) mismatched.push(`${c} (${a}=${na}, ${b}=${nb})`);
+  let pairsCompared = 0;
+  for (let i = 0; i < present.length - 1; i++) {
+    for (let j = i + 1; j < present.length; j++) {
+      const a = present[i], b = present[j];
+      pairsCompared++;
+      comparisonsMade++;
+      const ca = classesOf(byVp[a], screenName), cb = classesOf(byVp[b], screenName);
+      const ta = textsOf(byVp[a], screenName), tb = textsOf(byVp[b], screenName);
+      for (const c of new Set([...ca.keys(), ...cb.keys()])) {
+        const na = ca.get(c) || 0, nb = cb.get(c) || 0;
+        if (na !== nb) mismatched.push(`${c} (${a}=${na}, ${b}=${nb})`);
+      }
+      advisory += diff(ta, tb).length + diff(tb, ta).length;
+    }
   }
 
   /* Text parity is ADVISORY BY DESIGN, not pending implementation.
@@ -236,8 +253,6 @@ for (const [key, byVp] of screens) {
    * mistake, and nothing measurable tells them apart. Counted and printed so a
    * reviewer can read them; never a finding, because a check that cannot decide
    * must not block. */
-  advisory += diff(ta, tb).length + diff(tb, ta).length;
-
   if (!mismatched.length) {
     console.log(`ok       ${key}`);
     continue;
@@ -247,7 +262,15 @@ for (const [key, byVp] of screens) {
   findings++;
 }
 
-console.log(`\n${findings} finding(s), ${exempt} recorded parity exemption(s), `
+/* THE DENOMINATOR. This printed "0 finding(s)" on a project where every screen was
+ * excused at pass 1, so the structural pass ran ZERO comparisons — indistinguishable
+ * from a clean run over hundreds. A check must say what it measured, not only what it
+ * found. */
+console.log(`\n${findings} finding(s) over ${comparisonsMade} viewport-pair comparison(s) `
+          + `across ${screensCompared} screen(s), ${exempt} recorded parity exemption(s), `
           + `${pruned_total} box(es) pruned by reflowNotes, `
           + `${advisory} attributed text diff(s) (advisory, see notes above).`);
+if (!comparisonsMade)
+  console.log(`NOTE  the structural pass compared nothing: every screen was either excused or present `
+            + `at fewer than two viewports. That is not the same as structural parity holding.`);
 process.exit(findings ? 1 : 0);

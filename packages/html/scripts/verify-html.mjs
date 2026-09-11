@@ -154,10 +154,10 @@ const twins = new Set();
 for (const f of frames) {
   if (HUG.test(f.cap)) twins.add(`${f.pkg} :: ${f.cap.replace(HUG, "").trim()} @ ${f.viewport}`);
 }
-let unpaired = 0, tall = 0;
+let unpaired = 0, tall = 0, tallUnmeasurable = 0;
 for (const f of frames) {
   if (HUG.test(f.cap)) continue;
-  if (f.contentH == null) continue;       // no scroll region: nothing to clip
+  if (f.contentH == null) { tallUnmeasurable++; continue; }   // nothing to measure against
   const vpH = heightOf.get(f.viewport);
   if (vpH == null) continue;              // already reported by check 1
   const over = f.contentH - vpH;
@@ -520,7 +520,14 @@ console.log("");
 const table = [
   ["viewport-tagged", untagged, `${frames.length} frames checked`],
   ["overflow", overflowing, `${frames.length} frames checked`],
-  ["tall-screen-pair", unpaired, `${tall} frames exceed their viewport by >${HUG_THRESHOLD}px`],
+  /* THE DENOMINATOR. This printed "0 findings, N frames exceed their viewport" while
+   * having skipped every frame for a null contentH — a pass over nothing, which read
+   * exactly like a pass over everything. */
+  ["tall-screen-pair", unpaired,
+    tallUnmeasurable === frames.length
+      ? `NOT MEASURED: all ${frames.length} frames carry no content height. That is not a pass`
+      : `${tall} of ${frames.length - tallUnmeasurable} measurable frame(s) exceed their viewport by >${HUG_THRESHOLD}px`
+        + (tallUnmeasurable ? `, ${tallUnmeasurable} unmeasurable` : "")],
   ["viewport-coverage", uncovered, `${VIEWPORTS.length} viewports declared`],
   ["width-media", widthMedia, WM === undefined ? "capture predates this check, so not measured. That is not a pass" : ((WM || []).length + " width @media rule(s)")],
   ["data-ownership", ownViolations + ownUncheckable,
