@@ -93,21 +93,34 @@ fs.mkdirSync(OUT, { recursive: true });
  * industry skips stays skipped. */
 const URLS = args.filter((a, i) => args[i - 1] === "--url");
 const LIVE = URLS.length > 0;
+/* --dir and --url were mutually exclusive, and react-demo.md's own model needs both at
+ * once: "Boards stay static. The flow becomes React", captured `--dir` and `--url`
+ * respectively. One reference could hold one or the other, so a project built exactly as
+ * the rules prescribe could not produce a reference covering its own deliverable — and
+ * the per-source zero guard then failed every --dir run forever, because every file
+ * state.flows declares is client-rendered and has no frames on disk. A gate that can
+ * never go green is one people learn to pass with a flag.
+ * Pass --dir WITH --url and the sources are the union. */
+const WANT_DIR = args.includes("--dir") || !LIVE;
 
 let files = [];
-if (!LIVE) {
+if (WANT_DIR) {
   /* Guarded: a directory that does not exist threw an unguarded ENOENT, so a project
    * with nothing built yet crashed here instead of saying so. */
   if (!fs.existsSync(DIR)) {
-    console.error(`FAIL  ${DIR} does not exist, so there is nothing to capture and that is not a pass.`);
-    process.exit(2);
+    /* With --url alongside, a missing directory is simply "no boards", not a failure:
+       the routes are still a complete capture of what was asked for. */
+    if (!LIVE) {
+      console.error(`FAIL  ${DIR} does not exist, so there is nothing to capture and that is not a pass.`);
+      process.exit(2);
+    }
   }
-  files = fs.readdirSync(DIR)
+  files = !fs.existsSync(DIR) ? [] : fs.readdirSync(DIR)
     .filter(f => f.endsWith(".html") && !/review|index|design-system/i.test(f));
   /* Exit 2, not 1. Inside picaflow, 1 means "ran and found defects" and 2 means "could
    * not run". An empty directory is the second, and reporting it as the first made a
    * project with nothing built yet look like a project with failures. */
-  if (!files.length) {
+  if (!files.length && !LIVE) {
     console.error(`FAIL  no html files in ${DIR}. Nothing to capture, and that is not a pass.`);
     process.exit(2);
   }
@@ -124,9 +137,22 @@ const containerQueries = [];
 const settled = [], unsettled = [];
 let resolvedFont = null;
 
-const sources = LIVE
-  ? URLS.map(u => ({ name: u.replace(/^https?:\/\//, "").replace(/[^\w.-]+/g, "-").slice(0, 60), url: u }))
-  : files.map(f => ({ name: f.replace(/\.html$/, ""), url: null }));
+const sources = [
+  ...files.map(f => ({ name: f.replace(/\.html$/, ""), url: null })),
+  ...URLS.map(u => ({ name: u.replace(/^https?:\/\//, "").replace(/[^\w.-]+/g, "-").slice(0, 60), url: u })),
+];
+/* A route name is the URL flattened and cut to 60 characters, so two routes differing
+ * only past that point produced ONE key and the second silently replaced the first: a
+ * state captured, overwritten, and reported as covered. Deduplicate by suffix — the name
+ * is an identifier, and losing one is the same defect class as measuring nothing. */
+{
+  const seen = new Map();
+  for (const src of sources) {
+    const n = seen.get(src.name) || 0;
+    seen.set(src.name, n + 1);
+    if (n) src.name = `${src.name.slice(0, 57)}~${n}`;
+  }
+}
 
 for (const src of sources) {
   const file = src.url ? null : src.name + ".html";
@@ -231,9 +257,25 @@ for (const src of sources) {
     const CONTROL_SEL = "button, input:not([type=hidden]), select, textarea, a, summary, " +
       "[role], [tabindex], [onclick], [data-go], [data-tab], [data-sheet], [data-pane], " +
       "[data-popback], [data-href], .btn, .button, .navitem, .tile, .key, .chip, .swatch";
-    document.querySelectorAll(WRAP).forEach((wrap, i) => {
-      const cap = wrap.querySelector(".frame-cap");
-      const frame = wrap.querySelector(FRAME);
+    /* The wrapper NAMES a frame; it does not define one. A prototype page legitimately
+     * renders a frame without the board chrome around it — this project's static apps
+     * strip .frame-wrap on purpose, because the caption and border belong to the board
+     * and not to the thing a client clicks. Requiring the wrapper meant those pages
+     * captured zero frames and the per-source guard demanded a --url run that had just
+     * happened. So: wrappers first, and any VISIBLE frame not inside one is measured on
+     * its own, named from data-scr instead of a caption. */
+    const wraps = [...document.querySelectorAll(WRAP)];
+    const unwrapped = [...document.querySelectorAll(FRAME)].filter((f) => {
+      if (wraps.some((w) => w.contains(f))) return false;
+      const r = f.getBoundingClientRect();
+      const cs = getComputedStyle(f);
+      return r.width > 0 && r.height > 0 && cs.display !== "none" && cs.visibility !== "hidden";
+    });
+    [...wraps, ...unwrapped].forEach((node, i) => {
+      const bare = !node.matches(WRAP);
+      const wrap = bare ? node.parentElement || node : node;
+      const cap = bare ? null : wrap.querySelector(".frame-cap");
+      const frame = bare ? node : wrap.querySelector(FRAME);
       if (!frame) return;
       const fr = frame.getBoundingClientRect();
       const texts = [], boxes = [], controls = [];
@@ -608,7 +650,12 @@ for (const src of sources) {
         ? String(frame.dataset.state).trim() : "default";
       const hug = /(^|\s)hug(\s|$)/.test(frame.className || "");
       const sr = frame.querySelector(".scroll-region");
-      out.push({ idx: i, layout, cap: cap ? cap.textContent.trim() : "frame" + i,
+      /* An unwrapped frame names itself from the vocabulary it already carries, so the
+         report says "manage-alerts · desktop" rather than "frame0". */
+      const selfCap = [frame.getAttribute("data-scr"), frame.getAttribute("data-viewport")]
+        .filter(Boolean).join(" · ");
+      out.push({ idx: i, layout,
+        cap: cap ? cap.textContent.trim() : (selfCap || "frame" + i),
         viewport: vp, hug, uc, state: st,
         w: Math.round(fr.width), h: Math.round(fr.height),
         /* Falls back to the frame's own scroll height when no .scroll-region is
@@ -677,9 +724,20 @@ try {
   declaredEntries = (st.flows || []).map((f) => String(f.entry || "")).filter(Boolean);
 } catch { /* no state: nothing is declared, so nothing is required */ }
 
+/* A declared entry is satisfied by frames from ANY source that covers it, and with
+ * --dir alongside --url that is usually not the file of the same name: a client-rendered
+ * entry yields nothing on disk by definition and everything by route. Matching the file
+ * key alone failed a flow that had just been captured nineteen times — the guard would
+ * have demanded a --url capture that was sitting in the same run. Route source names are
+ * the URL flattened, so the entry's basename appears inside them. */
+const coveredByRoute = (entry) => {
+  const stem = entry.replace(/\.html$/, "").replace(/[^\w.-]+/g, "-");
+  return Object.entries(all).some(([k, v]) => v.length && k !== entry.replace(/\.html$/, "")
+    && k.includes(stem));
+};
 const emptyDeclared = declaredEntries.filter((e) => {
   const key = e.replace(/\.html$/, "");
-  return key in all && all[key].length === 0;
+  return key in all && all[key].length === 0 && !coveredByRoute(e);
 });
 const emptyOther = Object.entries(all).filter(([k, v]) => !v.length
   && !declaredEntries.some((e) => e.replace(/\.html$/, "") === k)).map(([k]) => k);
