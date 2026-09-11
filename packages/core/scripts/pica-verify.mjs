@@ -151,8 +151,23 @@ const applicable = (c) => c.needs.every((n) => n.split("|").some(met));
 
 const SUB = { "<state>": path.relative(PROJECT, path.resolve(statePath)) || ".pica/state.json",
   "<ref>": ".audit/html-reference.json", "<src>": "src", "<repo>": ".",
-  "<tokens>": "tokens/tokens.json", "<review>": "html/review.html" };
-const argsOf = (c) => c.args.split(/\s+/).map((a) => SUB[a] ?? a);
+  "<tokens>": "tokens/tokens.json", "<review>": "html/review.html",
+  /* Two checks declared placeholders this map never had. foundations-check was handed
+   * the literal string "<designSystem>" as a path, could not read it, printed its own
+   * "This is an abstention, not a pass", and exited 0 — which this runner rendered as
+   * `pass`. Given its real arguments on the project that found this, it returns 111
+   * findings. A placeholder with no substitution is a bug in THIS file, so `argsOf`
+   * now refuses rather than passing the angle brackets through as a filename. */
+  "<designSystem>": "html/design-system.html", "<structureDir>": "html" };
+const unsubstituted = [];
+const argsOf = (c) => c.args.split(/\s+/).map((a) => {
+  if (/^<[^>]+>$/.test(a) && !(a in SUB)) { unsubstituted.push(`${c.pkg}/${c.run} needs ${a}`); return null; }
+  return SUB[a] ?? a;
+});
+
+/* Matches the abstention notice the checks themselves emit. */
+const ABSTAINED_RE = /\bthis is an abstention,? not a pass\b|\bNOT a pass\b|\bdid NOT run\b|\bcould not be (read|parsed)\b/i;
+let internallyAbstained = 0;
 
 const scoped = checks.filter((c) => !ONLY_PHASE || c.phase === ONLY_PHASE);
 if (ONLY_PHASE && !PHASES.includes(ONLY_PHASE)) {
@@ -187,7 +202,12 @@ for (const r of results) {
   const a = assertionsOf(r.out);
   assertPass += a.filter((x) => x.verdict === "pass").length;
   assertFail += a.filter((x) => x.verdict === "FAIL").length;
-  if (r.code === 0) passed++; else failed++;
+  /* A check that could not read its input says so and exits 0, because exiting non-zero
+   * would mean "ran and found defects". Deciding the verdict from the exit code alone
+   * turned every such abstention into a green row. The checks already print the
+   * sentence; this reads it. */
+  if (r.code === 0 && ABSTAINED_RE.test(r.out)) { r.abstainedInternally = true; internallyAbstained++; }
+  else if (r.code === 0) passed++; else failed++;
   if (!byPhase.has(r.phase)) byPhase.set(r.phase, []);
   byPhase.get(r.phase).push({ ...r, assertions: a });
 }
@@ -209,9 +229,16 @@ if (JSON_OUT) {
 }
 
 /* ---- the table ---------------------------------------------------------- */
-const mark = (code) => code === null ? "abstain" : code === 0 ? "pass" : (code === 2 ? "no input" : "FAIL");
+const mark = (code, row) => row && row.abstainedInternally ? "ABSTAIN"
+  : code === null ? "abstain" : code === 0 ? "pass" : (code === 2 ? "no input" : "FAIL");
 console.log("");
-for (const phase of PHASES) {
+/* PHASES is a display order, not a filter. Three checks declared phases absent from it
+ * ("build", and two with none at all) and were never printed — the same fail-open shape
+ * as a capture that reports a total while hiding a per-source zero. Anything the list
+ * does not name is printed after it, under its own heading. */
+const EXTRA_PHASES = [...byPhase.keys()].filter((p) => !PHASES.includes(p)).sort();
+let rowsPrinted = 0;
+for (const phase of [...PHASES, ...EXTRA_PHASES]) {
   const rows = byPhase.get(phase);
   if (!rows || !rows.length) continue;
   console.log(`${phase.toUpperCase()}`);
@@ -221,10 +248,13 @@ for (const phase of PHASES) {
       ? `needs ${why(r.needs)}`
       : r.code === 2
         ? (r.out.trim().split("\n")[0] || "").replace(/^FAIL\s+/, "").slice(0, 62)
+        : r.abstainedInternally
+          ? ((r.out.split("\n").find((l) => ABSTAINED_RE.test(l)) || "could not read its input").trim().slice(0, 62))
         : r.code === 0
           ? `${r.assertions.length} assertion(s)`
           : `${n} finding(s) across ${r.assertions.filter((x) => x.verdict === "FAIL").length} check(s)`;
-    console.log(`  ${mark(r.code).padEnd(8)} ${r.run.replace(/\.mjs$/, "").padEnd(23)} ${detail}`);
+    rowsPrinted++;
+    console.log(`  ${mark(r.code, r).padEnd(8)} ${r.run.replace(/\.mjs$/, "").padEnd(23)} ${detail}`);
     if (EVIDENCE && r.code === 0)
       for (const a of r.assertions) console.log(`             · ${a.id}`);
     if (r.code === 1)
@@ -257,12 +287,30 @@ if (ADOPT && abstained.length) {
   console.log("  the difference between those two is the only reason this command has three verdicts.\n");
 }
 
-const line = `${passed} passed, ${failed} failed, ${abstained.length} abstained`;
+/* Three assertions about the RUN, not about the project. Each was a silent failure:
+ * a placeholder passed through as a filename, a check that abstained and read as green,
+ * and rows that were never printed at all. A runner that cannot be trusted to report a
+ * failure cannot be used to verify a fix to itself. */
+const runFaults = [];
+if (unsubstituted.length)
+  runFaults.push(`${unsubstituted.length} check(s) declare a placeholder this runner cannot substitute: ${unsubstituted.join("; ")}`);
+if (rowsPrinted !== results.length + abstained.length)
+  runFaults.push(`${results.length + abstained.length} check(s) resolved and ${rowsPrinted} row(s) printed. A check that is registered and never shown is indistinguishable from one that passed`);
+
+const line = `${passed} passed, ${failed} failed, ${abstained.length + internallyAbstained} abstained`;
 const asserts = `${assertPass} assertion(s) verified${assertFail ? `, ${assertFail} breached` : ""}`;
 console.log(`${scoped.length} check(s)${ONLY_PHASE ? ` in phase ${ONLY_PHASE}` : ""}: ${line}.`);
 console.log(`${asserts}.`);
+if (internallyAbstained)
+  console.log(`${internallyAbstained} check(s) ran, could not read their input, and said so. Shown as ABSTAIN, never as pass.`);
 if (abstained.length && !ADOPT)
   console.log(`Run with --adopt to see what ${abstained.length} abstention(s) would need. An abstention is not a pass.`);
 if (!failed && !EVIDENCE && assertPass)
   console.log("Run with --evidence to list every assertion that passed, which is what a review quotes.");
-process.exit(failed ? 1 : 0);
+
+if (runFaults.length) {
+  console.log("\nTHIS RUNNER IS NOT REPORTING HONESTLY:");
+  for (const f of runFaults) console.log(`  ${f}`);
+  console.log("  Fix the runner before reading anything above as a result.");
+}
+process.exit(failed || runFaults.length ? 1 : 0);
