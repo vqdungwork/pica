@@ -294,6 +294,15 @@ if (ADOPT && abstained.length) {
 const runFaults = [];
 if (unsubstituted.length)
   runFaults.push(`${unsubstituted.length} check(s) declare a placeholder this runner cannot substitute: ${unsubstituted.join("; ")}`);
+/* A check that failed and whose output this could not parse is a DIALECT MISMATCH, and
+ * it erases the contents of a real failure: flow-check printed "  ok  <id>  N" and was
+ * aggregated as "FAIL flow-check 0 finding(s) across 0 check(s)". Detecting it costs
+ * nothing and catches any future check that drifts from the row format. */
+const mute = results.filter((r) => r.code === 1 && !r.abstainedInternally && !assertionsOf(r.out).length);
+if (mute.length)
+  runFaults.push(`${mute.length} check(s) failed and printed no row this runner could parse, so their `
+    + `findings are reported as zero: ${mute.map((r) => r.run.replace(/\.mjs$/, "")).join(", ")}. `
+    + `Every check prints \`pass|FAIL  <id>  N finding(s)   (scope)\``);
 if (rowsPrinted !== results.length + abstained.length)
   runFaults.push(`${results.length + abstained.length} check(s) resolved and ${rowsPrinted} row(s) printed. A check that is registered and never shown is indistinguishable from one that passed`);
 

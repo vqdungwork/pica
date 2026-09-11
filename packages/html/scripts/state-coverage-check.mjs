@@ -54,9 +54,37 @@ catch (e) {
 /* The eight html-prototype.md names, and the ones it says are most often missing. */
 const MINIMUM = ["default", "loading", "empty", "error", "disabled", "keyboard-open", "focus"];
 
+/* ACCEPTS BOTH SHAPES, AND REFUSES A THIRD RATHER THAN THROWING.
+ * This read `for (const e of state.stateModel || [])`, so a stateModel written as the
+ * obvious map — { "screen-id": ["default", "error"] } — threw
+ * "object is not iterable" and died. pica-verify rendered that uncaught crash
+ * identically to an ordinary failure, so it looked like a finding rather than a broken
+ * check. parity-check already guards its inputs with expectArray; this did not. */
+const SM = state.stateModel;
 const modelStates = new Set();
-for (const e of state.stateModel || [])
-  for (const s of e.states || []) modelStates.add(String(s.name ?? s));
+const perScreen = new Map();
+if (Array.isArray(SM)) {
+  for (const e of SM) {
+    const list = (e.states || []).map((x) => String(x.name ?? x));
+    if (e.screen || e.id) perScreen.set(String(e.screen ?? e.id), list);
+    for (const s of list) modelStates.add(s);
+  }
+} else if (SM && typeof SM === "object") {
+  for (const [screen, list] of Object.entries(SM)) {
+    const arr = Array.isArray(list) ? list.map((x) => String(x.name ?? x)) : [];
+    if (!Array.isArray(list)) {
+      console.error(`FAIL  state.stateModel["${screen}"] is ${typeof list}, and this reads it as an array of states.`);
+      console.error("      Nothing below was checked, and that is not a pass.");
+      process.exit(2);
+    }
+    perScreen.set(screen, arr);
+    for (const s of arr) modelStates.add(s);
+  }
+} else if (SM !== undefined && SM !== null) {
+  console.error(`FAIL  state.stateModel is ${typeof SM}. Expected an array of { screen, states } or`);
+  console.error('      a map of { "screen-id": ["state", ...] }. Nothing was checked.');
+  process.exit(2);
+}
 if (!modelStates.size) {
   console.log("NOT APPLICABLE  state.stateModel is absent, so there is no authoritative list of states.");
   console.log("                pica-modeller produces it in analysis. This is an abstention, not a pass.");

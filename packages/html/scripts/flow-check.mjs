@@ -309,6 +309,16 @@ const by = {};
 for (const f of findings) (by[f.check] ||= []).push(f);
 const CHECKS = ["dangling-target", "dangling-href", "nav-target", "unreachable", "dead-end",
   "orphan-prototype", "flow-declared"];
+/* The denominator each check measured against, so a zero says what it is a zero OF. */
+const SCOPES = {
+  "dangling-target": `${links} link(s)`,
+  "dangling-href": `${links} link(s)`,
+  "nav-target": `${interactive.length} interactive file(s)`,
+  "unreachable": `${screens} screen(s)`,
+  "dead-end": `${screens} screen(s)`,
+  "orphan-prototype": `${interactive.length} interactive file(s)`,
+  "flow-declared": `${FLOWS.length} declared flow(s)`,
+};
 console.log("");
 for (const c of CHECKS) {
   const hits = by[c] || [];
@@ -316,7 +326,15 @@ for (const c of CHECKS) {
     console.log(`  ----  ${c.padEnd(18)} not run: no review.html in ${DIR}. This is not a pass`);
     continue;
   }
-  console.log(`  ${hits.length ? "FAIL" : "ok  "}  ${c.padEnd(18)} ${hits.length}`);
+  /* The dialect every other check prints, and the one pica-verify parses:
+   *   `pass|FAIL  <id>  N finding(s)   (scope)`
+   * This printed `  ok    <id>  N` — indented, "ok" rather than "pass", and no
+   * "finding". pica-verify's row regex matched none of it, so a run with real findings
+   * was aggregated as `FAIL flow-check 0 finding(s) across 0 check(s)`: a failure with
+   * its contents erased. A check that speaks its own dialect is invisible to the runner
+   * that reports it. */
+  console.log(`${hits.length ? "FAIL" : "pass"}  ${c.padEnd(18)} ${String(hits.length).padStart(3)} finding(s)   `
+    + `(${SCOPES[c] || `${screens} screen(s)`})`);
   for (const h of hits) console.log(`          ${h.where}: ${h.msg}`);
 }
 
