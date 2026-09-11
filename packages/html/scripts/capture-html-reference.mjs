@@ -617,6 +617,44 @@ for (const src of sources) {
  * well-formed artefact containing no frames, and every downstream check then passed
  * it: a green run that measured nothing. Refuse to write instead, and name both
  * selectors so the cause is obvious. */
+/* And a PER-SOURCE zero is a failure too.
+ *
+ * The guard above fires only on a zero TOTAL, so a capture that omitted the entire
+ * deliverable passed as long as something else was captured. On the project that found
+ * this: app-ops 0 frames, app-manage 0, app-pos-react 0, three static boards 17 — and
+ * verify-html reported "17 frames across 8 package(s) … HTML passes the measured gate."
+ * Every measured claim on that project described the boards. The applications a client
+ * actually clicks were measured by nothing.
+ *
+ * A file that state.flows names as an application entry MUST yield frames. A file with
+ * no frames that nobody declared is an ordinary board-less page and is reported, not
+ * failed. */
+let declaredEntries = [];
+try {
+  const st = JSON.parse(fs.readFileSync(path.join(DIR, "..", ".pica/state.json"), "utf8"));
+  declaredEntries = (st.flows || []).map((f) => String(f.entry || "")).filter(Boolean);
+} catch { /* no state: nothing is declared, so nothing is required */ }
+
+const emptyDeclared = declaredEntries.filter((e) => {
+  const key = e.replace(/\.html$/, "");
+  return key in all && all[key].length === 0;
+});
+const emptyOther = Object.entries(all).filter(([k, v]) => !v.length
+  && !declaredEntries.some((e) => e.replace(/\.html$/, "") === k)).map(([k]) => k);
+
+if (emptyDeclared.length) {
+  console.error(`\nFAIL  ${emptyDeclared.length} file(s) named in state.flows captured 0 frames:`);
+  for (const e of emptyDeclared) console.error(`        ${e}`);
+  console.error(`      state.flows calls these the applications, and html-prototype.md calls the`);
+  console.error(`      interactive flow the deliverable. A gate that measured everything except them`);
+  console.error(`      is not a gate. Either the frames carry no ${WRAP} wrapper, or their screens are`);
+  console.error(`      hidden — a hidden element has no box and cannot be captured from a file.`);
+  console.error(`      Capture a prototype by route with --url, one per addressable state.`);
+  process.exit(1);
+}
+if (emptyOther.length)
+  console.log(`note: ${emptyOther.length} file(s) carried no frames and are declared nowhere: ${emptyOther.join(", ")}`);
+
 const totalFrames = Object.values(all).reduce((a, d) => a + d.length, 0);
 if (!totalFrames) {
   console.error(`\nFAIL  captured 0 frames from ${Object.keys(all).length} file(s).`);
