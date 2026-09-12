@@ -97,11 +97,23 @@ Three colourways of one layout is **one** concept. The axis has to be the approa
 It reads state only, deliberately: divergence happens before any screen exists, so a check that
 needed the capture could only ever report on a decision already made.
 
-Never hand over a folder of separate HTML files. Build `review.html`: a tab bar plus lazily-loaded
-iframes, one tab per work package, and add a tab as each package lands.
+Never hand over a folder of separate HTML files. Build `review.html`: a tab bar and one pane per work
+package, **each package's body inlined into the shell**, and add a tab as each package lands.
 
-The per-package files stay the source of truth; the shell is only navigation. That keeps the Figma port
-reading from the same files a reviewer looks at.
+Inlined, not iframed. On `file://` every document is its own opaque origin, so a browser refuses to load
+a local file into an iframe of another local file: every pane renders the browser's own "It may have
+been moved, edited, or deleted" page and the review is empty. This rule said "lazily-loaded iframes"
+from 0.3.0 and the first project to follow it literally shipped a shell of error pages, then rebuilt it
+as a table of contents, which is not a review either.
+
+The per-package files stay the source of truth; the shell holds a copy of each body and is only
+navigation. That keeps the Figma port reading from the same files a reviewer looks at.
+
+**Lifting a body out of a page: cut at `<script`, not at `<script>`.** The exact-string form does not
+match `<script src="proto.js" data-nav='...'>`, so the prototype's own router tag is inlined verbatim
+along with the markup - the router then loads twice, two click listeners fire per tap, one tap pushes
+two history entries, and Back appears dead. The same tag's `data-home` runs against whatever frames
+have been parsed so far, which is a bug that hides until the pane order changes.
 
 Reason: a reviewer with four files to open reviews three of them. It gets worse every package.
 
@@ -140,9 +152,48 @@ Two more, both learned the same way: a tab that navigates **away** from the shel
 does not come back from, so every tab loads in place. And a tab bar that needs a scroll to reach the
 last tab hides whatever is last, so if the bar does not fit, the tabs are too verbose, not too many.
 
+**That last one holds to about eight tabs.** At 19 packages it stops being true: labels already as terse
+as "Auth flow", "Dashboard", "Own activity" still measured 3,414px against 1,337px of room, and no
+amount of shortening fits 19 tabs on a laptop. Past eight, group the bar by part (see the group order
+below) and make the scroll honest rather than hidden: smooth scrolling with the scrollbar suppressed, a
+mask fading **only the end that still has content** so it never suggests a direction that does not
+exist, vertical wheel driving it horizontally because a mouse has no horizontal axis, and
+`scrollIntoView({inline: 'nearest'})` on selection so a tab already in view is not yanked to the middle.
+That is a mitigation. The fix at that scale is a second level of grouping, and a project that needs one
+should build it rather than scroll further.
+
 **`shell-check.mjs` reads every rule in this section.** It was specified here from 0.3.0 and enforced by
 nothing until 0.9.4, which is why a shell could ship as a document with the viewer buried in the middle
 and score clean.
+
+### The shell's own furniture is scoped, because the screens are now in the same document
+
+Inlining puts every screen inside the shell's document, so the shell's stylesheet and the shell's
+queries reach into the thing under review. Both did. Measured on one 268-frame shell:
+
+| shell rule | matched inside the screens | what it did |
+|---|---|---|
+| `main{display:flex}` | 14 | turned each package's `<main class="page">` into a flex **row**: eight groups in one 3,342px line, scrolling sideways |
+| `h1{font-size:15px}` | 86 | every screen heading without a text-style class fell to 15px |
+| `[role="tab"]{...}` | 39 | the shell restyled the screens' own tabs, same specificity and a later stylesheet |
+| `h3`, `.meta` | 32 | page padding and a caveat-line style applied to screen content |
+
+**A review shell that restyles the thing under review is the worst version of this bug**, because every
+measured gate stays green and the reviewer reports on a design that was never built. The fix is
+mechanical:
+
+- the shell addresses its furniture by **its own classes**, scoped to `header` or `body > main`. No bare
+  element selector - not `main`, not `h1`, not `h3`, not `table` - appears in the shell's stylesheet.
+  ARIA roles stay on the markup for assistive technology; they are not selectors.
+- every shell query is scoped the same way. `document.querySelector('[role="tablist"]')` picks whichever
+  comes first, and once Favourites and a day strip are inlined that is **18 tablists**, so the shell's
+  keyboard navigation silently drives a screen's tabs instead of its own.
+- a handler binds to **the attribute it owns**: `.sw button[data-theme]`, not `.sw button`. A selector
+  meaning "every button in this kind of group" breaks the day the second group arrives - here the zoom
+  controls, which set `data-theme` to `undefined` and killed both switches.
+
+Worth measuring directly: after inlining, count how many elements inside a pane each shell selector
+matches. The answer is 0.
 
 ### The shell has a zoom control, and it has three settings
 

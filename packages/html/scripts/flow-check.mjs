@@ -220,6 +220,22 @@ for (const f of csrFiles) {
     href: [], popback: 0, tabs: [], home: null, router: false });
 }
 
+/* THE SHELL IS NOT AN APPLICATION.
+ *
+ * `review.html` carries a router whenever it inlines the prototype - and inlining is the
+ * only arrangement that works, because on file:// every document is its own opaque origin
+ * and a pane per iframe renders the browser's "it may have been moved" page. So the shell
+ * declares data-nav like any prototype, and every board screen it also inlines was then
+ * reported as "has no control that opens it": on FitShaker, 215 findings, 109 of them
+ * unreachable, every one a contact-sheet frame nobody was ever meant to click.
+ *
+ * Check 6 below already knew this and skipped the shell by name. It was the only check
+ * that did. The shell is navigation, not a screen set - the same reason shell-check gives
+ * for excluding it from the capture, "capturing it would put the chrome in the census".
+ *
+ * It stays in `doc`, so check 6 can still ask which prototypes it reaches. */
+const SHELL = "review.html";
+
 // Interactive files are the ones that declare a router. Everything else is a
 // board, and a board has no flow to check.
 //
@@ -227,7 +243,7 @@ for (const f of csrFiles) {
 // A documentation board that *describes* the convention in a <code> block matched
 // the looser test and was then reported as an interactive prototype with a
 // broken root: a finding about prose.
-const interactive = [...doc].filter(([, d]) => d.router);
+const interactive = [...doc].filter(([f, d]) => d.router && f !== SHELL);
 
 // Screens the router itself opens, rather than any control in the markup: the
 // bell, a deep-link default, a redirect. Collected from the string literals in
@@ -329,7 +345,7 @@ for (const [f, d] of interactive) {
 
 // 6. The review shell reaches every prototype. A prototype nobody can open from
 //    review.html is a prototype nobody reviews.
-const shell = [...doc].find(([f]) => f === "review.html");
+const shell = [...doc].find(([f]) => f === SHELL);
 /* This check needs review.html and there is not always one. It used to print "ok 0" in
  * that case, which is the pattern this repository keeps finding in itself: a check that
  * could not run reporting a pass. It now says which happened. */
@@ -337,8 +353,8 @@ const shellPresent = Boolean(shell);
 if (shell) {
   const tabbed = new Set(shell[1].iframes.map((s) => basename(s)));
   for (const [f] of interactive)
-    if (f !== "review.html" && !tabbed.has(f))
-      add("orphan-prototype", "review.html", `${f} is interactive but has no tab in the review shell`);
+    if (!tabbed.has(f))
+      add("orphan-prototype", SHELL, `${f} is interactive but has no tab in the review shell`);
 }
 
 // 7. Declared flows exist. This is what makes "one interactive prototype per

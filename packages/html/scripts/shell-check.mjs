@@ -61,7 +61,11 @@ const fail = (check, where, detail) => findings.push({ check, where, detail });
  * that only found <button role="tab"> would report "0 tabs" on a working page and call it
  * a pass. Zero tabs is a failure here for exactly that reason. */
 const tabs = [];
+/* Where the tab bar STARTS, which is where the header ends. Recorded from the first tab
+ * ELEMENT, not from the first occurrence of the string: see the meta-line check below. */
+let firstTabAt = -1;
 for (const m of html.matchAll(/<(button|a|div|li)\b([^>]*(?:role=["']tab["']|data-(?:tab|pane|target)=)[^>]*)>([\s\S]*?)<\/\1>/gi)) {
+  if (firstTabAt < 0) firstTabAt = m.index;
   const attrs = m[2];
   const label = m[3].replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
   if (!label) continue;
@@ -88,12 +92,29 @@ if (!tabs.length) {
 /* ---- 1. the meta line ---------------------------------------------------- *
  * The caveat is the load-bearing half. Two sentences written after somebody mistook a
  * demo for a product are the reason this check exists. */
-const head = html.slice(0, html.search(/role=["']tab/i) + 1 || 4000);
+/* The header is everything before the tab bar. That used to be
+ *   html.search(/role=["']tab/i)
+ * which matches a `[role="tablist"]{...}` SELECTOR in the <head> stylesheet just as
+ * happily as the markup. On one 1.3MB shell the selector sat at byte 2,684 and the meta
+ * paragraph at 7,739, so a correct, visible meta line was reported absent three times
+ * over: no revision date, no caveat, no viewports. The check was defeated by ordinary CSS.
+ * Cut at the first tab ELEMENT instead, which is the thing the rule is actually about.
+ *
+ * And START at <body>, because the window used to begin at byte 0 and take the whole
+ * <head> with it. On the same shell, deleting the meta line outright still scored
+ * "viewports: present" - satisfied by the string 375x812 inside a CSS COMMENT. The rule
+ * is that the READER can see it; <title>, <style> and every comment in them cannot be
+ * read by anyone, and a check that counts them is scoring the file rather than the page. */
+const bodyAt = (() => { const m = /<body\b[^>]*>/i.exec(html); return m ? m.index + m[0].length : 0; })();
+const head = html.slice(bodyAt, firstTabAt > bodyAt ? firstTabAt : bodyAt + 4000);
 let metaGaps = 0;
 const META = [
   ["a revision date", /revis(ed|ion)[^<]{0,40}\d|\b\d{1,2}[.\-/ ]\d{1,2}[.\-/ ]\d{2,4}\b|\b\d{4}-\d{2}-\d{2}\b/i],
   ["what it does not do", /\bno (database|live api|backend|server|payment)\b|\bsample data\b|\bnothing is (signed|transacted|charged|sent)\b|\bnot (a |)production\b|\bno real\b/i],
-  ["the viewports it was built at", /\b\d{3,4}\s*[x×]\s*\d{3,4}\b/],
+    /* &times; and &#215; render as the glyph the reader sees, so they say the viewports as
+     plainly as a literal x does. A shell that wrote "375 &times; 812" was told it had not
+     stated its viewports, while a 375x812 inside a CSS comment was accepted as proof. */
+  ["the viewports it was built at", /\b\d{3,4}\s*(?:[x\u00d7]|&times;|&#215;)\s*\d{3,4}\b/i],
 ];
 for (const [what, re] of META) {
   if (!re.test(head)) {
@@ -292,7 +313,7 @@ if (scale.size) {
   /* The pane's own padding, which is the gap the frame sits at. Read from the declared
    * value rather than measured, because the shell is excluded from the capture: it is
    * navigation, not a screen, and capturing it would put the chrome in the census. */
-  const paneRules = [...html.matchAll(/\.(pane|viewport|stage|canvas|shell__body)[^{]*\{([^}]*)\}/gi)];
+  const paneRules = [...html.matchAll(/(\.(?:pane|viewport|stage|canvas|shell__body)[^{]*)\{([^}]*)\}/gi)];
   for (const [, sel, body] of paneRules) {
     for (const m of body.matchAll(/padding[a-z-]*\s*:\s*([^;]+)/gi)) {
       for (const px of String(m[1]).matchAll(/(\d+(?:\.\d+)?)px/g)) {
@@ -300,10 +321,15 @@ if (scale.size) {
         if (v === 0) continue;
         if (![...scale].some((s) => Math.abs(s - v) <= 1)) {
           insetGaps++;
-          fail("frame-inset", `.${sel}`,
-            `sits frames ${v}px from the pane edge, which is on no step of the spacing scale ` +
-            `(${[...scale].sort((a, b) => a - b).join(", ")}). A 20px inset around a design built on an ` +
-            `8px scale is the first thing a designer notices and the last thing anyone writes down`);
+          /* Name the WHOLE selector, and the value that was actually read. It used to
+           * report only the matched keyword - `.pane` - for a rule that was
+           * `.pane > h3{padding:26px 24px 10px}`, so "sits frames 26px from the pane edge"
+           * described a heading, twice, and the reader went looking for a frame. */
+          fail("frame-inset", sel.trim(),
+            `declares ${m[0].trim()}, and ${v}px is on no step of the spacing scale ` +
+            `(${[...scale].sort((a, b) => a - b).join(", ")}). An off-scale inset around a design ` +
+            `built on that scale is the first thing a designer notices and the last thing anyone ` +
+            `writes down. If this rule does not set a frame inset, it should not be named like one`);
         }
       }
     }
