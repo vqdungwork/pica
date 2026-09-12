@@ -161,10 +161,18 @@ const twins = new Set();
 for (const f of frames) {
   if (HUG.test(f.cap)) twins.add(`${docOf(f.pkg)} :: ${f.cap.replace(HUG, "").trim()} @ ${f.viewport}`);
 }
-let unpaired = 0, tall = 0, tallUnmeasurable = 0;
+let unpaired = 0, tall = 0, tallUnmeasurable = 0, frameBoxOnly = 0;
 for (const f of frames) {
   if (HUG.test(f.cap)) continue;
   if (f.contentH == null) { tallUnmeasurable++; continue; }   // nothing to measure against
+  /* A fixed-height frame whose content is clipped inside it reports the FRAME's own
+   * scrollHeight, which is the frame's height, so `contentH - vpH` is 0 by construction
+   * and this frame can never trip the check. That is not a measurement and the
+   * denominator must not spend it like one: on one project 231 of 262 base frames came
+   * back at exactly the viewport height, and the summary read "2 of 280 measurable",
+   * which is 245 frames' worth of confidence nobody earned. Counted separately and named
+   * in the scope, so the reader can see how much of the page was actually looked at. */
+  if (f.contentHFrom === "frame" && f.contentH === f.h) frameBoxOnly++;
   const vpH = heightOf.get(f.viewport);
   if (vpH == null) continue;              // already reported by check 1
   const over = f.contentH - vpH;
@@ -574,7 +582,12 @@ const table = [
   ["tall-screen-pair", unpaired,
     tallUnmeasurable === frames.length
       ? `NOT MEASURED: all ${frames.length} frames carry no content height. That is not a pass`
-      : `${tall} of ${frames.length - tallUnmeasurable} measurable frame(s) exceed their viewport by >${HUG_THRESHOLD}px`
+      : frameBoxOnly && frameBoxOnly === frames.length - tallUnmeasurable
+      ? `NOT MEASURED: every measurable frame reported its own box height, so none of them `
+        + `could exceed it. Give the screens a scroll region. That is not a pass`
+      : `${tall} of ${frames.length - tallUnmeasurable - frameBoxOnly} truly measurable frame(s) `
+        + `exceed their viewport by >${HUG_THRESHOLD}px`
+        + (frameBoxOnly ? `, ${frameBoxOnly} measured against their own frame box and so cannot exceed it` : "")
         + (tallUnmeasurable ? `, ${tallUnmeasurable} unmeasurable` : "")],
   ["viewport-coverage", uncovered, `${VIEWPORTS.length} viewports declared`],
   ["width-media", widthMedia, WM === undefined ? "capture predates this check, so not measured. That is not a pass" : ((WM || []).length + " width @media rule(s)")],
