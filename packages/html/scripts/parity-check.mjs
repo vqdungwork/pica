@@ -33,8 +33,17 @@
 import fs from "fs";
 
 const [, , refPath, statePath] = process.argv;
+/* --quiet drops the per-screen `ok` lines and keeps every FINDING and the summary.
+ *
+ * It exists because the alternative is what harnesses actually do: pipe this through
+ * `tail -1` to get the count, which throws the findings away. On one project that check
+ * reported "3 finding(s)" and the three were invisible until it was re-run by hand,
+ * outside the harness, an hour later. A gate that reports a number and not the reason
+ * costs a cycle every single time it fires. */
+const QUIET = process.argv.includes("--quiet");
+const ok = (line) => { if (!QUIET) console.log(line); };
 if (!refPath || !statePath) {
-  console.error("usage: node parity-check.mjs <html-reference.json> <state.json>");
+  console.error("usage: node parity-check.mjs <html-reference.json> <state.json> [--quiet]");
   process.exit(2);
 }
 
@@ -207,7 +216,7 @@ for (const [key, byVp] of screens) {
     const ex = (state.parityExemptions || []).find((e) => e.screen === screenName);
     const excusedAll = ex && missing.every((v) => !(ex.presentAt || []).includes(v));
     if (excusedAll) {
-      console.log(`ok       ${key}  (absent at ${missing.join(", ")}: recorded decision: ${ex.why})`);
+      ok(`ok       ${key}  (absent at ${missing.join(", ")}: recorded decision: ${ex.why})`);
       exempt++;
       continue;
     }
@@ -255,7 +264,7 @@ for (const [key, byVp] of screens) {
    * reviewer can read them; never a finding, because a check that cannot decide
    * must not block. */
   if (!mismatched.length) {
-    console.log(`ok       ${key}`);
+    ok(`ok       ${key}`);
     continue;
   }
   console.log(`FINDING  ${key}`);

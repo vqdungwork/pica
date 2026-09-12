@@ -117,6 +117,23 @@ Contract when the data is thin, following `geometry-diff`: **no use cases in sta
 applicable**, and it says so. **Use cases declared with no frame tagged is a FAIL**, because the link
 cannot be checked and a check that cannot run is not a pass.
 
+## The shell gate
+
+`scripts/shell-check.mjs <review.html> [state.json]`. **Pass: 0 findings on all six checks.**
+
+**Run it from the first package, not at handover.** It reads every rule in the shell section of
+`html-prototype.md`, and on one project it was specified there and called by nothing for the whole
+build: 19 packages and 268 frames later, the first run reported nine findings that had been in the page
+from the beginning - a tab that navigated away, a fixed 52% zoom nobody chose, no meta line, and the
+interactive prototype sitting at tab 20 of 20. **A gate that exists and is not wired is indistinguishable
+from one that does not exist**, and it is worse than that: the person it was written for goes on to
+reinvent it, badly, and writes their version down as a proposal.
+
+`frame-inset` needs a spacing scale and **silently does not run without one**. It reads
+`tokens/tokens.json`, or `state.spacingScale` as a list of steps. Without either it prints
+`pass  frame-inset  (NOT RUN, no scale)` - a pass that is a skip. Declare the scale, and read the
+parenthesis on every run, not the word.
+
 ## The flow gate
 
 `scripts/flow-check.mjs --dir html [--state .pica/state.json]`. **Pass: 0 findings on all seven checks**,
@@ -152,7 +169,11 @@ tuning per screen.
 ## The viewport parity check
 <!-- enforced-by: parity-nominal, parity-structural -->
 
-`scripts/parity-check.mjs <html-reference.json> <state.json>`. **Pass: 0 findings.**
+`scripts/parity-check.mjs <html-reference.json> <state.json> [--quiet]`. **Pass: 0 findings.**
+
+`--quiet` drops the per-screen `ok` lines and keeps every finding and the summary. Use it in a harness,
+and **never pipe a gate through `tail -1`**: the summary carries the count and the findings carry the
+reason, and a run that reports "3 finding(s)" with the three discarded costs a cycle every time.
 
 Only with two or more declared viewports; with one it says so and exits 0. It answers one question: **do
 the viewports of a screen say the same thing, apart from the differences we declared?**
@@ -255,6 +276,7 @@ checkable rather than a habit.
 - [ ] `copy-check` returns zero, or the words are not written
 - [ ] `parity-check` returns zero, nominal and structural, where two or more viewports are declared
 - [ ] `flow-check` returns zero on all seven checks, with a non-zero screen and link count
+- [ ] `shell-check` returns zero on all six, with `frame-inset` reporting a scale rather than "NOT RUN"
 - [ ] **The main flow of every application clicked end to end**, by a human, from its real entry point
 - [ ] Every screen rendered and looked at **after** the last change, not before it
 - [ ] Every check written for this project has been **seen to fail** on the defect it was written for
