@@ -1,5 +1,72 @@
 # Changelog
 
+## 2.1.0
+
+### A gate that is never called is indistinguishable from one that does not exist
+
+Everything here came out of one build: a review shell carrying 19 work packages and 268 frames. The
+project specified `shell-check` from the first package and called it from nothing for the whole build.
+Wired in at the end, it reported nine findings that had been in the page since the first commit - a tab
+that navigated away, a fixed 52% zoom nobody chose, no meta line, the interactive prototype sitting at
+tab 20 of 20.
+
+The worse half is what happened while it was silent: the operator proposed rules pica **already had**,
+and proposed them worse than the versions already written down. A gate nobody runs does not merely fail
+to catch things. It invites the person it was written for to reinvent it badly.
+
+`html-gates.md` now documents the shell gate with the six checks that hold it, and the definition of
+done requires it to have run.
+
+### The checks that passed over nothing
+
+Nine of these, and they share one shape: a green line whose denominator was zero and which never said so.
+
+- **`pica-verify` reported failures and abstentions as passes.** The summary counted runs, not results.
+- **`--url` mode measured one screen of a demo and called it a pass**, having never reached the others.
+- **`tall-screen-pair` counted 245 blind frames as measured.** The pair existed; nothing had looked at it.
+- **`parity-check` found seven things and the runner printed zero.** The findings were discarded by the
+  harness line that read only the summary, so `--quiet` now keeps every finding, and the rules say never
+  to pipe a gate through `tail -1`.
+- **`capture` treated a per-source zero as silence** rather than as the failure it is, and hung on hidden
+  frames instead of skipping them.
+- **`foundations-check` read the token file wrong and the class list wrong**, passing a storybook it had
+  not parsed.
+- **`shell-check` could not see the file it was pointed at.**
+- **`a11y-check` told correct markup it was wrong, three ways** - added in this release, and the first
+  three findings it produced were its own.
+- **A React demo could never satisfy the tall-screen pair**, so the rule failed every project that
+  followed the rule. `react-demo.md` says what the pair means when the demo is an application.
+
+### Say which rules are enforced, and keep it honest
+
+272 rules across 22 rule modules, and roughly two thirds have no executable behind them. That is not a
+defect on its own; some rules are judgement and should stay judgement. The defect is that a reader
+cannot tell which, because the green table looks identical either way.
+
+Every `##` rule now carries a marker naming the checks that hold it, or saying `none` with a reason.
+`rule-coverage-check` enforces three things: that a rule is marked, that every id named still exists,
+and that no check is enforcing something nobody wrote down. It **ratchets** - today's backlog is
+recorded per file and only a number that gets worse fails, because a suite that is red on the day it
+lands teaches everyone to ignore the red. 246 rules are still unmarked and the number may only go down.
+
+`id-exists` is not ratcheted and never will be: a marker naming a check that no longer exists is an
+active false claim, not an unfinished one.
+
+### Also
+
+- **CI runs the rule coverage and the mutation suite on every push**, and fails a run that reports any
+  mutation as SKIPPED. A skipped mutation is not a passed one.
+- **One evaluator lens runs before the gate**, not after it, with a date that proves when.
+- **A demo the shell links is a flow; a demo the shell contains is a scrollbar.** `flow-check` and
+  `shell-check` read the markup rather than the tab label or the URL.
+- **Frames are fluid up to the declared width**, and a breakpoint that changes nothing is a finding.
+- **One reference cannot hold a project built the way the rules prescribe.** The single-reference
+  assumption broke at 19 packages.
+- 156 checks, up from 101. `a11y-check`, `pre-gate-lens-check` and `rule-coverage-check` are new.
+
+Manifest descriptions said "Six specialists, 101 checks" while the code said seven and 156. Nothing was
+watching that sentence; it now reads what the code counts.
+
 ## 2.0.0
 
 ### The build half goes, and everything that was asked for and never checked
