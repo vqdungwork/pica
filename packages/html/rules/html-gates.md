@@ -118,6 +118,7 @@ applicable**, and it says so. **Use cases declared with no frame tagged is a FAI
 cannot be checked and a check that cannot run is not a pass.
 
 ## The shell gate
+<!-- enforced-by: meta-line, flow-first, zoom, tabs-in-place, group-order, frame-inset -->
 
 `scripts/shell-check.mjs <review.html> [state.json]`. **Pass: 0 findings on all six checks.**
 
