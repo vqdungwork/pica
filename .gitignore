@@ -51,6 +51,11 @@
 # ---- belt and braces ----
 # These are ignored at ANY depth, including inside an allowlisted directory, so a
 # captured artefact or a client brief cannot ride along inside skills/ or docs/.
+#
+# .DS_Store is here because the allowlist does not stop it: `!/packages/` un-ignores
+# everything under that directory, and Finder writes one the moment somebody opens the
+# folder. 2.1.0 shipped with packages/.DS_Store tracked for exactly that reason.
+.DS_Store
 .pica/
 .audit/
 .cmp/
