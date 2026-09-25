@@ -13,8 +13,9 @@
       "state-schema.md"
     ],
     "scripts": [
-      "pica-verify.mjs",
-      "pica-status.mjs"
+      "pica-run.mjs",
+      "pica-status.mjs",
+      "pica-verify.mjs"
     ],
     "hooks": [
       "dispatcher.md",
