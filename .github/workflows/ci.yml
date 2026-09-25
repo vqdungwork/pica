@@ -53,6 +53,28 @@ jobs:
       - name: validate packages
         run: node scripts/validate-packages.mjs
 
+      # The authority on a manifest is the thing that installs it, and this repository
+      # learned that the expensive way: 3.0.0 was tagged, released and announced with a
+      # plugin Claude Code would not install, while every suite above was green. The
+      # manifest was internally consistent, and internal consistency was the only thing
+      # anything here had been asking for.
+      #
+      # validate-packages now holds the documented rules itself, so the defect is caught
+      # with no install on any machine. This step is the other half: `claude plugin
+      # validate` IS the installer's schema rather than our reading of it, and it knows
+      # fields we have not thought to check. When the two disagree, this one is right.
+      #
+      # --strict so that a warning fails here rather than becoming somebody's surprise
+      # after a release. Every package, plus the marketplace manifest at the root.
+      - name: validate manifests against the installer
+        run: |
+          npm install -g @anthropic-ai/claude-code
+          fail=0
+          for d in roles/*/ core/ .; do
+            claude plugin validate "$d" --strict || fail=1
+          done
+          exit $fail
+
       # Skills were the one surface nobody gated. Rules carry enforced-by markers and
       # rule-coverage-check ratchets them; scripts are proven by the mutation suite;
       # manifests are held by validate-packages. A skill citing a renamed check sends
