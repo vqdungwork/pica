@@ -1,0 +1,62 @@
+{
+  "name": "content-designer",
+  "status": "stable",
+  "description": "The words, in every state, bound to the glossary and to the client's own copy rules.",
+  "owns": {
+    "commands": [
+      "pica-copy.md"
+    ],
+    "rules": [
+      "content.md"
+    ],
+    "scripts": [
+      "copy-check.mjs"
+    ],
+    "agents": [
+      "pica-content-designer.md"
+    ],
+    "skills": [
+      "writing-every-state"
+    ]
+  },
+  "requires": {
+    "state": [
+      "glossary",
+      "stateModel"
+    ],
+    "artifacts": [],
+    "gates": []
+  },
+  "produces": {
+    "state": [
+      "copyRules"
+    ],
+    "artifacts": []
+  },
+  "checks": [
+    {
+      "run": "copy-check.mjs",
+      "passes": "0 findings",
+      "args": "<ref> <state>",
+      "phase": "design",
+      "needs": [
+        "@.audit/html-reference.json"
+      ]
+    }
+  ],
+  "definitionOfDone": [
+    {
+      "type": "check",
+      "run": "copy-check.mjs",
+      "passes": "0 findings"
+    },
+    {
+      "type": "human",
+      "says": "every error state says what to do, not only what happened"
+    },
+    {
+      "type": "gate",
+      "grants": "copyApproved"
+    }
+  ]
+}

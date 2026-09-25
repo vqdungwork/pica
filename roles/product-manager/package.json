@@ -1,0 +1,119 @@
+{
+  "name": "product-manager",
+  "status": "stable",
+  "description": "pica product manager: the brief as a contract, the scope boundary and its exclusions, and the proof of delivery against the brief that was agreed.",
+  "owns": {
+    "commands": [
+      "pica.md",
+      "pica-close.md",
+      "pica-feedback.md"
+    ],
+    "rules": [
+      "intake.md",
+      "proposals.md"
+    ],
+    "scripts": [
+      "close-check.mjs",
+      "proposal-check.mjs"
+    ],
+    "agents": [
+      "pica-product-manager.md"
+    ],
+    "skills": [
+      "running-intake",
+      "triaging-feedback",
+      "proving-delivery"
+    ]
+  },
+  "requires": {
+    "state": [],
+    "artifacts": [],
+    "gates": []
+  },
+  "produces": {
+    "state": [
+      "field",
+      "archetype",
+      "exclusions",
+      "viewports",
+      "deadline",
+      "scopeFrozen",
+      "intakeApproved",
+      "delivered",
+      "workPackages",
+      "flows",
+      "figmaInScope",
+      "proposals",
+      "closeout"
+    ],
+    "artifacts": [
+      "docs/brief.md",
+      "docs/contract.md",
+      "docs/exclusions.md"
+    ]
+  },
+  "checks": [
+    {
+      "run": "proposal-check.mjs",
+      "passes": "every universal slot is presented or skipped with a reason, every option names its provenance, and every choice records who, when and their own words",
+      "args": "<state> --phase design",
+      "phase": "design",
+      "needs": [
+        "proposals"
+      ]
+    },
+    {
+      "run": "close-check.mjs",
+      "passes": "0 findings",
+      "args": "<state>",
+      "phase": "close",
+      "needs": [
+        "closeout"
+      ]
+    },
+    {
+      "run": "proposal-check.mjs",
+      "passes": "S6 and S7 presented, priced per use case and stated in consequences",
+      "args": "<state> --phase scope",
+      "phase": "scope",
+      "needs": [
+        "proposals"
+      ]
+    }
+  ],
+  "definitionOfDone": [
+    {
+      "type": "artifact",
+      "path": "docs/contract.md"
+    },
+    {
+      "type": "artifact",
+      "path": "docs/exclusions.md"
+    },
+    {
+      "type": "human",
+      "says": "the human approved the contract, exclusions, options and tiers"
+    },
+    {
+      "type": "gate",
+      "grants": "intakeApproved"
+    },
+    {
+      "type": "gate",
+      "grants": "htmlApproved:<wp>"
+    },
+    {
+      "type": "check",
+      "run": "close-check.mjs",
+      "passes": "0 findings"
+    },
+    {
+      "type": "human",
+      "says": "read the original brief cold and did not substitute the contract"
+    },
+    {
+      "type": "gate",
+      "grants": "delivered"
+    }
+  ]
+}

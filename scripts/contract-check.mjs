@@ -40,28 +40,35 @@ import fs from "fs";
 import path from "path";
 
 const ROOT = process.cwd();
-const PKG_DIR = path.join(ROOT, "packages");
+/* Two directories hold packages now: the runtime at <root>/core, and the eleven roles under
+ * <root>/roles. Everything that used to read one directory reads both, so core is never
+ * silently dropped from validation. */
+const PKG_DIRS = [path.join(ROOT, "core"), path.join(ROOT, "roles")];
+const pkgPath = (name) => name === "core" ? path.join(ROOT, "core") : path.join(ROOT, "roles", name);
+const pkgNames = () => ["core", ...fs.readdirSync(path.join(ROOT, "roles"), { withFileTypes: true })
+  .filter((e) => e.isDirectory()).map((e) => e.name).sort()];
 
-if (!fs.existsSync(PKG_DIR)) {
-  console.error(`FAIL  no packages/ under ${ROOT}. Nothing was checked, and that is not a pass.`);
+
+if (!PKG_DIRS.every((d) => fs.existsSync(d))) {
+  console.error(`FAIL  no core/ or roles/ under ${ROOT}. Nothing was checked, and that is not a pass.`);
   process.exit(2);
 }
 
 /* ---- load ---------------------------------------------------------------- */
 const manifests = [];
-for (const name of fs.readdirSync(PKG_DIR).sort()) {
-  const file = path.join(PKG_DIR, name, "package.json");
+for (const name of pkgNames()) {
+  const file = path.join(pkgPath(name), "package.json");
   if (!fs.existsSync(file)) continue;
   try {
     manifests.push({ dir: name, m: JSON.parse(fs.readFileSync(file, "utf8")) });
   } catch (e) {
-    console.error(`FAIL  packages/${name}/package.json did not parse (${e.message}).`);
+    console.error(`FAIL  ${name}/package.json did not parse (${e.message}).`);
     console.error("      Nothing was checked, and that is not a pass.");
     process.exit(2);
   }
 }
 if (manifests.length < 2) {
-  console.error(`FAIL  found ${manifests.length} manifest(s) under packages/. Fewer than two cannot`);
+  console.error(`FAIL  found ${manifests.length} manifest(s) under core/ and roles/. Fewer than two cannot`);
   console.error("      describe a graph, so nothing was checked and that is not a pass.");
   process.exit(2);
 }

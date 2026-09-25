@@ -1,0 +1,28 @@
+{
+  "name": "pica-ui-designer",
+  "description": "pica UI designer: the visual direction argued against the sector's settled tradition, the palette proved against contrast before it is offered, and the style tiles the client chooses from.",
+  "version": "3.0.0",
+  "author": {
+    "name": "Dung Vuong"
+  },
+  "homepage": "https://github.com/vqdungwork/pica",
+  "repository": "https://github.com/vqdungwork/pica",
+  "license": "MIT",
+  "dependencies": [
+    "pica-core",
+    "pica-design-researcher"
+  ],
+  "keywords": [
+    "visual-direction",
+    "style-tiles",
+    "design-tokens",
+    "benchmarking",
+    "typography"
+  ],
+  "agents": [
+    "./agents/pica-ui-designer.md"
+  ],
+  "skills": [
+    "./skills"
+  ]
+}

@@ -5,9 +5,9 @@
 **Describe the product you want. Get requirements your team recognises and a demo your client can use.**
 <br>An expert team for Claude Code, with the checking built in.
 
-[![version](https://img.shields.io/badge/version-2.1.0-1f2328)](https://github.com/vqdungwork/pica/releases)
+[![version](https://img.shields.io/badge/version-3.0.0-1f2328)](https://github.com/vqdungwork/pica/releases)
 [![checks](https://img.shields.io/badge/checks-156%20fail--closed-1f2328)](#what-gets-checked)
-[![agents](https://img.shields.io/badge/specialists-7-1f2328)](#who-does-the-work)
+[![agents](https://img.shields.io/badge/specialists-12-1f2328)](#who-does-the-work)
 [![sectors](https://img.shields.io/badge/industries-28-1f2328)](#it-already-knows-your-industry)
 [![licence](https://img.shields.io/badge/licence-MIT-1f2328)](LICENSE)
 
@@ -115,8 +115,8 @@ abstains.**
 
 ```bash
 # the measured checks need a capture first; .audit/ is not committed
-node <pica>/packages/html/scripts/capture-html-reference.mjs --dir html --out .audit
-node <pica>/packages/core/scripts/pica-verify.mjs .pica/state.json --evidence
+node <pica>/roles/ux-engineer/scripts/capture-html-reference.mjs --dir html --out .audit
+node <pica>/core/scripts/pica-verify.mjs .pica/state.json --evidence
 # 33 check(s): 30 passed, 0 failed, 3 abstained.  136 assertion(s) verified.
 ```
 
@@ -238,13 +238,13 @@ loaded. Approvals live on disk, because a hook is a script and cannot know you s
 
 | Count | What each one is |
 |:--|:--|
-| **9 plugins** | 8 packages plus a bundle, each declaring what it requires, produces, checks and considers done |
+| **14 plugins** | 13 packages plus a bundle, each declaring what it requires, produces, checks and considers done |
 | **13 commands** | Deterministic once typed |
-| **22 rule modules** | Loaded per step, never all at once. 228 definition-of-done items across them |
+| **26 rule modules** | Loaded per step, never all at once. 228 definition-of-done items across them |
 | **26 check scripts** | Plus the capture harness, the status tool, and a harness that runs the in-Figma scripts outside Figma |
 | **156 checks** | Every one fails closed. `/pica-verify` runs every applicable one in a single table, and an abstention is never counted as a pass |
 | **28 sectors** | 264 names resolving to them, 4 deliberately refused as ambiguous |
-| **7 specialists** | Each loads its own craft rules and the sector entry before it starts. The evaluator has **no write access**, because a reviewer that can fix cannot be trusted to report |
+| **12 specialists** | Each loads its own craft rules and the sector entry before it starts. The evaluator has **no write access**, because a reviewer that can fix cannot be trusted to report |
 | **2 hooks** | One loads the rules every session; one refuses a Figma write that has not earned it |
 
 <details>
@@ -254,9 +254,9 @@ loaded. Approvals live on disk, because a hook is a script and cannot know you s
 
 | Install | You get | Because |
 |:--|:--:|:--|
-| `pica-analyst` · `pica-discover` · `pica-research` | 2 | they need the state schema and nothing else |
-| `pica-html` | 3 | it consumes `tokens/tokens.css`, which research produces |
-| `pica-content` · `pica-designqa` · `pica-figma` | 4 | all three read the capture artefact html produces |
+| `pica-business-analyst` · `pica-ux-researcher` · `pica-ui-designer` | 2 | they need the state schema and nothing else |
+| `pica-ux-engineer` | 3 | it consumes `tokens/tokens.css`, which research produces |
+| `pica-content-designer` · `pica-evaluator` · `pica-design-ops` | 4 | all three read the capture artefact html produces |
 | `pica` | 8 | the bundle |
 | pica is for | pica is not for |
 |:--|:--|
@@ -286,35 +286,39 @@ ends complete, not truncated.
 </details>
 
 <details>
-<summary><b>The 22 rule modules</b></summary>
+<summary><b>The 26 rule modules</b></summary>
 
 <br>Loaded per step rather than all at once. 228 definition of done items across them, each either
 decided by a check or explicitly left to a human.
 
 | Module | Package | Covers |
 |:--|:--|:--|
-| `intake.md` | core | The five-input packet, source authority, the engagement contract, exclusions, the disclosure policy |
-| `research.md` | research | Audit breadth, the direction derived from measurement, token provenance, mock-data provenance, data ownership |
-| `design-vocabulary.md` | research | The nine foundations, ten named styles with measurable signatures, style assertions, where to look |
-| `discovery.md` | discover | Three lists rather than one, evidence classes, frequency over adjectives, somebody who said no, the market derived bottom-up, what competitors charge |
-| `business-analysis.md` | analyst | Elicitation, AS-IS and TO-BE, the delta, business rules, use cases, the domain model, the PRD |
-| `domain-knowledge.md` | analyst | Where domain constraints live in order of authority, Event Storming without a workshop |
-| `industry-knowledge.md` | analyst | The 28-sector base and how to use it, the five convention axes, the waiver registers |
-| `modelling.md` | analyst | The four models: process notation, domain, roles and permissions, state, and NFRs as numbers |
-| `html-prototype.md` | html | Layout, the review page, options versus the interactive flow, the tall-screen pair, state matrices |
-| `html-gates.md` | html | The measured gate, the flow gate, viewport parity, HTML-only coverage, definition of done |
-| `native-mobile.md` | html | Safe areas per device class, touch targets, the release asymmetry between the two stores |
-| `react-demo.md` | html | The interactive demo: boards stay static, every state addressable by URL, the vocabulary stays in the markup |
-| `content.md` | content | Glossary-bound terms, every state written, length realism, mock data provenance |
-| `evaluation.md` | designqa | Heuristic evaluation fanned out, the cognitive walkthrough, severity, contrast from tokens |
+| `intake.md` | product-manager | The five-input packet, source authority, the engagement contract, exclusions, the disclosure policy |
+| `state-schema.md` | core | Every key in `.pica/state.json`: which role writes it, which checks read it, its shape from the worked example, and the keys nothing validates |
+| `research.md` | design-researcher | Audit breadth, the direction derived from measurement, token provenance, mock-data provenance, data ownership |
+| `design-vocabulary.md` | design-researcher | The nine foundations, ten named styles with measurable signatures, style assertions, where to look |
+| `direction.md` | ui-designer | The sector's settled tradition, spread inside it rather than across it, contrast proved before the palette is offered, reserved hues, what each direction serves badly |
+| `structure.md` | ux-designer | The lo-fi gate, every screen traced to a use case, greyscale, realistic lengths, every state present, flows with their failures, no dead ends, an IA validated rather than asserted |
+| `discovery.md` | ux-researcher | Three lists rather than one, evidence classes, frequency over adjectives, somebody who said no, the market derived bottom-up, what competitors charge |
+| `business-analysis.md` | business-analyst | Elicitation, AS-IS and TO-BE, the delta, business rules, use cases, the domain model, the PRD |
+| `domain-knowledge.md` | business-analyst | Where domain constraints live in order of authority, Event Storming without a workshop |
+| `industry-knowledge.md` | business-analyst | The 28-sector base and how to use it, the five convention axes, the waiver registers |
+| `modelling.md` | systems-analyst | The four models: process notation, domain, roles and permissions, state, and NFRs as numbers |
+| `architecture.md` | solution-architect | The stack layer by layer, a mechanism per NFR, a contract per integration including what happens when it is down, environments, lock-in answered per choice |
+| `html-prototype.md` | ux-engineer | Layout, the review page, options versus the interactive flow, the tall-screen pair, state matrices |
+| `html-gates.md` | ux-engineer | The measured gate, the flow gate, viewport parity, HTML-only coverage, definition of done |
+| `native-mobile.md` | ux-engineer | Safe areas per device class, touch targets, the release asymmetry between the two stores |
+| `react-demo.md` | ux-engineer | The interactive demo: boards stay static, every state addressable by URL, the vocabulary stays in the markup |
+| `content.md` | content-designer | Glossary-bound terms, every state written, length realism, mock data provenance |
+| `evaluation.md` | evaluator | Heuristic evaluation fanned out, the cognitive walkthrough, severity, contrast from tokens |
 | `reference-discipline.md` | core | The reference is read-only, identity channels, content parity, fixing at the definition |
-| `proposals.md` | core | The seven proposal slots, why the slots are universal and their content derived, and the register |
+| `proposals.md` | product-manager | The seven proposal slots, why the slots are universal and their content derived, and the register |
 | `review-discipline.md` | core | Report before fix, audit integrity, failing closed, verifying a check by breaking it |
-| `figma-elements.md` | figma | Token layers, geometry binding, component tiers, naming by role, merge mechanics |
-| `figma-screens.md` | figma | Frames, states, alignment, chrome pinning, CSS to auto-layout, the API traps |
-| `figma-gates.md` | figma | The audit checklist, appearance baselines, diff tolerances, the deviations register |
-| `figma-rebuild.md` | figma | Rebuilding an existing file: the source as arbiter, positional parity, lens baselines |
-| `figma-mcp.md` | figma | Rate limits and call budget, whole-file reads, write discipline |
+| `figma-elements.md` | design-ops | Token layers, geometry binding, component tiers, naming by role, merge mechanics |
+| `figma-screens.md` | design-ops | Frames, states, alignment, chrome pinning, CSS to auto-layout, the API traps |
+| `figma-gates.md` | design-ops | The audit checklist, appearance baselines, diff tolerances, the deviations register |
+| `figma-rebuild.md` | design-ops | Rebuilding an existing file: the source as arbiter, positional parity, lens baselines |
+| `figma-mcp.md` | design-ops | Rate limits and call budget, whole-file reads, write discipline |
 
 </details>
 
@@ -334,7 +338,7 @@ decided by a check or explicitly left to a human.
 the output, it will get in your way. Nothing in it assumes a client, a stack, a brand or a team.
 
 ```
-packages/
+roles/
   core/        intake, the contract, the state schema, every gate, the hooks, the proposals
   research/    the source audit, the nine foundations, token provenance
   analyst/     elicitation, the sector, audience and archetype data, the models, the PRD

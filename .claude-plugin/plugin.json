@@ -1,7 +1,7 @@
 {
   "name": "pica",
-  "description": "From the brief to a demo the client can use. Analyse the domain and its sector, design in HTML at every viewport you declare, verify by measurement rather than opinion, then hand over a PRD, a frozen scope and a working prototype. Seven specialists, 156 checks that fail closed, three gates enforced by hook.",
-  "version": "2.1.0",
+  "description": "From the brief to a demo the client can use. Analyse the domain and its sector, settle the visual direction against what the sector already decided, build in code at every viewport you declare, verify by measurement rather than opinion, then hand over a PRD, a frozen scope and a working prototype. Twelve specialists, 156 checks that fail closed, three gates enforced by hook.",
+  "version": "3.0.0",
   "author": {
     "name": "Dung Vuong"
   },
@@ -10,17 +10,18 @@
   "license": "MIT",
   "dependencies": [
     "pica-core",
-    "pica-analyst",
-    "pica-research",
-    "pica-html",
-    "pica-figma",
-    "pica-designqa",
-    "pica-architect",
-    "pica-estimate",
-    "pica-content",
-    "pica-impl",
-    "pica-developer",
-    "pica-qa"
+    "pica-product-manager",
+    "pica-ux-researcher",
+    "pica-business-analyst",
+    "pica-systems-analyst",
+    "pica-solution-architect",
+    "pica-ux-designer",
+    "pica-design-researcher",
+    "pica-ui-designer",
+    "pica-ux-engineer",
+    "pica-content-designer",
+    "pica-evaluator",
+    "pica-design-ops"
   ],
   "keywords": [
     "design",

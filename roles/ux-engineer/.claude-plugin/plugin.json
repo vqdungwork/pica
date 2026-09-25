@@ -1,0 +1,33 @@
+{
+  "name": "pica-ux-engineer",
+  "description": "pica UX engineer: the interactive demo in code \u2014 tokens as structured data, the component library, every screen at every viewport in every state, measured before anyone sees it.",
+  "version": "3.0.0",
+  "author": {
+    "name": "Dung Vuong"
+  },
+  "homepage": "https://github.com/vqdungwork/pica",
+  "repository": "https://github.com/vqdungwork/pica",
+  "license": "MIT",
+  "commands": [
+    "./commands"
+  ],
+  "dependencies": [
+    "pica-core",
+    "pica-ui-designer",
+    "pica-content-designer",
+    "pica-solution-architect"
+  ],
+  "keywords": [
+    "react",
+    "demo",
+    "prototype",
+    "design-tokens",
+    "accessibility"
+  ],
+  "agents": [
+    "./agents/pica-ux-engineer.md"
+  ],
+  "skills": [
+    "./skills"
+  ]
+}

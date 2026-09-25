@@ -1,0 +1,31 @@
+{
+  "name": "pica-content-designer",
+  "description": "pica content: the words. Glossary-bound terms, every state written, length-realistic copy, and mock data that is not quietly wrong.",
+  "version": "3.0.0",
+  "author": {
+    "name": "Dung Vuong"
+  },
+  "homepage": "https://github.com/vqdungwork/pica",
+  "repository": "https://github.com/vqdungwork/pica",
+  "license": "MIT",
+  "commands": [
+    "./commands"
+  ],
+  "dependencies": [
+    "pica-core",
+    "pica-business-analyst",
+    "pica-systems-analyst"
+  ],
+  "keywords": [
+    "ux-writing",
+    "content-design",
+    "copy",
+    "microcopy"
+  ],
+  "agents": [
+    "./agents/pica-content-designer.md"
+  ],
+  "skills": [
+    "./skills"
+  ]
+}

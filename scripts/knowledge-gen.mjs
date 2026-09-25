@@ -25,23 +25,23 @@ import fs from "fs";
 import path from "path";
 
 const ROOT = process.cwd();
-const DATA = path.join(ROOT, "packages/analyst/data");
+const DATA = path.join(ROOT, "roles/business-analyst/data");
 const CHECK = process.argv.includes("--check");
 
-const BEGIN = "<!-- BEGIN GENERATED: knowledge register. Edit packages/analyst/data/*.json, then run scripts/knowledge-gen.mjs -->";
+const BEGIN = "<!-- BEGIN GENERATED: knowledge register. Edit roles/business-analyst/data/*.json, then run scripts/knowledge-gen.mjs -->";
 const END = "<!-- END GENERATED -->";
 
 /* Which agents read the axes. All of them do: the rule is that every agent reads the
  * sector entry before it starts, and an agent that does not is the one that produces a
  * clinician's screen from a warehouse template. */
 const AGENTS = [
-  "packages/research/agents/pica-researcher.md",
-  "packages/discover/agents/pica-discoverer.md",
-  "packages/analyst/agents/pica-analyst.md",
-  "packages/analyst/agents/pica-modeller.md",
-  "packages/html/agents/pica-designer.md",
-  "packages/content/agents/pica-writer.md",
-  "packages/designqa/agents/pica-evaluator.md",
+  "roles/design-researcher/agents/pica-design-researcher.md",
+  "roles/ux-researcher/agents/pica-discover.md",
+  "roles/business-analyst/agents/pica-business-analyst.md",
+  "roles/systems-analyst/agents/pica-systems-analyst.md",
+  "roles/ux-engineer/agents/pica-ux-engineer.md",
+  "roles/content-designer/agents/pica-content-designer.md",
+  "roles/evaluator/agents/pica-evaluator.md",
 ];
 
 const read = (f) => {
@@ -74,7 +74,7 @@ function block() {
   L.push("");
 
   const sectors = Object.entries(industries.industries);
-  L.push(`### Sector · \`packages/analyst/data/industries.json\` · ${sectors.length} keys`);
+  L.push(`### Sector · \`roles/business-analyst/data/industries.json\` · ${sectors.length} keys`);
   L.push("");
   for (const [k, v] of sectors) L.push(`- \`${k}\` · ${v.label}`);
   L.push("");
@@ -87,7 +87,7 @@ function block() {
 
   const dims = Object.entries(audiences.dimensions);
   const nVals = dims.reduce((n, [, d]) => n + Object.keys(d.values).length, 0);
-  L.push(`### Audience · \`packages/analyst/data/audiences.json\` · ${dims.length} dimensions, ${nVals} values`);
+  L.push(`### Audience · \`roles/business-analyst/data/audiences.json\` · ${dims.length} dimensions, ${nVals} values`);
   L.push("");
   L.push("One value per dimension, except where a dimension says `multiple`. Numeric floors merge by **maximum**.");
   L.push("");
@@ -103,7 +103,7 @@ function block() {
   L.push("");
 
   const arch = Object.entries(archetypes.archetypes);
-  L.push(`### Archetype · \`packages/analyst/data/archetypes.json\` · ${arch.length} keys`);
+  L.push(`### Archetype · \`roles/business-analyst/data/archetypes.json\` · ${arch.length} keys`);
   L.push("");
   L.push("**Per application, not per project.** A product with a client portal and an admin console has two.");
   L.push("");

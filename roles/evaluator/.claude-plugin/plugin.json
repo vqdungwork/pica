@@ -1,0 +1,30 @@
+{
+  "name": "pica-evaluator",
+  "description": "pica design QA: heuristic evaluation fanned out to independent evaluators, cognitive walkthrough, and the build-versus-design comparison nobody owns.",
+  "version": "3.0.0",
+  "author": {
+    "name": "Dung Vuong"
+  },
+  "homepage": "https://github.com/vqdungwork/pica",
+  "repository": "https://github.com/vqdungwork/pica",
+  "license": "MIT",
+  "commands": [
+    "./commands"
+  ],
+  "dependencies": [
+    "pica-core",
+    "pica-ux-engineer"
+  ],
+  "keywords": [
+    "usability",
+    "accessibility",
+    "heuristic-evaluation",
+    "qa"
+  ],
+  "agents": [
+    "./agents/pica-evaluator.md"
+  ],
+  "skills": [
+    "./skills"
+  ]
+}

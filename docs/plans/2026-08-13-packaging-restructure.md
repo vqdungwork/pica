@@ -1,7 +1,7 @@
 # pica Packaging Restructure Implementation Plan
 
 **Status: completed in 0.6.0.** Kept as the record of how the split was done. The unticked checkboxes
-below are the plan as written, not work outstanding: `packages/`, the ten manifests and
+below are the plan as written, not work outstanding: `roles/`, the ten manifests and
 `scripts/validate-packages.mjs` all exist and pass. A plan with no status is a plan nobody can tell is
 finished, which is why this line is here.
 
@@ -9,7 +9,7 @@ finished, which is why this line is here.
 
 **Goal:** Split pica from one plugin into four installable packages, `core`, `research`, `html`, `figma`, each declaring what it requires, produces, checks and considers done, without changing any rule's meaning or breaking existing installs.
 
-**Architecture:** One repository, `packages/*` subdirectories, each a real plugin listed in `.claude-plugin/marketplace.json` with `dependencies`. A `package.json` per package declares the contract. A validator (`validate-packages.mjs`) enforces that every declared file exists and every shipped file is owned: it is written first and fails first, so the restructure is driven by a check rather than by inspection.
+**Architecture:** One repository, `roles/*` subdirectories, each a real plugin listed in `.claude-plugin/marketplace.json` with `dependencies`. A `package.json` per package declares the contract. A validator (`validate-packages.mjs`) enforces that every declared file exists and every shipped file is owned: it is written first and fails first, so the restructure is driven by a check rather than by inspection.
 
 **Tech Stack:** Node ≥18 (ESM, no dependencies), Claude Code plugin manifests, Markdown rules, git.
 
@@ -32,16 +32,16 @@ finished, which is why this line is here.
 | Path | Responsibility |
 |---|---|
 | `scripts/validate-packages.mjs` | Repo-level validator: manifests parse, declared files exist, every shipped file owned exactly once |
-| `packages/core/package.json` | Core contract |
-| `packages/core/plugin.json` | Core plugin manifest |
-| `packages/core/rules/review-discipline.md` | Medium-independent review rules extracted from `review-gates.md` |
-| `packages/core/scripts/pica-status.mjs` | Reads manifests + `.pica/state.json`, prints package readiness |
-| `packages/research/package.json`, `plugin.json` | Research contract + manifest |
-| `packages/html/package.json`, `plugin.json` | HTML contract + manifest |
-| `packages/html/rules/html-gates.md` | HTML-specific gate rules extracted from `review-gates.md` |
-| `packages/figma/package.json`, `plugin.json` | Figma contract + manifest |
-| `packages/figma/rules/figma-gates.md` | Figma-specific gate rules extracted from `review-gates.md` |
-| `packages/_planned/impl-web.package.json` etc. | Declared-only contracts, `status: "coming-soon"` |
+| `core/package.json` | Core contract |
+| `core/plugin.json` | Core plugin manifest |
+| `core/rules/review-discipline.md` | Medium-independent review rules extracted from `review-gates.md` |
+| `core/scripts/pica-status.mjs` | Reads manifests + `.pica/state.json`, prints package readiness |
+| `roles/ui-designer/package.json`, `plugin.json` | Research contract + manifest |
+| `roles/ux-engineer/package.json`, `plugin.json` | HTML contract + manifest |
+| `roles/ux-engineer/rules/html-gates.md` | HTML-specific gate rules extracted from `review-gates.md` |
+| `roles/design-ops/package.json`, `plugin.json` | Figma contract + manifest |
+| `roles/design-ops/rules/figma-gates.md` | Figma-specific gate rules extracted from `review-gates.md` |
+| `roles/_planned/impl-web.package.json` etc. | Declared-only contracts, `status: "coming-soon"` |
 
 **Modified:** `.claude-plugin/marketplace.json`, `skills/design-flow/SKILL.md`, `README.md`, `CHANGELOG.md`.
 
@@ -55,7 +55,7 @@ finished, which is why this line is here.
 - Create: `scripts/validate-packages.mjs`
 
 **Interfaces:**
-- Produces: CLI `node scripts/validate-packages.mjs`. Exit 0 = valid, 1 = findings, 2 = cannot run. Reads `packages/*/package.json`.
+- Produces: CLI `node scripts/validate-packages.mjs`. Exit 0 = valid, 1 = findings, 2 = cannot run. Reads `roles/*/package.json`.
 
 - [ ] **Step 1: Write the validator**
 
@@ -81,7 +81,7 @@ const VALID_STATUS = ["stable", "coming-soon"];
 const findings = [];
 
 if (!fs.existsSync(PKG_DIR)) {
-  console.error("FAIL  packages/ does not exist. Nothing to validate.");
+  console.error("FAIL  roles/ does not exist. Nothing to validate.");
   process.exit(2);
 }
 
@@ -90,7 +90,7 @@ const dirs = fs.readdirSync(PKG_DIR, { withFileTypes: true })
   .map((d) => d.name);
 
 if (!dirs.length) {
-  console.error("FAIL  packages/ contains no packages. A validator that validates nothing is not a pass.");
+  console.error("FAIL  roles/ contains no packages. A validator that validates nothing is not a pass.");
   process.exit(2);
 }
 
@@ -153,7 +153,7 @@ process.exit(findings.length ? 1 : 0);
 - [ ] **Step 2: Run it to verify it fails**
 
 Run: `node scripts/validate-packages.mjs`
-Expected: `FAIL  packages/ does not exist. Nothing to validate.` and exit code 2. Confirm with `echo $?`.
+Expected: `FAIL  roles/ does not exist. Nothing to validate.` and exit code 2. Confirm with `echo $?`.
 
 - [ ] **Step 3: Commit**
 
@@ -167,10 +167,10 @@ git commit -m "Add package validator, which fails until packages exist"
 ## Task 2: Core package, manifest and directories
 
 **Files:**
-- Create: `packages/core/package.json`, `packages/core/plugin.json`
-- Create dirs: `packages/core/{commands,rules,scripts}`
-- Move: `commands/pica.md`, `commands/pica-close.md`, `commands/pica-feedback.md` → `packages/core/commands/`
-- Move: `hooks/` → `packages/core/hooks/`
+- Create: `core/package.json`, `core/plugin.json`
+- Create dirs: `core/{commands,rules,scripts}`
+- Move: `commands/pica.md`, `commands/pica-close.md`, `commands/pica-feedback.md` → `core/commands/`
+- Move: `hooks/` → `core/hooks/`
 
 **Interfaces:**
 - Produces: package `core`, owning all gates. Every other package's `requires.gates` resolves against gates core writes into `.pica/state.json`.
@@ -178,14 +178,14 @@ git commit -m "Add package validator, which fails until packages exist"
 - [ ] **Step 1: Create the directories and move core's files with git mv**
 
 ```bash
-mkdir -p packages/core/{commands,rules,scripts}
-git mv commands/pica.md packages/core/commands/pica.md
-git mv commands/pica-close.md packages/core/commands/pica-close.md
-git mv commands/pica-feedback.md packages/core/commands/pica-feedback.md
-git mv hooks packages/core/hooks
+mkdir -p core/{commands,rules,scripts}
+git mv commands/pica.md roles/product-manager/commands/pica.md
+git mv commands/pica-close.md roles/product-manager/commands/pica-close.md
+git mv commands/pica-feedback.md roles/product-manager/commands/pica-feedback.md
+git mv hooks core/hooks
 ```
 
-- [ ] **Step 2: Write `packages/core/package.json`**
+- [ ] **Step 2: Write `core/package.json`**
 
 ```json
 {
@@ -212,7 +212,7 @@ git mv hooks packages/core/hooks
 }
 ```
 
-- [ ] **Step 3: Write `packages/core/plugin.json`**
+- [ ] **Step 3: Write `core/plugin.json`**
 
 ```json
 {
@@ -246,17 +246,17 @@ git commit -m "Create core package: intake, closeout, feedback, hooks"
 ## Task 3: Split review-gates.md, core's share
 
 **Files:**
-- Create: `packages/core/rules/review-discipline.md`
+- Create: `core/rules/review-discipline.md`
 - Modify: `skills/design-flow/rules/review-gates.md` (sections removed as they are moved)
 
 **Interfaces:**
-- Produces: `review-discipline.md`, referenced by `packages/core/package.json` and later by every other package's rules.
+- Produces: `review-discipline.md`, referenced by `core/package.json` and later by every other package's rules.
 
 **Context the implementer needs:** `review-gates.md` is 685 lines with 30 `##` sections. This task moves the **23 medium-independent** ones. Two `###` subsections, *A check must fail closed* (line 464) and *Every named check must ship* (line 483), currently sit nested under *The measured HTML gate*; they are general principles, so they must be **promoted to `##`** and moved here, while their parent section stays behind for Task 4.
 
 - [ ] **Step 1: Create the file with its header, then move these sections verbatim**
 
-Create `packages/core/rules/review-discipline.md` starting with:
+Create `core/rules/review-discipline.md` starting with:
 
 ```markdown
 # Review discipline
@@ -298,13 +298,13 @@ Then move these 23 sections **verbatim, no rewording**, in this order:
 # Section count. review-gates.md has 30 "##" sections and 2 "###" subsections.
 # Core takes 21 of the "##" plus both promoted "###", so it ends with 23 "##".
 # What remains is html's 3 and figma's 6 = 9.
-grep -c '^## ' packages/core/rules/review-discipline.md   # expect 23
+grep -c '^## ' core/rules/review-discipline.md   # expect 23
 grep -c '^## ' skills/design-flow/rules/review-gates.md   # expect 9
 grep -c '^### ' skills/design-flow/rules/review-gates.md  # expect 0: both were promoted
 
 # No text changed: every moved heading must appear exactly once across the two files
 diff <(git show HEAD:skills/design-flow/rules/review-gates.md | grep '^## \|^### ' | sed 's/^#*  *//' | sort) \
-     <(cat packages/core/rules/review-discipline.md skills/design-flow/rules/review-gates.md | grep '^## ' | sed 's/^#*  *//' | sort)
+     <(cat core/rules/review-discipline.md skills/design-flow/rules/review-gates.md | grep '^## ' | sed 's/^#*  *//' | sort)
 ```
 
 Expected: the section counts match, and `diff` reports no differences. A difference means a heading was reworded or dropped.
@@ -313,7 +313,7 @@ Expected: the section counts match, and `diff` reports no differences. A differe
 
 ```bash
 ORIG=$(git show HEAD:skills/design-flow/rules/review-gates.md | wc -l)
-NOW=$(( $(wc -l < packages/core/rules/review-discipline.md) + $(wc -l < skills/design-flow/rules/review-gates.md) ))
+NOW=$(( $(wc -l < core/rules/review-discipline.md) + $(wc -l < skills/design-flow/rules/review-gates.md) ))
 echo "original $ORIG, now $NOW (expect NOW = ORIG + 5 header lines)"
 ```
 
@@ -331,23 +331,23 @@ git commit -m "Split review-gates.md: move 23 medium-independent sections into c
 ## Task 4: HTML package, with its gates
 
 **Files:**
-- Create: `packages/html/{package.json,plugin.json}`, `packages/html/rules/html-gates.md`
-- Move: `commands/pica-wp.md` → `packages/html/commands/`
-- Move: `skills/design-flow/rules/html-prototype.md` → `packages/html/rules/`
-- Move: `capture-html-reference.mjs`, `verify-html.mjs`, `parity-check.mjs`, `flow-check.mjs` → `packages/html/scripts/`
+- Create: `roles/ux-engineer/{package.json,plugin.json}`, `roles/ux-engineer/rules/html-gates.md`
+- Move: `commands/pica-wp.md` → `roles/ux-engineer/commands/`
+- Move: `skills/design-flow/rules/html-prototype.md` → `roles/ux-engineer/rules/`
+- Move: `capture-html-reference.mjs`, `verify-html.mjs`, `parity-check.mjs`, `flow-check.mjs` → `roles/ux-engineer/scripts/`
 
 - [ ] **Step 1: Move the files**
 
 ```bash
-mkdir -p packages/html/{commands,rules,scripts}
-git mv commands/pica-wp.md packages/html/commands/pica-wp.md
-git mv skills/design-flow/rules/html-prototype.md packages/html/rules/html-prototype.md
+mkdir -p roles/ux-engineer/{commands,rules,scripts}
+git mv commands/pica-wp.md roles/ux-engineer/commands/pica-wp.md
+git mv skills/design-flow/rules/html-prototype.md roles/ux-engineer/rules/html-prototype.md
 for s in capture-html-reference.mjs verify-html.mjs parity-check.mjs flow-check.mjs; do
-  git mv skills/design-flow/scripts/$s packages/html/scripts/$s
+  git mv skills/design-flow/scripts/$s roles/ux-engineer/scripts/$s
 done
 ```
 
-- [ ] **Step 2: Create `packages/html/rules/html-gates.md`** with this header, then move 5 sections verbatim from `review-gates.md`
+- [ ] **Step 2: Create `roles/ux-engineer/rules/html-gates.md`** with this header, then move 5 sections verbatim from `review-gates.md`
 
 ```markdown
 # HTML gates
@@ -367,7 +367,7 @@ left for here and for Task 5). This task takes only the **HTML-side** checklist 
 Task 5's `figma-gates.md`, under its own `## Definition of done` heading. Do not delete or edit the
 Figma-side items here; Task 5 is responsible for cutting them out of `review-gates.md` when it runs.
 
-- [ ] **Step 3: Write `packages/html/package.json`**
+- [ ] **Step 3: Write `roles/ux-engineer/package.json`**
 
 ```json
 {
@@ -404,11 +404,11 @@ Figma-side items here; Task 5 is responsible for cutting them out of `review-gat
 }
 ```
 
-- [ ] **Step 4: Write `packages/html/plugin.json`**
+- [ ] **Step 4: Write `roles/ux-engineer/plugin.json`**
 
 ```json
 {
-  "name": "pica-html",
+  "name": "pica-ux-engineer",
   "description": "pica html: build each work package at every declared viewport and measure it before approval.",
   "version": "0.6.0",
   "author": { "name": "Dung Vuong" },
@@ -424,9 +424,9 @@ Figma-side items here; Task 5 is responsible for cutting them out of `review-gat
 - [ ] **Step 5: Verify the moved scripts still run**
 
 ```bash
-node packages/html/scripts/verify-html.mjs   # expect usage error, exit 2
-node packages/html/scripts/parity-check.mjs  # expect usage error, exit 2
-node packages/html/scripts/flow-check.mjs    # expect usage error, exit 2
+node roles/ux-engineer/scripts/verify-html.mjs   # expect usage error, exit 2
+node roles/ux-engineer/scripts/parity-check.mjs  # expect usage error, exit 2
+node roles/ux-engineer/scripts/flow-check.mjs    # expect usage error, exit 2
 ```
 
 Expected: each prints its usage line and exits non-zero. A script that exits 0 with no arguments has lost its fail-closed behaviour and must be fixed before continuing.
@@ -443,21 +443,21 @@ git commit -m "Create html package: work packages, the measured gate, parity and
 ## Task 5: Figma package, with its gates
 
 **Files:**
-- Create: `packages/figma/{package.json,plugin.json}`, `packages/figma/rules/figma-gates.md`
-- Move: `commands/pica-port.md`, `commands/pica-prototype.md`, `commands/pica-review.md` → `packages/figma/commands/`
-- Move: `figma-screens.md`, `figma-elements.md`, `figma-mcp.md` → `packages/figma/rules/`
-- Move: `geometry-diff.mjs`, `figma-audit.js`, `capture-baseline.js` → `packages/figma/scripts/`
+- Create: `roles/design-ops/{package.json,plugin.json}`, `roles/design-ops/rules/figma-gates.md`
+- Move: `commands/pica-port.md`, `commands/pica-prototype.md`, `commands/pica-review.md` → `roles/design-ops/commands/`
+- Move: `figma-screens.md`, `figma-elements.md`, `figma-mcp.md` → `roles/design-ops/rules/`
+- Move: `geometry-diff.mjs`, `figma-audit.js`, `capture-baseline.js` → `roles/design-ops/scripts/`
 
 - [ ] **Step 1: Move the files**
 
 ```bash
-mkdir -p packages/figma/{commands,rules,scripts}
-for c in pica-port.md pica-prototype.md pica-review.md; do git mv commands/$c packages/figma/commands/$c; done
-for r in figma-screens.md figma-elements.md figma-mcp.md; do git mv skills/design-flow/rules/$r packages/figma/rules/$r; done
-for s in geometry-diff.mjs figma-audit.js capture-baseline.js; do git mv skills/design-flow/scripts/$s packages/figma/scripts/$s; done
+mkdir -p roles/design-ops/{commands,rules,scripts}
+for c in pica-port.md pica-prototype.md pica-review.md; do git mv commands/$c roles/design-ops/commands/$c; done
+for r in figma-screens.md figma-elements.md figma-mcp.md; do git mv skills/design-flow/rules/$r roles/design-ops/rules/$r; done
+for s in geometry-diff.mjs figma-audit.js capture-baseline.js; do git mv skills/design-flow/scripts/$s roles/design-ops/scripts/$s; done
 ```
 
-- [ ] **Step 2: Create `packages/figma/rules/figma-gates.md`** with this header, then move 9 sections verbatim
+- [ ] **Step 2: Create `roles/design-ops/rules/figma-gates.md`** with this header, then move 9 sections verbatim
 
 ```markdown
 # Figma gates
@@ -495,7 +495,7 @@ half of `## Definition of done`. 5 + 9 + 1 split = all 15 accounted for, and the
 the end of this step. If any section remains, it was not classified: stop and classify it before
 deleting.
 
-- [ ] **Step 4: Write `packages/figma/package.json`**
+- [ ] **Step 4: Write `roles/design-ops/package.json`**
 
 ```json
 {
@@ -531,11 +531,11 @@ deleting.
 
 Note: `annotation-check.mjs` from the spec (D2) is **not** included. It does not exist yet, and the validator would reject a check with no script: correctly. It is a separate piece of work.
 
-- [ ] **Step 5: Write `packages/figma/plugin.json`**
+- [ ] **Step 5: Write `roles/design-ops/plugin.json`**
 
 ```json
 {
-  "name": "pica-figma",
+  "name": "pica-design-ops",
   "description": "pica figma: port an approved package, annotate it, verify it against the HTML by measurement.",
   "version": "0.6.0",
   "author": { "name": "Dung Vuong" },
@@ -543,7 +543,7 @@ Note: `annotation-check.mjs` from the spec (D2) is **not** included. It does not
   "repository": "https://github.com/vqdungwork/pica",
   "license": "MIT",
   "commands": ["./commands"],
-  "dependencies": ["pica-core", "pica-html"],
+  "dependencies": ["pica-core", "pica-ux-engineer"],
   "keywords": ["design", "figma", "handoff"]
 }
 ```
@@ -560,17 +560,17 @@ git commit -m "Create figma package: port, annotate, verify; retire review-gates
 ## Task 6: Research package
 
 **Files:**
-- Create: `packages/research/{package.json,plugin.json}`
-- Move: `skills/design-flow/rules/research.md` → `packages/research/rules/`
+- Create: `roles/ui-designer/{package.json,plugin.json}`
+- Move: `skills/design-flow/rules/research.md` → `roles/ui-designer/rules/`
 
 - [ ] **Step 1: Move and write the manifests**
 
 ```bash
-mkdir -p packages/research/rules
-git mv skills/design-flow/rules/research.md packages/research/rules/research.md
+mkdir -p roles/ui-designer/rules
+git mv skills/design-flow/rules/research.md roles/design-researcher/rules/research.md
 ```
 
-`packages/research/package.json`:
+`roles/ui-designer/package.json`:
 
 ```json
 {
@@ -590,11 +590,11 @@ git mv skills/design-flow/rules/research.md packages/research/rules/research.md
 }
 ```
 
-`packages/research/plugin.json`:
+`roles/ui-designer/plugin.json`:
 
 ```json
 {
-  "name": "pica-research",
+  "name": "pica-ui-designer",
   "description": "pica research: audit the named sources and derive tokens with provenance.",
   "version": "0.6.0",
   "author": { "name": "Dung Vuong" },
@@ -623,11 +623,11 @@ git commit -m "Create research package: audit and token provenance"
 ## Task 7: The status resolver, and the validator goes green
 
 **Files:**
-- Create: `packages/core/scripts/pica-status.mjs`
+- Create: `core/scripts/pica-status.mjs`
 
 **Interfaces:**
-- Consumes: `packages/*/package.json` (Task 2, 4, 5, 6), `.pica/state.json` written by core.
-- Produces: CLI `node packages/core/scripts/pica-status.mjs [state.json]`. Exit 0 always: it is a report, not a gate.
+- Consumes: `roles/*/package.json` (Task 2, 4, 5, 6), `.pica/state.json` written by core.
+- Produces: CLI `node core/scripts/pica-status.mjs [state.json]`. Exit 0 always: it is a report, not a gate.
 
 - [ ] **Step 1: Write the resolver**
 
@@ -645,7 +645,7 @@ import path from "path";
 const statePath = process.argv[2] || ".pica/state.json";
 const PKG_DIR = path.join(process.cwd(), "packages");
 
-if (!fs.existsSync(PKG_DIR)) { console.error("no packages/ directory"); process.exit(2); }
+if (!fs.existsSync(PKG_DIR)) { console.error("no roles/ directory"); process.exit(2); }
 const state = fs.existsSync(statePath) ? JSON.parse(fs.readFileSync(statePath, "utf8")) : {};
 const gates = state.gates || {};
 
@@ -689,20 +689,20 @@ Expected: `0 finding(s).` and exit 0. Confirm with `echo $?`.
 
 - [ ] **Step 3: Test the resolver from a project directory, not from the pica repo**
 
-Resolving `packages/` from `process.cwd()` means the resolver only works when the working directory
+Resolving `roles/` from `process.cwd()` means the resolver only works when the working directory
 happens to be the pica repo itself. Run from a **project** directory instead: where `.pica/state.json`
-and the built artifacts actually live, and where `packages/` does not exist: with an absent or empty
+and the built artifacts actually live, and where `roles/` does not exist: with an absent or empty
 `.pica/state.json`:
 
 ```
-cd /path/to/some/project && node /path/to/pica/packages/core/scripts/pica-status.mjs
+cd /path/to/some/project && node /path/to/pica/core/scripts/pica-status.mjs
 ```
 
-Expected: it still runs (exit 0), because `packages/` resolves from the script's own location
+Expected: it still runs (exit 0), because `roles/` resolves from the script's own location
 (`import.meta.url`), not from the working directory. `research`, `html` and `figma` report BLOCKED with
 their missing gates, state and artifacts named, proving `requires` actually blocks rather than
-decorating: from the location this script is actually meant to be run from. If `packages/` is instead
-resolved from `process.cwd()`, this step exits 2, because a project directory has no `packages/` of its
+decorating: from the location this script is actually meant to be run from. If `roles/` is instead
+resolved from `process.cwd()`, this step exits 2, because a project directory has no `roles/` of its
 own.
 
 - [ ] **Step 4: Commit**
@@ -717,13 +717,13 @@ git commit -m "Add pica-status resolver; package validator now returns zero"
 ## Task 8: Declared-only packages for the path past Figma
 
 **Files:**
-- Create: `packages/_planned/impl-web.package.json`, `impl-ios.package.json`, `impl-android.package.json`, `e2e.package.json`
+- Create: `roles/_planned/impl-web.package.json`, `impl-ios.package.json`, `impl-android.package.json`, `e2e.package.json`
 
-**Context:** these live under `packages/_planned/`, which the validator skips, because directories starting with `_` are excluded. They are contracts, not packages. **No rules, no scripts, no commands are authored for them; that content is the author's to define later.**
+**Context:** these live under `roles/_planned/`, which the validator skips, because directories starting with `_` are excluded. They are contracts, not packages. **No rules, no scripts, no commands are authored for them; that content is the author's to define later.**
 
 - [ ] **Step 1: Write the four contracts**
 
-`packages/_planned/impl-ios.package.json` (the other three follow the same shape, changing `name`, `description` and platform):
+`roles/_planned/impl-ios.package.json` (the other three follow the same shape, changing `name`, `description` and platform):
 
 ```json
 {
@@ -742,7 +742,7 @@ git commit -m "Add pica-status resolver; package validator now returns zero"
 }
 ```
 
-`packages/_planned/e2e.package.json`:
+`roles/_planned/e2e.package.json`:
 
 ```json
 {
@@ -786,10 +786,10 @@ git commit -m "Declare the packages past Figma as contracts only"
   "owner": { "name": "Dung Vuong" },
   "plugins": [
     { "name": "pica",          "source": "./",                  "version": "0.6.0", "description": "Everything below, as one install. Depends on the four packages." },
-    { "name": "pica-core",     "source": "./packages/core",     "version": "0.6.0", "description": "Intake, the contract, the state schema and every gate." },
-    { "name": "pica-research", "source": "./packages/research", "version": "0.6.0", "description": "Audit the named sources and derive tokens with provenance." },
-    { "name": "pica-html",     "source": "./packages/html",     "version": "0.6.0", "description": "Work packages in HTML at every viewport, measured before approval." },
-    { "name": "pica-figma",    "source": "./packages/figma",    "version": "0.6.0", "description": "Port an approved package to Figma and verify it by measurement." }
+    { "name": "pica-core",     "source": "./core",     "version": "0.6.0", "description": "Intake, the contract, the state schema and every gate." },
+    { "name": "pica-ui-designer", "source": "./roles/research", "version": "0.6.0", "description": "Audit the named sources and derive tokens with provenance." },
+    { "name": "pica-ux-engineer",     "source": "./roles/html",     "version": "0.6.0", "description": "Work packages in HTML at every viewport, measured before approval." },
+    { "name": "pica-design-ops",    "source": "./roles/figma",    "version": "0.6.0", "description": "Port an approved package to Figma and verify it by measurement." }
   ]
 }
 ```
@@ -805,7 +805,7 @@ git commit -m "Declare the packages past Figma as contracts only"
   "homepage": "https://github.com/vqdungwork/pica",
   "repository": "https://github.com/vqdungwork/pica",
   "license": "MIT",
-  "dependencies": ["pica-core", "pica-research", "pica-html", "pica-figma"],
+  "dependencies": ["pica-core", "pica-ui-designer", "pica-ux-engineer", "pica-design-ops"],
   "keywords": ["design", "figma", "ui", "ux", "design-system", "prototype", "handoff"]
 }
 ```
@@ -856,33 +856,33 @@ considers done, in its own `package.json`.
 | Package | Depends on | Owns |
 |---|---|---|
 | `pica-core` |: | intake, closeout, feedback, the state schema, every gate |
-| `pica-research` | core | the source audit and token provenance |
-| `pica-html` | core | work packages at every viewport, and the measured gate |
-| `pica-figma` | core, html | the port, annotations, and the geometry diff |
+| `pica-ui-designer` | core | the source audit and token provenance |
+| `pica-ux-engineer` | core | work packages at every viewport, and the measured gate |
+| `pica-design-ops` | core, html | the port, annotations, and the geometry diff |
 
-`pica` installs all four. A project that will never touch Figma installs `pica-html` and
+`pica` installs all four. A project that will never touch Figma installs `pica-ux-engineer` and
 never sees the Figma half.
 
 **No package may grant a gate it benefits from.** `html` requests `htmlApproved`; core
 grants it on human approval; `figma` requires it and cannot grant it. Run
-`node packages/core/scripts/pica-status.mjs` to see what is ready and what is blocked.
+`node core/scripts/pica-status.mjs` to see what is ready and what is blocked.
 
 The path past Figma: implementation for web, iOS and Android, then end-to-end testing,
-is declared in `packages/_planned/` as contracts only. Those are not built.
+is declared in `roles/_planned/` as contracts only. Those are not built.
 ```
 
 - [ ] **Step 2: Update every script path referenced in `SKILL.md` and the command files**
 
 ```bash
-grep -rn 'skills/design-flow/scripts/' packages/ skills/ README.md
+grep -rn 'skills/design-flow/scripts/' roles/ skills/ README.md
 ```
 
-Replace each with its new location: `capture-html-reference.mjs`, `verify-html.mjs`, `parity-check.mjs`, `flow-check.mjs` → `packages/html/scripts/`; `geometry-diff.mjs`, `figma-audit.js`, `capture-baseline.js` → `packages/figma/scripts/`.
+Replace each with its new location: `capture-html-reference.mjs`, `verify-html.mjs`, `parity-check.mjs`, `flow-check.mjs` → `roles/ux-engineer/scripts/`; `geometry-diff.mjs`, `figma-audit.js`, `capture-baseline.js` → `roles/design-ops/scripts/`.
 
 - [ ] **Step 3: Verify no stale path survives**
 
 ```bash
-grep -rn 'skills/design-flow/scripts/\|skills/design-flow/rules/' packages/ skills/ commands/ README.md CHANGELOG.md 2>/dev/null | grep -v CHANGELOG
+grep -rn 'skills/design-flow/scripts/\|skills/design-flow/rules/' roles/ skills/ commands/ README.md CHANGELOG.md 2>/dev/null | grep -v CHANGELOG
 ```
 
 Expected: no output. Hits in `CHANGELOG.md` are historical and correct: earlier releases genuinely had those paths.
@@ -907,10 +907,10 @@ sections into core's `review-discipline.md`, five HTML gates into `html-gates.md
 Figma gates into `figma-gates.md`, with `## Definition of done` split across both files. Sections moved verbatim; no rule changed meaning.
 
 New: `scripts/validate-packages.mjs` asserts every declared file exists and every shipped
-file is owned exactly once, and `packages/core/scripts/pica-status.mjs` reports what is
+file is owned exactly once, and `core/scripts/pica-status.mjs` reports what is
 ready and what is blocked and why.
 
-The path past Figma is declared in `packages/_planned/` as contracts with no content.
+The path past Figma is declared in `roles/_planned/` as contracts with no content.
 Those packages are planned, not built, and are shown as `PLANNED` everywhere they appear.
 
 ### Known limits
@@ -926,9 +926,9 @@ Those packages are planned, not built, and are shown as `PLANNED` everywhere the
 
 ```bash
 node scripts/validate-packages.mjs                        # expect 0 findings, exit 0
-node packages/core/scripts/pica-status.mjs                # expect core READY, others BLOCKED
-for s in packages/html/scripts/*.mjs packages/figma/scripts/*.mjs; do node --check "$s" || echo "SYNTAX FAIL $s"; done
-python3 -m py_compile packages/core/hooks/gate-figma-write && echo "hook compiles"
+node core/scripts/pica-status.mjs                # expect core READY, others BLOCKED
+for s in roles/ux-engineer/scripts/*.mjs roles/design-ops/scripts/*.mjs; do node --check "$s" || echo "SYNTAX FAIL $s"; done
+python3 -m py_compile core/hooks/gate-figma-write && echo "hook compiles"
 node -e 'JSON.parse(require("fs").readFileSync(".claude-plugin/marketplace.json","utf8"));console.log("marketplace valid")'
 ```
 

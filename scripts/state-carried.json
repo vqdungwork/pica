@@ -1,0 +1,39 @@
+{
+  "_note": "Keys written into state that no check reads. Each names why. This is a ratchet: the count may fall, never rise. A key added here without a reason is a key nobody decided about.",
+  "gates": {
+    "why": "recorded by a human to mark that a client agreed, and read by the runner rather than by a check. A check that verified them would be verifying its own input.",
+    "keys": [
+      "intakeApproved",
+      "scopeFrozen",
+      "exclusionsConfirmed",
+      "delivered",
+      "figmaInScope"
+    ]
+  },
+  "commercial": {
+    "why": "facts about the engagement, not about the product. They belong in the SOW and are carried here so the chain can read them.",
+    "keys": [
+      "deadline",
+      "exclusions"
+    ]
+  },
+  "build-markers": {
+    "why": "written by a phase to record that it ran. The artefact they point at is what gets checked, not the marker.",
+    "keys": [
+      "packages",
+      "demo"
+    ]
+  },
+  "not-yet-checked": {
+    "why": "genuinely unvalidated, and named here rather than left invisible. Each is a check somebody has not written.",
+    "keys": [
+      "copyRules",
+      "delta",
+      "domainModel",
+      "glossary",
+      "industry",
+      "operatingModel",
+      "stakeholders"
+    ]
+  }
+}

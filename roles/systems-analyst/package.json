@@ -1,0 +1,82 @@
+{
+  "name": "systems-analyst",
+  "status": "stable",
+  "description": "pica systems analyst: the four models \u2014 process, domain, state and permissions \u2014 that turn requirements into a specification.",
+  "owns": {
+    "commands": [],
+    "rules": [
+      "modelling.md"
+    ],
+    "scripts": [
+      "domain-check.mjs",
+      "process-check.mjs",
+      "permissions-check.mjs",
+      "journey-check.mjs"
+    ],
+    "agents": [
+      "pica-systems-analyst.md"
+    ],
+    "skills": [
+      "building-a-domain-model",
+      "mapping-states-and-permissions"
+    ]
+  },
+  "requires": {
+    "state": [
+      "useCases",
+      "businessRules"
+    ],
+    "artifacts": [],
+    "gates": []
+  },
+  "produces": {
+    "state": [
+      "domainModel",
+      "domainConstraints",
+      "rolesPermissions",
+      "stateModel",
+      "toBe",
+      "journeys"
+    ],
+    "artifacts": []
+  },
+  "checks": [
+    {
+      "run": "domain-check.mjs",
+      "passes": "0 findings",
+      "args": "<state>",
+      "phase": "analyse",
+      "needs": [
+        "domainConstraints"
+      ]
+    },
+    {
+      "run": "process-check.mjs",
+      "passes": "0 findings",
+      "args": "<state>",
+      "phase": "analyse",
+      "needs": [
+        "toBe|asIs"
+      ]
+    },
+    {
+      "run": "permissions-check.mjs",
+      "passes": "0 findings",
+      "args": "<state>",
+      "phase": "analyse",
+      "needs": [
+        "rolesPermissions"
+      ]
+    },
+    {
+      "run": "journey-check.mjs",
+      "passes": "0 findings",
+      "args": "<state>",
+      "phase": "analyse",
+      "needs": [
+        "journeys|toBe"
+      ]
+    }
+  ],
+  "definitionOfDone": []
+}

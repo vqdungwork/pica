@@ -1,0 +1,27 @@
+{
+  "name": "pica-design-researcher",
+  "description": "pica design researcher: one shipped product measured across the nine foundations, returning numbers with provenance per token. Never proposes a direction and never gives an impression.",
+  "version": "3.0.0",
+  "author": {
+    "name": "Dung Vuong"
+  },
+  "homepage": "https://github.com/vqdungwork/pica",
+  "repository": "https://github.com/vqdungwork/pica",
+  "license": "MIT",
+  "dependencies": [
+    "pica-core",
+    "pica-product-manager"
+  ],
+  "keywords": [
+    "design-research",
+    "benchmarking",
+    "design-tokens",
+    "provenance"
+  ],
+  "agents": [
+    "./agents/pica-design-researcher.md"
+  ],
+  "skills": [
+    "./skills"
+  ]
+}

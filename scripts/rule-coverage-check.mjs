@@ -48,7 +48,7 @@ import path from "path";
 const argv = process.argv.slice(2);
 const flag = (f) => argv.includes(f);
 const HERE = path.dirname(new URL(import.meta.url).pathname);
-const ROOT = argv.find((a) => !a.startsWith("--")) || path.resolve(HERE, "../packages");
+const ROOT = argv.find((a) => !a.startsWith("--")) || path.resolve(HERE, "../roles");
 const BASELINE = path.join(HERE, "rule-coverage-baseline.json");
 if (!fs.existsSync(ROOT)) {
   console.error(`FAIL  no packages directory at ${ROOT}`);
