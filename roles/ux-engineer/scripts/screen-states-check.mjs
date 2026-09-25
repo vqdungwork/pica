@@ -71,6 +71,11 @@ if (!built.length) {
   process.exit(0);
 }
 
+/* Same shape as every other check here: a fail() helper naming the assertion, so the id is
+   greppable and rule-coverage-check can see that a marker pointing at it is honest. */
+const out = [];
+const fail = (id, where, why) => out.push({ id, where, why });
+
 const missing = [];     /* declared and drawn nowhere at all */
 const dropped = [];     /* drawn in lo-fi and lost at final fidelity — the real defect */
 let declared = 0;
@@ -90,9 +95,9 @@ for (const scr of screens) {
   const mine = final.filter((b) => path.basename(b.path).toLowerCase().startsWith(String(id).toLowerCase()));
   for (const st of scr.states || []) {
     declared++;
-    if (!covers(built, st)) { missing.push(`[screen-states] ${id} declares state "${st}" and no artefact anywhere carries it`); continue; }
+    if (!covers(built, st)) { fail("screen-states", id, `declares state "${st}" and no artefact anywhere carries it`), missing.push(1); continue; }
     if (mine.length && covers(lofi, st) && !covers(mine, st))
-      dropped.push(`[screen-states] ${id} drew state "${st}" in lo-fi and ${path.basename(mine[0].path)} does not carry it`);
+      fail("screen-states-fidelity", id, `drew state "${st}" in lo-fi and ${path.basename(mine[0].path)} does not carry it`), dropped.push(1);
   }
 }
 
@@ -102,7 +107,7 @@ console.log(`artefacts scanned: ${built.length} (${lofi.length} lo-fi, ${final.l
 console.log(`declared and drawn nowhere: ${missing.length}`);
 console.log(`drawn in lo-fi, dropped at final fidelity: ${dropped.length}`);
 
-const findings = [...missing, ...dropped];
+const findings = out;
 /* Fails CLOSED. An earlier draft defaulted the baseline to the current count when no baseline file
    existed, which meant a project without one could never go red — the check could only ever agree
    with whatever it found. That is the failure mode this repository has a rule against, and it was
@@ -118,9 +123,9 @@ if (process.argv.includes("--write-baseline")) {
 
 if (findings.length > base.missing) {
   console.error("");
-  for (const m of findings) console.error(`FINDING  ${m}`);
+  for (const f of findings) console.error(`FINDING  [${f.id}] ${f.where}\n         ${f.why}`);
   console.error(`\n${findings.length} unbuilt, baseline is ${base.missing}. It got worse.`);
   process.exit(1);
 }
-console.log(findings.length ? `\n0 finding(s). Nothing regressed. ${findings.length} still unbuilt:\n  ${findings.slice(0,8).join("\n  ")}`
+console.log(findings.length ? `\n0 finding(s). Nothing regressed. ${findings.length} still unbuilt:\n  ${findings.slice(0,8).map((f)=>`[${f.id}] ${f.where} — ${f.why}`).join("\n  ")}`
                            : "\n0 finding(s). Every declared state exists somewhere it was built.");
