@@ -1,5 +1,51 @@
 # Changelog
 
+## 3.0.2
+
+### The command that could not run, and had never been read as code
+
+`/picaflow` was broken for every brief anyone could pass it, and had been since 3.0.0. Three defects,
+found in the first sixty seconds of the first real end-to-end run, none of them visible to any suite.
+
+**A slash command's markdown is argument-substituted before the shell sees it.** Four command files
+defined a resolver function on positional parameters, so invoking
+
+```
+/picaflow An app that helps staff see today's work
+```
+
+replaced them with the user's own words and turned every path into nonsense. Every guarded call then
+printed SKIPPED and the chain carried on — the outcome picaflow's own text calls "the exact failure
+this project exists to prevent", reachable by using the command exactly as documented. The resolver is
+now `core/scripts/pica-run.mjs`, because a file cannot be argument-substituted, and no command file
+contains a positional parameter anywhere.
+
+**`picaflow` ran the capture script out of `pica-html`,** a package 3.0.0 deleted. The script had
+moved to `pica-ux-engineer`. The capture is what eight measured checks read, so the chain would have
+completed, called itself complete, and measured nothing.
+
+**`pica-wp` ran `proposal-check.mjs` out of `core`,** which has never shipped it; it belongs to
+`product-manager`. This one was found by the new check below, thirty seconds after it first ran.
+
+### Nothing had ever read a command file as code
+
+That is the whole reason all three survived. `validate-packages` holds that a **declared** script
+exists. Nothing held that an **invoked** one does, and a package name inside a bash block is a bare
+string — the same class as `path.join(ROOT, "packages")` in mutate.mjs, `./packages/discover` in the
+marketplace, `agents: ["./agents"]` in ux-researcher, and the seven-of-twelve agent list in
+knowledge-gen. This is the fifth instance, and the first that was silent rather than red.
+
+`command-script-check.mjs` reads every command file, finds every script invocation, and fails when the
+package does not exist or does not ship the script. It fails closed: a run that recognises no
+invocation at all reports that, because "checked nothing" and "found nothing wrong" look identical in
+a green table. Seen to fail on the real defect, on a mistyped script name, and on a 2.1.0 package name
+surviving a rename.
+
+### Released through the gate
+
+3.0.1 built the release gate and proved it by refusing a deliberately broken tag. This is the first
+release to go through it for real.
+
 ## Unreleased
 
 ### The tag is the only way to publish, and it does not publish unverified

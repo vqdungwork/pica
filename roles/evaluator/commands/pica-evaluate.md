@@ -71,11 +71,12 @@ the issue.
 # Two layouts: the repository, where packages sit side by side under roles/, and an
 # install, where each has its own versioned directory under the marketplace cache. A path
 # that assumed only the first resolves to nothing on every real install.
-pica_find() {
-  R="${CLAUDE_PLUGIN_ROOT}"
-  [ -f "$R/../$1/scripts/$2" ] && { printf '%s' "$R/../$1/scripts/$2"; return 0; }
-  find "$R/../.." -maxdepth 4 -path "*/pica-$1/*/scripts/$2" -print 2>/dev/null | sort -V | tail -1
-}
+# A file, not a shell function: a positional parameter written inside this block is
+# replaced with the user's arguments before the shell runs, which silently broke every
+# call that followed.
+pica=$(find "${CLAUDE_PLUGIN_ROOT}/../.." -maxdepth 4 \
+  \( -path "*/pica-core/*/scripts/pica-run.mjs" -o -path "*/core/scripts/pica-run.mjs" \) \
+  -print 2>/dev/null | sort -V | tail -1)
 CAP=$(pica_find html capture-html-reference.mjs)
 node "$CAP" --url <live-url> --out .built
 node ${CLAUDE_PLUGIN_ROOT}/scripts/build-diff.mjs .audit/html-reference.json .built/html-reference.json

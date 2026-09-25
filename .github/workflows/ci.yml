@@ -94,6 +94,15 @@ jobs:
       - name: validate the state contract
         run: node scripts/state-contract-check.mjs
 
+      # Nothing had ever read a command file as code. picaflow ran the capture script out
+      # of `pica-html` for two releases after 3.0.0 deleted that package, and the guarded
+      # runner did what it promised: printed SKIPPED and carried on. The chain completed,
+      # called itself complete, and the capture that eight measured checks depend on was
+      # never produced. validate-packages holds that a DECLARED script exists; this holds
+      # that an INVOKED one does, which is the half nobody was holding.
+      - name: command scripts resolve
+        run: node scripts/command-script-check.mjs
+
       # A check must report on the project it was pointed at, not on whichever repository
       # encloses it. impl-check did the latter until 1.2.3, and its credential scan passed
       # having scanned nothing.

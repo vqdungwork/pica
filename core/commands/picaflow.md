@@ -174,54 +174,31 @@ With `--resume`, read `state.chain.completed` and continue from the next step.
 > dressing it as a choice. If it is wrong, the answer is a second round of three directions.
 
 ```bash
-# pica_find <package> <script>: the script's path, or nothing when the package is absent.
+# pica: resolve a package's script and run it, or say precisely why it did not.
 #
-# Two layouts, and only one of them is the one users have. In the repository, packages sit
-# side by side under roles/, so a sibling is ${CLAUDE_PLUGIN_ROOT}/../<name>. Installed,
-# each package has its own versioned directory under the marketplace cache, so a sibling is
-# ../../pica-<name>/<version>. A path that assumed only the first resolved to nothing on
-# every real install, and a guarded runner then reported every measured check as SKIPPED:
-# honest, and the whole chain silently unavailable.
+# The logic lives in a FILE, and that is the point. A slash command's markdown is
+# argument-substituted before the shell sees it, so a positional parameter written in a
+# bash block is replaced with the user's own words. This block used to define pica_find()
+# on positional parameters, and invoking the command with any brief turned the resolver into
+# nonsense. Every guarded call then reported SKIPPED, which is the outcome this file
+# warns about four lines below. It was reachable by using the command exactly as written.
 #
-# find, not a glob: an unmatched glob is a hard error in zsh.
-pica_find() {
-  R="${CLAUDE_PLUGIN_ROOT}"
-  [ -f "$R/../$1/scripts/$2" ] && { printf '%s' "$R/../$1/scripts/$2"; return 0; }
-  find "$R/../.." -maxdepth 4 -path "*/pica-$1/*/scripts/$2" -print 2>/dev/null | sort -V | tail -1
-}
-
-# Every call is guarded and names the package it could not find. A chain reported as
-# complete with four of its checks silently absent is the exact failure this project
-# exists to prevent.
-# Two different absences, and telling them apart matters: "pica-ux-engineer is not installed"
-# sent someone to install a package they already had, when what was missing was one
-# script that version does not ship.
-pica_has() {
-  R="${CLAUDE_PLUGIN_ROOT}"
-  [ -d "$R/../$1" ] && return 0
-  [ -n "$(find "$R/../.." -maxdepth 1 -name "pica-$1" -print 2>/dev/null)" ]
-}
-run() { pkg="$1"; sc="$2"; shift 2
-  p=$(pica_find "$pkg" "$sc")
-  if [ -n "$p" ]; then node "$p" "$@"
-  elif pica_has "$pkg"; then
-    echo "SKIPPED $sc: pica-$pkg is installed but ships no $sc. Upgrade it. NOT a pass."
-  else
-    echo "SKIPPED $sc: pica-$pkg is not installed. NOT a pass."
-  fi; }
+# pica-run.mjs resolves both layouts itself, the repository and the marketplace cache,
+# and prints the same two SKIPPED lines as before, which are still not passes.
+pica="${CLAUDE_PLUGIN_ROOT}/scripts/pica-run.mjs"
 
 # The capture first: it is produced, not checked, and eight checks abstain until it exists.
 # --url for the demo, --dir for the static boards. It refuses to write an unsettled capture.
-run html      capture-html-reference.mjs --dir html --out .audit
+node "$pica" ux-engineer      capture-html-reference.mjs --dir html --out .audit
 
 # Then everything applicable, in one table, phase by phase. pica-verify reads what to run
 # from each package's own manifest rather than from a list kept here, which is why this
 # block no longer has to name twenty-eight invocations and drift from them.
-run core      pica-verify.mjs      .pica/state.json --phase intake
-run core      pica-verify.mjs      .pica/state.json --phase discover
-run core      pica-verify.mjs      .pica/state.json --phase research
-run core      pica-verify.mjs      .pica/state.json --phase analyse
-run core      pica-verify.mjs      .pica/state.json --phase design --evidence
+node "$pica" core      pica-verify.mjs      .pica/state.json --phase intake
+node "$pica" core      pica-verify.mjs      .pica/state.json --phase discover
+node "$pica" core      pica-verify.mjs      .pica/state.json --phase research
+node "$pica" core      pica-verify.mjs      .pica/state.json --phase analyse
+node "$pica" core      pica-verify.mjs      .pica/state.json --phase design --evidence
 ```
 
 All zero, or fix and re-run. **A failing check is not an assumption**: it is a defect, and continuing
@@ -244,12 +221,12 @@ past it produces a demo that breaks in front of the client.
 | **7f** | `pica-design-ops`, only if you ask for it: check the Figma MCP, port, verify frame by frame | `.audit/figma-dump.json` |
 
 ```bash
-run core      pica-verify.mjs      .pica/state.json --phase scope
-run core      pica-verify.mjs      .pica/state.json --phase close
+node "$pica" core      pica-verify.mjs      .pica/state.json --phase scope
+node "$pica" core      pica-verify.mjs      .pica/state.json --phase close
 
 # One run at the end over everything, so the closing report can state a number rather
 # than a feeling: how many assertions were verified, and how many checks abstained.
-run core      pica-verify.mjs      .pica/state.json --adopt --evidence
+node "$pica" core      pica-verify.mjs      .pica/state.json --adopt --evidence
 ```
 
 `close-check` is the one that compares rather than trusts: it fails when `closeout.briefReadFrom`

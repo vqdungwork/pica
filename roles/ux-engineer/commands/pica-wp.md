@@ -34,12 +34,13 @@ Record every offer and every answer in `state.proposals`, then:
 # side under roles/, and an install, where each has its own versioned directory under
 # the marketplace cache. A path assuming only the first resolves to nothing on every real
 # install. Prints nothing when the package is absent, which is a finding, not a skip.
-pica_find() {
-  R="${CLAUDE_PLUGIN_ROOT}"
-  [ -f "$R/../$1/scripts/$2" ] && { printf '%s' "$R/../$1/scripts/$2"; return 0; }
-  find "$R/../.." -maxdepth 4 -path "*/pica-$1/*/scripts/$2" -print 2>/dev/null | sort -V | tail -1
-}
-node "$(pica_find core proposal-check.mjs)" .pica/state.json --phase design
+# A file, not a shell function: a positional parameter written inside this block is
+# replaced with the user's arguments before the shell runs, which silently broke every
+# call that followed.
+pica=$(find "${CLAUDE_PLUGIN_ROOT}/../.." -maxdepth 4 \
+  \( -path "*/pica-core/*/scripts/pica-run.mjs" -o -path "*/core/scripts/pica-run.mjs" \) \
+  -print 2>/dev/null | sort -V | tail -1)
+node "$pica" product-manager proposal-check.mjs .pica/state.json --phase design
 ```
 
 A slot with no material in this project is skipped **with a reason**. A question nobody asked and a
