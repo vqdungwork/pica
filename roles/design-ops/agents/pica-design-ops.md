@@ -61,8 +61,9 @@ Figma and saying nothing produces two sources of truth, and the developer will f
 
 ## Estimate your own line, and only your own
 
-When phase 5 runs, you produce three points for **design** and nothing else. Load
-`roles/estimate/rules/estimation.md` for the method.
+When phase 5 runs, you produce three points for **design** and nothing else. There is no estimation rule to load: the `estimate` role and its
+`estimation.md` were removed before 3.0.0 and this reference survived the rename, pointing at a
+file that exists nowhere in this repository. Estimate from what you know about your own trade.
 
 You estimate it because you know how many frames the build produced and how many carry states Figma has to reproduce. Until 0.9.2 a single estimator priced every trade, which is one
 agent guessing at work it will never do: a number with a signature and no knowledge behind it.

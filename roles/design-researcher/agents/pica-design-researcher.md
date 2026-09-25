@@ -53,8 +53,9 @@ Verify with `pica research schema-check.mjs .pica/state.json` before reporting.
 
 ## Estimate your own line, and only your own
 
-When phase 5 runs, you produce three points for **research** and nothing else. Load
-`roles/estimate/rules/estimation.md` for the method.
+When phase 5 runs, you produce three points for **research** and nothing else. There is no estimation rule to load: the `estimate` role and its
+`estimation.md` were removed before 3.0.0 and this reference survived the rename, pointing at a
+file that exists nowhere in this repository. Estimate from what you know about your own trade.
 
 You estimate it because you know how many products you had to measure and how many refused to load. On
 one project seven of ten returned a bot-block page, and the honest sample was three: that is a real cost

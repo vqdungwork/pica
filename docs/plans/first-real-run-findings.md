@@ -132,3 +132,84 @@ lý do — một suite đỏ ngay ngày nó ra đời dạy mọi người bỏ 
 chỉ con số **tệ đi** mới đỏ. Thêm một check mà không thêm mutation cho nó là thứ nó chặn.
 
 Đã thấy nó đỏ đúng trên defect nó được viết ra để bắt, và xanh lại khi khôi phục.
+
+
+---
+
+## E13 · Tái cấu trúc 3.0.0 chia một vai tốt thành hai vai thiếu — ĐÃ SỬA MỘT NỬA
+
+Client nói: *"pica bản cũ từ hồi kiểu mới ra design đẹp oke lắm, chẳng hiểu sao giờ kh như vậy
+nữa."* Đây là một sự thoái lui, và nó kiểm chứng được từ backup 2.1.0.
+
+**2.1.0 có đúng một agent thiết kế**, `pica-designer`, trong package `html`. Chỉ thị mở đầu của
+nó:
+
+> **Load:** `html-prototype.md`, `html-gates.md`, `design-vocabulary.md`, và `native-mobile.md`
+> nếu có native. Rồi sector entry **đầy đủ**.
+
+Dòng mô tả vai kết thúc bằng:
+
+> *"...then every screen at every viewport in every state, and **measures before showing anyone**."*
+
+**3.0.0 tách nó làm đôi.** Bốn luật dựng và renderer sang `ux-engineer`. Vai mới `ui-designer`
+nhận **một** file luật (`direction.md`), **không renderer**, và một dòng mô tả kết thúc bằng:
+
+> *"...**Builds no screens.**"*
+
+| | 2.1.0 `pica-designer` | 3.0.2 `ui-designer` |
+|---|---|---|
+| Từ vựng đo được | đọc | đọc |
+| Luật dựng | **nắm cả 4** | **không cái nào** |
+| Renderer | có | **không** |
+| Dựng màn hình và đo | **có, bắt buộc** | **bị cấm** |
+| Quyết mọi thứ trông thế nào | có | có |
+
+Vai quyết định hình thức bị tước đúng ba thứ giúp nó quyết đúng: luật tay nghề, khả năng nhìn, và
+việc phải tự dựng ra thứ mình quyết. Không ai xoá gì — việc tách vai **tạo ra một nửa bị mù**.
+
+**Đã sửa nửa rẻ:** `roles/ui-designer/rules/craft.md` mới, và agent `pica-ui-designer` được trả
+lại khối `Load` — craft, direction, design-vocabulary, và `ux-engineer`'s html-gates +
+html-prototype — cộng lệnh nạp skill `dataviz` của Claude khi bề mặt có tổng hợp, cộng lệnh phải
+render-và-nhìn hoặc **ghi rõ là đã không nhìn được**.
+
+**Nửa còn lại chưa sửa:** `ui-designer` vẫn không có renderer (E7). Đó là quyết định kiến trúc:
+chuyển `capture-html-reference.mjs` lên `pica-core` để mọi vai dựng HTML gọi được.
+
+## E14 · Chín agent trỏ vào một file luật không tồn tại — ĐÃ SỬA
+
+Chín agent — gần như mọi vai — dặn người đọc:
+
+> Load `roles/estimate/rules/estimation.md` for the method.
+
+File đó **không tồn tại ở đâu trong repo**. Vai `estimate` bị gỡ trước 3.0.0 và chín tham chiếu
+tới nó sống sót qua rename, vì một đường dẫn nằm trong văn xuôi là chuỗi trần, và rename chỉ chạm
+đường dẫn nằm trong code.
+
+**Mọi vai của pica đã ước lượng dựa trên một file rỗng kể từ 3.0.0, và không gì nói ra điều đó.**
+
+Đây là **lần thứ sáu** của cùng một lớp lỗi, và năm lần trước mỗi lần đều được viết một check
+riêng sau khi sự đã rồi. `validate-packages` giữ file **được khai báo**; `command-script-check`
+giữ script **được gọi**; không gì giữ dạng thứ ba: **file mà một con người được bảo hãy đọc**.
+
+**Đã sửa:** `scripts/reference-check.mjs` đọc mọi markdown trong `roles/` và `core/`, rút mọi
+đường dẫn trỏ vào package, và fail khi đích không tồn tại. 110 tham chiếu trong 75 file, 0 finding
+sau khi sửa. Đã thấy nó đỏ đúng trên defect nó sinh ra để bắt.
+
+## E15 · pica không bao giờ dùng skill thiết kế của Claude
+
+Đếm được: `artifact-design`, `dataviz`, `artifact-diagramming`, `frontend-design` — **0 file
+trong toàn bộ pica nhắc tới bất kỳ cái nào**.
+
+pica có nghiên cứu thiết kế riêng và nghiên cứu đó tốt — `design-researcher` đo bốn sản phẩm đã
+ship trên chín nền tảng với provenance thật. Nhưng giữa *đo được* và *dựng đẹp* có một khoảng
+trống, và Claude ship sẵn hướng dẫn cho đúng khoảng trống đó.
+
+Cụ thể trong lần chạy này: rail tổng quan tô màu chính các **con số**. Luật của `dataviz`: *chữ
+mặc token chữ, không bao giờ mặc màu của chuỗi dữ liệu* — con số là mực, một dấu hiệu có **hình
+dạng** bên cạnh mới mang danh tính. Không luật nào của pica nói điều đó, và không check nào bắt.
+
+**Đã sửa một phần:** `craft.md` và agent `ui-designer` giờ chỉ thị nạp `dataviz` khi bề mặt có
+tổng hợp, và cố ý **không chép lại** nội dung của nó để không bị lệch pha.
+
+**Chưa làm:** `artifact-design` cho vai dựng, và câu hỏi rộng hơn — pica nên **mượn** hướng dẫn
+thiết kế của Claude ở đâu thay vì tự viết lại. Đó là quyết định của chủ framework.

@@ -240,7 +240,7 @@ loaded. Approvals live on disk, because a hook is a script and cannot know you s
 |:--|:--|
 | **14 plugins** | 13 packages plus a bundle, each declaring what it requires, produces, checks and considers done |
 | **13 commands** | Deterministic once typed |
-| **26 rule modules** | Loaded per step, never all at once. 228 definition-of-done items across them |
+| **27 rule modules** | Loaded per step, never all at once. 228 definition-of-done items across them |
 | **26 check scripts** | Plus the capture harness, the status tool, and a harness that runs the in-Figma scripts outside Figma |
 | **156 checks** | Every one fails closed. `/pica-verify` runs every applicable one in a single table, and an abstention is never counted as a pass |
 | **28 sectors** | 264 names resolving to them, 4 deliberately refused as ambiguous |
@@ -286,7 +286,7 @@ ends complete, not truncated.
 </details>
 
 <details>
-<summary><b>The 26 rule modules</b></summary>
+<summary><b>The 27 rule modules</b></summary>
 
 <br>Loaded per step rather than all at once. 228 definition of done items across them, each either
 decided by a check or explicitly left to a human.
