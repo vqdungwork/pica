@@ -36,12 +36,17 @@ const END = "<!-- END GENERATED -->";
  * clinician's screen from a warehouse template. */
 const AGENTS = [
   "roles/design-researcher/agents/pica-design-researcher.md",
-  "roles/ux-researcher/agents/pica-discover.md",
+  "roles/ux-researcher/agents/pica-ux-researcher.md",
   "roles/business-analyst/agents/pica-business-analyst.md",
   "roles/systems-analyst/agents/pica-systems-analyst.md",
   "roles/ux-engineer/agents/pica-ux-engineer.md",
   "roles/content-designer/agents/pica-content-designer.md",
   "roles/evaluator/agents/pica-evaluator.md",
+  "roles/product-manager/agents/pica-product-manager.md",
+  "roles/solution-architect/agents/pica-solution-architect.md",
+  "roles/ux-designer/agents/pica-ux-designer.md",
+  "roles/ui-designer/agents/pica-ui-designer.md",
+  "roles/design-ops/agents/pica-design-ops.md",
 ];
 
 const read = (f) => {
