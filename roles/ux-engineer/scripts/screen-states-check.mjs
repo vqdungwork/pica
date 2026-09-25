@@ -92,11 +92,18 @@ for (const scr of screens) {
   const id = scr.id || scr.name || "(unnamed screen)";
   /* Only screens that HAVE a final artefact can have dropped one: a screen not yet carried to
      final fidelity is unfinished, which is a different thing and not this check's business. */
-  const mine = final.filter((b) => path.basename(b.path).toLowerCase().startsWith(String(id).toLowerCase()));
+  /* A screen id and the file that implements it rarely spell each other exactly: "WL-02" ships
+     as WL02.jsx in a React demo, which is the shape picaflow's own step 5.7 asks for. Compare on
+     alphanumerics only, or this check reports a complete build as a regression — which it did,
+     on the first demo it was ever pointed at. */
+  const key = (x) => String(x).toLowerCase().replace(/[^a-z0-9]/g, "");
+  const mine = final.filter((b) => key(path.basename(b.path)).startsWith(key(id)));
   for (const st of scr.states || []) {
     declared++;
     if (!covers(built, st)) { fail("screen-states", id, `declares state "${st}" and no artefact anywhere carries it`), missing.push(1); continue; }
-    if (mine.length && covers(lofi, st) && !covers(mine, st))
+    /* A state addressable at runtime — ?state=degraded on a router — is built, even though no
+       file is named for it. If the final artefacts carry the state anywhere, that is enough. */
+    if (mine.length && covers(lofi, st) && !covers(mine, st) && !covers(final, st))
       fail("screen-states-fidelity", id, `drew state "${st}" in lo-fi and ${path.basename(mine[0].path)} does not carry it`), dropped.push(1);
   }
 }
