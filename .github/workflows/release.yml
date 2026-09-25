@@ -1,0 +1,84 @@
+# release.yml: the tag is the only way to publish, and it does not publish unverified.
+#
+# 3.0.0 is why this file exists. It was tagged on d17efb1, whose CI run failed, and the
+# release was created before that run reported. Three fixes landed on main within the
+# hour and none of them was in the tag, so for a day the artefact anyone could download
+# was the one where pica-ux-researcher does not install, the mutation suite exits before
+# proving anything, and knowledge-gen knows seven agents of twelve.
+#
+# Every check in this repository was green at the time. They were green about MAIN. The
+# thing being released was a different tree, and nothing had ever been pointed at it.
+#
+# So the release is no longer something a person does next to the pipeline. It is what
+# the pipeline does, last, and only if:
+#
+#   1. the whole ci.yml suite passes against the TAGGED tree, not against main
+#   2. release-check.mjs agrees the tag is releasable: every manifest and every
+#      marketplace entry carries the tag's version, the CHANGELOG has a section for it,
+#      and no release under that version already exists
+#
+# The notes are the CHANGELOG section. Writing them is therefore a condition of
+# releasing, rather than something done afterwards from memory.
+#
+# To cut a release: bump the versions, write the CHANGELOG section, get main green, then
+# `git tag -a vX.Y.Z && git push origin vX.Y.Z`. Nothing else. If the suite fails the
+# tag stays and no release appears, which is the correct outcome and the one 3.0.0 did
+# not get.
+
+name: release
+
+on:
+  push:
+    tags: ['v*']
+
+jobs:
+  # The same suite, against the tag. Not a repeat of the main run and not a lookup of
+  # whether one passed: a run on this tree. "CI passed on main" was true of 3.0.0.
+  verify:
+    uses: ./.github/workflows/ci.yml
+
+  publish:
+    needs: verify
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      # Asked before release-check rather than inside it: the script runs locally too,
+      # where there is no API to ask. It reads the answer from the environment and holds
+      # the rule; this step is only how the answer is obtained on a runner.
+      - name: has this version already been released?
+        id: existing
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view "${GITHUB_REF_NAME}" -R "${GITHUB_REPOSITORY}" >/dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: is this tag releasable?
+        env:
+          RELEASE_EXISTS: ${{ steps.existing.outputs.exists }}
+        run: node scripts/release-check.mjs "${GITHUB_REF_NAME}"
+
+      # The notes come out of the CHANGELOG section release-check just proved exists, so
+      # the release cannot say something different from the file in the tree.
+      - name: publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          node scripts/release-check.mjs "${GITHUB_REF_NAME}" --notes > /tmp/notes.md
+          title=$(head -40 /tmp/notes.md | grep -m1 '^### ' | sed 's/^### //')
+          gh release create "${GITHUB_REF_NAME}" \
+            -R "${GITHUB_REPOSITORY}" \
+            --title "${GITHUB_REF_NAME#v} — ${title:-release}" \
+            --notes-file /tmp/notes.md \
+            --latest

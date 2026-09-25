@@ -1,5 +1,35 @@
 # Changelog
 
+## Unreleased
+
+### The tag is the only way to publish, and it does not publish unverified
+
+3.0.1 fixed the manifest and closed the check that missed it, and said plainly that the cause
+was untouched: nothing stopped a release being tagged before its pipeline was green. This is
+that.
+
+Releasing is no longer something a person does alongside the pipeline. It is the last thing the
+pipeline does, and only if both hold:
+
+1. **The whole `ci.yml` suite passes against the tagged tree.** Not a lookup of whether a run
+   passed on `main` — a run on this tree. "CI passed on main" was true of 3.0.0, and the thing
+   released was a different tree.
+2. **`release-check.mjs` agrees the tag is releasable.** Every manifest and every marketplace
+   entry carries the tag's version; the CHANGELOG has a section for it; and no release under
+   that version already exists, because re-tagging in place ships two trees under one version.
+
+The notes are the CHANGELOG section itself, so the release cannot say something different from
+the file in the tree, and writing them is a condition of releasing rather than something done
+afterwards from memory.
+
+`count-test` holds the manifests against each other. Nothing held them against the tag, so
+`v3.0.1` could have been cut on manifests reading 3.0.0 with every suite green. That is now one
+of the four defects `release-check` has been seen to fail on.
+
+To cut a release: bump the versions, write the CHANGELOG section, get `main` green, then
+`git tag -a vX.Y.Z && git push origin vX.Y.Z`. Nothing else. If the suite fails, the tag stays
+and no release appears — which is what 3.0.0 should have got.
+
 ## 3.0.1
 
 ### The release nobody could install, and the check that would have said so
