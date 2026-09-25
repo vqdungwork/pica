@@ -213,3 +213,44 @@ tổng hợp, và cố ý **không chép lại** nội dung của nó để khô
 
 **Chưa làm:** `artifact-design` cho vai dựng, và câu hỏi rộng hơn — pica nên **mượn** hướng dẫn
 thiết kế của Claude ở đâu thay vì tự viết lại. Đó là quyết định của chủ framework.
+
+
+## E16 · Đánh giá chạy quá muộn, và không luật nào bảo evaluator phải bấm thử
+
+Xem `docs/plans/blind-evaluation-comparison.md` cho số liệu đầy đủ.
+
+Bốn evaluator mù, mỗi người một lăng kính, tìm ra **12 khiếm khuyết mà cả client lẫn điều phối
+viên đều bỏ sót** — giao nhau bằng không với 6 phát hiện của client và 8 của điều phối viên.
+Phương pháp hoạt động. Hai vấn đề là **thời điểm** và **chỉ thị**.
+
+**Thời điểm.** Fan-out đánh giá ở bước 5.6, sau khi mọi màn hình đã dựng xong. Ba trong sáu phát
+hiện của client (xấu, không responsive, guideline lẫn màn hình) đã phải sửa xong *trước khi*
+evaluator được chạy — nghĩa là client làm công việc mà evaluator lẽ ra phải làm, và làm sớm hơn
+nhiều vòng.
+
+**Chỉ thị.** Cả bốn evaluator đều có `Bash` trong danh sách công cụ. Không luật nào của
+`pica-evaluator` bảo chúng **render và bấm thử**. Ba phát hiện nặng nhất — 24 control không có
+hành vi, khung "Theo người" không tồn tại, UC-08 không có cửa vào — chỉ ra được vì điều phối viên
+viết câu đó vào brief. Nếu câu đó nằm trong luật thay vì trong brief, mọi lần chạy đều có nó.
+
+**Đề xuất (chưa làm):** một lăng kính chạy ở 5.2 trên chính direction board, trước khi client
+nhìn thấy nó lần đầu — cùng nguyên tắc `pre-gate-lens` đã áp cho `/pica-wp`, áp cho bước sớm
+nhất mà client phán xét một thứ được dựng. Và `evaluation.md` nên bắt buộc: render, bấm mọi
+control, ghi lại cái nào không có hành vi.
+
+## E17 · Cảnh báo nằm trong văn xuôi thì không ngăn được gì — ĐÃ MỘT PHẦN
+
+`docs/tension-per-person.md` được viết ở bước 4.B, cảnh báo chính xác rằng một bảng theo người
+gộp xuyên dự án là hình dạng giám sát mà loại trừ số 5 cấm.
+
+Ở bước 5.2, điều phối viên yêu cầu "làm cho màn hình quản lý quét được". Kết quả: ngoại lệ đẩy
+lên đầu — và khi ngoại lệ là *"người này không có gì để xác nhận"*, không có công việc nào để chỉ
+vào, **nên giao diện lấy tên người làm tiêu đề cảnh báo đỏ**. Đúng hình dạng đã được cảnh báo,
+xuất hiện bất chấp cảnh báo, và chỉ được tìm ra bởi một evaluator có lăng kính *niềm tin*.
+
+Cảnh báo đúng, viết sớm, nằm trong tài liệu mọi vai đều đọc — **và không ngăn được gì**, vì không
+có gì đối chiếu bản dựng với nó.
+
+**Đã sửa một phần:** `roles/ui-designer/rules/craft.md` giờ có luật *"một báo cáo phải đọc mới
+hiểu là một báo cáo đã hỏng"* kèm ba cách làm nó quét được — trọng lượng, nhóm, và **thứ bỏ đi** —
+nhưng không cái nào nói *đừng lấy người làm tiêu đề cảnh báo*. Luật đó vẫn chưa tồn tại.
