@@ -115,3 +115,23 @@ screen as done on arithmetic alone. If a renderer is available to you, render it
 is not, the sentence "I could not see this" belongs in your report — it is what tells the reviewer
 where to look.
 
+## Never make a person the headline of an alert
+
+<!-- enforced-by: none — judgement, not decidable by a script -->
+
+When you sort exceptions to the top so a screen can be scanned, watch what happens to the
+exception that has no object. A drift has a work item to name. A reassignment has a work item to
+name. *"This person has nothing to confirm"* has nothing — so the interface reaches for the only
+noun available and puts a **human being's name** in the title slot, in the same weight it uses for
+tasks, inside the red bin, sorted above everything else.
+
+That happened. Two of four alert rows read `Hùng` and `Phạm Văn Sơn` in bold beside a warning
+triangle, while the two rows that did have an object correctly titled the work and left the person
+in the metadata. The asymmetry is the tell.
+
+The project's own analysis had written the warning four steps earlier, in prose every role reads,
+and it did not prevent it — because prose in a document is not a constraint on a build.
+
+So: **an alert names a condition, not a person.** "Không có việc nào được xác nhận hôm nay" is a
+condition; a name is not. Where a person must appear, they appear the way they appear on every
+other row — in the supporting line, not the headline.

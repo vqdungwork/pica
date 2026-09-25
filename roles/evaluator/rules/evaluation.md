@@ -175,3 +175,36 @@ check waiting on text that changed is a check hiding a real defect.
 - [ ] Anything that could not be checked is reported as such, not omitted
 - [ ] Zero findings reported together with what was run and what it covered
 - [ ] No fix applied in the same pass as the report
+
+## Render it, and click every control
+
+<!-- enforced-by: none — judgement, not decidable by a script -->
+
+An evaluation read from source is a code review wearing an evaluator's name. You have `Bash`; use
+it. Render every screen you were given at the narrowest and widest declared viewport, read the
+screenshots, and **activate every control that looks activatable** — tabs, buttons, rows, links.
+
+Then write down which ones did nothing.
+
+This is not pedantry. On the first engagement that ran this rule's absence, a blind walkthrough
+found **twenty-four controls with no behaviour** on two screens that had passed every width,
+contrast, target-size and truncation floor — including the one button the primary screen exists to
+drive. Three of the heaviest findings in that evaluation existed only because someone thought to
+click. Two evaluators reading the same files without clicking reported neither.
+
+A control that looks live and does nothing is the worst failure state there is: the user cannot
+tell whether they missed, the data is empty, or the product is broken. It is silent, and silence
+is what an evaluation is for.
+
+## Say what the specification promised and the build did not deliver
+
+<!-- enforced-by: screen-states, screen-states-fidelity -->
+
+Read `state.screens` before you look at a screen. It declares, per screen, the states that screen
+owes. Then check the built artefact against that list rather than against your impression of it.
+
+A project once declared eight states for its primary screen, drew all eight in greyscale, and
+shipped a final screen carrying none of them — no degraded, no stale, no error, no empty. Every
+floor passed. `grep` for those words returned nothing. The failure paths the whole analysis worked
+to find arrived in production never having been drawn, and the only thing that noticed was an
+evaluator who read the declaration first.

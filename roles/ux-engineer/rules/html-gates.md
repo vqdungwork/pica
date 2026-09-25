@@ -282,3 +282,35 @@ checkable rather than a habit.
 - [ ] Every screen rendered and looked at **after** the last change, not before it
 - [ ] Every check written for this project has been **seen to fail** on the defect it was written for
 - [ ] Every option board either folded into the flow or labelled as provenance
+
+## A title is never truncated, at any width
+
+<!-- enforced-by: none — judgement, not decidable by a script -->
+
+Not "wraps below 640". Not "fits at the declared viewports". **Never, at any width you have not
+personally checked.**
+
+One engagement fixed this defect three times. Found in the greyscale round and fixed. Reintroduced
+in the refined build and fixed below 640px. Still live between 641 and 1180px, where a work item
+read `Sửa lỗi thanh toán thẻ Visa bị treo ở bước OT…` on a common laptop. Each fix treated it as a
+symptom at one breakpoint; none treated it as an invariant.
+
+It stopped recurring the moment `white-space:nowrap` and `text-overflow:ellipsis` were deleted
+from the base rule rather than overridden per breakpoint. That is the shape of the fix: **remove
+the cause, do not override it where you happened to look.**
+
+An employee who cannot read which task it is cannot confirm it. Truncating the identifying text of
+a row is not a layout compromise; it removes the only thing the row is for.
+
+## Sweep the width range, not the declared viewports
+
+<!-- enforced-by: overflow, viewport-coverage -->
+
+Declaring two viewports does not mean a build is only used at two widths. One board was hard-coded
+to `width:1440px` and passed every check at 1440 — and overflowed by 160px at 1280, the commonest
+laptop width there is, and by 1050px at 390. The client opened it and it was broken before they
+read a word.
+
+Sweep from 320 to 2560. `scrollWidth === clientWidth` at **every** width, not at the two you
+declared. A fix that makes a number read zero at one width and hard-codes the breakage everywhere
+else is worse than the defect, because now it is invisible.
