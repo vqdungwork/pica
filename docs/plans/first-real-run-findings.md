@@ -306,3 +306,56 @@ hữu nó. Rẻ, và nó bắt đúng thứ đã xảy ra ở đây.
 Lưu ý một điều khó chịu: điều phối viên **đọc bảng đó** ở đầu lượt chạy. Biết mà vẫn đi sai, và
 không có gì hỏi lại. Đó là lý do nó phải là một check chứ không phải một dòng tài liệu — cùng bài
 học với E17.
+
+
+## E19 · Chín nền tảng đều đo hình thức, không cái nào đo cách hoạt động
+
+Client nhìn bản dựng lần thứ tư và hỏi: *"về thứ tự dự án, về bảng — không dùng list mà kanban
+thì sao, có thật sự là làm research chưa."*
+
+Có. Rất kỹ. Sai chiều.
+
+`design-researcher` đo bốn sản phẩm đã ship trên chín nền tảng, provenance thật, 36 giá trị:
+
+```
+typography · colour · spacing · elevation · motion
+iconography · grid · density · accessibility
+```
+
+**Cả chín đều trả lời "trông thế nào". Không cái nào trả lời "hoạt động thế nào".**
+
+Đo được trong dự án này:
+- Không tài liệu nào bàn **list vs board vs bảng vs lịch**
+- Không dòng nào quy định **thứ tự dự án** — nó tuỳ tiện, và client nhận ra
+- Bố cục danh sách **chưa bao giờ được chọn**: nó đến từ wireframe lo-fi theo mặc định và không
+  tài liệu nào lập luận cho nó
+
+### Vì sao đây là lỗi hệ thống
+
+`schema-check` bắt buộc đủ chín nền tảng và fail khi thiếu một. Nó **không thể** bắt sự vắng mặt
+của một nền tảng thứ mười mà không ai nghĩ tới. Danh sách chín cái là trần, không phải sàn — và
+nó bị đọc như một danh sách đầy đủ.
+
+Hệ quả: mô hình tương tác — **thứ quyết định nhiều nhất việc UI có dùng được hay không** — không
+bao giờ được nghiên cứu, không bao giờ được đưa ra như một lựa chọn, không bao giờ được lập luận.
+Nó được thừa kế từ bản vẽ xám đầu tiên và im lặng đi qua mọi cổng.
+
+Đây là cùng một hình dạng với E17: pica cảnh báo rất hay về "im lặng thành mặc định" ở nhiều chỗ,
+và không gác chính chỗ này.
+
+### Ràng buộc mà research lẽ ra phải nêu
+
+Sản phẩm này **chỉ đọc** với 8project (BR-06, BR-09). Affordance cốt lõi của kanban là **kéo thẻ
+để đổi trạng thái** — bị cấm ở đây. Một kanban không kéo được thì tệ hơn một danh sách, và đó là
+kết luận mà năm phút nghiên cứu mô hình tương tác sẽ đưa ra. Không ai làm năm phút đó, nên câu hỏi
+đến từ client ở vòng thứ tư thay vì từ research ở phase 3.
+
+### Hướng sửa (chưa làm)
+
+Thêm nền tảng thứ mười vào `design-vocabulary.md` và `schema-check`: **interaction model** — mẫu
+(list/board/table/calendar/hybrid), tương tác chính, **có cần quyền ghi không**, quy tắc sắp xếp,
+quy tắc nhóm. Đo giống hệt chín cái kia: có nguồn, có phương pháp, null kèm lý do khi không đo
+được.
+
+Và nó phải vào **proposals** như một ô riêng, vì nó đổi màn hình chứ không đổi cách màn hình
+trông — đúng tiêu chí mà `proposals.md` dùng để phân biệt cái gì đáng hỏi client.
