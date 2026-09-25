@@ -26,7 +26,8 @@
       "shell-check.mjs",
       "spacing-check.mjs",
       "state-coverage-check.mjs",
-      "verify-html.mjs"
+      "verify-html.mjs",
+      "visual-qa-check.mjs"
     ],
     "agents": [
       "pica-ux-engineer.md"

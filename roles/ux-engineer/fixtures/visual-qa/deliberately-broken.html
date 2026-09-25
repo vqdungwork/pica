@@ -1,0 +1,22 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+:root{ --ink:#e8e8ea; --surface:#1a1b1e; --accent:#3aa0de; }
+body{ background:var(--surface); color:var(--ink); font:16px system-ui; padding:24px; }
+/* 1. ô chứa glyph bo tròn nhưng KHÔNG vuông  → phải bắt [round-is-square] */
+.avatar{ display:inline-flex; align-items:center; justify-content:center;
+         border-radius:999px; background:var(--accent); height:40px; width:64px; }
+/* 2. khung clip nhưng nội dung tràn            → phải bắt [clip-contains] */
+.clipbox{ overflow:hidden; width:120px; height:40px; background:var(--surface); position:relative; }
+.clipbox > span{ display:block; width:260px; white-space:nowrap; }
+/* 3. overlay tuyệt đối lệch tâm 3px            → phải bắt [concentric] */
+.host{ position:relative; width:80px; height:80px; background:var(--accent); margin-top:16px; }
+.host > .dot{ position:absolute; left:calc(50% - 8px + 3px); top:calc(50% - 8px); width:16px; height:16px;
+              border-radius:999px; background:var(--ink); }
+/* 4. màu literal, không phải token             → phải bắt [colour-is-token] */
+.literal{ color:#ff00aa; margin-top:16px; }
+.literal2{ color:#ff00aa; }
+</style></head><body>
+<div class="avatar"><svg width="16" height="16"><circle cx="8" cy="8" r="6" fill="currentColor"/></svg></div>
+<div class="clipbox"><span>một chuỗi dài hơn khung chứa nó rất nhiều lần</span></div>
+<div class="host"><div class="dot"></div></div>
+<p class="literal">màu literal</p><p class="literal2">màu literal lần hai</p>
+</body></html>
