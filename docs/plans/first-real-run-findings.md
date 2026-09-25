@@ -254,3 +254,55 @@ có gì đối chiếu bản dựng với nó.
 **Đã sửa một phần:** `roles/ui-designer/rules/craft.md` giờ có luật *"một báo cáo phải đọc mới
 hiểu là một báo cáo đã hỏng"* kèm ba cách làm nó quét được — trọng lượng, nhóm, và **thứ bỏ đi** —
 nhưng không cái nào nói *đừng lấy người làm tiêu đề cảnh báo*. Luật đó vẫn chưa tồn tại.
+
+
+## E18 · state ghi bước nào đã chạy, không ghi ai chạy
+
+Phát hiện nghiêm trọng nhất về quy trình trong cả lần chạy, và nó giải thích vì sao demo tệ.
+
+`picaflow.md` có bảng phân vai rõ ràng: bước **5.4** (mọi màn hình ở mọi viewport ở mọi trạng
+thái) và **5.7** (`demo.html` React tương tác) thuộc `pica-ux-engineer`. Vai đó sở hữu bốn luật
+dựng, renderer `capture-html-reference.mjs`, và hai skill viết riêng cho việc này —
+`scaffolding-the-demo` và `generating-mock-data`.
+
+Trong lần chạy này, điều phối viên bỏ qua bảng đó và giao toàn bộ việc dựng màn hình cho
+`pica-ui-designer` — vai mà mô tả của chính nó ghi **"Builds no screens"**, không có luật dựng
+nào, không có renderer, và không có hai skill trên.
+
+**Không gì phát hiện ra.** `validate-packages`, `structure-check`, `flow-paths-check`,
+`foundations-check`, `pica-verify --phase design` — tất cả xanh. Vì:
+
+> `state.chain.completed` ghi **bước nào đã chạy**. Nó không ghi **vai nào chạy**.
+
+Một bước do đúng vai thực hiện và một bước do sai vai thực hiện **trông giống hệt nhau trong
+state**. Đó chính xác là lớp lỗi mà repo này đã năm lần tự viết check để chống — một chuỗi trần
+làm việc cấu trúc — chỉ khác là lần này chuỗi trần là *sự vắng mặt* của thông tin, không phải một
+giá trị sai.
+
+### Cái giá đo được
+
+Khi `pica-ux-engineer` cuối cùng được gọi và chạy đúng luật của nó, trong **một lượt**:
+
+- sinh mock data từ entity model — 34 người, 9 dự án, 87 việc, 40 sự kiện xác nhận, seeded
+- phát hiện `tokens.json` chỉ có **4** state group trong khi `state-model.md` đo được **5**
+  (thiếu `Backlog`) — khoảng lệch giữa đặc tả và token mà không ai thấy
+- dựng đủ **8 trạng thái khai báo × 2 viewport**, địa chỉ được bằng URL
+- làm nó **tương tác thật**: chọn từng việc, cảnh báo bất khả nghịch, đoạn công bố FR-16(a) đúng
+  khoảnh khắc bảo chứng — **bốn phát hiện của evaluator được giải quyết cùng lúc**
+- tìm ra ba lỗi chỉ render-và-bấm mới thấy: `container-type` thiếu `container-name` khiến mọi
+  luật `@container` chết âm thầm và tiêu đề vỡ xuống một ký tự mỗi dòng ở 390px; tab 47px thiếu
+  đúng 1px so với sàn; nút xác nhận dùng đồng hồ máy thật thay vì `NOW` cố định
+- quét **152 tổ hợp khổ × trạng thái** từ 320 đến 2560
+
+Toàn bộ đầu ra của 5 phase — **4.563 dòng** — đã nằm sẵn suốt thời gian đó. Nó chưa bao giờ được
+giao cho vai đáng lẽ tiêu thụ nó.
+
+### Hướng sửa (chưa làm)
+
+`chain.completed` nên ghi cặp `{ step, role }` thay vì chỉ `step`. Rồi một check đối chiếu từng
+cặp với bảng phân vai trong `picaflow.md` và fail khi một bước được thực hiện bởi vai không sở
+hữu nó. Rẻ, và nó bắt đúng thứ đã xảy ra ở đây.
+
+Lưu ý một điều khó chịu: điều phối viên **đọc bảng đó** ở đầu lượt chạy. Biết mà vẫn đi sai, và
+không có gì hỏi lại. Đó là lý do nó phải là một check chứ không phải một dòng tài liệu — cùng bài
+học với E17.
