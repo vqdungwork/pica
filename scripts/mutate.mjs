@@ -282,6 +282,10 @@ const M = [
   // structure-check
   ["lofi-traced",     "ux-designer/scripts/structure-check.mjs", ["html/structure", S], "@html/structure", (s) => { s.useCases = s.useCases.filter((u) => u.id !== "UC-01"); s.useCases.push({ id: "UC-77", name: "something else", actor: "account holder", tracesTo: ["BR-01"], touches: [{ entity: "payment", ops: "cr" }, { entity: "approval", ops: "cru" }] }); }],
   ["lofi-states",     "ux-designer/scripts/structure-check.mjs", ["html/structure", S], "@html/structure", (s) => { s.structureExemptions = []; }],
+  /* A state declared and drawn nowhere. Found by a blind evaluator on a project whose lo-fi boards
+     carried all seventeen sections and whose final screen carried none of them: structure-check
+     holds the wireframes, and nothing held what replaced them. */
+  ["screen-states",   "ux-engineer/scripts/screen-states-check.mjs", ["html", S], "@html", (s) => { (s.screens?.[0]?.states || []).push("a-state-nothing-draws"); }],
 
   // foundations-check
   ["contrast-floor",    "ux-engineer/scripts/foundations-check.mjs", ["html/design-system.html", "tokens/tokens.json", S], "direction", (s) => { s.audience.floors.contrastRatio = 21; }],
