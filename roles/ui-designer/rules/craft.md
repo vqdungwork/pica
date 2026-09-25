@@ -73,6 +73,23 @@ For anything that summarises — a stat tile, a KPI row, a meter, any chart at a
 and a runnable palette validator, and it is design-system agnostic, so it consumes this project's
 tokens unchanged. pica does not restate it here and must not drift from it.
 
+## Load the skill, do not summarise it
+
+<!-- enforced-by: none — judgement, not decidable by a script -->
+
+Claude ships `dataviz` for exactly the surfaces this role builds badly: a stat row, a meter, a
+summary, a chart. It carries a form heuristic that answers *is this even a chart*, a colour
+formula, mark specs, an anti-pattern catalogue, and a palette validator you run rather than reason
+about.
+
+On the engagement these rules come from it was loaded once — by a coordinator, who then reduced it
+to four bullet points in a brief. The method never reached the build. The resulting report carried
+**26 displayed strings of prose against 4 graphic marks**, passed every floor, and the client called
+it a wall of text.
+
+Four bullets from a skill is not the skill. Load it, work through it, and let it change what you
+build. pica deliberately does not restate its contents here, so there is nothing to read instead.
+
 ## A report that must be read has failed
 
 <!-- enforced-by: none — judgement, not decidable by a script -->
