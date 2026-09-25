@@ -61,8 +61,9 @@ as a researcher who names the design direction.
 
 ## Estimate your own line, and only your own
 
-When phase 5 runs you produce three points for **discovery** and nothing else. Load
-`roles/estimate/rules/estimation.md` for the method.
+When phase 5 runs you produce three points for **discovery** and nothing else. There is no estimation rule to load: the `estimate` role and its
+`estimation.md` were removed before 3.0.0 and this reference survived the rename, pointing at a
+file that exists nowhere in this repository. Estimate from what you know about your own trade.
 
 You estimate it because you know how many people had to be recruited and how many cancelled. On
 one project nine of fourteen scheduled interviews were rescheduled at least once and two never

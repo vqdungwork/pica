@@ -79,8 +79,9 @@ another role's screen. Measurement and eyes catch different things.
 
 ## Estimate your own line, and only your own
 
-When phase 5 runs, you produce three points for **design** and nothing else. Load
-`roles/estimate/rules/estimation.md` for the method.
+When phase 5 runs, you produce three points for **design** and nothing else. There is no estimation rule to load: the `estimate` role and its
+`estimation.md` were removed before 3.0.0 and this reference survived the rename, pointing at a
+file that exists nowhere in this repository. Estimate from what you know about your own trade.
 
 You estimate it because you know how many screens, at how many viewports, in how many states. Until 0.9.2 a single estimator priced every trade, which is one
 agent guessing at work it will never do: a number with a signature and no knowledge behind it.

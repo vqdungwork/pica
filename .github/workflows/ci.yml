@@ -103,6 +103,14 @@ jobs:
       - name: command scripts resolve
         run: node scripts/command-script-check.mjs
 
+      # validate-packages holds that a DECLARED file exists; command-script-check holds that
+      # an INVOKED script exists. This holds the third form: a file a human is TOLD to read.
+      # Nine agents — nearly every role — instructed their reader to load
+      # roles/estimate/rules/estimation.md, a file removed before 3.0.0. Every role's estimation
+      # step ran on nothing since, and nothing said so. Sixth instance of one class.
+      - name: references resolve
+        run: node scripts/reference-check.mjs
+
       # A check must report on the project it was pointed at, not on whichever repository
       # encloses it. impl-check did the latter until 1.2.3, and its credential scan passed
       # having scanned nothing.

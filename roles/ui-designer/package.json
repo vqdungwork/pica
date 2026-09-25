@@ -5,6 +5,7 @@
   "owns": {
     "commands": [],
     "rules": [
+      "craft.md",
       "direction.md"
     ],
     "scripts": [
