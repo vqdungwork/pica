@@ -31,7 +31,15 @@ import { fileURLToPath } from "url";
 import { createRequire } from "module";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const PKG = path.join(ROOT, "packages");
+/* Two roots since 3.0.0: the runtime at <root>/core and the roles under <root>/roles.
+   A mutation names its script as "<package>/scripts/<file>.mjs", so the package half
+   decides which root it resolves against. This was a bare "packages" string, which is
+   why a rename that caught every "packages/" left it behind and only the mutation suite
+   on CI noticed. */
+const pkgScript = (rel) => {
+  const [pkg, ...rest] = rel.split("/");
+  return path.join(ROOT, pkg === "core" ? "core" : path.join("roles", pkg), ...rest);
+};
 const args = process.argv.slice(2);
 const FIXTURE = args.includes("--fixture");
 const onlyAt = args.indexOf("--only");
@@ -81,7 +89,7 @@ function makeFixture() {
    * would drift the way a copied field drifts. Conditional on playwright, and it says so
    * when it cannot. */
   try {
-    const args = [path.join(PKG, "html/scripts/capture-html-reference.mjs"),
+    const args = [pkgScript("ux-engineer/scripts/capture-html-reference.mjs"),
       "--dir", "html", "--out", ".audit"];
     try {
       args.push("--playwright", path.dirname(createRequire(import.meta.url).resolve("playwright")));
@@ -114,7 +122,7 @@ const REF = path.join(DIR, ".audit", "html-reference.json");
 const hasCapture = fs.existsSync(REF);
 
 const run = (script, argv) => {
-  try { execFileSync("node", [path.join(PKG, script), ...argv], { encoding: "utf8", cwd: DIR }); return ""; }
+  try { execFileSync("node", [pkgScript(script), ...argv], { encoding: "utf8", cwd: DIR }); return ""; }
   catch (e) { return (e.stdout || "") + (e.stderr || ""); }
 };
 
@@ -130,158 +138,158 @@ const M = [
    *
    * Two earlier versions of this mutation tested the guarantee the file's HEADER claimed
    * rather than the one its code held, and both silently caught nothing. */
-  ["glossary-closure", "analyst/scripts/trace-check.mjs", [S], "glossary", (s) => {
+  ["glossary-closure", "business-analyst/scripts/trace-check.mjs", [S], "glossary", (s) => {
     s.glossary[0].notOurTerm = [...(s.glossary[0].notOurTerm || []), "flange"];
     s.businessRules[0].rule = "Every flange must be recorded before dispatch.";
   }],
-  ["rule-enforcement", "analyst/scripts/trace-check.mjs", [S], "businessRules", (s) => delete s.businessRules[0].enforcedBy],
-  ["use-case-trace",   "analyst/scripts/trace-check.mjs", [S], "useCases", (s) => delete s.useCases[0].tracesTo],
-  ["entity-terms",     "analyst/scripts/trace-check.mjs", [S], "domainModel", (s) => s.domainModel.push({ entity: "widget", attributes: [] })],
-  ["as-is-present",    "analyst/scripts/trace-check.mjs", [S], "asIs", (s) => delete s.asIs],
-  ["assumption-radius","analyst/scripts/trace-check.mjs", [S], "assumptions", (s) => delete s.assumptions[0].affects],
-  ["exclusions-asked", "analyst/scripts/trace-check.mjs", [S], null, (s) => s.exclusionsConfirmed = false],
+  ["rule-enforcement", "business-analyst/scripts/trace-check.mjs", [S], "businessRules", (s) => delete s.businessRules[0].enforcedBy],
+  ["use-case-trace",   "business-analyst/scripts/trace-check.mjs", [S], "useCases", (s) => delete s.useCases[0].tracesTo],
+  ["entity-terms",     "business-analyst/scripts/trace-check.mjs", [S], "domainModel", (s) => s.domainModel.push({ entity: "widget", attributes: [] })],
+  ["as-is-present",    "business-analyst/scripts/trace-check.mjs", [S], "asIs", (s) => delete s.asIs],
+  ["assumption-radius","business-analyst/scripts/trace-check.mjs", [S], "assumptions", (s) => delete s.assumptions[0].affects],
+  ["exclusions-asked", "business-analyst/scripts/trace-check.mjs", [S], null, (s) => s.exclusionsConfirmed = false],
   // industry-check
-  ["industry-known",   "analyst/scripts/industry-check.mjs", [S], null, (s) => { s.field = "assorted things"; delete s.industry.key; }],
+  ["industry-known",   "business-analyst/scripts/industry-check.mjs", [S], null, (s) => { s.field = "assorted things"; delete s.industry.key; }],
 
   // archetype-check
-  ["archetype-declared", "analyst/scripts/archetype-check.mjs", [S], "applications", (s) => { delete s.applications[0].archetype; delete s.archetype; }],
-  ["archetype-resolved", "analyst/scripts/archetype-check.mjs", [S], "applications", (s) => { s.applications[0].archetype = "widget-thing"; }],
-  ["archetype-ambiguous","analyst/scripts/archetype-check.mjs", [S], "applications", (s) => { s.applications[0].archetype = "platform"; }],
+  ["archetype-declared", "business-analyst/scripts/archetype-check.mjs", [S], "applications", (s) => { delete s.applications[0].archetype; delete s.archetype; }],
+  ["archetype-resolved", "business-analyst/scripts/archetype-check.mjs", [S], "applications", (s) => { s.applications[0].archetype = "widget-thing"; }],
+  ["archetype-ambiguous","business-analyst/scripts/archetype-check.mjs", [S], "applications", (s) => { s.applications[0].archetype = "platform"; }],
 
   // audience-check
-  ["audience-resolved",  "analyst/scripts/audience-check.mjs", [S], "audience", (s) => { s.audience.dimensions.age.value = "middle-aged"; }],
-  ["audience-dimensions","analyst/scripts/audience-check.mjs", [S], "audience", (s) => { delete s.audience.dimensions.literacy; }],
-  ["audience-floors",    "analyst/scripts/audience-check.mjs", [S], "audience", (s) => { s.audience.dimensions.age.value = "older-adults"; }],
-  ["audience-evidence",  "analyst/scripts/audience-check.mjs", [S], "audience", (s) => { delete s.audience.dimensions.region.evidence; }],
-  ["audience-ambiguous", "analyst/scripts/audience-check.mjs", [S], "audience", (s) => { s.audience.dimensions.region.value = "asia"; }],
+  ["audience-resolved",  "business-analyst/scripts/audience-check.mjs", [S], "audience", (s) => { s.audience.dimensions.age.value = "middle-aged"; }],
+  ["audience-dimensions","business-analyst/scripts/audience-check.mjs", [S], "audience", (s) => { delete s.audience.dimensions.literacy; }],
+  ["audience-floors",    "business-analyst/scripts/audience-check.mjs", [S], "audience", (s) => { s.audience.dimensions.age.value = "older-adults"; }],
+  ["audience-evidence",  "business-analyst/scripts/audience-check.mjs", [S], "audience", (s) => { delete s.audience.dimensions.region.evidence; }],
+  ["audience-ambiguous", "business-analyst/scripts/audience-check.mjs", [S], "audience", (s) => { s.audience.dimensions.region.value = "asia"; }],
 
   // process-check
-  ["notation-named",   "analyst/scripts/process-check.mjs", [S], "toBe", (s) => { s.toBe.notation = "uml-activity"; }],
-  ["notation-named",   "analyst/scripts/process-check.mjs", [S], "toBe", (s) => { delete s.toBe.notationWhy; }],
-  ["activity-laned",   "analyst/scripts/process-check.mjs", [S], "toBe", (s) => { delete s.toBe.nodes.find((n) => n.id === "raise").lane; }],
-  ["gateway-forks",    "analyst/scripts/process-check.mjs", [S], "toBe", (s) => { s.toBe.edges = s.toBe.edges.filter((e) => !(e.from === "decide" && e.to === "amend")); }],
-  ["no-dead-end",      "analyst/scripts/process-check.mjs", [S], "toBe", (s) => { s.toBe.edges = s.toBe.edges.filter((e) => e.from !== "record"); }],
-  ["activity-traced",  "analyst/scripts/process-check.mjs", [S], "toBe", (s) => { delete s.toBe.nodes.find((n) => n.id === "raise").tracesTo; }],
+  ["notation-named",   "systems-analyst/scripts/process-check.mjs", [S], "toBe", (s) => { s.toBe.notation = "uml-activity"; }],
+  ["notation-named",   "systems-analyst/scripts/process-check.mjs", [S], "toBe", (s) => { delete s.toBe.notationWhy; }],
+  ["activity-laned",   "systems-analyst/scripts/process-check.mjs", [S], "toBe", (s) => { delete s.toBe.nodes.find((n) => n.id === "raise").lane; }],
+  ["gateway-forks",    "systems-analyst/scripts/process-check.mjs", [S], "toBe", (s) => { s.toBe.edges = s.toBe.edges.filter((e) => !(e.from === "decide" && e.to === "amend")); }],
+  ["no-dead-end",      "systems-analyst/scripts/process-check.mjs", [S], "toBe", (s) => { s.toBe.edges = s.toBe.edges.filter((e) => e.from !== "record"); }],
+  ["activity-traced",  "systems-analyst/scripts/process-check.mjs", [S], "toBe", (s) => { delete s.toBe.nodes.find((n) => n.id === "raise").tracesTo; }],
 
   // permissions-check
-  ["cell-answered",    "analyst/scripts/permissions-check.mjs", [S], "rolesPermissions", (s) => { delete s.rolesPermissions["account holder"].payment; }],
-  ["entity-owned",     "analyst/scripts/permissions-check.mjs", [S], "rolesPermissions", (s) => { s.rolesPermissions["account holder"].payment = "r"; }],
-  ["role-known",       "analyst/scripts/permissions-check.mjs", [S], "rolesPermissions", (s) => { s.rolesPermissions["shadow admin"] = { payment: "crud", approval: "crud" }; }],
-  ["use-case-backs",   "analyst/scripts/permissions-check.mjs", [S], "rolesPermissions", (s) => { s.rolesPermissions["compliance officer"].payment = "rd"; }],
+  ["cell-answered",    "systems-analyst/scripts/permissions-check.mjs", [S], "rolesPermissions", (s) => { delete s.rolesPermissions["account holder"].payment; }],
+  ["entity-owned",     "systems-analyst/scripts/permissions-check.mjs", [S], "rolesPermissions", (s) => { s.rolesPermissions["account holder"].payment = "r"; }],
+  ["role-known",       "systems-analyst/scripts/permissions-check.mjs", [S], "rolesPermissions", (s) => { s.rolesPermissions["shadow admin"] = { payment: "crud", approval: "crud" }; }],
+  ["use-case-backs",   "systems-analyst/scripts/permissions-check.mjs", [S], "rolesPermissions", (s) => { s.rolesPermissions["compliance officer"].payment = "rd"; }],
 
   // requirements-check
-  ["nfr-measured",     "analyst/scripts/requirements-check.mjs", [S], "nfr", (s) => { s.nfr[0].requirement = "the approval queue is fast"; }],
-  ["nfr-measured",     "analyst/scripts/requirements-check.mjs", [S], "nfr", (s) => { delete s.nfr[0].measuredBy; }],
-  ["classified",       "analyst/scripts/requirements-check.mjs", [S], "requirements", (s) => { delete s.requirements[0].class; }],
-  ["transition-flagged","analyst/scripts/requirements-check.mjs", [S], "requirements", (s) => { delete s.requirements.find((r) => r.class === "transition").untilWhen; }],
-  ["state-closed",     "analyst/scripts/requirements-check.mjs", [S], "stateModel", (s) => { delete s.stateModel[0].states.find((x) => x.name === "held").to; }],
-  ["state-closed",     "analyst/scripts/requirements-check.mjs", [S], "stateModel", (s) => { s.stateModel[0].states.find((x) => x.name === "approved").terminal = false; }],
+  ["nfr-measured",     "business-analyst/scripts/requirements-check.mjs", [S], "nfr", (s) => { s.nfr[0].requirement = "the approval queue is fast"; }],
+  ["nfr-measured",     "business-analyst/scripts/requirements-check.mjs", [S], "nfr", (s) => { delete s.nfr[0].measuredBy; }],
+  ["classified",       "business-analyst/scripts/requirements-check.mjs", [S], "requirements", (s) => { delete s.requirements[0].class; }],
+  ["transition-flagged","business-analyst/scripts/requirements-check.mjs", [S], "requirements", (s) => { delete s.requirements.find((r) => r.class === "transition").untilWhen; }],
+  ["state-closed",     "business-analyst/scripts/requirements-check.mjs", [S], "stateModel", (s) => { delete s.stateModel[0].states.find((x) => x.name === "held").to; }],
+  ["state-closed",     "business-analyst/scripts/requirements-check.mjs", [S], "stateModel", (s) => { s.stateModel[0].states.find((x) => x.name === "approved").terminal = false; }],
 
   // journey-check
-  ["lane-covered",     "analyst/scripts/journey-check.mjs", [S], "journeys", (s) => { s.journeys[0].actor = "somebody with no lane"; }],
-  ["stage-derived",    "analyst/scripts/journey-check.mjs", [S], "journeys", (s) => { s.journeys[0].stages[0].from = ["a step that is not in the lane"]; }],
-  ["pain-sourced",     "analyst/scripts/journey-check.mjs", [S], "journeys", (s) => { delete s.journeys[0].stages[0].pain[0].nOf; }],
-  ["pain-sourced",     "analyst/scripts/journey-check.mjs", [S], "journeys", (s) => { delete s.journeys[0].stages[0].pain[0].class; }],
-  ["delta-stated",     "analyst/scripts/journey-check.mjs", [S], "journeys", (s) => { delete s.delta; }],
-  ["conventions",      "analyst/scripts/industry-check.mjs", [S], "industry", (s) => s.industry.conventions.pop()],
-  ["stakeholders",     "analyst/scripts/industry-check.mjs", [S], "stakeholders", (s) => s.stakeholders = []],
+  ["lane-covered",     "systems-analyst/scripts/journey-check.mjs", [S], "journeys", (s) => { s.journeys[0].actor = "somebody with no lane"; }],
+  ["stage-derived",    "systems-analyst/scripts/journey-check.mjs", [S], "journeys", (s) => { s.journeys[0].stages[0].from = ["a step that is not in the lane"]; }],
+  ["pain-sourced",     "systems-analyst/scripts/journey-check.mjs", [S], "journeys", (s) => { delete s.journeys[0].stages[0].pain[0].nOf; }],
+  ["pain-sourced",     "systems-analyst/scripts/journey-check.mjs", [S], "journeys", (s) => { delete s.journeys[0].stages[0].pain[0].class; }],
+  ["delta-stated",     "systems-analyst/scripts/journey-check.mjs", [S], "journeys", (s) => { delete s.delta; }],
+  ["conventions",      "business-analyst/scripts/industry-check.mjs", [S], "industry", (s) => s.industry.conventions.pop()],
+  ["stakeholders",     "business-analyst/scripts/industry-check.mjs", [S], "stakeholders", (s) => s.stakeholders = []],
   // domain-check
-  ["all-categories",   "analyst/scripts/domain-check.mjs", [S], "domainConstraints", (s) => s.domainConstraints = (s.domainConstraints || []).slice(1)],
-  ["sourced",          "analyst/scripts/domain-check.mjs", [S], "domainConstraints", (s) => s.domainConstraints[0].source = "n/a"],
+  ["all-categories",   "systems-analyst/scripts/domain-check.mjs", [S], "domainConstraints", (s) => s.domainConstraints = (s.domainConstraints || []).slice(1)],
+  ["sourced",          "systems-analyst/scripts/domain-check.mjs", [S], "domainConstraints", (s) => s.domainConstraints[0].source = "n/a"],
   // problem-check
   /* Two mutations on `metric`, deliberately: absent and VOID are different defects, and
    * the second is the one that defeated an earlier revision of industry-check end to end
    * by writing "n/a" into every field it required. */
-  ["metric",              "analyst/scripts/problem-check.mjs", [S], "problem", (s) => delete s.problem.metric],
-  ["metric",              "analyst/scripts/problem-check.mjs", [S], "problem", (s) => s.problem.metric = "n/a"],
-  ["target",              "analyst/scripts/problem-check.mjs", [S], "problem", (s) => s.problem.target = s.problem.baseline],
-  ["baseline",            "analyst/scripts/problem-check.mjs", [S], "problem", (s) => delete s.problem.baselineMeasuredBy],
-  ["guardrail",           "analyst/scripts/problem-check.mjs", [S], "problem", (s) => s.problem.guardrails = []],
-  ["counter-evidence",    "analyst/scripts/problem-check.mjs", [S], "problem", (s) => s.problem.counterEvidence = "n/a"],
-  ["hmw-generative",      "analyst/scripts/problem-check.mjs", [S], "problem", (s) => s.problem.hmw = "How might we build an approvals dashboard?"],
-  ["tier-declared",       "analyst/scripts/problem-check.mjs", [S], "workPackages", (s) => delete s.workPackages.approvals.tier],
-  ["freeze-attributed",   "analyst/scripts/problem-check.mjs", [S, "--freeze"], "workPackages", (s) => delete s.frozenBy],
+  ["metric",              "business-analyst/scripts/problem-check.mjs", [S], "problem", (s) => delete s.problem.metric],
+  ["metric",              "business-analyst/scripts/problem-check.mjs", [S], "problem", (s) => s.problem.metric = "n/a"],
+  ["target",              "business-analyst/scripts/problem-check.mjs", [S], "problem", (s) => s.problem.target = s.problem.baseline],
+  ["baseline",            "business-analyst/scripts/problem-check.mjs", [S], "problem", (s) => delete s.problem.baselineMeasuredBy],
+  ["guardrail",           "business-analyst/scripts/problem-check.mjs", [S], "problem", (s) => s.problem.guardrails = []],
+  ["counter-evidence",    "business-analyst/scripts/problem-check.mjs", [S], "problem", (s) => s.problem.counterEvidence = "n/a"],
+  ["hmw-generative",      "business-analyst/scripts/problem-check.mjs", [S], "problem", (s) => s.problem.hmw = "How might we build an approvals dashboard?"],
+  ["tier-declared",       "business-analyst/scripts/problem-check.mjs", [S], "workPackages", (s) => delete s.workPackages.approvals.tier],
+  ["freeze-attributed",   "business-analyst/scripts/problem-check.mjs", [S, "--freeze"], "workPackages", (s) => delete s.frozenBy],
   // schema-check
-  ["sample-size",      "research/scripts/schema-check.mjs", [S], "measured", (s) => s.measured = s.measured.slice(0, 2)],
-  ["provenance",       "research/scripts/schema-check.mjs", [S], "measured", (s) => delete s.measured[0].method],
+  ["sample-size",      "design-researcher/scripts/schema-check.mjs", [S], "measured", (s) => s.measured = s.measured.slice(0, 2)],
+  ["provenance",       "design-researcher/scripts/schema-check.mjs", [S], "measured", (s) => delete s.measured[0].method],
   // discover-check
-  ["segment-defined",    "discover/scripts/discover-check.mjs", [S], "discovery", (s) => delete s.discovery.segments[0].context],
-  ["users-sample-size",  "discover/scripts/discover-check.mjs", [S], "discovery", (s) => { s.discovery.segments[0].interviews = 2; }],
-  ["pain-frequency",     "discover/scripts/discover-check.mjs", [S], "discovery", (s) => { s.discovery.painPoints[0].nOf = [9, 5]; }],
-  ["evidence-class",     "discover/scripts/discover-check.mjs", [S], "discovery", (s) => { s.discovery.painPoints[2].class = "inferred"; s.discovery.painPoints[2].confidence = "high"; }],
-  ["said-no",            "discover/scripts/discover-check.mjs", [S], "discovery", (s) => { s.discovery.saidNo = []; }],
-  ["stakeholder-fears",  "discover/scripts/discover-check.mjs", [S], "stakeholders", (s) => delete s.stakeholders[1].fears],
-  ["buyer-named",        "discover/scripts/discover-check.mjs", [S], "discovery", (s) => { for (const g of s.discovery.segments) g.isBuyer = false; }],
-  ["competitor-pricing", "discover/scripts/discover-check.mjs", [S], "discovery", (s) => { s.discovery.competitors[1].pricing = "unknown"; }],
-  ["market-bottom-up",   "discover/scripts/discover-check.mjs", [S], "discovery", (s) => { s.discovery.market.size = 950000; }],
-  ["users-provenance",   "discover/scripts/discover-check.mjs", [S], "discovery", (s) => delete s.discovery.painPoints[1].source],
+  ["segment-defined",    "ux-researcher/scripts/discover-check.mjs", [S], "discovery", (s) => delete s.discovery.segments[0].context],
+  ["users-sample-size",  "ux-researcher/scripts/discover-check.mjs", [S], "discovery", (s) => { s.discovery.segments[0].interviews = 2; }],
+  ["pain-frequency",     "ux-researcher/scripts/discover-check.mjs", [S], "discovery", (s) => { s.discovery.painPoints[0].nOf = [9, 5]; }],
+  ["evidence-class",     "ux-researcher/scripts/discover-check.mjs", [S], "discovery", (s) => { s.discovery.painPoints[2].class = "inferred"; s.discovery.painPoints[2].confidence = "high"; }],
+  ["said-no",            "ux-researcher/scripts/discover-check.mjs", [S], "discovery", (s) => { s.discovery.saidNo = []; }],
+  ["stakeholder-fears",  "ux-researcher/scripts/discover-check.mjs", [S], "stakeholders", (s) => delete s.stakeholders[1].fears],
+  ["buyer-named",        "ux-researcher/scripts/discover-check.mjs", [S], "discovery", (s) => { for (const g of s.discovery.segments) g.isBuyer = false; }],
+  ["competitor-pricing", "ux-researcher/scripts/discover-check.mjs", [S], "discovery", (s) => { s.discovery.competitors[1].pricing = "unknown"; }],
+  ["market-bottom-up",   "ux-researcher/scripts/discover-check.mjs", [S], "discovery", (s) => { s.discovery.market.size = 950000; }],
+  ["users-provenance",   "ux-researcher/scripts/discover-check.mjs", [S], "discovery", (s) => delete s.discovery.painPoints[1].source],
   /* Strip the PROVENANCE from a driver rather than deleting the driver. Deleting it also
    * orphaned the sensitivity entry naming it, so one missing driver reported as two
    * findings and sent the reader in two directions. An unsourced driver is the defect
    * this check is actually written for. */
   // concept-check  (state only: divergence happens before any screen exists)
-  ["concepts-diverged", "html/scripts/concept-check.mjs", [S], "workPackages", (s) => { s.workPackages.approvals.concepts = s.workPackages.approvals.concepts.slice(0, 1); }],
-  ["concepts-diverged", "html/scripts/concept-check.mjs", [S], "workPackages", (s) => { for (const c of s.workPackages.approvals.concepts) c.servesBadly = []; }],
-  ["concepts-diverged", "html/scripts/concept-check.mjs", [S], "workPackages", (s) => { for (const c of s.workPackages.approvals.concepts) c.dropped = false; }],
+  ["concepts-diverged", "ux-engineer/scripts/concept-check.mjs", [S], "workPackages", (s) => { s.workPackages.approvals.concepts = s.workPackages.approvals.concepts.slice(0, 1); }],
+  ["concepts-diverged", "ux-engineer/scripts/concept-check.mjs", [S], "workPackages", (s) => { for (const c of s.workPackages.approvals.concepts) c.servesBadly = []; }],
+  ["concepts-diverged", "ux-engineer/scripts/concept-check.mjs", [S], "workPackages", (s) => { for (const c of s.workPackages.approvals.concepts) c.dropped = false; }],
   // proposal-check
-  ["slot-addressed",   "core/scripts/proposal-check.mjs", [S], "proposals", (s) => s.proposals = s.proposals.filter((p) => p.slot !== "S1")],
-  ["axis-named",       "core/scripts/proposal-check.mjs", [S], "proposals", (s) => delete s.proposals.find((p) => p.presented)?.axis],
-  ["provenance",       "core/scripts/proposal-check.mjs", [S], "proposals", (s) => delete s.proposals.find((p) => p.presented)?.options[0].from],
-  ["choice-recorded",  "core/scripts/proposal-check.mjs", [S], "proposals", (s) => delete s.proposals.find((p) => p.presented)?.by],
+  ["slot-addressed",   "product-manager/scripts/proposal-check.mjs", [S], "proposals", (s) => s.proposals = s.proposals.filter((p) => p.slot !== "S1")],
+  ["axis-named",       "product-manager/scripts/proposal-check.mjs", [S], "proposals", (s) => delete s.proposals.find((p) => p.presented)?.axis],
+  ["provenance",       "product-manager/scripts/proposal-check.mjs", [S], "proposals", (s) => delete s.proposals.find((p) => p.presented)?.options[0].from],
+  ["choice-recorded",  "product-manager/scripts/proposal-check.mjs", [S], "proposals", (s) => delete s.proposals.find((p) => p.presented)?.by],
   // close-check
-  ["brief-cold",         "core/scripts/close-check.mjs", [S], "closeout", (s) => s.closeout.briefReadFrom = "docs/contract.md"],
+  ["brief-cold",         "product-manager/scripts/close-check.mjs", [S], "closeout", (s) => s.closeout.briefReadFrom = "docs/contract.md"],
   /* Recorded and then gone. A declared absence excuses a brief nobody ever supplied; it
    * cannot excuse one that was written down and lost, because that one was supposed to
    * survive the project. */
-  ["brief-cold",         "core/scripts/close-check.mjs", [S], "closeout", (s) => { s.briefPath = "docs/gone.md"; s.briefAbsent = "the client never sent one, which is recorded here so it is not read as an oversight"; }],
-  ["nothing-excluded",   "core/scripts/close-check.mjs", [S], "closeout", (s) => s.closeout.shipped.push("Card issuing")],
-  ["metric-compared",    "core/scripts/close-check.mjs", [S], "closeout", (s) => delete s.closeout.metricNow],
-  ["committed-shipped",  "core/scripts/close-check.mjs", [S], "closeout", (s) => { s.closeout.shipped = []; }],
-  ["assumption-outcome", "core/scripts/close-check.mjs", [S], "assumptions", (s) => delete s.assumptions[0].outcome],
+  ["brief-cold",         "product-manager/scripts/close-check.mjs", [S], "closeout", (s) => { s.briefPath = "docs/gone.md"; s.briefAbsent = "the client never sent one, which is recorded here so it is not read as an oversight"; }],
+  ["nothing-excluded",   "product-manager/scripts/close-check.mjs", [S], "closeout", (s) => s.closeout.shipped.push("Card issuing")],
+  ["metric-compared",    "product-manager/scripts/close-check.mjs", [S], "closeout", (s) => delete s.closeout.metricNow],
+  ["committed-shipped",  "product-manager/scripts/close-check.mjs", [S], "closeout", (s) => { s.closeout.shipped = []; }],
+  ["assumption-outcome", "product-manager/scripts/close-check.mjs", [S], "assumptions", (s) => delete s.assumptions[0].outcome],
   /* Wrong WITHOUT a cost, not merely wrong. What it cost is the whole value of having
    * written the assumption down, and it is the first thing dropped in a hurried closeout. */
-  ["assumption-outcome", "core/scripts/close-check.mjs", [S], "assumptions", (s) => { s.assumptions[0].outcome = "wrong"; }],
+  ["assumption-outcome", "product-manager/scripts/close-check.mjs", [S], "assumptions", (s) => { s.assumptions[0].outcome = "wrong"; }],
   /* Exempted and pointing at no register. A dispute that excuses a check without naming
    * where the exemption lives IS the ignored finding it was built to prevent, wearing
    * better paperwork. */
-  ["check-disputed",     "core/scripts/close-check.mjs", [S], "checkDisputes", (s) => delete s.checkDisputes[0].exemptionIn],
-  ["check-disputed",     "core/scripts/close-check.mjs", [S], "checkDisputes", (s) => { s.checkDisputes[0].argument = "we disagreed"; }],
-  ["delivered-frozen",   "core/scripts/close-check.mjs", [S], "closeout", (s) => { s.delivered = true; s.workPackages.approvals.htmlApproved = false; }],
+  ["check-disputed",     "product-manager/scripts/close-check.mjs", [S], "checkDisputes", (s) => delete s.checkDisputes[0].exemptionIn],
+  ["check-disputed",     "product-manager/scripts/close-check.mjs", [S], "checkDisputes", (s) => { s.checkDisputes[0].argument = "we disagreed"; }],
+  ["delivered-frozen",   "product-manager/scripts/close-check.mjs", [S], "closeout", (s) => { s.delivered = true; s.workPackages.approvals.htmlApproved = false; }],
   // capture-reading checks
-  ["direction",        "html/scripts/verify-html.mjs", [REF, S], "capture+direction", (s) => s.direction.assert["type.roles.max"] = 1],
-  ["exemption-used",   "html/scripts/contrast-check.mjs", [REF, S], "capture", (s) => s.contrastExemptions = [{ where: "nothing here", why: "a stale exemption nobody removed", by: "somebody" }]],
-  ["uc-covered",       "html/scripts/coverage-check.mjs", [REF, S], "capture", (s) => s.useCases.push({ id: "UC-99", name: "A use case nobody built", tracesTo: ["BR-01"] })],
+  ["direction",        "ux-engineer/scripts/verify-html.mjs", [REF, S], "capture+direction", (s) => s.direction.assert["type.roles.max"] = 1],
+  ["exemption-used",   "ux-engineer/scripts/contrast-check.mjs", [REF, S], "capture", (s) => s.contrastExemptions = [{ where: "nothing here", why: "a stale exemption nobody removed", by: "somebody" }]],
+  ["uc-covered",       "ux-engineer/scripts/coverage-check.mjs", [REF, S], "capture", (s) => s.useCases.push({ id: "UC-99", name: "A use case nobody built", tracesTo: ["BR-01"] })],
     /* spacing-check reads the TOKEN FILE first and falls back to state.spacingScale, so
    * mutating the fallback did nothing on any project that has tokens. Redirect the path
    * at a scale on which no real gap lands. */
   // font-check
-  ["family-declared",  "html/scripts/font-check.mjs", [REF, S], "capture", (s) => { delete s.direction.fontsWhy; }],
-  ["family-resolved",  "html/scripts/font-check.mjs", [REF, S], "capture", (s) => { s.direction.fonts.display = "Archivo, Helvetica, sans-serif"; }],
-  ["fallback-stated",  "html/scripts/font-check.mjs", [REF, S], "capture", (s) => { s.direction.fonts.body = "Archivo"; }],
+  ["family-declared",  "ui-designer/scripts/font-check.mjs", [REF, S], "capture", (s) => { delete s.direction.fontsWhy; }],
+  ["family-resolved",  "ui-designer/scripts/font-check.mjs", [REF, S], "capture", (s) => { s.direction.fonts.display = "Archivo, Helvetica, sans-serif"; }],
+  ["fallback-stated",  "ui-designer/scripts/font-check.mjs", [REF, S], "capture", (s) => { s.direction.fonts.body = "Archivo"; }],
 
   // state-coverage-check
-  ["state-captured",   "html/scripts/state-coverage-check.mjs", [REF, S], "capture", (s) => { s.stateExemptions = s.stateExemptions.filter((x) => x.state !== "returned"); }],
-  ["minimum-present",  "html/scripts/state-coverage-check.mjs", [REF, S], "capture", (s) => { s.stateExemptions = s.stateExemptions.filter((x) => x.state !== "error"); }],
-  ["excused-named",    "html/scripts/state-coverage-check.mjs", [REF, S], "capture", (s) => { s.stateExemptions.find((x) => x.state === "draft").why = "n/a"; }],
-  ["stale-exemption",  "html/scripts/state-coverage-check.mjs", [REF, S], "capture", (s) => { s.stateExemptions.push({ state: "a state the model never had", why: "a stale exemption nobody removed" }); }],
+  ["state-captured",   "ux-engineer/scripts/state-coverage-check.mjs", [REF, S], "capture", (s) => { s.stateExemptions = s.stateExemptions.filter((x) => x.state !== "returned"); }],
+  ["minimum-present",  "ux-engineer/scripts/state-coverage-check.mjs", [REF, S], "capture", (s) => { s.stateExemptions = s.stateExemptions.filter((x) => x.state !== "error"); }],
+  ["excused-named",    "ux-engineer/scripts/state-coverage-check.mjs", [REF, S], "capture", (s) => { s.stateExemptions.find((x) => x.state === "draft").why = "n/a"; }],
+  ["stale-exemption",  "ux-engineer/scripts/state-coverage-check.mjs", [REF, S], "capture", (s) => { s.stateExemptions.push({ state: "a state the model never had", why: "a stale exemption nobody removed" }); }],
 
   // direction-spread-check
-  ["three-offered",     "html/scripts/direction-spread-check.mjs", [S], "proposals", (s) => { const p = s.proposals.find((x) => x.slot === "S1"); p.options = p.options.slice(0, 2); }],
-  ["traditions-differ", "html/scripts/direction-spread-check.mjs", [S], "proposals", (s) => { const p = s.proposals.find((x) => x.slot === "S1"); p.options[1].tradition = p.options[0].tradition; }],
-  ["baseline-present",  "html/scripts/direction-spread-check.mjs", [S], "proposals", (s) => { for (const o of s.proposals.find((x) => x.slot === "S1").options) o.isSectorBaseline = false; }],
-  ["numbers-differ",    "html/scripts/direction-spread-check.mjs", [S], "proposals", (s) => { for (const o of s.proposals.find((x) => x.slot === "S1").options) o.asserts.radius = 8; }],
+  ["three-offered",     "ui-designer/scripts/direction-spread-check.mjs", [S], "proposals", (s) => { const p = s.proposals.find((x) => x.slot === "S1"); p.options = p.options.slice(0, 2); }],
+  ["traditions-differ", "ui-designer/scripts/direction-spread-check.mjs", [S], "proposals", (s) => { const p = s.proposals.find((x) => x.slot === "S1"); p.options[1].tradition = p.options[0].tradition; }],
+  ["baseline-present",  "ui-designer/scripts/direction-spread-check.mjs", [S], "proposals", (s) => { for (const o of s.proposals.find((x) => x.slot === "S1").options) o.isSectorBaseline = false; }],
+  ["numbers-differ",    "ui-designer/scripts/direction-spread-check.mjs", [S], "proposals", (s) => { for (const o of s.proposals.find((x) => x.slot === "S1").options) o.asserts.radius = 8; }],
 
   // structure-check
-  ["lofi-traced",     "html/scripts/structure-check.mjs", ["html/structure", S], "@html/structure", (s) => { s.useCases = s.useCases.filter((u) => u.id !== "UC-01"); s.useCases.push({ id: "UC-77", name: "something else", actor: "account holder", tracesTo: ["BR-01"], touches: [{ entity: "payment", ops: "cr" }, { entity: "approval", ops: "cru" }] }); }],
-  ["lofi-states",     "html/scripts/structure-check.mjs", ["html/structure", S], "@html/structure", (s) => { s.structureExemptions = []; }],
+  ["lofi-traced",     "ux-designer/scripts/structure-check.mjs", ["html/structure", S], "@html/structure", (s) => { s.useCases = s.useCases.filter((u) => u.id !== "UC-01"); s.useCases.push({ id: "UC-77", name: "something else", actor: "account holder", tracesTo: ["BR-01"], touches: [{ entity: "payment", ops: "cr" }, { entity: "approval", ops: "cru" }] }); }],
+  ["lofi-states",     "ux-designer/scripts/structure-check.mjs", ["html/structure", S], "@html/structure", (s) => { s.structureExemptions = []; }],
 
   // foundations-check
-  ["contrast-floor",    "html/scripts/foundations-check.mjs", ["html/design-system.html", "tokens/tokens.json", S], "direction", (s) => { s.audience.floors.contrastRatio = 21; }],
-  ["state-covered",     "html/scripts/foundations-check.mjs", ["html/design-system.html", "tokens/tokens.json", S], "direction", (s) => { s.direction.components[0].states.push("pressed"); }],
-  ["icon-set",          "html/scripts/foundations-check.mjs", ["html/design-system.html", "tokens/tokens.json", S], "direction", (s) => { delete s.direction.icons.licence; }],
-  ["icon-set",          "html/scripts/foundations-check.mjs", ["html/design-system.html", "tokens/tokens.json", S], "direction", (s) => { s.direction.icons.strokeWidth = "2"; }],
+  ["contrast-floor",    "ux-engineer/scripts/foundations-check.mjs", ["html/design-system.html", "tokens/tokens.json", S], "direction", (s) => { s.audience.floors.contrastRatio = 21; }],
+  ["state-covered",     "ux-engineer/scripts/foundations-check.mjs", ["html/design-system.html", "tokens/tokens.json", S], "direction", (s) => { s.direction.components[0].states.push("pressed"); }],
+  ["icon-set",          "ux-engineer/scripts/foundations-check.mjs", ["html/design-system.html", "tokens/tokens.json", S], "direction", (s) => { delete s.direction.icons.licence; }],
+  ["icon-set",          "ux-engineer/scripts/foundations-check.mjs", ["html/design-system.html", "tokens/tokens.json", S], "direction", (s) => { s.direction.icons.strokeWidth = "2"; }],
 
-  ["off-scale",        "html/scripts/spacing-check.mjs", [REF, S], "capture", (s) => {
+  ["off-scale",        "ux-engineer/scripts/spacing-check.mjs", [REF, S], "capture", (s) => {
     s.tokensPath = ".pica/mutant-tokens.json";
     /* A scale on which the EDGES still land and the gaps do not. A file with only
      * "--s-1": "7px" put every edge inset off-scale too, so one redirected token file
