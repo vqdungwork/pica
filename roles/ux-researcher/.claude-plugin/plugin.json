@@ -1,6 +1,6 @@
 {
   "name": "pica-ux-researcher",
-  "description": "pica discover: who uses it and what actually hurts, who can veto it and what they fear, what the field charges, and a market size derived from factors rather than asserted.",
+  "description": "pica UX researcher: who uses it and what actually hurts, who can veto it and what they fear, what the field charges, and a market size derived from factors rather than asserted.",
   "version": "3.0.0",
   "author": {
     "name": "Dung Vuong"
@@ -12,7 +12,7 @@
     "./commands"
   ],
   "agents": [
-    "./agents"
+    "./agents/pica-ux-researcher.md"
   ],
   "dependencies": [
     "pica-core"
