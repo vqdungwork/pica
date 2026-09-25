@@ -152,3 +152,39 @@ and it did not prevent it — because prose in a document is not a constraint on
 So: **an alert names a condition, not a person.** "Không có việc nào được xác nhận hôm nay" is a
 condition; a name is not. Where a person must appear, they appear the way they appear on every
 other row — in the supporting line, not the headline.
+
+## A fix belongs in the shape, not at the site
+
+<!-- enforced-by: none — judgement, not decidable by a script -->
+
+`craft.md` already says *delete the cause, do not override it where you happened to look* — that is
+about a defect spreading across breakpoints. This is the other axis: a defect spreading across
+**copies**.
+
+One engagement fixed the same container defect three times. A screen capped its column at 720px;
+the next screen reused the wrapper unchanged and inherited it; a third invented 960px the same way
+the first invented 720. Each fix landed at the site. The builder's own diagnosis was the sharpest
+sentence of the project: *"I copied the row's flex shape without copying the fix."*
+
+When a component or a layout shape is reused, **it carries its pre-fix state unless the fix went
+into the shared thing.** So after fixing anything twice, stop fixing and go build the shared
+primitive — one row component, one container decision, one place the next screen inherits rather
+than copies. That project built `ListRow` and the row defects stopped recurring; the container was
+never given the same treatment and recurred a third time.
+
+If you cannot name where the next screen would inherit the fix from, the fix is not finished.
+
+## Measure the glyph, not the box that holds it
+
+<!-- enforced-by: none — judgement, not decidable by a script -->
+
+A stretched container reports its own width, not the width of what is drawn inside it. Measuring
+scan distance from a flex container that claims all leftover space gives a number bearing no
+relation to how far the eye travels — on one project it produced a reported 16px for a gap that
+was really 678px, and the same error had already been made and corrected once in the same
+engagement.
+
+Measure from the rendered text — a `Range` around the glyphs, or the ink box — whenever the number
+is about what a person sees. Container geometry answers layout questions; it does not answer
+perceptual ones, and the two are easy to confuse precisely because both produce a confident number.
+
