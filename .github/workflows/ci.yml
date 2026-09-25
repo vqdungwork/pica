@@ -144,6 +144,18 @@ jobs:
       - name: rule coverage
         run: node scripts/rule-coverage-check.mjs
 
+      # mutate.mjs proves a check FIRES on its defect. It cannot prove a check nobody
+      # wrote a mutation for, and its summary line — "100 caught, 0 missed, 0 skipped" —
+      # reads as complete while covering 24 of 39. architecture-check was one of the
+      # fifteen, and its data-governed assertion failed unconditionally on every correctly
+      # shaped domain model for three releases underneath a green suite.
+      #
+      # Ratchets, like rule coverage, and for the same reason: a suite that is red on the
+      # day it lands teaches everyone to ignore the red. Adding a check without adding a
+      # mutation for it is what this stops.
+      - name: mutation coverage
+        run: node scripts/mutation-coverage-check.mjs
+
       # The gate is folded into the run rather than repeating it: mutate.mjs exits 0 with
       # mutations SKIPPED, so a green tick alone does not mean every check was proven.
       - name: mutation suite
