@@ -53,19 +53,25 @@ const README = read("README.md");
 const BANNER = read("assets/banner.svg");
 
 /* ---- derive ------------------------------------------------------------- */
-const pkgDir = path.join(ROOT, "packages");
-const pkgs = fs.readdirSync(pkgDir).filter((d) => fs.existsSync(path.join(pkgDir, d, "package.json")));
+/* Two directories hold packages now: the runtime at <root>/core, and the eleven roles under
+ * <root>/roles. Everything that used to read one directory reads both, so core is never
+ * silently dropped from validation. */
+const PKG_DIRS = [path.join(ROOT, "core"), path.join(ROOT, "roles")];
+const pkgPath = (name) => name === "core" ? path.join(ROOT, "core") : path.join(ROOT, "roles", name);
+const pkgNames = () => ["core", ...fs.readdirSync(path.join(ROOT, "roles"), { withFileTypes: true })
+  .filter((e) => e.isDirectory()).map((e) => e.name).sort()];
+const pkgs = pkgNames().filter((d) => fs.existsSync(path.join(pkgPath(d), "package.json")));
 
 let agents = 0, commands = 0, rules = 0;
 for (const p of pkgs) {
-  const m = JSON.parse(fs.readFileSync(path.join(pkgDir, p, "package.json"), "utf8"));
+  const m = JSON.parse(fs.readFileSync(path.join(pkgPath(p), "package.json"), "utf8"));
   const o = m.owns || {};
   agents += (o.agents || []).length;
   commands += (o.commands || []).length;
   rules += (o.rules || []).length;
 }
 
-const industries = JSON.parse(read("packages/analyst/data/industries.json"));
+const industries = JSON.parse(read("roles/business-analyst/data/industries.json"));
 const sectors = Object.keys(industries.industries).length;
 const ambiguous = Object.keys(industries.ambiguous).length;
 const names = Object.values(industries.industries).reduce((n, v) => n + (v.aka || []).length, 0) + sectors;
@@ -86,7 +92,7 @@ const checks = tableRows.reduce((a, b) => a + b, 0);
 /* ---- version: the manifests must agree before anything is compared to them ---- */
 console.log("the manifests agree with each other");
 {
-  const files = [".claude-plugin/plugin.json", ...pkgs.map((p) => `packages/${p}/.claude-plugin/plugin.json`)];
+  const files = [".claude-plugin/plugin.json", ...pkgs.map((p) => p === "core" ? "core/.claude-plugin/plugin.json" : `roles/${p}/.claude-plugin/plugin.json`)];
   const versions = new Map();
   for (const f of files) {
     const v = JSON.parse(read(f)).version;

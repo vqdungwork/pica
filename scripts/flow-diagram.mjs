@@ -22,13 +22,20 @@ import fs from "fs";
 import path from "path";
 
 const ROOT = process.cwd();
-const PKG_DIR = path.join(ROOT, "packages");
+/* Two directories hold packages now: the runtime at <root>/core, and the eleven roles under
+ * <root>/roles. Everything that used to read one directory reads both, so core is never
+ * silently dropped from validation. */
+const PKG_DIRS = [path.join(ROOT, "core"), path.join(ROOT, "roles")];
+const pkgPath = (name) => name === "core" ? path.join(ROOT, "core") : path.join(ROOT, "roles", name);
+const pkgNames = () => ["core", ...fs.readdirSync(path.join(ROOT, "roles"), { withFileTypes: true })
+  .filter((e) => e.isDirectory()).map((e) => e.name).sort()];
+
 const OUT = path.join(ROOT, "assets", "flow.svg");
 const CHECK = process.argv.includes("--check");
 
 /* pica-verify's own phase order. Keeping a second copy here would be the drift this file exists to
    prevent, so read it out of the source rather than restating it. */
-const verifySrc = fs.readFileSync(path.join(PKG_DIR, "core/scripts/pica-verify.mjs"), "utf8");
+const verifySrc = fs.readFileSync(path.join(ROOT, "core/scripts/pica-verify.mjs"), "utf8");
 const m = /const PHASES = \[([\s\S]*?)\];/.exec(verifySrc);
 if (!m) {
   console.error("FAIL  could not read PHASES from pica-verify.mjs. Nothing was drawn, and that is not a pass.");
@@ -37,8 +44,8 @@ if (!m) {
 const PHASES = [...m[1].matchAll(/"([a-z]+)"/g)].map((x) => x[1]);
 
 const manifests = [];
-for (const name of fs.readdirSync(PKG_DIR).sort()) {
-  const f = path.join(PKG_DIR, name, "package.json");
+for (const name of pkgNames()) {
+  const f = path.join(pkgPath(name), "package.json");
   if (fs.existsSync(f)) manifests.push(JSON.parse(fs.readFileSync(f, "utf8")));
 }
 if (manifests.length < 2) {

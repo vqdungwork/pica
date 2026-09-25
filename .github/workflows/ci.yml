@@ -53,6 +53,21 @@ jobs:
       - name: validate packages
         run: node scripts/validate-packages.mjs
 
+      # Skills were the one surface nobody gated. Rules carry enforced-by markers and
+      # rule-coverage-check ratchets them; scripts are proven by the mutation suite;
+      # manifests are held by validate-packages. A skill citing a renamed check sends
+      # somebody to a file that is not there, and claims cover that is gone.
+      - name: validate skills
+        run: node scripts/skill-check.mjs
+
+      # Both directions of the state contract. contract-check holds `requires` against
+      # `produces`; this holds what a CHECK needs, and what a package produces that nothing
+      # reads. `proposals` was required and produced by nobody for a whole release, and
+      # `stack` was announced as an output on the day the role was written while the check
+      # read it nested one level down.
+      - name: validate the state contract
+        run: node scripts/state-contract-check.mjs
+
       # A check must report on the project it was pointed at, not on whichever repository
       # encloses it. impl-check did the latter until 1.2.3, and its credential scan passed
       # having scanned nothing.

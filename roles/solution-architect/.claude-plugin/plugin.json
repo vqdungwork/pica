@@ -1,0 +1,29 @@
+{
+  "name": "pica-solution-architect",
+  "description": "pica solution architect: the stack layer by layer, a mechanism behind every non-functional requirement, a contract per integration including what happens when it is down, and the environments it runs in \u2014 written down before the demo decides them by default.",
+  "version": "3.0.0",
+  "author": {
+    "name": "Dung Vuong"
+  },
+  "homepage": "https://github.com/vqdungwork/pica",
+  "repository": "https://github.com/vqdungwork/pica",
+  "license": "MIT",
+  "dependencies": [
+    "pica-core",
+    "pica-business-analyst",
+    "pica-systems-analyst"
+  ],
+  "keywords": [
+    "architecture",
+    "platform",
+    "stack",
+    "integrations",
+    "non-functional"
+  ],
+  "agents": [
+    "./agents/pica-solution-architect.md"
+  ],
+  "skills": [
+    "./skills"
+  ]
+}

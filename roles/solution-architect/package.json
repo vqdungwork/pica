@@ -1,0 +1,59 @@
+{
+  "name": "solution-architect",
+  "status": "stable",
+  "description": "pica solution architect: the stack layer by layer, a mechanism behind every non-functional requirement, a contract per integration including what happens when it is down, and the environments it runs in \u2014 written down before the demo decides them by default.",
+  "owns": {
+    "commands": [],
+    "rules": [
+      "architecture.md"
+    ],
+    "scripts": [
+      "architecture-check.mjs"
+    ],
+    "agents": [
+      "pica-solution-architect.md"
+    ],
+    "skills": [
+      "choosing-a-stack",
+      "contracting-an-integration"
+    ]
+  },
+  "requires": {
+    "state": [
+      "nfr",
+      "requirements",
+      "domainModel",
+      "domainConstraints"
+    ],
+    "artifacts": [],
+    "gates": []
+  },
+  "produces": {
+    "state": [
+      "architecture"
+    ],
+    "artifacts": []
+  },
+  "checks": [
+    {
+      "run": "architecture-check.mjs",
+      "passes": "every layer answered and argued, every NFR carries the mechanism that meets it, every integration has a contract including what happens when it is unavailable, at least two environments each naming a host and a purpose, what is not being built is named, every entity declares owner, location and retention, and lock-in answered per choice",
+      "args": "<state>",
+      "phase": "analyse",
+      "needs": [
+        "architecture"
+      ]
+    }
+  ],
+  "definitionOfDone": [
+    {
+      "type": "check",
+      "run": "architecture-check.mjs",
+      "passes": "0 findings"
+    },
+    {
+      "type": "human",
+      "says": "the client confirmed the stack in writing, which the contract requires before development begins"
+    }
+  ]
+}

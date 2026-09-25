@@ -1,0 +1,59 @@
+{
+  "name": "ux-designer",
+  "status": "stable",
+  "description": "pica UX designer: information architecture, user flows and greyscale structure \u2014 every screen and every state named before anything is styled.",
+  "owns": {
+    "commands": [],
+    "rules": [
+      "structure.md"
+    ],
+    "scripts": [
+      "flow-paths-check.mjs",
+      "structure-check.mjs"
+    ],
+    "agents": [
+      "pica-ux-designer.md"
+    ],
+    "skills": [
+      "building-information-architecture",
+      "drawing-flows-with-failures"
+    ]
+  },
+  "requires": {
+    "state": [
+      "useCases",
+      "stateModel"
+    ],
+    "artifacts": [],
+    "gates": [
+      "intakeApproved"
+    ]
+  },
+  "produces": {
+    "state": [],
+    "artifacts": [
+      "html/structure"
+    ]
+  },
+  "checks": [
+    {
+      "run": "structure-check.mjs",
+      "passes": "0 findings",
+      "args": "<structureDir> <state>",
+      "phase": "design",
+      "needs": [
+        "@html/structure"
+      ]
+    },
+    {
+      "run": "flow-paths-check.mjs",
+      "passes": "every flow declares at least one failure branch or says by name that it cannot fail, every terminal step either completes the job or names where the person goes next, and the navigation cites a card sort, a tree test or a reason neither was possible",
+      "args": "<state>",
+      "phase": "design",
+      "needs": [
+        "flows"
+      ]
+    }
+  ],
+  "definitionOfDone": []
+}

@@ -5,7 +5,7 @@ purpose and complete on purpose: **every check pica ships either passes on it or
 why it abstains.**
 
 ```
-node <pica>/packages/core/scripts/pica-verify.mjs .pica/state.json --evidence
+node <pica>/core/scripts/pica-verify.mjs .pica/state.json --evidence
 ```
 
 It exists for two reasons, and the second is the one that keeps it honest.

@@ -1,0 +1,199 @@
+{
+  "name": "business-analyst",
+  "status": "stable",
+  "description": "pica business analyst: elicitation, the problem, the glossary, business rules, use cases and the requirements the business signs.",
+  "owns": {
+    "commands": [
+      "pica-analyse.md"
+    ],
+    "rules": [
+      "business-analysis.md",
+      "domain-knowledge.md",
+      "industry-knowledge.md"
+    ],
+    "scripts": [
+      "trace-check.mjs",
+      "industry-check.mjs",
+      "problem-check.mjs",
+      "archetype-check.mjs",
+      "audience-check.mjs",
+      "requirements-check.mjs"
+    ],
+    "agents": [
+      "pica-business-analyst.md"
+    ],
+    "skills": [
+      "running-elicitation",
+      "writing-use-cases"
+    ]
+  },
+  "requires": {
+    "state": [
+      "field",
+      "asIs",
+      "audience",
+      "archetype"
+    ],
+    "artifacts": [
+      "docs/brief.md"
+    ],
+    "gates": []
+  },
+  "produces": {
+    "state": [
+      "glossary",
+      "businessRules",
+      "useCases",
+      "industry",
+      "delta",
+      "stakeholders",
+      "exclusionsConfirmed",
+      "problem",
+      "nfr",
+      "requirements"
+    ],
+    "artifacts": [
+      "docs/prd.md"
+    ]
+  },
+  "checks": [
+    {
+      "run": "trace-check.mjs",
+      "passes": "0 findings",
+      "args": "<state>",
+      "phase": "analyse",
+      "needs": [
+        "useCases",
+        "businessRules"
+      ]
+    },
+    {
+      "run": "industry-check.mjs",
+      "passes": "0 findings",
+      "args": "<state>",
+      "phase": "analyse",
+      "needs": [
+        "field"
+      ]
+    },
+    {
+      "run": "problem-check.mjs",
+      "passes": "0 findings",
+      "args": "<state>",
+      "phase": "analyse",
+      "needs": [
+        "problem|trigger|commercialConstraint"
+      ]
+    },
+    {
+      "run": "archetype-check.mjs",
+      "passes": "0 findings",
+      "args": "<state>",
+      "phase": "intake",
+      "needs": [
+        "applications|archetype"
+      ]
+    },
+    {
+      "run": "audience-check.mjs",
+      "passes": "0 findings",
+      "args": "<state>",
+      "phase": "discover",
+      "needs": [
+        "audience"
+      ]
+    },
+    {
+      "run": "requirements-check.mjs",
+      "passes": "0 findings",
+      "args": "<state>",
+      "phase": "analyse",
+      "needs": [
+        "nfr|requirements|stateModel"
+      ]
+    }
+  ],
+  "definitionOfDone": [
+    {
+      "type": "check",
+      "run": "trace-check.mjs",
+      "passes": "0 findings"
+    },
+    {
+      "type": "check",
+      "run": "domain-check.mjs",
+      "passes": "0 findings"
+    },
+    {
+      "type": "check",
+      "run": "industry-check.mjs",
+      "passes": "0 findings"
+    },
+    {
+      "type": "artifact",
+      "path": "docs/contract.md"
+    },
+    {
+      "type": "human",
+      "says": "a non-technical reader can follow the TO-BE and say whether it is their business"
+    },
+    {
+      "type": "gate",
+      "grants": "analysisApproved"
+    },
+    {
+      "type": "check",
+      "run": "problem-check.mjs",
+      "passes": "0 findings on trigger-complete"
+    },
+    {
+      "type": "human",
+      "says": "says what changed and when the window closes"
+    },
+    {
+      "type": "gate",
+      "grants": "triggerRecorded"
+    },
+    {
+      "type": "human",
+      "says": "the decider said the number out loud, and the baseline exists in a system that already runs"
+    },
+    {
+      "type": "gate",
+      "grants": "problemAgreed"
+    },
+    {
+      "type": "human",
+      "says": "names which of scope, date and resources is fixed, and who fixed it"
+    },
+    {
+      "type": "gate",
+      "grants": "constraintFixed"
+    },
+    {
+      "type": "human",
+      "says": "confirms the tiers, because the client knows which are harder than they look"
+    },
+    {
+      "type": "gate",
+      "grants": "scopeCandidate"
+    },
+    {
+      "type": "check",
+      "run": "problem-check.mjs --freeze",
+      "passes": "0 findings on freeze-attributed"
+    },
+    {
+      "type": "human",
+      "says": "the decider approved the package they clicked, and change control is agreed in writing"
+    },
+    {
+      "type": "gate",
+      "grants": "scopeFrozen"
+    },
+    {
+      "type": "gate",
+      "grants": "modelsClosed"
+    }
+  ]
+}

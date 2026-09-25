@@ -1,0 +1,76 @@
+{
+  "name": "core",
+  "status": "stable",
+  "description": "pica core: the state schema, the gates, the check runner and the orchestration every other package is built on.",
+  "owns": {
+    "commands": [
+      "pica-verify.md",
+      "picaflow.md"
+    ],
+    "rules": [
+      "reference-discipline.md",
+      "review-discipline.md",
+      "state-schema.md"
+    ],
+    "scripts": [
+      "pica-verify.mjs",
+      "pica-status.mjs"
+    ],
+    "hooks": [
+      "dispatcher.md",
+      "gate-figma-write",
+      "hooks.json",
+      "session-start"
+    ],
+    "skills": [
+      "design-flow"
+    ]
+  },
+  "requires": {
+    "state": [],
+    "artifacts": [],
+    "gates": []
+  },
+  "produces": {
+    "state": [],
+    "artifacts": [
+      ".pica/state.json"
+    ]
+  },
+  "checks": [],
+  "definitionOfDone": [
+    {
+      "type": "artifact",
+      "path": "docs/contract.md"
+    },
+    {
+      "type": "artifact",
+      "path": "docs/exclusions.md"
+    },
+    {
+      "type": "human",
+      "says": "the human approved the contract, exclusions, options and tiers"
+    },
+    {
+      "type": "gate",
+      "grants": "intakeApproved"
+    },
+    {
+      "type": "gate",
+      "grants": "htmlApproved:<wp>"
+    },
+    {
+      "type": "check",
+      "run": "close-check.mjs",
+      "passes": "0 findings"
+    },
+    {
+      "type": "human",
+      "says": "read the original brief cold and did not substitute the contract"
+    },
+    {
+      "type": "gate",
+      "grants": "delivered"
+    }
+  ]
+}

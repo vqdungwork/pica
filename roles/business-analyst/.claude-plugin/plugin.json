@@ -1,0 +1,30 @@
+{
+  "name": "pica-business-analyst",
+  "description": "pica business analyst: elicitation, the problem, the glossary, business rules, use cases and the requirements the business signs.",
+  "version": "3.0.0",
+  "author": {
+    "name": "Dung Vuong"
+  },
+  "homepage": "https://github.com/vqdungwork/pica",
+  "repository": "https://github.com/vqdungwork/pica",
+  "license": "MIT",
+  "commands": [
+    "./commands"
+  ],
+  "dependencies": [
+    "pica-core"
+  ],
+  "keywords": [
+    "business-analysis",
+    "requirements",
+    "use-cases",
+    "babok",
+    "glossary"
+  ],
+  "agents": [
+    "./agents/pica-business-analyst.md"
+  ],
+  "skills": [
+    "./skills"
+  ]
+}

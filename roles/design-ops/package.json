@@ -1,0 +1,113 @@
+{
+  "name": "design-ops",
+  "status": "stable",
+  "description": "pica design ops: the approved build ported to Figma and verified frame by frame by measurement, the prototype wired, and a file a developer who was in no meeting can build from.",
+  "owns": {
+    "commands": [
+      "pica-port.md",
+      "pica-prototype.md",
+      "pica-review.md"
+    ],
+    "rules": [
+      "figma-elements.md",
+      "figma-gates.md",
+      "figma-mcp.md",
+      "figma-rebuild.md",
+      "figma-screens.md"
+    ],
+    "scripts": [
+      "capture-baseline.js",
+      "figma-audit.js",
+      "geometry-diff.mjs",
+      "mock-figma.mjs",
+      "source-parity.js",
+      "frame-inventory-check.mjs"
+    ],
+    "agents": [
+      "pica-design-ops.md"
+    ],
+    "skills": [
+      "porting-to-figma"
+    ]
+  },
+  "requires": {
+    "state": [
+      "viewports",
+      "figmaInScope=true"
+    ],
+    "artifacts": [
+      ".audit/html-reference.json",
+      ".audit/html-reference-forced.json"
+    ],
+    "gates": [
+      "htmlApproved:<wp>"
+    ]
+  },
+  "produces": {
+    "state": [
+      "packages.figma.ported"
+    ],
+    "artifacts": [
+      ".audit/figma-dump.json"
+    ]
+  },
+  "checks": [
+    {
+      "run": "geometry-diff.mjs",
+      "passes": "0 findings above tolerance AND more than 0 text runs compared",
+      "args": "<ref> .audit/figma-dump.json <state>",
+      "phase": "design",
+      "needs": [
+        "@.audit/html-reference.json",
+        "@.audit/figma-dump.json"
+      ]
+    },
+    {
+      "run": "frame-inventory-check.mjs",
+      "passes": "0 findings",
+      "args": "<ref> .audit/figma-dump.json <state>",
+      "phase": "design",
+      "needs": [
+        "@.audit/html-reference.json",
+        "@.audit/figma-dump.json"
+      ]
+    },
+    {
+      "run": "figma-audit.js",
+      "passes": "every count returns 0",
+      "runsIn": "figma"
+    },
+    {
+      "run": "source-parity.js",
+      "passes": "contamination 0, 0 missing and 0 extra strings per screen except registered deviations, and more than 0 screens compared",
+      "when": "rebuild of an existing Figma file, in place of geometry-diff.mjs",
+      "runsIn": "figma"
+    }
+  ],
+  "definitionOfDone": [
+    {
+      "type": "check",
+      "run": "geometry-diff.mjs",
+      "passes": "0 findings"
+    },
+    {
+      "type": "check",
+      "run": "figma-audit.js",
+      "passes": "0 findings"
+    },
+    {
+      "type": "check",
+      "run": "source-parity.js",
+      "passes": "0 findings",
+      "when": "rebuild"
+    },
+    {
+      "type": "human",
+      "says": "every frame rendered and looked at, after the last change"
+    },
+    {
+      "type": "gate",
+      "grants": "figmaVerified:<wp>"
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "name": "pica-systems-analyst",
+  "description": "pica systems analyst: the four models \u2014 process, domain, state and permissions \u2014 that turn requirements into a specification.",
+  "version": "3.0.0",
+  "author": {
+    "name": "Dung Vuong"
+  },
+  "homepage": "https://github.com/vqdungwork/pica",
+  "repository": "https://github.com/vqdungwork/pica",
+  "license": "MIT",
+  "dependencies": [
+    "pica-core",
+    "pica-business-analyst"
+  ],
+  "keywords": [
+    "domain-model",
+    "state-machine",
+    "permissions",
+    "rbac",
+    "modelling"
+  ],
+  "agents": [
+    "./agents/pica-systems-analyst.md"
+  ],
+  "skills": [
+    "./skills"
+  ]
+}

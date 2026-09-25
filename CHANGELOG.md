@@ -1,5 +1,95 @@
 # Changelog
 
+## 3.0.0
+
+### One folder per role, and the folder is named after the person
+
+pica shipped eight packages named after artefacts: `html`, `figma`, `content`, `designqa`. A newcomer
+opening the repository saw a monorepo and had to read three manifests to work out it was a team. Worse,
+two of those packages owned commands and **no agent at all** — `/pica-port` and `/pica` ran with nobody
+accountable for how — while `analyst` held two agents in one directory.
+
+The repository now says what it is in its own layout: **`core/` is the runtime, `roles/` is the team**,
+and every directory under `roles/` holds exactly one agent. That property is now something a check can
+hold, which was impossible while a non-role sat among the roles.
+
+| Was | Is |
+|---|---|
+| `packages/discover` | `roles/ux-researcher` |
+| `packages/analyst` | `roles/business-analyst` **+** `roles/systems-analyst` |
+| `packages/research` | `roles/design-researcher` |
+| `packages/html` | `roles/ux-designer` **+** `roles/ui-designer` **+** `roles/ux-engineer` |
+| `packages/content` | `roles/content-designer` |
+| `packages/designqa` | `roles/evaluator` |
+| `packages/figma` | `roles/design-ops` |
+| `packages/core` | `core/` **+** `roles/product-manager` |
+
+**Every plugin is renamed, so this release requires a reinstall.** There is no alias mechanism in the
+marketplace format, which is why it is one break rather than a gradual migration that would leave the
+tree half-named.
+
+### Three roles that did not exist
+
+**`pica-solution-architect`.** On the engagement this came from, platform work — infrastructure, CI,
+observability, auth, the API core, transactional mail — was **265 hours of 1416, nineteen per cent of
+the build**, and no role owned it. It was decided invisibly, by whoever scaffolded the demo: a monorepo,
+a token pipeline and a set of wire contracts settled while building screens. The contract meanwhile
+said the stack would be *confirmed in writing with the Customer before development begins*. Both were
+true at once. `architecture-check` now requires the stack argued layer by layer, a mechanism behind
+every NFR, a contract per integration **including what happens when it is unavailable**, environments
+with a stated purpose, what is explicitly **not** being built, and data owner and retention per entity.
+
+**`pica-ux-designer` and `pica-ui-designer`.** One agent used to name the direction, derive the tokens,
+build the kit and draw every screen. Those are three jobs with three different gates, and bundling them
+meant the lo-fi gate — structure agreed before anything is styled — could not exist. It does now, and
+`flow-paths-check` holds what a screen inventory cannot see: a flow with no failure branch, and a
+terminal step that neither completes the job nor says where the person goes next.
+
+### Skills, and the gate they were missing
+
+Twenty-two skills across twelve roles. Each carries the frontmatter a skill needs to be matched to a
+situation — `scenarios` written in the words somebody actually says, `estimated_time`, `best_for` — and
+each ends with **`## Done when`, running the check that proves its own output**. A procedure with no
+finish condition is advice, and advice is what pica is not.
+
+`skill-check` is new, and it exists because skills were the one surface nobody gated. Rules carry
+`enforced-by` markers that `rule-coverage-check` ratchets; scripts are proven by the mutation suite;
+manifests are held by `validate-packages`. A skill citing a check that was later renamed sends somebody
+to a file that is not there, and claims cover that is gone.
+
+Its own first draft failed a correct skill: `scaffolding-the-demo` warns **against** lorem ipsum, so it
+contains the phrase. The pattern was narrowed, and the reason is written into the file. A check that
+fires on correct input is worse than no check.
+
+### Four things that were quietly wrong, found by doing this
+
+**The umbrella asked for five plugins that have not existed since 2.0.0.** `pica-architect`,
+`pica-developer`, `pica-estimate`, `pica-impl` and `pica-qa` were deleted in the 14-to-8 restructure and
+stayed in the dependency list through two releases and six green CI runs. Nothing checked that a
+declared dependency resolves to a real plugin.
+
+**`proposals` was required and produced by nobody.** It was invisible because check-level `needs` are
+not validated the way package `requires` are, and only surfaced when the split forced the requirement to
+be declared.
+
+**`proposal-check` runs in two phases, design and scope.** A dict keyed by script name collapsed the
+duplicate, and the example went from 35 checks to 34 with nothing complaining. Only running the fixture
+end to end caught it — which is the argument for the fixture.
+
+**The allowlist still named `/packages/`.** For a few minutes, a push would have produced a repository
+with a README, a CHANGELOG and no code. The `.gitignore` is an inverted allowlist precisely so that
+publishing something new is deliberate; renaming the directory it names is exactly the case it is blind
+to.
+
+### Also
+
+- `content-designer` no longer requires the built-HTML capture to start, which removed a declared
+  dependency cycle with `ux-engineer`. Copy is written from the state list, before screens exist
+- `structureDir` in `pica-verify` pointed at `html` where the manifest declares `@html/structure`,
+  grading finished colour screens as greyscale wireframes: 29 false findings on every run
+- `spike/` removed, 6.1 MB that was never committed
+- 25 rule modules, 41 checks, 216 check ids, 212 rules still unmarked — down from 246
+
 ## 2.1.0
 
 ### A gate that is never called is indistinguishable from one that does not exist

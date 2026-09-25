@@ -19,7 +19,7 @@
  *      the map: because moving the skill into pica-core changed its depth and nothing
  *      checked. Ownership validation cannot see this: the files were all present and all
  *      owned. Links out of a skill are resolved against the SHIPPED layout, where
- *      packages/core/skills/<s> is installed at <root>/skills/<s>, not against the repo.
+ *      core/skills/<s> is installed at <root>/skills/<s>, not against the repo.
  *
  * Fails closed: zero packages found is an error, not a pass.
  */
@@ -27,29 +27,34 @@ import fs from "fs";
 import path from "path";
 
 const ROOT = process.cwd();
-const PKG_DIR = path.join(ROOT, "packages");
+/* Two directories hold packages now: the runtime at <root>/core, and the eleven roles under
+ * <root>/roles. Everything that used to read one directory reads both, so core is never
+ * silently dropped from validation. */
+const PKG_DIRS = [path.join(ROOT, "core"), path.join(ROOT, "roles")];
+const pkgPath = (name) => name === "core" ? path.join(ROOT, "core") : path.join(ROOT, "roles", name);
+const pkgNames = () => ["core", ...fs.readdirSync(path.join(ROOT, "roles"), { withFileTypes: true })
+  .filter((e) => e.isDirectory()).map((e) => e.name).sort()];
+
 const REQUIRED = ["name", "status", "description", "owns", "requires", "produces", "checks", "definitionOfDone"];
 const VALID_STATUS = ["stable", "coming-soon"];
 const findings = [];
 
-if (!fs.existsSync(PKG_DIR)) {
-  console.error("FAIL  packages/ does not exist. Nothing to validate.");
+if (!PKG_DIRS.every((d) => fs.existsSync(d))) {
+  console.error("FAIL  core/ or roles/ does not exist. Nothing to validate.");
   process.exit(2);
 }
 
-const dirs = fs.readdirSync(PKG_DIR, { withFileTypes: true })
-  .filter((d) => d.isDirectory() && !d.name.startsWith("_"))
-  .map((d) => d.name);
+const dirs = pkgNames();
 
 if (!dirs.length) {
-  console.error("FAIL  packages/ contains no packages. A validator that validates nothing is not a pass.");
+  console.error("FAIL  roles/ contains no packages. A validator that validates nothing is not a pass.");
   process.exit(2);
 }
 
 const owned = new Map();   // repo-relative path -> package name
 
 for (const name of dirs) {
-  const manifestPath = path.join(PKG_DIR, name, "package.json");
+  const manifestPath = path.join(pkgPath(name), "package.json");
   if (!fs.existsSync(manifestPath)) { findings.push(`${name}: no package.json`); continue; }
 
   let m;
@@ -100,7 +105,7 @@ for (const name of dirs) {
   /* Claude Code reads a plugin's manifest from .claude-plugin/plugin.json, not from
      plugin.json at the package root. A package.json passing every check above with no
      plugin.json in the right place is a package Claude Code cannot actually install. */
-  const pluginManifest = path.join(PKG_DIR, name, ".claude-plugin", "plugin.json");
+  const pluginManifest = path.join(pkgPath(name), ".claude-plugin", "plugin.json");
   if (!fs.existsSync(pluginManifest)) {
     findings.push(`${name}: no .claude-plugin/plugin.json, Claude Code will not find this package's manifest`);
   } else {
@@ -115,7 +120,7 @@ for (const name of dirs) {
 
   for (const kind of ["commands", "rules", "scripts", "hooks", "agents"]) {
     for (const file of (m.owns?.[kind] || [])) {
-      const rel = path.join("packages", name, kind, file);
+      const rel = path.join(name === "core" ? "core" : path.join("roles", name), kind, file);
       if (!fs.existsSync(path.join(ROOT, rel))) findings.push(`${name}: owns ${kind}/${file}, which does not exist`);
       if (owned.has(rel)) findings.push(`${rel} is owned by both ${owned.get(rel)} and ${name}`);
       owned.set(rel, name);
@@ -123,9 +128,9 @@ for (const name of dirs) {
   }
 
   /* A skill is a DIRECTORY containing SKILL.md, not a file: `owns.skills` names the
-     directory, and existence means packages/<pkg>/skills/<name>/SKILL.md is present. */
+     directory, and existence means roles/<pkg>/skills/<name>/SKILL.md is present. */
   for (const skill of (m.owns?.skills || [])) {
-    const rel = path.join("packages", name, "skills", skill);
+    const rel = path.join(name === "core" ? "core" : path.join("roles", name), "skills", skill);
     const skillFile = path.join(rel, "SKILL.md");
     if (!fs.existsSync(path.join(ROOT, skillFile))) findings.push(`${name}: owns skills/${skill}, which has no SKILL.md`);
     if (owned.has(rel)) findings.push(`${rel} is owned by both ${owned.get(rel)} and ${name}`);
@@ -134,7 +139,7 @@ for (const name of dirs) {
 
   for (const c of (m.checks || [])) {
     if (!c.run || !c.passes) { findings.push(`${name}: a check is missing "run" or "passes"`); continue; }
-    const rel = path.join("packages", name, "scripts", c.run);
+    const rel = path.join(name === "core" ? "core" : path.join("roles", name), "scripts", c.run);
     if (!fs.existsSync(path.join(ROOT, rel))) findings.push(`${name}: check "${c.run}" has no script at ${rel}`);
   }
 
@@ -156,21 +161,21 @@ for (const name of dirs) {
    forever, which is the whole failure mode it was written to end. */
 for (const name of dirs) {
   for (const kind of ["commands", "rules", "scripts", "hooks", "agents"]) {
-    const dir = path.join(PKG_DIR, name, kind);
+    const dir = path.join(pkgPath(name), kind);
     if (!fs.existsSync(dir)) continue;
     for (const f of fs.readdirSync(dir)) {
-      const rel = path.join("packages", name, kind, f);
+      const rel = path.join(name === "core" ? "core" : path.join("roles", name), kind, f);
       if (!owned.has(rel)) findings.push(`${rel} exists but no package.json claims it`);
     }
   }
 
   /* skills/ holds directories, each a skill named by its own directory (containing
      SKILL.md), not files: scanned the same way but by directory name. */
-  const skillsDir = path.join(PKG_DIR, name, "skills");
+  const skillsDir = path.join(pkgPath(name), "skills");
   if (fs.existsSync(skillsDir)) {
     for (const f of fs.readdirSync(skillsDir, { withFileTypes: true })) {
       if (!f.isDirectory()) continue;
-      const rel = path.join("packages", name, "skills", f.name);
+      const rel = path.join(name === "core" ? "core" : path.join("roles", name), "skills", f.name);
       if (!owned.has(rel)) findings.push(`${rel} exists but no package.json claims it`);
     }
   }
@@ -194,7 +199,7 @@ for (const name of dirs) {
   if (mk) {
     const listed = new Map((mk.plugins || []).map((p) => [p.name, p]));
     const manifests = [path.join(ROOT, ".claude-plugin", "plugin.json"),
-      ...dirs.map((d) => path.join(PKG_DIR, d, ".claude-plugin", "plugin.json"))];
+      ...dirs.map((d) => path.join(pkgPath(d), ".claude-plugin", "plugin.json"))];
     for (const mp of manifests) {
       if (!fs.existsSync(mp)) continue;
       let pj;
@@ -217,14 +222,14 @@ for (const name of dirs) {
 
    This check carried a model of the layout that stopped being true at 0.6.0. It resolved
    the skill from <repo>/skills/<name>, which was the shipped location back when the whole
-   repository was ONE plugin. Since the split, packages/core IS the plugin root: the file's
+   repository was ONE plugin. Since the split, roles/core IS the plugin root: the file's
    repo location and its shipped location are the same path, so the base is its own
    directory like every other markdown file here.
 
    The consequence of the stale model was worse than a wrong base. It made
-   ../../packages/<pkg>/rules/x.md look correct, and that form resolves in NEITHER layout:
-   not in the repo, where it lands on packages/core/packages/..., and not installed, where a
-   sibling package is a separate plugin directory named pica-<pkg> and there is no packages/
+   ../../roles/<pkg>/rules/x.md look correct, and that form resolves in NEITHER layout:
+   not in the repo, where it lands on core/roles/..., and not installed, where a
+   sibling package is a separate plugin directory named pica-<pkg> and there is no roles/
    at all. Thirty-eight links in the map of the whole flow pointed at nothing, in every
    layout, for three releases.
 
@@ -234,11 +239,11 @@ for (const name of dirs) {
 const mdLink = /\]\((\.[^)#\s]+)/g;
 const mdFiles = [];
 for (const name of dirs) {
-  const rulesDir = path.join(PKG_DIR, name, "rules");
+  const rulesDir = path.join(pkgPath(name), "rules");
   if (fs.existsSync(rulesDir))
     for (const f of fs.readdirSync(rulesDir))
       if (f.endsWith(".md")) mdFiles.push({ file: path.join(rulesDir, f), base: rulesDir });
-  const skillsDir = path.join(PKG_DIR, name, "skills");
+  const skillsDir = path.join(pkgPath(name), "skills");
   if (fs.existsSync(skillsDir))
     for (const d of fs.readdirSync(skillsDir, { withFileTypes: true })) {
       if (!d.isDirectory()) continue;
@@ -261,9 +266,19 @@ for (const { file, base } of mdFiles) {
     }
     /* A link that leaves its own package resolves in the repo and breaks the moment
        somebody installs that package on its own, which is the whole point of the split. */
-    const owner = path.relative(PKG_DIR, file).split(path.sep)[0];
-    const targetOwner = path.relative(PKG_DIR, target).split(path.sep)[0];
-    if (!path.relative(PKG_DIR, target).startsWith("..") && targetOwner !== owner)
+    /* Two roots now, so "which package owns this file" is asked of both: core/ is a package
+       in its own right and roles/<name> is the rest. A file under neither has no owner and
+       is not a cross-package link. */
+    const ownerOf = (f) => {
+      const c = path.relative(path.join(ROOT, "core"), f);
+      if (!c.startsWith("..") && !path.isAbsolute(c)) return "core";
+      const r = path.relative(path.join(ROOT, "roles"), f);
+      if (!r.startsWith("..") && !path.isAbsolute(r)) return r.split(path.sep)[0];
+      return null;
+    };
+    const owner = ownerOf(file);
+    const targetOwner = ownerOf(target);
+    if (targetOwner !== null && owner !== null && targetOwner !== owner)
       findings.push(`${path.relative(ROOT, file)} links to ${m[1]} in package "${targetOwner}". ` +
         `A single-package install has no sibling to resolve it against: name it as a repo path instead`);
   }

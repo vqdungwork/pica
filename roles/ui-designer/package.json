@@ -1,0 +1,69 @@
+{
+  "name": "ui-designer",
+  "status": "stable",
+  "description": "pica UI designer: the visual direction argued against the sector's settled tradition, the palette proved against contrast before it is offered, and the style tiles the client chooses from.",
+  "owns": {
+    "commands": [],
+    "rules": [
+      "direction.md"
+    ],
+    "scripts": [
+      "direction-spread-check.mjs",
+      "font-check.mjs",
+      "palette-check.mjs"
+    ],
+    "agents": [
+      "pica-ui-designer.md"
+    ],
+    "skills": [
+      "building-a-style-tile",
+      "deriving-tokens"
+    ]
+  },
+  "requires": {
+    "state": [
+      "field",
+      "proposals",
+      "measured"
+    ],
+    "artifacts": [],
+    "gates": []
+  },
+  "produces": {
+    "state": [
+      "direction"
+    ],
+    "artifacts": []
+  },
+  "checks": [
+    {
+      "run": "direction-spread-check.mjs",
+      "passes": "0 findings",
+      "args": "<state>",
+      "phase": "design",
+      "needs": [
+        "proposals"
+      ]
+    },
+    {
+      "run": "font-check.mjs",
+      "passes": "0 findings",
+      "args": "<ref> <state>",
+      "phase": "close",
+      "needs": [
+        "@.audit/html-reference.json",
+        "direction"
+      ]
+    },
+    {
+      "run": "palette-check.mjs",
+      "passes": "every direction carries a palette of named roles, declares which foreground sits on which background, every declared pair meets its floor (4.5 body, 3 large, 3 interface), and no hue the sector reserves is spent decoratively",
+      "args": "<state>",
+      "phase": "design",
+      "needs": [
+        "proposals"
+      ]
+    }
+  ],
+  "definitionOfDone": []
+}
