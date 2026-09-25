@@ -27,7 +27,7 @@
       "name": "pica-ux-researcher",
       "source": "./roles/ux-researcher",
       "version": "3.0.0",
-      "description": "pica discover: who uses it and what actually hurts, who can veto it and what they fear, what the field charges, and a market size derived from factors rather than asserted."
+      "description": "pica UX researcher: who uses it and what actually hurts, who can veto it and what they fear, what the field charges, and a market size derived from factors rather than asserted."
     },
     {
       "name": "pica-business-analyst",
