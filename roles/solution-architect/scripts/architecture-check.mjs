@@ -125,7 +125,14 @@ const entities = Array.isArray(state.domainModel?.entities) ? state.domainModel.
 const gov = Array.isArray(arch.data) ? arch.data : [];
 let ungoverned = 0;
 for (const e of entities) {
-  const name = typeof e === "string" ? e : e?.name;
+  /* `entity` is the field, and the worked example is what says so: its domainModel entries
+     carry { entity, attributes } and no `name` at all. permissions-check reads it correctly
+     as `e.entity ?? e.name`; this read `e.name` alone, so on any domain model shaped the way
+     the example shapes it, every entity resolved to undefined and data-governed failed
+     unconditionally with "(unnamed entity)". A check that cannot pass on pica's own example
+     is not a gate, it is an obstacle, and the only way past it was to misshape the model.
+     Found by a solution-architect agent on the first real end-to-end run. */
+  const name = typeof e === "string" ? e : (e?.entity ?? e?.name);
   const g = gov.find((x) => x?.entity === name);
   const missing = !g ? ["owner", "location", "retention"]
     : ["owner", "location", "retention"].filter((k) => EMPTY(g[k]));
