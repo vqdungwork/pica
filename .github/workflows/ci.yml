@@ -111,6 +111,12 @@ jobs:
       - name: references resolve
         run: node scripts/reference-check.mjs
 
+      # Not a repo check — it runs against a project. Kept here as a note rather than a step:
+      # screen-states-check.mjs (ux-engineer) holds that a state a screen DECLARES exists
+      # somewhere it was BUILT, and that none drawn in lo-fi is lost at final fidelity. A blind
+      # evaluator found 28 states drawn in wireframes and dropped from the delivered screens,
+      # under a green structure-check — which holds the wireframes and not what replaced them.
+
       # A check must report on the project it was pointed at, not on whichever repository
       # encloses it. impl-check did the latter until 1.2.3, and its credential scan passed
       # having scanned nothing.

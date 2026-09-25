@@ -1410,7 +1410,7 @@
     },
     {
       "state": "loading",
-      "why": "shown on design-system.html, which the capture producer deliberately excludes \u2014 a real project builds it per screen"
+      "why": "shown on design-system.html, which the capture producer deliberately excludes — a real project builds it per screen"
     },
     {
       "state": "error",
@@ -1427,6 +1427,44 @@
     {
       "state": "keyboard-open",
       "why": "a desk surface with no text entry; the state has no case here and inventing one would be a screen nobody needs"
+    }
+  ],
+  "screens": [
+    {
+      "id": "queue",
+      "app": "approvals",
+      "role": "queue",
+      "states": [
+        "default",
+        "empty",
+        "held"
+      ],
+      "name": "approvals queue"
+    },
+    {
+      "id": "case",
+      "app": "approvals",
+      "role": "case",
+      "states": [
+        "default"
+      ]
+    },
+    {
+      "id": "decide",
+      "app": "approvals",
+      "role": "decide",
+      "states": [
+        "default",
+        "disabled"
+      ]
+    },
+    {
+      "id": "history",
+      "app": "approvals",
+      "role": "history",
+      "states": [
+        "default"
+      ]
     }
   ]
 }
