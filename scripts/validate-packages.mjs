@@ -9,7 +9,12 @@
  *      "artifacts" as arrays: these are the two fields pica-status.mjs reads, and
  *      `"requires":null,"produces":null` used to pass this check while asserting nothing.
  *   2. every package has its plugin manifest at .claude-plugin/plugin.json, the
- *      location Claude Code actually reads, and that manifest parses and has a "name"
+ *      location Claude Code actually reads, and that manifest parses and has a "name",
+ *      and every component path in it obeys the schema the INSTALLER enforces rather
+ *      than the one this file used to imagine. 3.0.0 shipped a plugin declaring
+ *      "agents": ["./agents"]: internally consistent, green here, and refused by Claude
+ *      Code with `agents.0: Invalid input`. Agents are .md files and directories are not
+ *      accepted; skills are directories; and every path must exist inside the plugin root.
  *   3. every file a package CLAIMS to own actually exists
  *   4. every shipped rule/script/command/hook/agent is owned by exactly one package
  *   5. every declared check resolves to a script that exists
@@ -52,6 +57,87 @@ if (!dirs.length) {
 }
 
 const owned = new Map();   // repo-relative path -> package name
+
+/* 2b. the component paths, against the schema the INSTALLER enforces.
+ *
+ * 3.0.0 was tagged and released with `"agents": ["./agents"]` in pica-ux-researcher, and
+ * Claude Code refused to install that plugin: `agents.0: Invalid input`. Every check in
+ * this file was green at the time, because the only thing asked of a plugin.json was that
+ * it parsed and carried a "name". The directory it named existed, so nothing objected.
+ *
+ * That is the shape of the failure worth naming: the manifest was internally consistent
+ * and uninstallable, and internal consistency is all this file had ever been asking for.
+ * It was the fourth time a bare string survived a rename, and the first time the cost was
+ * a release nobody could install.
+ *
+ * The rules are the manifest reference's, not this file's guesses:
+ *   agents     .md FILES. "Directories aren't accepted" is the documented wording
+ *   skills     directories, and "." or "./" for the plugin root
+ *   commands   a flat .md file or a directory, or an object map that names no path
+ *   hooks      a .json file, or the hooks object inline
+ * and for every one of them: the path must exist and must resolve inside the plugin root.
+ *
+ * This does not make `claude plugin validate` redundant, and CI runs that too. That
+ * command is the authority and knows fields this does not; this runs with no install, on
+ * every machine, and holds the one rule that has already cost a release.
+ */
+const COMPONENT_RULES = {
+  agents:   { form: "file", ext: ".md",   note: "directories aren't accepted" },
+  skills:   { form: "dir",                note: "each entry names a directory of skills" },
+  commands: { form: "either", ext: ".md", note: "a flat .md file or a directory" },
+  hooks:    { form: "either", ext: ".json", note: "a .json file or the hooks object inline" },
+};
+
+function checkComponentPaths(name, pm, root) {
+  for (const [key, rule] of Object.entries(COMPONENT_RULES)) {
+    if (!(key in pm)) continue;
+    const raw = pm[key];
+
+    /* commands may be an object map of command name to source/content, and hooks may be
+       the hooks object itself. Neither names a path, so there is nothing to resolve. */
+    if (raw && typeof raw === "object" && !Array.isArray(raw)) continue;
+
+    const entries = Array.isArray(raw) ? raw : [raw];
+    entries.forEach((entry, i) => {
+      const where = `${name}: .claude-plugin/plugin.json ${key}.${i}`;
+
+      if (typeof entry !== "string" || entry.length === 0) {
+        findings.push(`${where} is ${JSON.stringify(entry)}, which is not a path`);
+        return;
+      }
+      /* A path containing ".." is reported by the installer as a traversal attempt, and a
+         path resolving outside the plugin root does not load at all. */
+      if (entry.split(/[\\/]/).includes("..")) {
+        findings.push(`${where} contains "..", which the installer reads as a path traversal attempt`);
+        return;
+      }
+
+      const abs = path.resolve(root, entry);
+      if (abs !== root && !abs.startsWith(root + path.sep)) {
+        findings.push(`${where} resolves outside the plugin root, so it will not load: ${entry}`);
+        return;
+      }
+      if (!fs.existsSync(abs)) {
+        findings.push(`${where} names ${entry}, which does not exist`);
+        return;
+      }
+
+      const isDir = fs.statSync(abs).isDirectory();
+      if (rule.form === "file" && isDir) {
+        findings.push(`${where} names the directory ${entry}, and ${rule.note}. ` +
+          `Name each file instead, as in "./${key}/<file>${rule.ext}"`);
+        return;
+      }
+      if (rule.form === "dir" && !isDir) {
+        findings.push(`${where} names the file ${entry}, and ${rule.note}`);
+        return;
+      }
+      if (!isDir && rule.ext && !abs.endsWith(rule.ext))
+        findings.push(`${where} names ${entry}, and ${key} files must end in ${rule.ext}`);
+    });
+  }
+}
+
 
 for (const name of dirs) {
   const manifestPath = path.join(pkgPath(name), "package.json");
@@ -113,6 +199,7 @@ for (const name of dirs) {
       const pm = JSON.parse(fs.readFileSync(pluginManifest, "utf8"));
       if (!pm || typeof pm !== "object" || Array.isArray(pm) || !pm.name)
         findings.push(`${name}: .claude-plugin/plugin.json has no "name" field`);
+      else checkComponentPaths(name, pm, pkgPath(name));
     } catch (e) {
       findings.push(`${name}: .claude-plugin/plugin.json does not parse, ${e.message}`);
     }
