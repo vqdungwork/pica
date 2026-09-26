@@ -100,3 +100,34 @@ So, alongside the constraints the model gives you:
 A fixture's job is to make the design judgeable. Data that draws attention to itself has failed
 that job however correct it is.
 
+## A seeded generator is one shared stream
+
+Determinism is the reason to seed a generator: the same fixture every run, so a defect found today
+is reproducible tomorrow and a screenshot means something a week later.
+
+That determinism is also a trap, and it is invisible.
+
+Every field drawn from the same PRNG consumes values from **one sequence**. Change how many draws
+one field takes and every field after it shifts. A generator is not a set of independent random
+values; it is a single stream being read in order.
+
+On one engagement, a fix for duplicate titles used rejection sampling — draw, check, draw again
+until unique. Correct in isolation, and it consumed a variable number of values per record. Every
+downstream field moved. The canonical `success` fixture for the product's primary screen went from
+**eleven unconfirmed items to zero**, so the screen the whole demo is built around rendered an
+empty state while claiming to be the populated one. Nothing about the change looked wrong; a
+navigation test caught it, not a reading of the diff.
+
+So:
+
+- **A field consumes a fixed number of draws, always.** Derive uniqueness by index, hash or
+  permutation of the pool — never by retrying until the value is acceptable.
+- **Anything that can retry gets its own PRNG instance**, seeded separately, so its consumption
+  cannot perturb the shared stream.
+- **Pin the fixtures that matter by assertion, not by hope.** The states a demo is judged on —
+  the populated one, the empty one, the one with the longest string — should be asserted somewhere
+  a test runs, because a shift like this produces a plausible screen rather than an error.
+
+The failure mode to remember: the build still works, every check still passes, and the demo quietly
+shows a different day than the one it says it is showing.
+
