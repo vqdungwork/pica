@@ -29,7 +29,7 @@ const CHECKS = ["visual-baseline"];
 
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
-import { pathToFileURL } from "node:url";
+import { pathToFileURL, fileURLToPath } from "node:url";
 import { join } from "node:path";
 import { createRequire } from "node:module";
 
@@ -82,7 +82,9 @@ if (!base) {
  * first time anything called it from outside the project directory. `--modules` names the base
  * explicitly; otherwise the baseline directory's own ancestors are tried. */
 let chromium, PNG, pixelmatch;
-const bases = [process.cwd(), arg("--modules", ""), DIR, join(DIR, ".."), join(DIR, "..", ".."), join(DIR, "..", "..", "..")]
+// ...and, last, wherever this script is installed, which is where playwright itself resolves from
+const bases = [process.cwd(), arg("--modules", ""), DIR, join(DIR, ".."), join(DIR, "..", ".."), join(DIR, "..", "..", ".."),
+  fileURLToPath(new URL(".", import.meta.url))]
   .filter(Boolean).map((b) => (b.endsWith("/") ? b : `${b}/`));
 try {
   ({ chromium } = await import("playwright"));

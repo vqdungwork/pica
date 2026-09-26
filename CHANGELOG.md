@@ -40,6 +40,11 @@ had made. It reports what it reached, or abstains if that was nothing. On a real
 control labelled for one screen that returned there from a different one: the defect class it exists
 for, in a project whose every other check was green.
 
+**axe-check and visual-baseline-check looked for their tools in the project only**, while playwright
+beside them was resolved from pica's own install; on CI, where the tools sit beside pica, both
+abstained on the example while the mutation suite ran them fine. Both also look where the script is
+installed now, and axe runs on the example in CI: five routes, no violations.
+
 **The runner ran the build and its reader side by side.** build-check empties and rewrites the build
 directory while artifact-readiness-check reads it; the build runs first, alone.
 

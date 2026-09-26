@@ -72,8 +72,12 @@ if (!base) {
 }
 
 let axeSource = arg("--axe", "");
-if (!axeSource) {
-  try { axeSource = createRequire(`${process.cwd()}/`).resolve("axe-core/axe.min.js"); } catch { /* below */ }
+/* The project first, then wherever this script is installed: that is where playwright is resolved
+ * from, a line below, and resolving axe-core from the project alone made this abstain wherever the
+ * tools sat beside pica rather than inside the project, CI included. */
+for (const base of [`${process.cwd()}/`, import.meta.url]) {
+  if (axeSource) break;
+  try { axeSource = createRequire(base).resolve("axe-core/axe.min.js"); } catch { /* next */ }
 }
 if (!axeSource || !existsSync(axeSource)) {
   console.log("axe-check: SKIPPED — axe-core not found (npm i -D axe-core, or pass --axe). This is not a pass.");
