@@ -1,7 +1,7 @@
 {
   "name": "pica-design-ops",
   "description": "pica design ops: the approved build ported to Figma and verified frame by frame by measurement, the prototype wired, and a file a developer who was in no meeting can build from.",
-  "version": "3.5.0",
+  "version": "3.5.1",
   "author": {
     "name": "Dung Vuong"
   },

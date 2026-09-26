@@ -1,5 +1,35 @@
 # Changelog
 
+## 3.5.1
+
+### Reading it as the person who receives it
+
+The published plain-language test is whether the intended reader can **find** what they need,
+**understand** what they find, and **use** it. Reading a finished document in the recipient's
+chair found seven defects in ten minutes that a week of building had not.
+
+- **The title was a machine field.** `Đặc tả — professional services` — the sector key, printed as
+  a headline. The reader looks for their own product and meets an industry classification.
+- **The opening paragraph was the analyst's evidence note**, ending *"interviews=0, xem
+  docs/as-is.md"*, then cut mid-word by a 300-character slice. The first paragraph is the one
+  thing everybody reads.
+- **Half the pictures were in English** — `work item`, `assignee`, `unconfirmed` — drawn from a
+  glossary that already held the Vietnamese and which no diagram had ever consulted. The original
+  term stays in a quiet mono label beside the translation: both readers exist, and only one of
+  them decides.
+- **The permissions matrix read `r` and `cru`**, twenty times, with no key anywhere on the page.
+  Not a dense notation — an unanswered question printed twenty times.
+- **Numbering implied an order that did not exist.** Cards numbered 01–07 down a lane told the
+  reader that three independent triggers were steps two, three and four of a process. The number
+  is the *stage* now, so parallel things share one.
+- **Emphasis by SHOUTING** — how a register gets read back by the person who wrote it.
+- **Text cut mid-word.** `Xem một dự án đang chạy t` is not a shorter label, it is a broken one,
+  and it was on every card with more than one next step.
+
+The habit underneath all seven: **a document assembled from a register inherits the register's
+voice**, and someone has to read it as the recipient before it goes out — which cannot be the
+register.
+
 ## 3.5.0
 
 ### The reader who decides is the one who does not know the notation

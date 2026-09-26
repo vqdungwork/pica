@@ -132,3 +132,47 @@ sitting, so nobody ever sees them together, and each one looks defensible on its
 Cite the rule in a comment beside the code that implements it, where the citation earns its keep
 and no user meets it. `internal-reference-check.mjs` reads text nodes and the attributes a screen
 reader speaks, and deliberately ignores comments and props.
+
+## Read it as the person who receives it, not as the person who wrote it
+
+<!-- enforced-by: none — judgement, not decidable by a script -->
+
+A specification is signed by someone who knows the business and not the method. Reading it in
+their chair, out loud, finds in ten minutes what a week of building did not — and the published
+plain-language test is exactly that: can the intended reader **find** what they need, **understand**
+what they find, and **use** it. Every defect below came from that reading of a document its author
+thought was finished.
+
+**The title was a machine field.** `Đặc tả — professional services` — the sector key, printed as a
+headline. The reader looks for their own product and meets an industry classification. The title
+is the product's name.
+
+**The opening paragraph was the analyst's evidence note**, ending *"interviews=0, xem
+docs/as-is.md"*, and then cut mid-word by a 300-character slice. The first paragraph is the one
+thing everybody reads. Write it; never slice a field into it.
+
+**Half the pictures were in English.** `work item`, `assignee`, `unconfirmed` — in a Vietnamese
+document, drawn from a glossary that already held `việc`, `người được giao`, `chưa xác nhận`, and
+which no diagram had ever consulted. Keep the original term in a quiet mono label beside the
+translation: both readers exist, and only one of them decides.
+
+**A permissions matrix read `r` and `cru`**, twenty times, with no key anywhere on the page. That
+is not a dense notation, it is an unanswered question printed twenty times. `xem`, `tạo · xem`,
+`tạo · xem · sửa` are words the reader already has.
+
+**Numbering implied an order that did not exist.** Cards numbered 01–07 down a lane told the
+reader that three independent triggers were steps two, three and four of a process. Number the
+*stage*, so things that happen at the same time share a number, and say which cards merely start
+a chain.
+
+**Emphasis by SHOUTING.** `KÉO`, `ĐẨY`, `MỌI`, `THEO NGƯỜI` — how a register gets read back by the
+person who wrote it, not how anyone wants to be spoken to. Bold carries emphasis; capitals carry
+volume.
+
+**Text cut mid-word.** `Xem một dự án đang chạy t` is not a shorter label, it is a broken one, and
+it appeared on every card with more than one next step. Cut at a word, or show one label whole and
+count the rest.
+
+The habit underneath all seven: a document assembled from a register inherits the register's
+voice. Someone has to read it as the recipient before it goes out, and that someone cannot be the
+register.
