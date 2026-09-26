@@ -264,3 +264,35 @@ anything — the other labels, and the steps themselves — and only then emit.
 
 Three attempts at this were made by eye and each left a different collision. The one that worked
 was measured: lay out, detect, separate, re-check.
+
+
+## whether a figure is clickable is a measurement, not a kind
+
+<!-- enforced-by: figure-control-does-nothing -->
+
+Which diagrams are worth making interrogable was decided once by kind — "the lifecycle figures
+are interrogable, a use case model has no route to follow" — and it was exactly backwards.
+
+A lifecycle is a cycle. Every state reaches every other state, so focusing one lights 100% of the
+diagram and the control does nothing. A use case model narrows to a tenth. The guess was confident,
+reasonable, and wrong in both directions at once.
+
+**Measure it on the graph that was actually drawn.** A figure is interrogable when it is big enough
+to need help, when focusing the median node leaves most of it dimmed, AND when that node has
+neighbours at all — a graph with no edges passes a "does it narrow" test by narrowing to nothing,
+which is how the use case model came to offer a control that dimmed nine nodes and lit none.
+
+## the question a click answers is not "everything after this"
+
+<!-- enforced-by: figure-control-does-nothing -->
+
+Transitive reachability is the obvious thing to highlight and the wrong one. On a process that
+mostly runs top to bottom, everything after the first step is the whole process: clicking step 1
+lit 21 of 23 boxes.
+
+The question a reader has in front of a swimlane is smaller and better: **where does this step sit
+— who hands it to me, and who do I hand it to.** The immediate neighbourhood narrows on every
+graph shape, linear or cyclical, and it is the thing somebody points at on a call.
+
+A control that appears to do something and does not is worse than no control, because the reader
+spends attention finding out.

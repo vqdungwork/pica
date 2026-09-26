@@ -389,8 +389,8 @@ table.rtm tr.warn td{background:var(--open-bg)}
    themes, which is what a printed diagram does on a dark page anyway. */
 
 .fig figcaption{font-size:11.5px;color:var(--ink3);margin-top:9px}
-.fig:not(.fig--static) svg [data-node]{cursor:pointer}
-.fig--static svg [data-node]{cursor:default}
+.fig svg[data-interrogable="yes"] [data-node]{cursor:pointer}
+
 .fig svg [data-edge]{pointer-events:none}
 figure[data-focus] svg [data-node],figure[data-focus] svg [data-edge]{opacity:.15;transition:opacity .18s}
 figure[data-focus] svg [data-node][data-on],figure[data-focus] svg [data-edge][data-on]{opacity:1}
@@ -448,7 +448,7 @@ ${diagrams.some((d) => d.name === "context") ? `<section class="part">
   <p class="eyebrow">Bắt đầu từ đây</p>
   <h2>Hệ thống này chạm vào những gì</h2>
   <p class="deck">Ai dùng nó, nó nối với hệ thống nào, và dữ liệu đi theo chiều nào. Mọi thứ còn lại trong tài liệu nằm bên trong ô xanh.</p>
-  <figure class="fig fig--static" data-label="Sơ đồ bối cảnh" data-figure="context">${diagrams.find((d) => d.name === "context").svg}</figure>
+  <figure class="fig" data-label="Sơ đồ bối cảnh" data-figure="context">${diagrams.find((d) => d.name === "context").svg}</figure>
 </section>` : ""}
 
 ${journey.length ? `<section class="part">
@@ -502,7 +502,7 @@ ${diagrams.some((d) => d.name === "usecases") ? `<section class="part">
   <p class="eyebrow">Phần 2b</p>
   <h2>Ai làm được gì</h2>
   <p class="deck">Mỗi đường là một việc một vai làm được. Không phải màn hình, không phải tính năng — là quyền làm một việc.</p>
-  <figure class="fig fig--static" data-label="Ai làm được gì" data-figure="usecases">${diagrams.find((d) => d.name === "usecases").svg}</figure>
+  <figure class="fig" data-label="Ai làm được gì" data-figure="usecases">${diagrams.find((d) => d.name === "usecases").svg}</figure>
 </section>` : ""}
 
 ${arr(S.screens).length ? `<section class="part">
@@ -530,7 +530,7 @@ ${diagrams.some((d) => d.name === "erd") ? `<section class="part">
   <p class="eyebrow">Phần 4</p>
   <h2>Dữ liệu, và cái gì liên quan cái gì</h2>
   <p class="deck">Bốn thực thể. Chỉ một do app này sở hữu — phần còn lại là bản soi chỉ đọc của 8project, và app này không bao giờ ghi ngược lên.</p>
-  <figure class="fig fig--static" data-label="Dữ liệu và quan hệ" data-figure="erd">${diagrams.find((d) => d.name === "erd").svg}</figure>
+  <figure class="fig" data-label="Dữ liệu và quan hệ" data-figure="erd">${diagrams.find((d) => d.name === "erd").svg}</figure>
 </section>` : ""}
 
 ${arr(S.domainModel).length && !diagrams.some((d) => d.name === "erd") ? `<section class="part">
@@ -606,20 +606,31 @@ ${appendix.length ? `<section class="part">
 // Only the lifecycle figures are interrogable: focus answers "what follows this", and a
 // use case or an entity has no route to follow. Making them clickable dimmed the page and
 // taught the reader nothing, which is a control that looks interactive and is not.
-document.querySelectorAll("figure.fig:not(.fig--static)").forEach(fig => {
+/* Which figures are clickable is DECIDED BY MEASUREMENT, in the generator, and carried on the svg
+   as data-interrogable. The page used to decide it by kind, and got it exactly backwards: the
+   lifecycle models were clickable although focusing a state in a cyclical lifecycle lights every
+   other state, and the use case model — which narrows to a tenth — was not. */
+document.querySelectorAll("figure.fig").forEach(fig => {
+  if (fig.querySelector("svg")?.dataset.interrogable !== "yes") return;
   const svg = fig.querySelector("svg"); if (!svg) return;
   const nodes = [...svg.querySelectorAll("[data-node]")];
   const edges = [...svg.querySelectorAll("[data-edge]")].map(el => { const [from,to]=el.dataset.edge.split("|"); return {el,from,to}; });
   if (!nodes.length) return;
   const name = fig.querySelector(".fname"); let seed = null;
-  const reach = id => { const seen=new Set([id]); const q=[id];
-    while(q.length){ const cur=q.shift(); for(const e of edges) if(e.from===cur && !seen.has(e.to)){ seen.add(e.to); q.push(e.to);} } return seen; };
+  /* What leads in, and what leads straight out — NOT everything transitively reachable.
+     On a process that mostly runs top to bottom, "everything after this" is almost the whole
+     diagram: clicking the first step lit 21 of 23 boxes, which is a control that appears to do
+     something and does not. The immediate neighbourhood always narrows, and it answers the
+     question a reader actually has in front of a swimlane: where does this step sit, who hands
+     it to me and who do I hand it to. */
+  const reach = id => { const seen=new Set([id]);
+    for(const e of edges){ if(e.from===id) seen.add(e.to); if(e.to===id) seen.add(e.from); } return seen; };
   function paint(){
     if(!seed){ fig.removeAttribute("data-focus"); nodes.forEach(n=>{n.removeAttribute("data-on");n.removeAttribute("data-seed");}); edges.forEach(e=>e.el.removeAttribute("data-on")); return; }
     const on = reach(seed); fig.setAttribute("data-focus","");
     nodes.forEach(n=>{ n.toggleAttribute("data-on", on.has(n.dataset.node)); n.toggleAttribute("data-seed", n.dataset.node===seed); });
     edges.forEach(e=>e.el.toggleAttribute("data-on", on.has(e.from)&&on.has(e.to)));
-    if (name) name.textContent = (nodes.find(n=>n.dataset.node===seed)?.getAttribute("aria-label")||seed) + " — " + (on.size-1) + " bước phía sau";
+    if (name) name.textContent = (nodes.find(n=>n.dataset.node===seed)?.getAttribute("aria-label")||seed) + " — " + (on.size-1) + " bước liền kề";
   }
   nodes.forEach(n => { const go=()=>{ seed = seed===n.dataset.node ? null : n.dataset.node; paint(); };
     n.addEventListener("click", go);

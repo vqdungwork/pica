@@ -106,6 +106,41 @@ for (const f of svgs) {
       `reads as neither of them. Separate them where the coordinates are, before emitting`);
 }
 
+/* A control that looks interactive and changes nothing.
+ *
+ * The generator marks each diagram data-interrogable after measuring whether focusing a node
+ * narrows the view. This re-derives that independently, because a claim and its evidence should
+ * not come from the same line of code: a figure asserting "yes" has to have edges, and focusing
+ * its median node has to leave most of the diagram dimmed.
+ *
+ * Both failures were live. Clicking the first step of the process lit 21 of 23 boxes, because
+ * "everything reachable from the start" is the whole diagram. The use case model claimed to
+ * narrow to a tenth and had no tagged edges at all, so clicking a node dimmed the other nine and
+ * lit nothing. */
+for (const f of svgs) {
+  const src = readFileSync(join(dir, f), "utf8");
+  if (!/data-interrogable="yes"/.test(src)) continue;
+  const ids = [...src.matchAll(/data-node="([^"]+)"/g)].map((m) => m[1]);
+  const pairs = [...src.matchAll(/data-edge="([^"|]+)\|([^"]+)"/g)].map((m) => [m[1], m[2]]);
+  if (!pairs.length) {
+    fail("figure-control-does-nothing",
+      `${f} offers a click control and carries no edges, so focusing a node dims every other node ` +
+      "and lights nothing. A graph with no edges is a list");
+    continue;
+  }
+  const near = (id) => {
+    const set = new Set([id]);
+    for (const [a, b] of pairs) { if (a === id) set.add(b); if (b === id) set.add(a); }
+    return set.size;
+  };
+  const sizes = ids.map(near).sort((a, b) => a - b);
+  const med = sizes[Math.floor(sizes.length / 2)];
+  if (med / ids.length > 0.5)
+    fail("figure-control-does-nothing",
+      `${f} offers a click control that lights ${med} of its ${ids.length} node(s) for the median step. ` +
+      "A control that dims almost nothing answers no question — make the figure a drawing and say so");
+}
+
 // and the reverse: a figure the page frames but has no caption is a picture with no question
 const framed = [...html.matchAll(/<figure[^>]*>/g)];
 for (const tag of framed) {
