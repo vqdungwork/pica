@@ -65,6 +65,49 @@ when the integration is down.
 
 **Gates at the end.** Then a contrast failure is a re-theme rather than a token edit.
 
+## Declare the runners on day one
+
+Write `.pica/runners.json` when the demo first serves, not at the end. It is how the project tells
+the runner the things only the project knows — where the app runs, which selector is its dialog,
+which part of the page is its own review chrome — and without it those checks abstain.
+
+```json
+{
+  "serve": { "cmd": "npm run dev", "cwd": "demo", "url": "http://localhost:5173/" },
+  "build": { "cmd": "npm run build", "cwd": "demo", "out": "demo/dist" },
+  "substitutions": {
+    "<servedDemo>": "http://localhost:5173/",
+    "<everyScreenAndState>": "demo/scripts/screens.mjs",
+    "<knownRoute>": "scr=WL-02&state=success",
+    "<harnessChrome>": ".devbar",
+    "<targetFloor>": "48",
+    "<frame>": ".frame", "<primary>": "main", "<dialog>": "[role=dialog]",
+    "<opener>": "[data-confirm-open]", "<baselines>": "demo/.baselines", "<srcDir>": "demo/src"
+  }
+}
+```
+
+**Why this and not the project's own npm scripts.** One finished project wired every one of those
+checks into its `package.json` with a hardcoded localhost URL and a hardcoded path into the plugin
+cache, and ran them itself — 94 routes, 376 renders, exit 0. All of it real, all of it passing, and
+the closing report said twenty-one of twenty-nine design checks abstained, because the runner had no
+way to fill `<servedDemo>` or guess a selector. **Evidence that exists only in a side channel is
+evidence nobody will find.**
+
+`<targetFloor>` comes from the audience profile, not from a default. `<harnessChrome>` is whatever
+the demo's own screen and state pickers live in — without it, target-size-check measures the review
+toolbar and reports a dozen defects in chrome the client never sees.
+
+## Every script in the chain must be able to fail
+
+A demo's check chain is joined with `&&`, so anything that exits 0 unconditionally is a gap with a
+green tick beside it. One project's `target-sizes.mjs` printed the dimensions of seven hand-picked
+selectors and returned success every time it ran.
+
+Every script the chain calls either asserts and exits non-zero, or prints that it SKIPPED and says
+that a skip is not a pass. Prefer pica's own checks over a local script: a local one drifts, and
+nothing mutates it.
+
 ## Done when
 
 ```bash
