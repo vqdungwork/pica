@@ -50,13 +50,13 @@ const REGISTERS = [
     rows: () => (S.problem ? [{ id: "PROB", head: S.problem.whose, body: S.problem.statement, meta: [S.problem.metric && `${S.problem.metric}: ${S.problem.baseline ?? "?"} ${S.problem.unit ?? ""}`].filter(Boolean) }] : []) },
   { key: "rules",      phase: "03 Analysis",      docs: ["BRD", "FRD"], title: "Luật nghiệp vụ",
     rows: () => arr(S.businessRules).map((x) => ({ id: x.id, head: x.status === "open" ? "CHƯA CHỐT" : (x.confirmed ? "đã xác nhận" : ""), body: x.rule, meta: [x.enforcedBy && `thực thi bởi: ${x.enforcedBy}`].filter(Boolean), open: x.status === "open" })) },
-  { key: "glossary",   phase: "03 Analysis",      docs: ["BRD", "PRD", "FRD"], title: "Từ điển",
+  { key: "glossary",   phase: "03 Analysis",      docs: ["BRD", "PRD", "FRD"], title: "Từ điển", dense: true,
     rows: () => arr(S.glossary).map((x, i) => ({ id: `G-${String(i + 1).padStart(2, "0")}`, head: `${x.term}${x.vi ? ` · ${x.vi}` : ""}`, body: x.means, meta: [x.notOurTerm?.length && `không phải: ${arr(x.notOurTerm).join(", ")}`].filter(Boolean) })) },
-  { key: "useCases",   phase: "03 Analysis",      docs: ["PRD"],        title: "Use case",
+  { key: "useCases",   phase: "03 Analysis",      docs: ["PRD"],        title: "Use case", dense: true,
     rows: () => arr(S.useCases).map((x) => ({ id: x.id, head: x.name, body: arr(x.mainFlow).slice(0, 3).join(" → "), meta: [x.app, arr(x.actors)[0]].filter(Boolean), refs: [...ids(x.addresses), ...ids(x.tracesTo)] })) },
-  { key: "reqs",       phase: "03 Analysis",      docs: ["PRD"],        title: "Yêu cầu",
+  { key: "reqs",       phase: "03 Analysis",      docs: ["PRD"],        title: "Yêu cầu", dense: true,
     rows: () => arr(S.requirements).map((x) => ({ id: x.id, head: x.class, body: x.statement, meta: [x.app].filter(Boolean), refs: ids(x.tracesTo) })) },
-  { key: "nfr",        phase: "03 Analysis",      docs: ["PRD", "FRD"], title: "Yêu cầu phi chức năng",
+  { key: "nfr",        phase: "03 Analysis",      docs: ["PRD", "FRD"], title: "Yêu cầu phi chức năng", dense: true,
     rows: () => arr(S.nfr).map((x) => ({ id: x.id, head: x.kind, body: x.requirement, meta: [x.condition, x.measuredBy].filter(Boolean) })) },
   { key: "entities",   phase: "04 Specification", docs: ["FRD"],        title: "Mô hình miền",
     rows: () => arr(S.domainModel).map((x) => ({ id: `ENT-${String(x.entity).replace(/\W+/g, "-").toLowerCase()}`, head: x.entity, body: `chủ sở hữu: ${x.owner ?? "—"}`, meta: [arr(x.states).length && `${arr(x.states).length} trạng thái`, arr(x.attributes).length && `${arr(x.attributes).length} thuộc tính`].filter(Boolean) })) },
@@ -100,6 +100,30 @@ const docCount = (d) => built.filter((r) => r.docs.includes(d)).reduce((n, r) =>
 const title = arg("--title", `${S.problem?.whose ? "" : ""}Đặc tả — ${esc(S.field ?? "dự án")}`);
 const openCount = built.reduce((n, r) => n + r.items.filter((i) => i.open).length, 0);
 
+/* The chain drawn as a chain. The first version made every id a link and called that "the matrix
+ * is the navigation" — which it was, per item. What it had no view of was the SHAPE: 129 entries
+ * in one linear list, 18 screens of scrolling, and no way to see that this specification is three
+ * segments narrowing to nine pains widening to thirteen use cases. Navigation answers "where does
+ * this one go"; a map answers "how much is there and how does it divide", and that is the first
+ * question anyone asks. */
+const CHAIN = [
+  { key: "segments", label: "phân khúc" },
+  { key: "pains",    label: "nỗi đau" },
+  { key: "useCases", label: "use case" },
+  { key: "reqs",     label: "yêu cầu" },
+  { key: "rules",    label: "luật" },
+  { key: "entities", label: "thực thể" },
+  { key: "screens",  label: "màn hình" },
+];
+const chainHtml = () => {
+  const hops = CHAIN.map((h) => ({ ...h, n: (built.find((b) => b.key === h.key)?.items.length) || 0 })).filter((h) => h.n);
+  const max = Math.max(...hops.map((h) => h.n), 1);
+  return `<div class="chain"><div class="chain-head">Chuỗi truy vết — đi được cả hai chiều, không mục nào mồ côi</div>
+  <ol class="hops">${hops.map((h, i) => `<li><button class="hop" data-hop="${h.key}">
+    <span class="hopn">${h.n}</span><span class="hopl">${esc(h.label)}</span>
+    <span class="hopbar" style="--f:${(h.n / max * 100).toFixed(0)}%"></span></button>${i < hops.length - 1 ? '<span class="arrow" aria-hidden="true">→</span>' : ""}</li>`).join("")}</ol></div>`;
+};
+
 const html = `<!doctype html><html lang="vi"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${esc(title)}</title>
@@ -142,11 +166,43 @@ li.item:target,li.item[data-lit]{background:color-mix(in srgb,var(--accent) 12%,
 .refs .lbl{color:var(--muted)}
 .dia{margin:26px 0}
 .dia figure{margin:0 0 18px;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px;overflow-x:auto}
-.dia svg{max-width:100%;height:auto;display:block}
+/* A 23-step process across four lanes is ~1900px wide. Capping it at 100% of the column shrank
+   it into a grey smear: technically present, unreadable, and worse than absent because it looks
+   answered. Wide diagrams scroll sideways at their own size; narrow ones still fit.
+   (No backticks in comments inside this template literal — one ended the string an hour ago and
+   this is the second time.) */
+.dia svg{height:auto;display:block;max-width:none}
+.dia figure{scrollbar-width:thin}
+@media(min-width:900px){.dia svg{max-width:100%}.dia figure.wide svg{max-width:none}}
 .dia figcaption{color:var(--muted);font-size:12px;margin-top:8px}
 .note{background:var(--card);border-left:3px solid var(--accent);border-radius:0 var(--r) var(--r) 0;padding:12px 16px;margin:20px 0;font-size:14px}
 .warnnote{border-left-color:var(--warn)}
-@media(max-width:620px){li.item{grid-template-columns:1fr}.body,.meta,.refs{grid-column:1}}
+.chain{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px;margin-bottom:22px}
+.chain-head{font-size:13px;color:var(--muted);margin-bottom:12px}
+ol.hops{list-style:none;margin:0;padding:0;display:flex;align-items:flex-end;gap:4px;flex-wrap:wrap}
+ol.hops li{display:flex;align-items:center;gap:4px}
+.hop{display:grid;gap:2px;justify-items:start;min-width:74px;padding:6px 9px;border:1px solid transparent;border-radius:8px;background:none;font:inherit;color:inherit;cursor:pointer;text-align:left}
+.hop:hover{border-color:var(--strong);background:color-mix(in srgb,var(--accent) 7%,transparent)}
+.hop:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.hopn{font-size:21px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
+.hopl{font-size:11px;color:var(--muted)}
+.hopbar{width:100%;height:3px;border-radius:2px;background:color-mix(in srgb,var(--accent) 18%,transparent);position:relative;margin-top:3px}
+.hopbar::after{content:"";position:absolute;inset:0 auto 0 0;width:var(--f);background:var(--accent);border-radius:2px}
+.arrow{color:var(--strong);font-size:13px}
+.more{display:block;width:100%;min-height:44px;border:none;border-top:1px solid var(--line);background:none;font:inherit;font-size:13px;color:var(--accent);cursor:pointer;padding:10px 16px;text-align:left}
+.more:hover{background:color-mix(in srgb,var(--accent) 8%,transparent)}
+section.reg[data-dense] li.item[data-over]{display:none}
+section.reg[data-dense][data-expanded] li.item[data-over]{display:grid}
+section.reg[data-dense][data-expanded] .more{color:var(--muted)}
+@media(max-width:620px){
+  li.item{grid-template-columns:1fr}.body,.meta,.refs{grid-column:1}
+  /* Four full-height cards ate the whole first screen on a phone: the reader met four labels and
+     no content. Two columns, compact, so the map is above the fold with them. */
+  .docs{grid-template-columns:1fr 1fr;gap:8px}
+  .doc{padding:10px 12px}.doc b{font-size:15px}.doc .n{font-size:18px}.doc .who{display:none}
+  .wrap{padding-top:20px}h1{font-size:22px}.sub{font-size:13px}
+  .hop{min-width:62px}.hopn{font-size:17px}
+}
 </style></head><body><div class="wrap">
 <h1>${esc(title)}</h1>
 <p class="sub">Gom từ <code>.pica/state.json</code> — cùng một nguồn các check đọc, nên trang này không thể mâu thuẫn với chúng. Sinh lại là cập nhật; không có bản sao nào để lệch.</p>
@@ -163,14 +219,29 @@ ${openCount ? `<div class="note warnnote"><b>${openCount} mục chưa chốt.</b
   <span class="count" id="count"></span>
 </div>
 
+${chainHtml()}
+
+${diagrams.length ? `<div class="dia">
+<p class="sub">Mô hình — vẽ từ chính dữ liệu các check đã kiểm, không có nguồn thứ hai.</p>
+${diagrams.map((d) => {
+  const w = Number((d.svg.match(/width="(\d+)"/) || [])[1] || 0);
+  const label = d.name.startsWith("state-")
+    ? `Vòng đời · ${d.name.replace(/^state-/, "").replace(/-/g, " ")}`
+    : d.name === "permissions" ? "Ma trận quyền · vai trò × đối tượng"
+    : d.name === "process" ? "Quy trình TO-BE · theo vai trò"
+    : d.name;
+  return `<figure${w > 900 ? ' class="wide"' : ""}>${d.svg}<figcaption>${esc(label)}${w > 900 ? " — cuộn ngang để xem hết" : ""}</figcaption></figure>`;
+}).join("")}</div>` : ""}
+
 ${built.map((reg) => `
-<section class="reg" data-docs="${reg.docs.join(" ")}">
+<section class="reg" data-key="${reg.key}" data-docs="${reg.docs.join(" ")}"${reg.dense ? " data-dense" : ""}>
   <h2>${esc(reg.title)} <span class="phase">${esc(reg.phase)}</span>
     <span class="tags">${reg.docs.map((d) => `<span class="tag">${d}</span>`).join("")}</span></h2>
-  <ul class="items">${reg.items.map((it) => {
+  <ul class="items">${reg.items.map((it, idx) => {
     const cites = arr(it.refs).filter((r) => defined.has(r));
     const citedHere = citedBy.get(it.id) || [];
-    return `<li class="item" id="${esc(it.id)}" data-id="${esc(it.id)}"${it.open ? ' data-open="1"' : ""}>
+    const over = reg.dense && idx >= 6 && !it.open;
+    return `<li class="item" id="${esc(it.id)}" data-id="${esc(it.id)}"${it.open ? ' data-open="1"' : ""}${over ? " data-over" : ""}>
       <span class="id" data-jump="${esc(it.id)}">${esc(it.id)}</span>
       ${it.head ? `<span class="head">${esc(it.head)}</span>` : "<span></span>"}
       <div class="body">${esc(it.body)}</div>
@@ -180,12 +251,8 @@ ${built.map((reg) => `
         ${citedHere.length ? `<span class="lbl">${cites.length ? "· " : ""}được dùng bởi</span>${[...new Set(citedHere)].map((r) => `<a href="#${esc(r)}">${esc(r)}</a>`).join("")}` : ""}
       </div>` : ""}
     </li>`;
-  }).join("")}</ul>
+  }).join("")}${reg.dense && reg.items.length > 6 ? `<button class="more" data-more>Còn ${reg.items.length - Math.min(6, reg.items.filter((i) => !i.open).length ? 6 : 0)} mục nữa — mở ra</button>` : ""}</ul>
 </section>`).join("")}
-
-${diagrams.length ? `<div class="dia"><h2>Mô hình</h2>
-<p class="sub">Vẽ từ chính dữ liệu các check đã kiểm — không có nguồn thứ hai, nên hình không thể lệch với mô hình.</p>
-${diagrams.map((d) => `<figure>${d.svg}<figcaption>${esc(d.name)}</figcaption></figure>`).join("")}</div>` : ""}
 
 </div><script>
 const items = [...document.querySelectorAll("li.item")];
@@ -219,6 +286,33 @@ document.addEventListener("click", e => {
   document.querySelectorAll('a[href="#'+id+'"]').forEach(a => a.closest("li.item")?.setAttribute("data-lit",""));
   document.getElementById(id)?.setAttribute("data-lit","");
 });
+document.querySelectorAll("[data-more]").forEach(btn => btn.onclick = () => {
+  const sec = btn.closest("section.reg");
+  const open = sec.hasAttribute("data-expanded");
+  if (open) { sec.removeAttribute("data-expanded"); btn.textContent = btn.dataset.closed; }
+  else { btn.dataset.closed = btn.textContent; sec.setAttribute("data-expanded",""); btn.textContent = "Thu lại"; }
+});
+// A hop on the map jumps to its register and opens it — the map is a way IN, not an ornament.
+document.querySelectorAll(".hop").forEach(h => h.onclick = () => {
+  apply("ALL");
+  const sec = [...secs].find(s => s.dataset.key === h.dataset.hop);
+  if (!sec) return;
+  sec.setAttribute("data-expanded","");
+  const btn = sec.querySelector("[data-more]"); if (btn) btn.textContent = "Thu lại";
+  sec.scrollIntoView({behavior:"smooth", block:"start"});
+});
+// Say "scroll sideways" only where it is TRUE, measured, and re-decided on resize. A fixed width
+// threshold captioned two diagrams that fitted comfortably as needing a scroll they did not need,
+// and left the one that did need it unmarked on a phone. A caption that tells a reader to do
+// something unnecessary is a caption they learn to disbelieve.
+function hintScroll(){
+  for (const f of document.querySelectorAll(".dia figure")){
+    const over = f.scrollWidth > f.clientWidth + 1;
+    f.querySelector("figcaption").textContent = f.dataset.label + (over ? " — cuộn ngang để xem hết" : "");
+  }
+}
+addEventListener("resize", hintScroll);
+hintScroll();
 apply("ALL");
 </script></body></html>`;
 

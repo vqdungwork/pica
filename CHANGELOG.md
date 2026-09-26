@@ -1,5 +1,36 @@
 # Changelog
 
+## 3.3.2
+
+### A long list is not a visualisation
+
+3.3.0 assembled thirty-five documents into one page and called it done. Asked whether the
+visualisation was actually good, the honest answer was no: 129 items in a single linear column,
+**eighteen and a half screens of scrolling**, diagrams at the very bottom where nobody reaches
+them, every register rendered identically so a glossary entry looked exactly like a screen, and a
+phone showing four labels and no content on its first screenful.
+
+It was, precisely, the wall of text this project had spent a week diagnosing on somebody else's
+report screen. Writing the rule does not exempt the next thing you build from it.
+
+- **Lead with a map.** The chain drawn as a chain — *3 segments → 9 pains → 13 use cases → 29
+  requirements → 13 rules → 4 entities → 11 screens* — each hop a proportional bar and a way in.
+  Navigation answers "where does this one go"; a map answers "how much is there", which is asked
+  first.
+- **Pictures where they are read**, not after eighteen screens of list.
+- **Reference registers collapse.** Six visible, a line saying how many are behind it. Open items
+  never collapse.
+- **A phone's first screen carries content**, not four stacked labels.
+
+Result: 20 325px → 15 361px, and the shape is legible in a second rather than assembled in the
+reader's head over eighteen screens.
+
+Two smaller lessons with wider reach. A wide diagram must **scroll, not shrink** — capped at the
+column, a 23-step process became a grey smear, present and unreadable and worse than absent
+because it looks answered. And the "scroll sideways" hint is decided by **measuring at runtime**,
+never by a width threshold guessed in the generator: the guess captioned two diagrams that fitted
+as needing a scroll they did not, and left the one that did unmarked on a phone.
+
 ## 3.3.1
 
 ### A demo answers "does it work". A canvas answers "how much is there"
