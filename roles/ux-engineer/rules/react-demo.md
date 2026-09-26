@@ -305,3 +305,17 @@ iframes, camera and microphone. None of them errors. They just do nothing.
 
 **Decide before building whether the demo will be handed over this way**, because the URL scheme
 is not something to retrofit — it is how every state in the demo is addressed.
+
+
+## the project declares what only the project knows
+
+<!-- enforced-by: none — pica-verify names every undeclared placeholder and refuses a spaced one -->
+
+A check that needs a running app, a selector, or a known-good route cannot be addressed by
+convention: nothing can guess that the dialog is `[role=dialog]` or that the review toolbar is
+`.devbar`. The project says so once, in `.pica/runners.json`, written the day the demo first
+serves.
+
+Skip it and the checks do not disappear — they abstain, which reads as "not applicable" and is
+counted as such in the closing report. On one project fifteen of them were running and passing
+under the demo's own npm scripts the whole time.
