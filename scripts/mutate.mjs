@@ -319,6 +319,42 @@ const M = [
         '<div class="row"><div class="t">Another title here</div><div class="b">badge</div></div>' +
         '</div></div>\n' }],
 
+  /* keyboard-check — a dialog with no way out. The fixture is a page with an open role="dialog"
+   * that neither traps Tab nor answers Escape, which is precisely what shipped: the two defects
+   * a static capture cannot see, because every control in it is individually correct. */
+  ["escape-closes", "ux-engineer/scripts/keyboard-check.mjs",
+    ["--url", "file://" + path.join(DIR, "__mutation-kb__.html"), "--frame", ".frame",
+     "--open", "#opener", "--modal", '[role="dialog"]', "--viewport", "390x844"], "@demo",
+    { file: "__mutation-kb__.html",
+      content: '<!doctype html><meta charset="utf-8"><title>m</title>' +
+        '<style>.frame{width:390px;height:844px}button:focus{outline:2px solid #06c}</style>' +
+        '<div class="frame"><button id="opener" onclick="d.hidden=false">open</button>' +
+        '<button id="behind">behind</button>' +
+        '<div id="d" role="dialog" aria-modal="true" hidden><button>inside</button></div></div>\n' }],
+
+  /* axe-check — a control with no accessible name, which is the single most common real-world
+   * violation and one that every geometric check in this repo is blind to. */
+  ["axe-violations", "ux-engineer/scripts/axe-check.mjs",
+    ["--url", "file://" + path.join(DIR, "__mutation-axe__.html"), "--include", ".frame",
+     "--axe", path.join(DIR, "demo", "node_modules", "axe-core", "axe.min.js"), "--viewport", "390x844"], "@demo/node_modules/axe-core",
+    { file: "__mutation-axe__.html",
+      content: '<!doctype html><html lang="vi"><meta charset="utf-8"><title>m</title>' +
+        '<div class="frame"><button></button><img src="data:image/gif;base64,R0lGODlhAQABAAAAACw="></div></html>\n' }],
+
+  /* visual-baseline-check — a page that no longer matches its committed baseline. Two files,
+   * because a comparison cannot be broken by writing only one side of it: the fixture, and a
+   * baseline PNG of different dimensions standing in for "this used to look like something
+   * else". This is the mutation that made the harness learn multi-file and binary fixtures. */
+  ["visual-baseline", "ux-engineer/scripts/visual-baseline-check.mjs",
+    ["--url", "file://" + path.join(DIR, "__mutation-vis__.html"), "--clip", ".frame",
+     "--dir", path.join(DIR, "__mutation-baseline__"), "--modules", path.join(DIR, "demo"), "--viewport", "390x844"], "@demo",
+    { files: [
+        { file: "__mutation-vis__.html",
+          content: '<!doctype html><meta charset="utf-8"><title>m</title>' +
+            '<style>.frame{width:390px;height:844px;background:#fff}</style><div class="frame">x</div>\n' },
+        { file: path.join("__mutation-baseline__", "index.png"), base64: "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==" },
+      ] }],
+
   // foundations-check
   ["contrast-floor",    "ux-engineer/scripts/foundations-check.mjs", ["html/design-system.html", "tokens/tokens.json", S], "direction", (s) => { s.audience.floors.contrastRatio = 21; }],
   ["state-covered",     "ux-engineer/scripts/foundations-check.mjs", ["html/design-system.html", "tokens/tokens.json", S], "direction", (s) => { s.direction.components[0].states.push("pressed"); }],
@@ -400,15 +436,21 @@ const exercised = (script, argv) => M.some(([, s, a, need]) =>
  * rather than a missing capability. Two checks added on one day both landed in that gap, which
  * is what finally made it visible. */
 function applyFileMutation(m) {
-  const target = path.join(DIR, m.file);
-  const existed = fs.existsSync(target);
-  const prior = existed ? fs.readFileSync(target) : null;
-  fs.mkdirSync(path.dirname(target), { recursive: true });
-  fs.writeFileSync(target, m.content);
-  return () => {
-    if (existed) fs.writeFileSync(target, prior);
-    else fs.rmSync(target, { force: true });
-  };
+  /* One mutation, one or more files, text or binary. A single file was enough until a check
+   * needed a fixture AND the baseline to compare it against — a comparison cannot be broken by
+   * writing only one of the two things being compared. `base64` exists for the same reason: the
+   * artefact some checks read is a PNG. */
+  const parts = m.files || [m];
+  const undo = [];
+  for (const part of parts) {
+    const target = path.join(DIR, part.file);
+    const existed = fs.existsSync(target);
+    const prior = existed ? fs.readFileSync(target) : null;
+    fs.mkdirSync(path.dirname(target), { recursive: true });
+    fs.writeFileSync(target, part.base64 ? Buffer.from(part.base64, "base64") : part.content);
+    undo.push(() => { if (existed) fs.writeFileSync(target, prior); else fs.rmSync(target, { force: true }); });
+  }
+  return () => { for (const u of undo) u(); };
 }
 
 for (const [check, script, argv, need, mutate] of M) {
@@ -420,7 +462,7 @@ for (const [check, script, argv, need, mutate] of M) {
     continue;
   }
   let restoreFile = null;
-  if (typeof mutate === "object" && mutate !== null && mutate.file) {
+  if (typeof mutate === "object" && mutate !== null && (mutate.file || mutate.files)) {
     try { restoreFile = applyFileMutation(mutate); }
     catch { skipped++; results.push(["skip", name, "the file mutation could not be written"]); continue; }
   } else {

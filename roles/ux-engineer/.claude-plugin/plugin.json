@@ -1,7 +1,7 @@
 {
   "name": "pica-ux-engineer",
   "description": "pica UX engineer: the interactive demo in code \u2014 tokens as structured data, the component library, every screen at every viewport in every state, measured before anyone sees it.",
-  "version": "3.0.4",
+  "version": "3.1.0",
   "author": {
     "name": "Dung Vuong"
   },

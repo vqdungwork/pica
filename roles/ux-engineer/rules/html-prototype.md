@@ -668,3 +668,69 @@ What transfers from app convention to mobile web, and is not native-only:
 The test is not whether it works at 390px. It is whether someone holding a phone would recognise
 it as an application rather than a page.
 
+
+## Operate it with the keyboard before anyone else has to
+
+<!-- enforced-by: focus-order, keyboard-trap, modal-traps-focus, escape-closes, focus-returns, focus-visible-live -->
+
+`a11y-check` asks five questions of a capture: is this control reachable, named, focus-visible,
+big enough, and does it carry a role. Every one is a property of a control **in isolation**. None
+is a property of the sequence, and the sequence is what a keyboard user actually experiences.
+
+The first time anything operated one finished demo by keyboard it found, in under a minute, that
+Tab walked straight out of an open sheet into the list behind it — still there, still operable,
+under a scrim saying otherwise — and that Escape did nothing, so the only way out of the dialog
+was a pointer. Both had shipped. Neither is visible in a screenshot, neither appears in a capture
+that records what each control *is*, and both are exactly what the published limits of static
+scanning say will be missed: automated scanners cannot detect focus traps or broken keyboard
+interactions.
+
+So: a dialog is a room with a door, and both work from the keyboard. Focus moves into it on open,
+cycles inside while it is open, and returns to the control that opened it on close — otherwise a
+person is dropped at the top of the document with no idea where they were. Outside a dialog, Tab
+can always leave. Focus order follows reading order **within a scroll region**; pinned chrome is
+not part of that order and must not be judged against it.
+
+## axe is the floor, and the floor is about a third
+
+<!-- enforced-by: axe-violations -->
+
+Run axe-core over every route. It covers the machine-checkable subset of WCAG — contrast, labels,
+ARIA misuse, landmark and heading structure, and roughly a hundred rules more — and published
+estimates put that at somewhere between a third and a half of the success criteria. **The rest
+needs a person, and a page that passes every rule here can still be unusable with a screen
+reader.** Print that limit beside the pass, every time; a green line implying more than it proves
+is how a team stops looking.
+
+Two things it caught on a build that had already passed every geometric check pica owns. A
+`role="tablist"` that was asserted and never honoured — its children were plain buttons, so it
+promised a tab widget and delivered two buttons with no selection state and no relation to the
+panel below; every individual control was correct and the *claim* about them was false, which no
+screenshot can see. And a scrolling list of seventeen deliberately inert rows, which therefore
+contained nothing focusable and could not be scrolled from a keyboard at all.
+
+It also caught a rule this project had just written. "Done work recedes" had been implemented as
+`opacity: .55` on a confirmed row's status text, which put it under 4.5:1. **Quiet and illegible
+are not the same thing, and a percentage cannot tell them apart** — recede by moving to a quieter
+token, never by fading text through the floor.
+
+## A baseline is what catches the second consequence
+
+<!-- enforced-by: visual-baseline -->
+
+Every other check asserts a property: no overflow, one left edge, contrast over the floor. A
+committed screenshot asserts something none of them can — that nothing changed except what was
+meant to.
+
+The defects this catches all have the same shape: a one-line edit with a consequence somewhere
+nobody was looking. A chip removed from a list for good reasons, which silently removed it from a
+detail screen too. A divider that stopped drawing when a later rule won a cascade it had never
+been checked against. A receding style that crossed the contrast floor. Each was invisible in the
+diff that caused it.
+
+Design the flake out rather than tolerating it, along the three axes that cause nearly all of it:
+freeze animations at capture, await `document.fonts.ready` — a shot taken before the web font
+loads differs from one taken after, every time — and state the viewport explicitly instead of
+inheriting it. A small per-pixel tolerance absorbs anti-aliasing without absorbing regressions.
+Commit an updated baseline in the same change as the code that moved it, so a reviewer sees the
+visual diff beside the diff that caused it; a baseline updated on its own proves nothing.

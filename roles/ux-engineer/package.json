@@ -29,7 +29,10 @@
       "verify-html.mjs",
       "visual-qa-check.mjs",
       "url-param-guard.mjs",
-      "layout-coherence-check.mjs"
+      "layout-coherence-check.mjs",
+      "keyboard-check.mjs",
+      "axe-check.mjs",
+      "visual-baseline-check.mjs"
     ],
     "agents": [
       "pica-ux-engineer.md"
@@ -200,6 +203,27 @@
       "run": "layout-coherence-check.mjs",
       "passes": "0 findings",
       "args": "--url <servedDemo> --routes <everyScreenAndState>",
+      "phase": "design",
+      "needs": []
+    },
+    {
+      "run": "keyboard-check.mjs",
+      "passes": "0 findings",
+      "args": "--url <servedDemo> --routes <every screen> --open <opener> --modal <dialog>",
+      "phase": "design",
+      "needs": []
+    },
+    {
+      "run": "axe-check.mjs",
+      "passes": "0 violations",
+      "args": "--url <servedDemo> --routes <every screen> --include <frame>",
+      "phase": "design",
+      "needs": []
+    },
+    {
+      "run": "visual-baseline-check.mjs",
+      "passes": "0 changed",
+      "args": "--url <servedDemo> --routes <every screen> --dir <baselines>",
       "phase": "design",
       "needs": []
     }

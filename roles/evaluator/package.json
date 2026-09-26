@@ -17,7 +17,8 @@
       "pica-evaluator.md"
     ],
     "skills": [
-      "running-a-blind-evaluation"
+      "running-a-blind-evaluation",
+      "running-a-cognitive-walkthrough"
     ]
   },
   "requires": {
