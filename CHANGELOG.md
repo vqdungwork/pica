@@ -1,5 +1,51 @@
 # Changelog
 
+## 3.0.4
+
+### The gap every previous check left open
+
+A client looked at a screen and said the mobile UI looked like nobody knew how to build it. They
+were right, and the build had just passed 376 screen×state×viewport renders with zero overflow,
+zero console errors and every tap target over 48px. Their question was the correct one: does pica
+actually test after it builds?
+
+It measured. It did not look. Every check answered "did it render" or "is this value from a
+token"; none answered "is the result coherent to look at", and every defect in that engagement
+lived in that gap — each found by a person opening a screenshot.
+
+**`ux-engineer/layout-coherence-check`** closes it, with four assertions over a rendered screen:
+
+- **ragged-rows** — a row that stacks on a phone presents ONE left edge. Its marker may sit
+  further left, that is what a marker column is, but only on the title's own line. A line below
+  the title starting left of it is a badge outdented past what it belongs to; three or more
+  columns in one row is a grid that broke. The photographed row had four.
+- **orphan-slot** — a label whose value renders nothing. The label already spent the ink.
+- **framed-viewport** — a declared viewport has two numbers and the review window must show both.
+  When it cannot, the frame's own header slides out of sight and the reviewer is shown an app with
+  no chrome, which is indistinguishable from missing chrome and was reported as missing chrome.
+- **device-scrollbar** — a phone has no grey scrollbar down the middle of its screen. Asserted on
+  `scrollbar-width`, not on a measurement: headless Chromium uses overlay scrollbars and reports
+  0px on a page that draws a classic bar on any machine set to show them, which is where it was
+  seen — on a reviewer's screen and on none of the captures.
+
+### Three lessons from building the check, all the same mistake
+
+It first measured text alone and called eleven correct rows ragged, because a status icon at the
+title's own edge is invisible to a text walker. It then compared exact pixels and called seventeen
+more ragged over 2px differences no eye resolves — **a check for what a person sees must not be
+more precise than seeing.** And it took a `--list` selector, defaulted it to `.list`, passed
+clean, and missed the one screen whose rows live in `.sheet-list`: the confirm screen, the screen
+that had actually broken. **A check that only looks where it is pointed inherits the blind spot of
+whoever pointed it.** Containers are discovered now, innermost first, and `--list` only narrows.
+
+Once working it found three routes nobody had opened, all of them the same self-inflicted defect:
+the "scaled to fit" label added to the harness bar made that bar wrap, which shrank the space the
+scale had just been computed against — a measurement that changed the thing it measured. Then one
+more, 4px, from rounding a scale factor up instead of down.
+
+All four assertions are proven in both directions, and the one that a mutation can carry is in the
+suite. Coverage: 43 checks declared, 28 with a mutation, 15 proven in neither direction.
+
 ## 3.0.3
 
 Everything here came out of one engagement: a brief taken to `--to design`, then six rounds of the

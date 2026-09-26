@@ -328,3 +328,34 @@ This is the general shape: a declaration losing a cascade it was never checked a
 **silently and selectively** — present at some call sites, absent at others, invisible to every
 check that reads files instead of pixels. Whenever a style is asserted as done, the evidence is the
 rendered pixel or the computed value from the live element, never the line in the stylesheet.
+
+## Measure what a person sees, not only what a token says
+
+<!-- enforced-by: ragged-rows, orphan-slot, framed-viewport, device-scrollbar -->
+
+A build once passed 376 screen×state×viewport renders with zero overflow, zero console errors and
+every tap target over 48px, on screens the client called unusable — twice. Every defect was found
+by a person opening a screenshot, and every one of them was geometric:
+
+- **ragged-rows.** A row that stacks on a phone must present one left edge. Its marker may sit
+  further left — that is what a marker column is — but only on the title's own line. A line
+  *below* the title starting left of it is a badge outdented past the thing it belongs to; three
+  or more columns in one row is a grid that broke. On the screen that made a client say the UI
+  looked like nobody knew how, the row had four.
+- **orphan-slot.** A label whose value renders nothing. The label has already spent the ink.
+- **framed-viewport.** A declared viewport has two numbers and the review window must show both.
+  When it cannot, the frame's own header slides out of sight and the reviewer is shown an app with
+  no chrome — indistinguishable from missing chrome, and reported as missing chrome.
+- **device-scrollbar.** A phone does not have a grey scrollbar down the middle of its screen.
+  Asserted on `scrollbar-width`, not on a measurement: headless Chromium uses overlay scrollbars
+  and reports 0px on a page that draws a classic bar on any machine set to show them — which is
+  where it was seen, on a reviewer's screen and on none of the captures.
+
+Three things were learned building the check itself, and each is the same mistake in a different
+coat. It first measured text alone and reported eleven correct rows as ragged, because a status
+icon at the title's edge is invisible to a text walker. It then counted exact pixels and reported
+seventeen more, every one a 2px difference no eye resolves — **a check for what a person sees must
+not be more precise than seeing.** And it took a `--list` selector, defaulted it to `.list`,
+passed clean, and missed the one screen whose rows live in `.sheet-list` — the confirm screen,
+which was the screen that had actually broken. **A check that only looks where it is pointed
+inherits the blind spot of whoever pointed it.** Containers are discovered now, innermost first.

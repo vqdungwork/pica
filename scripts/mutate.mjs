@@ -304,6 +304,21 @@ const M = [
     { file: "__mutation__.html",
       content: '<!doctype html><meta charset="utf-8"><title>m</title><div class="frame">renders regardless of the URL</div>\n' }],
 
+  /* layout-coherence-check — a row whose second line starts left of its own title. Written as a
+   * static page because the defect is purely geometric: two rows in a list, the badge under the
+   * title outdented back to the row's edge, which is exactly what a broken grid produces and
+   * exactly what no overflow, token or target-size check can see. file://, so no server. */
+  ["ragged-rows", "ux-engineer/scripts/layout-coherence-check.mjs",
+    ["--url", "file://" + path.join(DIR, "__mutation-layout__.html"), "--viewport", "390x844"], "@demo",
+    { file: "__mutation-layout__.html",
+      content: '<!doctype html><meta charset="utf-8"><title>m</title>' +
+        '<style>.frame{width:390px;height:844px}.list{padding:8px}.row{padding:8px}' +
+        '.t{margin-left:38px}.b{margin-left:0}</style>' +
+        '<div class="frame"><div class="list">' +
+        '<div class="row"><div class="t">A title that wraps</div><div class="b">badge</div></div>' +
+        '<div class="row"><div class="t">Another title here</div><div class="b">badge</div></div>' +
+        '</div></div>\n' }],
+
   // foundations-check
   ["contrast-floor",    "ux-engineer/scripts/foundations-check.mjs", ["html/design-system.html", "tokens/tokens.json", S], "direction", (s) => { s.audience.floors.contrastRatio = 21; }],
   ["state-covered",     "ux-engineer/scripts/foundations-check.mjs", ["html/design-system.html", "tokens/tokens.json", S], "direction", (s) => { s.direction.components[0].states.push("pressed"); }],
