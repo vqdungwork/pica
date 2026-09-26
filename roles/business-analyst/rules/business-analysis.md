@@ -314,3 +314,73 @@ What this replaced: 129 entries in eight registers, 20 325px of scrolling. What 
 narrative in parts, each opening with one sentence and then a grid, with the registers moved to a
 closed appendix for the one reader in ten who wants to look up a code. 7 700px, and the first
 screen carries the argument instead of a table of contents.
+
+## the picture before the paragraph
+
+<!-- enforced-by: figure-rendered-but-not-placed, figure-without-a-caption, no-figures, figure-too-wide-to-read -->
+
+A context diagram is the first thing a business analyst draws and the last thing pica drew. It
+answers *what does this system touch* — who uses it, what it connects to, which way the data
+moves — and an executive reads it with no preparation at all. Every other model in the document
+needs the reader to already know something.
+
+So it opens the document. Everything after it is inside that box.
+
+**How to know it is wrong:** the page begins with a paragraph. Or the diagram exists in
+`diagrams/` and nothing in the assembled page points at it, which is the same as not drawing it.
+
+## the matrix is the artefact, not only the check
+
+<!-- enforced-by: orphan-requirement, orphan-screen, broken-link -->
+
+pica has walked the chain `segment → pain → use case → requirement → rule → state → screen` as a
+*check* for a while. A check tells one person, once, that nothing is orphaned. It does not settle
+the argument that actually happens on a project, which is a client saying *we never asked for that
+screen* six weeks in.
+
+A requirements traceability matrix settles it, because it is readable by the person having the
+argument: one row per requirement, and the columns walk both directions — which pain it came from,
+and which screen it ends up on. A row with no screen is scope with nowhere to land. A screen no row
+reaches is a screen nobody asked for.
+
+The data was already there. Only the rendering was missing. **When a check walks a structure, ask
+whether the reader should be able to see the same walk.**
+
+## a requirement nobody can test is a wish
+
+<!-- enforced-by: acceptance-coverage-regressed, acceptance-too-thin, acceptance-restates-the-requirement -->
+
+Top-tier requirement documents attach acceptance criteria to every functional requirement: the
+condition under which a reviewer says *this is done*. Without them "the system shall display a
+report" is unfalsifiable, and the delivery argument has no referee.
+
+pica wrote 29 requirements on one project and 0 acceptance criteria, and every check passed,
+because no check asked. `acceptance-check` now does, and it **ratchets** rather than gates: a
+project mid-flight is not retroactively broken, but the number of untestable requirements may
+never grow.
+
+A criterion that restates the requirement is not a criterion. *"The system must show the report"*
+under a requirement to show the report is a sentence that can never fail.
+
+
+## draw along the page's long axis, not along the tradition's
+
+<!-- enforced-by: figure-too-wide-to-read -->
+
+A swimlane diagram is drawn sideways because the convention was set on paper, which is wider than
+it is tall. A web page is the opposite: its width is fixed and its height is free.
+
+Drawn sideways, a 23-step process across three roles came out 1538px wide. The page scaled it to
+fit and every label rendered at 6.7px. The figure was there, every check passed, and nobody could
+read a word of it. Turned ninety degrees — lanes as columns, the process running down — the same
+23 steps came out 968px wide and every label was legible.
+
+The same reasoning caps how many steps may sit side by side in one lane. Laying out everything
+simultaneous in one row is correct as a model and wrong as a drawing, because it spends the scarce
+axis. Two per lane, and the third drops to a half-row below.
+
+**How to know it is wrong:** measure it. The smallest `font-size` in the SVG, times
+`column width ÷ viewBox width`, is what the reader actually gets. Below about 9px, Vietnamese
+diacritics stop resolving and the diagram is decoration.
+
+Horizontal scrolling is not the fix. The reader will not do it.

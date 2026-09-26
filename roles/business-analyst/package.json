@@ -19,7 +19,9 @@
       "audience-check.mjs",
       "requirements-check.mjs",
       "traceability-check.mjs",
-      "assemble-spec.mjs"
+      "assemble-spec.mjs",
+      "acceptance-check.mjs",
+      "figure-placement-check.mjs"
     ],
     "agents": [
       "pica-business-analyst.md"
@@ -119,6 +121,22 @@
       "run": "traceability-check.mjs",
       "passes": "0 findings",
       "args": "<state>",
+      "phase": "analyse",
+      "needs": []
+    },
+    {
+      "run": "acceptance-check.mjs",
+      "passes": "0 findings",
+      "args": "<state>",
+      "phase": "analyse",
+      "needs": [
+        "requirements"
+      ]
+    },
+    {
+      "run": "figure-placement-check.mjs",
+      "passes": "0 findings",
+      "args": "docs/spec/index.html docs/spec/diagrams",
       "phase": "analyse",
       "needs": []
     }
