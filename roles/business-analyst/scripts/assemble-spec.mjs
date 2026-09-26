@@ -122,312 +122,374 @@ const chainHtml = () => {
   <ol class="hops">${hops.map((h, i) => `<li><button class="hop" data-hop="${h.key}">
     <span class="hopn">${h.n}</span><span class="hopl">${esc(h.label)}</span>
     <span class="hopbar" style="--f:${(h.n / max * 100).toFixed(0)}%"></span></button>${i < hops.length - 1 ? '<span class="arrow" aria-hidden="true">→</span>' : ""}</li>`).join("")}</ol></div>`;
-};
-/* ---- the page -------------------------------------------------------------------------------
- * Design plan, written before the markup, because the first version had none and looked it.
+};/* ---- the page -------------------------------------------------------------------------------
+ * A reference document, not a database export.
  *
- * SUBJECT  A specification that will be read by three different people for three different
- *          reasons, mostly by consulting it rather than reading it through. The governing fact
- *          from the research: design for someone who will read as little as possible.
+ * What this replaces dumped eight registers of 129 entries into one scrolling column. Every entry
+ * was correct and the result was unreadable to the only people whose opinion decides anything:
+ * the ones who know the business and not the notation. They do not want to find a fact. They want
+ * to SEE what a person can do, where they go, and what the system holds — and to recognise their
+ * own operation in it.
  *
- * COLOUR   Warm neutrals, not the default grey — paper #fbfaf8, ink #1a1c1e, rule #e3e1dd. One
- *          accent, the product's own Plane-derived blue #005a8d, and one semantic amber #a15c00
- *          reserved for what is unresolved. Nothing else gets a colour.
+ * So the page is a narrative in parts, and the parts that matter are GRIDS in which colour is the
+ * information. One legend, used everywhere: where a step happens, and where a screen's data comes
+ * from, are the same question in two places. A reader who learns "grey is 8project, blue is this
+ * app, olive is outside any system" can then read every grid on the page at a glance — and see,
+ * without reading a word, how much of their day this product actually touches.
  *
- * TYPE     Three roles. Source Serif 4 for headings, because this is a document somebody signs
- *          and a serif says so. IBM Plex Sans for body, which holds up at small sizes and dense
- *          line lengths. IBM Plex Mono for ids, because an id is data. Prose is held near 68
- *          characters; tables use the full measure.
+ * Nothing scrolls sideways. A diagram that has to be scrolled is a diagram nobody sees whole,
+ * which defeats the reason for drawing it: the process grid wraps, the lifecycle fits its column,
+ * and the one genuinely wide picture is drawn to the width available rather than to its own.
  *
- * LAYOUT   A sticky rail of registers with counts on the left — you jump, you do not scroll —
- *          and the content as TABLES, not cards. The previous version gave every one of 129
- *          entries a rounded white card with the same radius and shadow, which flattens hierarchy
- *          into a stack of identical objects. A register is tabular data: one object with many
- *          rows, not many objects. Cards are kept for the two things that are genuinely separate
- *          objects — the map and the open items.
- *
- * Light only, by request. Colours are painted explicitly so the page does not borrow a host
- * theme.
+ * COLOUR   paper #fbfaf8 · ink #1a1c1e · rule #e3e1dd. Four semantic hues and no others:
+ *          slate #5c6166 (8project, mirrored), blue #005a8d (this app, owned),
+ *          olive #6b6420 (outside any system), amber #a15c00 (not settled).
+ * TYPE     Source Serif 4 headings (a document somebody signs), IBM Plex Sans body,
+ *          IBM Plex Mono for references. Prose held to 68 characters.
+ * LAYOUT   Parts down the page, each opening with one sentence and then a grid. Light only.
  */
+
+/* Where a thing happens, or where its data comes from — one vocabulary for both. */
+const laneKind = (lane) => {
+  const s = String(lane || "").toLowerCase();
+  if (/8project|plane|upstream/.test(s)) return "mirror";
+  if (/ngoài|ngoai|outside|manual/.test(s)) return "outside";
+  return "app";
+};
+const KIND = {
+  mirror:  { label: "8project — nguồn ngoài, chỉ đọc", css: "k-mirror" },
+  app:     { label: "worklog / reporting — app này làm", css: "k-app" },
+  outside: { label: "Ngoài hệ thống — người làm, không app nào", css: "k-outside" },
+  open:    { label: "Chưa chốt", css: "k-open" },
+};
+
+/* The journey: the TO-BE steps, ordered by depth, grouped by who does them. This is the
+ * "what can a person do, and where do they go" picture, and it is a grid rather than a graph
+ * because a grid fits the page and a 23-node graph does not. */
+const jNodes = arr(S.toBe?.nodes), jEdges = arr(S.toBe?.edges);
+const jLanes = arr(S.toBe?.lanes).map((l) => (typeof l === "string" ? { id: l, name: l } : l));
+const depthOf = (() => {
+  const memo = new Map();
+  const d = (id, seen = new Set()) => {
+    if (memo.has(id)) return memo.get(id);
+    if (seen.has(id)) return 0;
+    seen.add(id);
+    const ins = jEdges.filter((e) => e.to === id);
+    const v = ins.length ? Math.max(...ins.map((e) => d(e.from, seen) + 1)) : 0;
+    memo.set(id, v); return v;
+  };
+  jNodes.forEach((n) => d(n.id));
+  return memo;
+})();
+const laneOf = (n) => jLanes.find((l) => l.id === n.lane || l.name === n.lane) || { id: n.lane, name: n.lane || "—" };
+const journey = jLanes.map((l) => ({
+  lane: l,
+  kind: laneKind(l.name || l.id),
+  steps: jNodes.filter((n) => laneOf(n).id === l.id).sort((a, b) => depthOf.get(a.id) - depthOf.get(b.id)),
+})).filter((g) => g.steps.length);
+
+const isGateway = (n) => /gateway|decision|xor/i.test(n.type || "") || /\?$/.test(String(n.name || "").trim());
+const nextOf = (id) => jEdges.filter((e) => e.from === id).map((e) => jNodes.find((n) => n.id === e.to)).filter(Boolean);
+
+/* A screen's data, in the same vocabulary: what it mirrors, what it owns, what it works out. */
+const screenKinds = (s) => {
+  const ds = s.dataSource || {};
+  return [
+    ...arr(ds.mirrored).map((x) => ({ kind: "mirror", text: x })),
+    ...arr(ds.owned).map((x) => ({ kind: "app", text: x })),
+    ...arr(ds.computed).map((x) => ({ kind: "app", text: x, computed: true })),
+  ];
+};
+
+const openThings = [
+  ...arr(S.businessRules).filter((r) => r.status === "open").map((r) => ({ id: r.id, t: r.rule })),
+  ...arr(S.assumptions).filter((a) => /thấp|low/i.test(String(a.confidence))).map((a) => ({ id: a.id, t: a.assumed })),
+];
+
+const APPENDIX = new Set(["rules", "reqs", "nfr", "glossary", "useCases", "exclusions", "assumptions"]);
+const appendix = built.filter((r) => APPENDIX.has(r.key));
+
 const html = `<!doctype html><html lang="vi"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>${esc(title)}</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&display=swap">
 <style>
 :root{
   color-scheme:light;
-  --paper:#fbfaf8; --card:#fff; --ink:#1a1c1e; --ink2:#5c6166; --ink3:#8b9096;
-  --rule:#e3e1dd; --rule2:#f0eeea; --accent:#005a8d; --accent-wash:#eef4f8;
-  --open:#a15c00; --open-wash:#fdf4e7;
-  --serif:"Source Serif 4",Georgia,"Times New Roman",serif;
+  --paper:#fbfaf8; --card:#fff; --ink:#1a1c1e; --ink2:#4e5459; --ink3:#868b91;
+  --rule:#e3e1dd; --rule2:#efedea;
+  --mirror:#5c6166; --mirror-bg:#f3f2f0;
+  --app:#005a8d;    --app-bg:#eaf2f8;
+  --outside:#6b6420; --outside-bg:#f6f4e6;
+  --open:#a15c00;   --open-bg:#fdf3e6;
+  --serif:"Source Serif 4",Georgia,serif;
   --sans:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
-  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
   --measure:68ch;
 }
 *{box-sizing:border-box}
-body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.6 var(--sans);-webkit-font-smoothing:antialiased}
-.page{display:grid;grid-template-columns:232px minmax(0,1fr);gap:48px;max-width:1180px;margin:0 auto;padding-block:40px 120px;padding-inline:24px;overflow-x:clip}
-main{min-width:0}
+body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.62 var(--sans);-webkit-font-smoothing:antialiased}
+.wrap{max-width:980px;margin:0 auto;padding-block:48px 120px;padding-inline:24px}
+h1{font:700 clamp(30px,5vw,42px)/1.08 var(--serif);margin:0 0 14px;letter-spacing:-.015em;text-wrap:balance}
+h2{font:600 clamp(21px,3vw,27px)/1.2 var(--serif);margin:0 0 8px;letter-spacing:-.01em;text-wrap:balance}
+h3{font:600 15px/1.3 var(--sans);margin:0 0 10px}
+p{max-width:var(--measure)}
+.eyebrow{font:600 10.5px/1 var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--outside);margin:0 0 9px}
+.deck{font:400 18px/1.55 var(--serif);color:var(--ink2);max-width:var(--measure);margin:0 0 18px}
+.deck b{color:var(--ink);font-weight:600}
+.meta{font-size:13px;color:var(--ink3);margin:0 0 30px}
+.meta b{color:var(--ink2);font-weight:600}
+hr{border:0;border-top:2px solid var(--outside);margin:0 0 30px}
 
-/* the rail: you jump, you do not scroll */
-.rail{position:sticky;top:env(safe-area-inset-top,0px);align-self:start;max-height:100vh;overflow-y:auto;padding-block:4px 24px}
-.rail h1{font:600 19px/1.25 var(--serif);margin:0 0 3px;letter-spacing:-.005em;text-wrap:balance}
-.rail .tag{font:500 10px/1 var(--sans);letter-spacing:.09em;text-transform:uppercase;color:var(--ink3);display:block;margin-bottom:22px}
-.rail nav{display:flex;flex-direction:column;gap:1px;margin-bottom:22px}
-.rail a{display:flex;align-items:baseline;gap:8px;padding:4px 8px;margin-inline:-8px;border-radius:5px;text-decoration:none;color:var(--ink2);font-size:13px}
-.rail a:hover{background:var(--accent-wash);color:var(--accent)}
-.rail a .n{margin-left:auto;font:500 11px/1 var(--mono);color:var(--ink3);font-variant-numeric:tabular-nums}
-.rail a[data-open] .n{color:var(--open)}
-.filters{display:flex;flex-wrap:wrap;gap:4px}
-.filters button{font:500 11px/1 var(--sans);padding:6px 9px;min-height:30px;border:1px solid var(--rule);background:var(--card);color:var(--ink2);border-radius:5px;cursor:pointer}
-.filters button[aria-pressed=true]{background:var(--ink);border-color:var(--ink);color:var(--paper)}
-.filters button:focus-visible,.rail a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.howto{background:#f6f5f2;border:1px solid var(--rule);border-radius:10px;padding:18px 22px;margin-bottom:54px}
+.howto p{margin:0 0 11px;font-size:14px;max-width:var(--measure)}
+.howto p:last-child{margin-bottom:0}
+.ref{display:inline-block;font:600 11px/1.5 var(--mono);background:var(--outside);color:#fff;padding:1px 7px;border-radius:4px}
 
-.lede{font:400 17px/1.5 var(--serif);color:var(--ink2);max-width:var(--measure);margin:0 0 30px}
-.lede b{color:var(--ink);font-weight:600}
+section.part{margin-bottom:58px;scroll-margin-top:16px}
 
-/* the map — one of the two things that earns a card */
-.map{background:var(--card);border:1px solid var(--rule);border-radius:8px;padding:18px 20px 16px;margin-bottom:14px}
-.map-h{font:500 10px/1 var(--sans);letter-spacing:.09em;text-transform:uppercase;color:var(--ink3);margin-bottom:14px}
-.hops{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;align-items:flex-end;gap:2px}
-.hops li{display:flex;align-items:center;gap:2px}
-.hop{display:grid;gap:1px;justify-items:start;min-width:70px;padding:5px 8px;border:0;background:none;border-radius:5px;font:inherit;color:inherit;cursor:pointer;text-align:left}
-.hop:hover{background:var(--accent-wash)}
-.hop:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
-.hopn{font:600 20px/1 var(--serif);font-variant-numeric:tabular-nums}
-.hopl{font-size:11px;color:var(--ink3)}
-.hopbar{width:100%;height:2px;background:var(--rule);margin-top:4px;position:relative}
-.hopbar::after{content:"";position:absolute;inset:0 auto 0 0;width:var(--f);background:var(--accent)}
-.arrow{color:var(--ink3);font-size:11px;padding-bottom:9px}
+/* the legend — one vocabulary, used by every grid below */
+.legend{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 20px}
+.chip{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;padding:6px 12px;border:1px solid var(--rule);background:var(--card);border-radius:999px;color:var(--ink2)}
+.dot{width:9px;height:9px;border-radius:2px;flex:0 0 auto}
+.k-mirror .dot,.dot.k-mirror{background:var(--mirror)}
+.k-app .dot,.dot.k-app{background:var(--app)}
+.k-outside .dot,.dot.k-outside{background:var(--outside)}
+.k-open .dot,.dot.k-open{background:var(--open)}
 
-/* the other card: what is not settled */
-.open-note{background:var(--open-wash);border:1px solid #f0dfc4;border-radius:8px;padding:14px 18px;margin-bottom:34px;font-size:14px;color:#6d4200;max-width:var(--measure)}
-.open-note b{color:var(--open)}
+/* the grids — nothing here scrolls sideways */
+.lane{margin-bottom:26px}
+.lane-h{display:flex;align-items:baseline;gap:10px;margin-bottom:10px}
+.lane-h .who{font:600 15px/1.3 var(--sans)}
+.lane-h .n{font:500 11.5px/1 var(--mono);color:var(--ink3)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px}
+.step{background:var(--card);border:1px solid var(--rule);border-left:3px solid var(--rule);border-radius:9px;padding:11px 13px;min-height:84px;display:flex;flex-direction:column;gap:5px}
+.step .no{font:500 10px/1 var(--mono);color:var(--ink3);letter-spacing:.04em}
+.step .nm{font-size:13.5px;line-height:1.38;font-weight:500}
+.step .tail{margin-top:auto;font-size:11.5px;color:var(--ink3);display:flex;align-items:center;gap:6px}
+.step.k-mirror{border-left-color:var(--mirror);background:var(--mirror-bg)}
+.step.k-app{border-left-color:var(--app);background:var(--app-bg)}
+.step.k-outside{border-left-color:var(--outside);background:var(--outside-bg)}
+.step.gate{border-style:dashed}
+.step.gate .nm::after{content:" ↳ rẽ nhánh";color:var(--ink3);font-weight:400;font-size:11.5px}
 
-/* registers as TABLES */
-section.reg{margin-bottom:46px;scroll-margin-top:24px}
-section.reg h2{font:600 15px/1.3 var(--serif);margin:0 0 2px;display:flex;align-items:baseline;gap:10px}
-section.reg h2 .doc{margin-left:auto;font:500 9px/1 var(--sans);letter-spacing:.08em;color:var(--ink3);text-transform:uppercase}
-section.reg .why{font-size:12.5px;color:var(--ink3);margin:0 0 12px;max-width:var(--measure)}
-table{width:100%;border-collapse:collapse;font-size:13.5px}
-tbody tr{border-top:1px solid var(--rule2)}
-tbody tr:first-child{border-top:1px solid var(--rule)}
-tbody tr[data-open]{background:var(--open-wash)}
-tbody tr:target,tbody tr[data-lit]{background:var(--accent-wash)}
-td{padding:9px 10px 9px 0;vertical-align:top}
-td.c-id{width:104px;padding-left:0}
-td.c-id button{font:600 11.5px/1.5 var(--mono);color:var(--accent);background:none;border:0;padding:0;cursor:pointer;text-align:left}
-td.c-id button:hover{text-decoration:underline}
-td.c-id .tiny{display:block;font:400 10.5px/1.4 var(--sans);color:var(--ink3);margin-top:1px}
-td.c-body{max-width:0}
-td.c-body .t{display:block}
-td.c-body .m{display:block;color:var(--ink3);font-size:12px;margin-top:2px}
-td.c-refs{width:210px;text-align:right;padding-right:0}
-td.c-refs a{display:inline-block;font:600 10.5px/1.5 var(--mono);color:var(--accent);text-decoration:none;border-bottom:1px solid #cfe0ea;margin-left:5px}
-td.c-refs a:hover{border-bottom-color:var(--accent)}
-td.c-refs .lbl{font-size:10px;color:var(--ink3);letter-spacing:.03em}
-.more{margin-top:8px;font:500 12.5px/1 var(--sans);color:var(--accent);background:none;border:0;padding:8px 0;min-height:36px;cursor:pointer}
-.more:hover{text-decoration:underline}
-section.reg[data-dense] tr[data-over]{display:none}
-section.reg[data-dense][data-expanded] tr[data-over]{display:table-row}
+.scr{background:var(--card);border:1px solid var(--rule);border-radius:9px;padding:13px 15px;display:flex;flex-direction:column;gap:7px}
+.scr .id{font:600 11px/1 var(--mono);color:var(--app)}
+.scr .nm{font-size:14.5px;font-weight:600;line-height:1.3}
+.scr .sts{font-size:11.5px;color:var(--ink3)}
+.scr ul{list-style:none;margin:2px 0 0;padding:0;display:flex;flex-direction:column;gap:4px}
+.scr li{display:flex;gap:7px;align-items:flex-start;font-size:12px;line-height:1.4;color:var(--ink2)}
+.scr li .dot{margin-top:5px}
 
-/* figures run to the full measure and scroll if wider */
-.dia{margin:0 0 46px}
-.dia figure{margin:0 0 14px;background:var(--card);border:1px solid var(--rule);border-radius:8px;padding:14px;overflow-x:auto}
-.dia svg{height:auto;display:block;max-width:none}
-.dia figcaption{font-size:11.5px;color:var(--ink3);margin-top:9px}
-/* Focus and trace. A diagram nobody can interrogate is a picture, and a 23-step process read all
-   at once is the same wall of text in another medium. Clicking a step dims everything not on its
-   route; the route is followed forward through the graph, so "what happens after this" is one
-   click instead of a traced finger. */
-.dia svg [data-node]{cursor:pointer}
-/* Edges are drawn after nodes, so they paint over them and — without this — swallow the
-   click. Several steps in the process simply did not respond, and a control that looks
-   interactive and is not is worse than one that never offered. Only nodes are targets. */
-.dia svg [data-edge]{pointer-events:none}
-.dia svg [data-node]:focus-visible rect,.dia svg [data-node]:focus-visible path{outline:2px solid var(--accent);outline-offset:2px}
-figure[data-focus] svg [data-node],figure[data-focus] svg [data-edge]{opacity:.16;transition:opacity .18s}
+.ent{background:var(--card);border:1px solid var(--rule);border-radius:9px;padding:14px 16px}
+.ent h3{margin-bottom:3px;font-size:15px}
+.ent .own{font-size:11.5px;color:var(--ink3);margin-bottom:9px}
+.ent .attrs{display:flex;flex-wrap:wrap;gap:4px}
+.ent .attrs span{font:500 11px/1 var(--mono);background:#f4f3f1;border-radius:4px;padding:4px 7px;color:var(--ink2)}
+.ent .rel{font-size:12px;color:var(--ink2);margin-top:9px;padding-top:9px;border-top:1px solid var(--rule2)}
+
+.seg{background:var(--card);border:1px solid var(--rule);border-radius:9px;padding:15px 17px}
+.seg .who{font:600 15px/1.3 var(--sans);margin-bottom:3px}
+.seg .jtbd{font-size:13px;color:var(--ink2);margin-bottom:10px}
+.seg .pain{font-size:12.5px;color:var(--ink2);display:flex;gap:7px;padding:5px 0;border-top:1px solid var(--rule2)}
+.seg .pain .pid{font:600 10.5px/1.6 var(--mono);color:var(--ink3);flex:0 0 auto}
+
+.openlist{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px}
+.openc{background:var(--open-bg);border:1px solid #f0dfc4;border-left:3px solid var(--open);border-radius:9px;padding:12px 14px}
+.openc .id{font:600 10.5px/1 var(--mono);color:var(--open)}
+.openc p{margin:6px 0 0;font-size:12.5px;line-height:1.45;color:#6d4200}
+
+/* figures fit the column; nothing scrolls sideways */
+.fig{background:var(--card);border:1px solid var(--rule);border-radius:10px;padding:14px;margin:0 0 14px}
+.fig svg{width:100%;height:auto;display:block}
+.fig figcaption{font-size:11.5px;color:var(--ink3);margin-top:9px}
+.fig svg [data-node]{cursor:pointer}
+.fig svg [data-edge]{pointer-events:none}
+figure[data-focus] svg [data-node],figure[data-focus] svg [data-edge]{opacity:.15;transition:opacity .18s}
 figure[data-focus] svg [data-node][data-on],figure[data-focus] svg [data-edge][data-on]{opacity:1}
-figure[data-focus] svg [data-node][data-seed] rect,figure[data-focus] svg [data-node][data-seed] path{stroke:var(--accent);stroke-width:2}
-.dia .focusbar{display:none;align-items:center;gap:10px;margin-top:9px;font-size:12px;color:var(--ink2)}
-figure[data-focus] + .focusbar,.dia figure[data-focus] .focusbar{display:flex}
-.dia .focusbar button{font:500 11px/1 var(--sans);border:1px solid var(--rule);background:var(--card);color:var(--ink2);border-radius:5px;padding:5px 8px;min-height:28px;cursor:pointer}
-.dia .focusbar button:hover{border-color:var(--accent);color:var(--accent)}
-.dia .hint{font-size:11px;color:var(--ink3);margin-top:7px}
-@media (prefers-reduced-motion:reduce){figure[data-focus] svg [data-node],figure[data-focus] svg [data-edge]{transition:none}}
+figure[data-focus] svg [data-node][data-seed] rect{stroke:var(--app);stroke-width:2}
+.fbar{display:none;align-items:center;gap:9px;margin-top:9px;font-size:12px;color:var(--ink2);flex-wrap:wrap}
+figure[data-focus] .fbar{display:flex}
+.fbar button{font:500 11px/1 var(--sans);border:1px solid var(--rule);background:var(--card);color:var(--ink2);border-radius:5px;padding:5px 9px;min-height:30px;cursor:pointer}
+.fbar button:hover{border-color:var(--app);color:var(--app)}
 
-@media (max-width:860px){
-  .page{grid-template-columns:1fr;gap:24px;padding-block:24px 80px;padding-inline:16px}
-  .rail{position:static;max-height:none;border-bottom:1px solid var(--rule);padding-bottom:18px}
-  .rail nav{display:grid;grid-template-columns:1fr 1fr;gap:0 14px;margin-bottom:16px}
-  .lede{font-size:15.5px}
-  .map{overflow-x:auto}
-  .hops{flex-wrap:nowrap;min-width:max-content}
-  table,tbody,tr,td{display:block}
-  tbody tr{padding:11px 0}
-  td{padding:0;max-width:none!important;width:auto!important;text-align:left!important}
-  td.c-id{margin-bottom:2px}
-  td.c-refs{margin-top:5px}
-  td.c-refs a{margin:0 5px 0 0}
-  .dia svg{max-width:none}
+/* the appendix: registers, closed by default */
+details.app{border-top:1px solid var(--rule);padding-top:14px;margin-top:14px}
+details.app summary{cursor:pointer;font:600 14px/1.4 var(--sans);list-style:none;display:flex;align-items:baseline;gap:10px;min-height:34px}
+details.app summary::-webkit-details-marker{display:none}
+details.app summary::before{content:"▸";color:var(--ink3);font-size:11px}
+details.app[open] summary::before{content:"▾"}
+details.app summary .n{margin-left:auto;font:500 11.5px/1 var(--mono);color:var(--ink3)}
+details.app table{width:100%;border-collapse:collapse;font-size:13px;margin-top:10px}
+details.app tr{border-top:1px solid var(--rule2)}
+details.app td{padding:8px 10px 8px 0;vertical-align:top}
+details.app td:first-child{width:96px}
+details.app td:first-child b{font:600 11px/1.5 var(--mono);color:var(--app);font-weight:600}
+details.app tr[data-open]{background:var(--open-bg)}
+
+@media (max-width:640px){
+  .wrap{padding-block:28px 80px;padding-inline:16px}
+  .grid{grid-template-columns:1fr 1fr;gap:8px}
+  .step{min-height:76px;padding:9px 10px}
+  .step .nm{font-size:12.5px}
+  .openlist{grid-template-columns:1fr}
+  details.app td:first-child{width:auto;display:block;padding-bottom:2px}
+  details.app td{display:block;padding-right:0}
 }
-@media print{.rail nav,.filters,.more{display:none}body{background:#fff}}
-@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
-</style></head><body>
-<div class="page">
+@media print{details.app{display:block}details.app[open]{}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style></head><body><div class="wrap">
 
-<div class="rail">
-  <h1>${esc(title)}</h1>
-  <span class="tag">${built.reduce((n, r) => n + r.items.length, 0)} mục · ${diagrams.length} mô hình</span>
-  <nav>${built.map((r) => `<a href="#reg-${r.key}">${esc(r.title)}<span class="n">${r.items.length}</span></a>`).join("")}</nav>
-  <div class="filters">
-    <button class="f" data-doc="ALL" aria-pressed="true">Tất cả</button>
-    ${Object.keys(DOC_META).map((d) => `<button class="f" data-doc="${d}" aria-pressed="false">${d} ${docCount(d)}</button>`).join("")}
-    ${openCount ? `<button class="f" data-doc="OPEN" aria-pressed="false">Chưa chốt ${openCount}</button>` : ""}
-  </div>
+<p class="eyebrow">${esc(S.field ?? "Dự án")} · tài liệu tham chiếu</p>
+<h1>${esc(title)}</h1>
+<p class="deck">${esc(String(S.asIs || S.problem?.statement || "").slice(0, 300))}</p>
+<p class="meta"><b>Phạm vi</b> ${arr(S.applications).map((a) => esc(a.name)).join(" · ") || "—"} &nbsp;·&nbsp; <b>Trạng thái</b> ${S.scopeFrozen ? "đã chốt phạm vi" : "chưa chốt phạm vi"}${openCount ? ` · ${openCount} điểm chưa xác nhận` : ""}</p>
+<hr>
+
+<div class="howto">
+  <p><b>Mọi mục đều có mã tham chiếu</b>, ví dụ <span class="ref">BR-01</span> <span class="ref">UC-04</span> <span class="ref">WL-02</span>. Góp ý có thể nêu theo mã thay vì mô tả bằng lời — một câu như <i>“BR-01: ngày tính từ 6 giờ sáng”</i> là đủ để sửa.</p>
+  <p><b>Điểm chưa xác nhận được tô cam</b>, không điền đại một con số nghe có lý.</p>
+  <p><b>Màu ở mọi lưới bên dưới mang cùng một nghĩa:</b> nơi một việc xảy ra, và nơi dữ liệu của một màn hình đến từ, là cùng một câu hỏi.</p>
 </div>
 
-<main>
-  <p class="lede">Gom từ <b>.pica/state.json</b> — cùng một nguồn các check đọc, nên trang này không thể mâu thuẫn với chúng. Sinh lại là cập nhật; không có bản sao nào để lệch.
-  <b>BRD</b> trả lời <i>vì sao</i>, <b>PRD</b> trả lời <i>cái gì</i>, <b>FRD</b> trả lời <i>hoạt động ra sao</i>.</p>
+<div class="legend">
+  ${Object.entries(KIND).map(([k, v]) => `<span class="chip ${v.css}"><span class="dot ${v.css}"></span>${esc(v.label)}</span>`).join("")}
+</div>
 
-  ${(() => {
-    const hops = CHAIN.map((h) => ({ ...h, n: (built.find((b) => b.key === h.key)?.items.length) || 0 })).filter((h) => h.n);
-    const max = Math.max(...hops.map((h) => h.n), 1);
-    return `<div class="map"><div class="map-h">Chuỗi truy vết · đi được cả hai chiều · không mục nào mồ côi</div>
-    <ol class="hops">${hops.map((h, i) => `<li><button class="hop" data-hop="${h.key}">
-      <span class="hopn">${h.n}</span><span class="hopl">${esc(h.label)}</span>
-      <span class="hopbar" style="--f:${(h.n / max * 100).toFixed(0)}%"></span></button>${i < hops.length - 1 ? '<span class="arrow" aria-hidden="true">→</span>' : ""}</li>`).join("")}</ol></div>`;
-  })()}
+${journey.length ? `<section class="part">
+  <p class="eyebrow">Phần 1</p>
+  <h2>Một ngày chạy thế nào</h2>
+  <p class="deck">${jNodes.length} bước, chia theo ai làm. Xám là việc 8project đã làm sẵn; xanh là việc app này thêm vào; ô-liu là việc con người làm và không hệ thống nào chạm tới.</p>
+  ${journey.map((g) => `<div class="lane">
+    <div class="lane-h"><span class="who">${esc(g.lane.name || g.lane.id)}</span><span class="n">${g.steps.length} bước</span></div>
+    <div class="grid">${g.steps.map((n, i) => {
+      const nx = nextOf(n.id);
+      return `<div class="step ${KIND[g.kind].css}${isGateway(n) ? " gate" : ""}">
+        <span class="no">${String(i + 1).padStart(2, "0")}</span>
+        <span class="nm">${esc(String(n.name || n.id).replace(/\s*\([^)]*\)\s*$/, ""))}</span>
+        ${nx.length ? `<span class="tail">→ ${esc(nx.map((x) => String(x.name || x.id).split(/[,(—-]/)[0].trim()).slice(0, 2).join(" · ").slice(0, 44))}</span>` : `<span class="tail">kết thúc</span>`}
+      </div>`;
+    }).join("")}</div>
+  </div>`).join("")}
+</section>` : ""}
 
-  ${openCount ? `<p class="open-note"><b>${openCount} mục chưa chốt.</b> Mọi thứ đứng trên chúng là tạm. Một luật ghi là “chưa chốt” tốt hơn một luật bịa ra — nhưng nó phải được nhìn thấy, không nằm im trong sổ giả định.</p>` : ""}
+${arr(S.discovery?.segments).length ? `<section class="part">
+  <p class="eyebrow">Phần 2</p>
+  <h2>Ai dùng, và đau ở đâu</h2>
+  <p class="deck">Mỗi nhóm người dùng, việc họ cần xong, và những nỗi đau đã ghi nhận được cho nhóm đó.</p>
+  <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(290px,1fr))">
+  ${arr(S.discovery.segments).map((sg) => {
+    const pains = arr(S.discovery.painPoints).filter((pp) => pp.segment === sg.name);
+    return `<div class="seg">
+      <div class="who">${esc(sg.name)}</div>
+      <div class="jtbd">${esc(sg.jobToBeDone || "")}</div>
+      ${pains.map((pp) => `<div class="pain"><span class="pid">${esc(pp.id)}</span><span>${esc(String(pp.statement).slice(0, 150))}</span></div>`).join("")}
+    </div>`;
+  }).join("")}
+  </div>
+</section>` : ""}
 
-  ${diagrams.length ? `<div class="dia">${diagrams.map((d) => {
-    const w = Number((d.svg.match(/width="(\d+)"/) || [])[1] || 0);
+${diagrams.some((d) => d.name === "usecases") ? `<section class="part">
+  <p class="eyebrow">Phần 2b</p>
+  <h2>Ai làm được gì</h2>
+  <p class="deck">Mỗi đường là một việc một vai làm được. Không phải màn hình, không phải tính năng — là quyền làm một việc.</p>
+  <figure class="fig" data-label="Ai làm được gì">${diagrams.find((d) => d.name === "usecases").svg}</figure>
+</section>` : ""}
+
+${arr(S.screens).length ? `<section class="part">
+  <p class="eyebrow">Phần 3</p>
+  <h2>Những màn hình, và mỗi màn lấy dữ liệu từ đâu</h2>
+  <p class="deck">${arr(S.screens).length} màn, ${arr(S.screens).reduce((n, s) => n + arr(s.states).length, 0)} trạng thái. Chấm xám là dữ liệu soi từ 8project; chấm xanh là dữ liệu app này sở hữu hoặc tự tính.</p>
+  <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(250px,1fr))">
+  ${arr(S.screens).map((s) => `<div class="scr">
+    <span class="id">${esc(s.id)}</span>
+    <span class="nm">${esc(s.name)}</span>
+    <span class="sts">${arr(s.states).length} trạng thái · ${esc(s.application || "")}</span>
+    <ul>${screenKinds(s).slice(0, 4).map((x) => `<li><span class="dot ${KIND[x.kind].css}"></span><span>${esc(String(x.text).slice(0, 62))}${x.computed ? " <i>(tính ra)</i>" : ""}</span></li>`).join("")}</ul>
+  </div>`).join("")}
+  </div>
+</section>` : ""}
+
+${diagrams.some((d) => d.name === "erd") ? `<section class="part">
+  <p class="eyebrow">Phần 4</p>
+  <h2>Dữ liệu, và cái gì liên quan cái gì</h2>
+  <p class="deck">Bốn thực thể. Chỉ một do app này sở hữu — phần còn lại là bản soi chỉ đọc của 8project, và app này không bao giờ ghi ngược lên.</p>
+  <figure class="fig" data-label="Dữ liệu và quan hệ">${diagrams.find((d) => d.name === "erd").svg}</figure>
+</section>` : ""}
+
+${arr(S.domainModel).length && !diagrams.some((d) => d.name === "erd") ? `<section class="part">
+  <p class="eyebrow">Phần 4</p>
+  <h2>Hệ thống giữ những gì</h2>
+  <p class="deck">Bốn thực thể. Chỉ một trong số đó do app này sở hữu — phần còn lại là bản soi của 8project, và app này không bao giờ ghi ngược lên.</p>
+  <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(280px,1fr))">
+  ${arr(S.domainModel).map((e) => `<div class="ent">
+    <h3>${esc(e.entity)}</h3>
+    <div class="own"><span class="dot ${/worklog|app|này/i.test(String(e.owner)) ? "k-app" : "k-mirror"}" style="display:inline-block;margin-right:5px"></span>${esc(e.owner || "—")}</div>
+    <div class="attrs">${arr(e.attributes).slice(0, 9).map((a) => `<span>${esc(typeof a === "string" ? a : a.name || "")}</span>`).join("")}</div>
+    ${arr(e.relationships).length ? `<div class="rel">${arr(e.relationships).slice(0, 3).map((r) => esc(typeof r === "string" ? r : `${r.to ?? ""} ${r.kind ?? ""}`)).join(" · ")}</div>` : ""}
+  </div>`).join("")}
+  </div>
+</section>` : ""}
+
+${diagrams.length ? `<section class="part">
+  <p class="eyebrow">Phần 5</p>
+  <h2>Vòng đời và quyền</h2>
+  <p class="deck">Một việc đi qua những trạng thái nào, ai được làm gì. Bấm một trạng thái để chỉ xem đường đi của nó.</p>
+  ${diagrams.filter((d) => !["process", "erd", "usecases"].includes(d.name)).map((d) => {
     const label = d.name.startsWith("state-") ? `Vòng đời · ${d.name.replace(/^state-/, "").replace(/-/g, " ")}`
-      : d.name === "permissions" ? "Ma trận quyền · vai trò × đối tượng"
-      : d.name === "process" ? "Quy trình TO-BE · theo vai trò" : d.name;
-    return `<figure${w > 900 ? ' class="wide"' : ""} data-label="${esc(label)}">${d.svg}<figcaption>${esc(label)}</figcaption>
-      <div class="focusbar"><span class="fname"></span><button data-back>← bước trước</button><button data-fwd>bước sau →</button><button data-clear>bỏ chọn</button></div>
-      <p class="hint">Bấm một bước để chỉ xem đường đi của nó.</p></figure>`;
-  }).join("")}</div>` : ""}
+      : d.name === "permissions" ? "Ma trận quyền · vai trò × đối tượng" : d.name;
+    return `<figure class="fig" data-label="${esc(label)}">${d.svg}<figcaption>${esc(label)}</figcaption>
+      <div class="fbar"><span class="fname"></span><button data-back>← trước</button><button data-fwd>sau →</button><button data-clear>bỏ chọn</button></div></figure>`;
+  }).join("")}
+</section>` : ""}
 
-  ${built.map((reg) => `
-  <section class="reg" id="reg-${reg.key}" data-key="${reg.key}" data-docs="${reg.docs.join(" ")}"${reg.dense ? " data-dense" : ""}>
-    <h2>${esc(reg.title)}<span class="doc">${esc(reg.phase)} · ${reg.docs.join(" ")}</span></h2>
-    <table><tbody>${reg.items.map((it, idx) => {
-      const cites = arr(it.refs).filter((r) => defined.has(r));
-      const citedHere = [...new Set(citedBy.get(it.id) || [])];
-      const over = reg.dense && idx >= 6 && !it.open;
-      return `<tr id="${esc(it.id)}"${it.open ? " data-open" : ""}${over ? " data-over" : ""}>
-        <td class="c-id"><button data-jump="${esc(it.id)}">${esc(it.id)}</button>${it.head ? `<span class="tiny">${esc(it.head)}</span>` : ""}</td>
-        <td class="c-body"><span class="t">${esc(it.body)}</span>${arr(it.meta).length ? `<span class="m">${arr(it.meta).map(esc).join(" · ")}</span>` : ""}</td>
-        <td class="c-refs">${cites.length ? `<span class="lbl">dựa trên</span>${cites.map((r) => `<a href="#${esc(r)}">${esc(r)}</a>`).join("")}` : ""}${citedHere.length ? `${cites.length ? "<br>" : ""}<span class="lbl">dùng bởi</span>${citedHere.map((r) => `<a href="#${esc(r)}">${esc(r)}</a>`).join("")}` : ""}</td>
-      </tr>`;
-    }).join("")}</tbody></table>
-    ${reg.dense && reg.items.length > 6 ? `<button class="more" data-more>Còn ${reg.items.length - 6} mục — mở ra</button>` : ""}
-  </section>`).join("")}
-</main>
+${openThings.length ? `<section class="part">
+  <p class="eyebrow">Phần 6</p>
+  <h2>Chưa chốt</h2>
+  <p class="deck">Ghi ra thay vì điền đại. Mọi thứ đứng trên những điểm này đều là tạm.</p>
+  <div class="openlist">${openThings.map((o) => `<div class="openc"><span class="id">${esc(o.id)}</span><p>${esc(String(o.t).slice(0, 240))}</p></div>`).join("")}</div>
+</section>` : ""}
+
+${appendix.length ? `<section class="part">
+  <p class="eyebrow">Phụ lục</p>
+  <h2>Sổ tra cứu</h2>
+  <p class="deck">Mở ra khi cần tra một mã cụ thể. Không ai phải đọc hết phần này.</p>
+  ${appendix.map((reg) => `<details class="app"><summary>${esc(reg.title)}<span class="n">${reg.items.length}</span></summary>
+    <table><tbody>${reg.items.map((it) => `<tr id="${esc(it.id)}"${it.open ? " data-open" : ""}>
+      <td><b>${esc(it.id)}</b></td>
+      <td>${esc(String(it.body).slice(0, 400))}${arr(it.refs).filter((r) => defined.has(r)).length ? `<br><span style="font:500 10.5px/1.6 var(--mono);color:var(--ink3)">${arr(it.refs).filter((r) => defined.has(r)).map(esc).join(" · ")}</span>` : ""}</td>
+    </tr>`).join("")}</tbody></table></details>`).join("")}
+</section>` : ""}
+
 </div>
 <script>
-const secs = [...document.querySelectorAll("section.reg")];
-function apply(doc){
-  for (const b of document.querySelectorAll("button.f")) b.setAttribute("aria-pressed", String(b.dataset.doc === doc));
-  for (const s of secs){
-    const inDoc = doc === "ALL" || doc === "OPEN" || s.dataset.docs.split(" ").includes(doc);
-    let any = false;
-    for (const tr of s.querySelectorAll("tbody tr")){
-      const ok = inDoc && (doc !== "OPEN" || tr.hasAttribute("data-open"));
-      tr.hidden = !ok; if (ok) any = true;
-    }
-    s.hidden = !any;
-    const more = s.querySelector("[data-more]"); if (more) more.hidden = doc === "OPEN" || !any;
-  }
-}
-document.querySelectorAll("button.f").forEach(b => b.onclick = () => apply(b.dataset.doc));
-document.querySelectorAll("[data-more]").forEach(btn => btn.onclick = () => {
-  const sec = btn.closest("section.reg");
-  if (sec.hasAttribute("data-expanded")) { sec.removeAttribute("data-expanded"); btn.textContent = btn.dataset.closed; }
-  else { btn.dataset.closed = btn.textContent; sec.setAttribute("data-expanded",""); btn.textContent = "Thu lại"; }
-});
-// An id lights every row that cites it — the matrix as navigation, both directions.
-document.addEventListener("click", e => {
-  const j = e.target.closest("[data-jump]"); if (!j) return;
-  const id = j.dataset.jump;
-  document.querySelectorAll("[data-lit]").forEach(el => el.removeAttribute("data-lit"));
-  document.querySelectorAll('a[href="#'+id+'"]').forEach(a => a.closest("tr")?.setAttribute("data-lit",""));
-  document.getElementById(id)?.setAttribute("data-lit","");
-});
-// A hop on the map opens its register and goes there.
-document.querySelectorAll(".hop").forEach(h => h.onclick = () => {
-  apply("ALL");
-  const sec = secs.find(s => s.dataset.key === h.dataset.hop); if (!sec) return;
-  sec.setAttribute("data-expanded","");
-  const btn = sec.querySelector("[data-more]"); if (btn) btn.textContent = "Thu lại";
-  sec.scrollIntoView({behavior:"smooth", block:"start"});
-});
-// Say "scroll sideways" only where it is true, measured, and re-decided on resize.
-function hintScroll(){
-  for (const f of document.querySelectorAll(".dia figure")){
-    const over = f.scrollWidth > f.clientWidth + 1;
-    f.querySelector("figcaption").textContent = f.dataset.label + (over ? " — cuộn ngang để xem hết" : "");
-  }
-}
-/* ---- focus and trace ------------------------------------------------------------------------
- * Read the edges out of the SVG itself, so the viewer has no second copy of the graph to fall
- * behind. Focusing a node lights it, everything reachable forward from it, and the edges between;
- * the step buttons walk the route one hop at a time. */
-document.querySelectorAll(".dia figure").forEach(fig => {
+document.querySelectorAll("figure.fig").forEach(fig => {
   const svg = fig.querySelector("svg"); if (!svg) return;
   const nodes = [...svg.querySelectorAll("[data-node]")];
-  const edges = [...svg.querySelectorAll("[data-edge]")].map(el => {
-    const [from, to] = el.dataset.edge.split("|"); return { el, from, to };
-  });
-  if (!nodes.length) { fig.querySelector(".hint")?.remove(); return; }
-  const name = fig.querySelector(".fname");
-  let seed = null;
-
-  const reach = id => {
-    // Shift ONCE per round, not once per edge. Calling shift() inside a filter predicate runs it
-    // for every edge, so the queue drained on the first pass and every route reported exactly one
-    // step ahead of itself — a wrong number, stated confidently.
-    const seen = new Set([id]); const q = [id];
-    while (q.length) {
-      const cur = q.shift();
-      for (const e of edges) if (e.from === cur && !seen.has(e.to)) { seen.add(e.to); q.push(e.to); }
-    }
-    return seen;
-  };
-  function paint() {
-    if (!seed) {
-      fig.removeAttribute("data-focus");
-      nodes.forEach(n => { n.removeAttribute("data-on"); n.removeAttribute("data-seed"); });
-      edges.forEach(e => e.el.removeAttribute("data-on"));
-      return;
-    }
-    const on = reach(seed);
-    fig.setAttribute("data-focus", "");
-    nodes.forEach(n => {
-      n.toggleAttribute("data-on", on.has(n.dataset.node));
-      n.toggleAttribute("data-seed", n.dataset.node === seed);
-    });
-    edges.forEach(e => e.el.toggleAttribute("data-on", on.has(e.from) && on.has(e.to)));
-    const label = nodes.find(n => n.dataset.node === seed)?.getAttribute("aria-label") || seed;
-    name.textContent = label + " — " + (on.size - 1) + " bước phía sau";
+  const edges = [...svg.querySelectorAll("[data-edge]")].map(el => { const [from,to]=el.dataset.edge.split("|"); return {el,from,to}; });
+  if (!nodes.length) return;
+  const name = fig.querySelector(".fname"); let seed = null;
+  const reach = id => { const seen=new Set([id]); const q=[id];
+    while(q.length){ const cur=q.shift(); for(const e of edges) if(e.from===cur && !seen.has(e.to)){ seen.add(e.to); q.push(e.to);} } return seen; };
+  function paint(){
+    if(!seed){ fig.removeAttribute("data-focus"); nodes.forEach(n=>{n.removeAttribute("data-on");n.removeAttribute("data-seed");}); edges.forEach(e=>e.el.removeAttribute("data-on")); return; }
+    const on = reach(seed); fig.setAttribute("data-focus","");
+    nodes.forEach(n=>{ n.toggleAttribute("data-on", on.has(n.dataset.node)); n.toggleAttribute("data-seed", n.dataset.node===seed); });
+    edges.forEach(e=>e.el.toggleAttribute("data-on", on.has(e.from)&&on.has(e.to)));
+    if (name) name.textContent = (nodes.find(n=>n.dataset.node===seed)?.getAttribute("aria-label")||seed) + " — " + (on.size-1) + " bước phía sau";
   }
-  nodes.forEach(n => {
-    const go = () => { seed = seed === n.dataset.node ? null : n.dataset.node; paint(); };
+  nodes.forEach(n => { const go=()=>{ seed = seed===n.dataset.node ? null : n.dataset.node; paint(); };
     n.addEventListener("click", go);
-    n.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go(); } });
-  });
-  fig.querySelector("[data-clear]").onclick = () => { seed = null; paint(); };
-  fig.querySelector("[data-fwd]").onclick = () => { const nx = edges.find(e => e.from === seed); if (nx) { seed = nx.to; paint(); } };
-  fig.querySelector("[data-back]").onclick = () => { const pv = edges.find(e => e.to === seed); if (pv) { seed = pv.from; paint(); } };
+    n.addEventListener("keydown", e => { if(e.key==="Enter"||e.key===" "){ e.preventDefault(); go(); } }); });
+  // Not every figure has a step bar — the use-case and data models are focusable but have no
+  // route to walk. Assuming the controls exist threw on load and killed the script for ALL
+  // figures, so the two that DID have controls silently stopped working too.
+  const on = (sel, fn) => { const el = fig.querySelector(sel); if (el) el.onclick = fn; };
+  on("[data-clear]", () => { seed=null; paint(); });
+  on("[data-fwd]",   () => { const nx=edges.find(e=>e.from===seed); if(nx){seed=nx.to;paint();} });
+  on("[data-back]",  () => { const pv=edges.find(e=>e.to===seed); if(pv){seed=pv.from;paint();} });
 });
-
-addEventListener("resize", hintScroll); hintScroll();
-apply("ALL");
 </script></body></html>`;
 
 mkdirSync(dirname(OUT), { recursive: true });

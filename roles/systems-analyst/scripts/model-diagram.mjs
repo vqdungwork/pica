@@ -297,6 +297,136 @@ function processDiagram(toBe) {
   ].join("\n");
 }
 
+
+/* ---- entity relationship diagram ------------------------------------------------------------
+ * BABOK names four model types a specification owes its readers, and this is one of them: how
+ * information is structured and RELATED. Attribute chips in a card are a list of field names; an
+ * ERD is the sentence "a work item belongs to one project" drawn, which is the part a person who
+ * knows the business can confirm or correct.
+ *
+ * Relationships are recorded as prose — "belongs to one project", "assigned to zero or one
+ * assignee" — so the cardinality is parsed out of the sentence and drawn on the line, and the
+ * sentence stays as the label. Guessing a {from, to, kind} shape the model never used would draw
+ * nothing, which is how the forbidden transitions were lost the first time.
+ */
+function erdDiagram(entities) {
+  if (!entities.length) return null;
+  const W = 900;
+  const colW = W / Math.min(entities.length, 2) - 30;
+  const boxW = Math.min(340, colW), rowGap = 30;
+  const pos = new Map();
+  const rows = Math.ceil(entities.length / 2);
+  // Height must include the "+N more" line; without it that line drew BELOW the box and read
+  // as a stray caption belonging to nothing.
+  const heights = entities.map((e) => 56 + Math.min(arr(e.attributes).length, 6) * 16 + (arr(e.attributes).length > 6 ? 18 : 0));
+  let y = 84, H = 0;
+  entities.forEach((e, i) => {
+    const c = i % 2, r = Math.floor(i / 2);
+    const x = 30 + c * (boxW + 60);
+    const yy = 84 + r * (Math.max(...heights) + rowGap + 34);
+    pos.set(e.entity, { x, y: yy, w: boxW, h: heights[i] });
+    H = Math.max(H, yy + heights[i]);
+  });
+  void y; void rows;
+  H += 70;
+
+  const owned = (e) => /owned here|worklog|app này/i.test(String(e.owner || ""));
+  const card = (txt) => {
+    const t = String(txt).toLowerCase();
+    if (/zero or one|0..1|không hoặc một/.test(t)) return "0..1";
+    if (/zero or more|0..\*|không hoặc nhiều/.test(t)) return "0..*";
+    if (/one or more|1..\*|một hoặc nhiều/.test(t)) return "1..*";
+    if (/\bone\b|một/.test(t)) return "1";
+    return "";
+  };
+  const target = (txt) => {
+    const t = String(txt).toLowerCase();
+    return entities.map((e) => e.entity).find((n) => t.includes(String(n).toLowerCase()));
+  };
+
+  const L = [`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" ${F} role="img" aria-label="Mô hình dữ liệu">`];
+  L.push(`<text x="30" y="34" font-size="15" font-weight="700" fill="${C.ink}">Dữ liệu và quan hệ</text>`);
+  L.push(`<text x="30" y="54" font-size="12" fill="${C.muted}">${entities.length} thực thể · chỉ ${entities.filter(owned).length} do app này sở hữu, phần còn lại là bản soi chỉ đọc</text>`);
+
+  // lines first, so the boxes sit on top of them
+  for (const e of entities) {
+    const a = pos.get(e.entity); if (!a) continue;
+    for (const rel of arr(e.relationships)) {
+      const to = target(rel); if (!to || to === e.entity) continue;
+      const b = pos.get(to); if (!b) continue;
+      const ax = a.x + a.w / 2, ay = a.y + a.h / 2, bx = b.x + b.w / 2, by = b.y + b.h / 2;
+      L.push(`<path d="M${ax} ${ay} L${bx} ${by}" stroke="${C.line}" stroke-width="1.3" fill="none"/>`);
+      const c = card(rel);
+      if (c) {
+        const mx = ax + (bx - ax) * 0.72, my = ay + (by - ay) * 0.72;
+        L.push(`<rect x="${mx - 17}" y="${my - 9}" width="34" height="17" rx="4" fill="${C.card}" stroke="${C.line}"/>`);
+        L.push(`<text x="${mx}" y="${my + 3}" text-anchor="middle" font-size="10" font-weight="600" fill="${C.muted}">${esc(c)}</text>`);
+      }
+    }
+  }
+  for (const e of entities) {
+    const b = pos.get(e.entity); if (!b) continue;
+    const own = owned(e);
+    L.push(`<g data-node="${esc(e.entity)}" tabindex="0" role="button" aria-label="${esc(e.entity)}">`);
+    L.push(`<rect x="${b.x}" y="${b.y}" width="${b.w}" height="${b.h}" rx="8" fill="${own ? "#eaf2f8" : C.card}" stroke="${own ? C.accent : C.line}" stroke-width="${own ? 1.8 : 1.2}"/>`);
+    L.push(`<text x="${b.x + 14}" y="${b.y + 24}" font-size="13.5" font-weight="700" fill="${C.ink}">${esc(e.entity)}</text>`);
+    L.push(`<text x="${b.x + 14}" y="${b.y + 41}" font-size="10.5" fill="${own ? C.accent : C.muted}">${own ? "app này sở hữu" : "bản soi từ 8project — chỉ đọc"}</text>`);
+    arr(e.attributes).slice(0, 6).forEach((a, i) => {
+      const nm = typeof a === "string" ? a : (a.name || "");
+      L.push(`<text x="${b.x + 14}" y="${b.y + 60 + i * 16}" font-size="11" fill="${C.muted}">${esc(String(nm).slice(0, 34))}</text>`);
+    });
+    if (arr(e.attributes).length > 6) {
+      L.push(`<text x="${b.x + 14}" y="${b.y + 60 + 6 * 16}" font-size="10.5" fill="${C.muted}">+${arr(e.attributes).length - 6} thuộc tính nữa</text>`);
+    }
+    L.push(`</g>`);
+  }
+  L.push("</svg>");
+  return L.join("\n");
+}
+
+/* ---- use case diagram -----------------------------------------------------------------------
+ * "Interactions between users and the system", the second model BABOK names. A reader who knows
+ * the business reads this one first: it is the only picture that answers "what can each person
+ * actually do", and it answers it without a word of notation.
+ */
+function useCaseDiagram(useCases) {
+  const real = useCases.filter((u) => !/INT|SYS/.test(String(u.id)));
+  if (!real.length) return null;
+  const human = (a) => !/hệ thống|system|8project|tiến trình/i.test(String(a));
+  const actors = [...new Set(real.flatMap((u) => arr(u.actors).filter(human)))];
+  if (!actors.length) return null;
+  const byActor = actors.map((a) => ({ actor: a, ucs: real.filter((u) => arr(u.actors).includes(a)) }));
+  const W = 900, ucW = 340, rowH = 44;
+  const total = byActor.reduce((n, g) => n + g.ucs.length, 0);
+  const H = 84 + total * rowH + byActor.length * 26 + 30;
+  const L = [`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" ${F} role="img" aria-label="Mô hình use case">`];
+  L.push(`<text x="30" y="34" font-size="15" font-weight="700" fill="${C.ink}">Ai làm được gì</text>`);
+  L.push(`<text x="30" y="54" font-size="12" fill="${C.muted}">${actors.length} vai · ${real.length} việc họ làm được. Mỗi đường là một quyền, không phải một màn hình.</text>`);
+  let y = 86;
+  for (const g of byActor) {
+    const ay = y + (g.ucs.length * rowH) / 2 - 6;
+    L.push(`<circle cx="60" cy="${ay - 16}" r="9" fill="none" stroke="${C.accent}" stroke-width="1.6"/>`);
+    L.push(`<path d="M60 ${ay - 7} L60 ${ay + 10} M51 ${ay} L69 ${ay} M60 ${ay + 10} L52 ${ay + 21} M60 ${ay + 10} L68 ${ay + 21}" stroke="${C.accent}" stroke-width="1.6" fill="none"/>`);
+    L.push(`<text x="60" y="${ay + 38}" text-anchor="middle" font-size="11.5" font-weight="600" fill="${C.ink}">${esc(wrap(g.actor, 16, 1)[0])}</text>`);
+    g.ucs.forEach((u, i) => {
+      const uy = y + i * rowH;
+      L.push(`<path d="M78 ${ay} C150 ${ay} 150 ${uy + 15} 230 ${uy + 15}" stroke="${C.line}" stroke-width="1.2" fill="none"/>`);
+      L.push(`<g data-node="${esc(u.id)}" tabindex="0" role="button" aria-label="${esc(u.name)}">`);
+      // Two lines rather than an ellipsis: a use case whose name is cut off is the one thing on
+      // this diagram a reader most needs to read, and "Phát hiện người trống việc hoặc việ…" is
+      // not a use case, it is a hint that one exists.
+      const ln = wrap(u.name, 40, 2);
+      L.push(`<rect x="230" y="${uy}" width="${ucW}" height="${ln.length > 1 ? 34 : 30}" rx="${ln.length > 1 ? 12 : 15}" fill="${C.card}" stroke="${C.line}"/>`);
+      ln.forEach((t, k) => L.push(`<text x="244" y="${uy + (ln.length > 1 ? 15 : 20) + k * 13}" font-size="11.5" fill="${C.ink}">${esc(t)}</text>`));
+      L.push(`</g>`);
+      L.push(`<text x="${230 + ucW + 12}" y="${uy + 20}" font-size="10.5" font-weight="600" fill="${C.muted}" font-family="ui-monospace,Menlo,monospace">${esc(u.id)}</text>`);
+    });
+    y += g.ucs.length * rowH + 26;
+  }
+  L.push("</svg>");
+  return L.join("\n");
+}
+
 const built = {};
 for (const e of arr(state.stateModel)) {
   const svg = stateDiagram(e);
@@ -304,6 +434,8 @@ for (const e of arr(state.stateModel)) {
 }
 const perm = permissionsDiagram(state.rolesPermissions); if (perm) built["permissions"] = perm;
 const proc = processDiagram(state.toBe);                 if (proc) built["process"] = proc;
+const erd  = erdDiagram(arr(state.domainModel));         if (erd)  built["erd"] = erd;
+const ucd  = useCaseDiagram(arr(state.useCases));        if (ucd)  built["usecases"] = ucd;
 
 if (TO_STDOUT) {
   const key = Object.keys(built).find((k) => k.includes(ONLY)) || Object.keys(built)[0];

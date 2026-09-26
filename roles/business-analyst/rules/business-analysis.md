@@ -270,3 +270,47 @@ absent because it looks answered. And the "scroll sideways" hint is decided by *
 runtime**, never by a width threshold guessed in the generator: the guess captioned two diagrams
 that fitted as needing a scroll they did not, and left the one that did unmarked on a phone. A
 caption that asks a reader to do something unnecessary is a caption they learn to disbelieve.
+
+## The reader who decides is the one who does not know the notation
+
+<!-- enforced-by: assemble-spec, model-diagram -->
+
+A specification is signed by someone who knows the business and not the method. They are not
+trying to *find* a fact; they are trying to **see** what a person can do, where they go, and what
+the system holds — and to recognise their own operation in it. A register dump asks them to do the
+opposite: read every line and assemble the picture themselves. They will not, and they are right
+not to.
+
+**BABOK names four models a specification owes its readers**, and each answers a question prose
+cannot:
+
+| Model | Answers |
+|---|---|
+| Process | how work flows through the business |
+| Use case | what each person can actually do |
+| Data / ERD | how information is structured and what relates to what |
+| State | how a thing moves between conditions, and what may never happen |
+
+pica held all four as validated data and drew none of them. The data was right and unread.
+
+Three things make the difference between a diagram and a picture of one:
+
+**Colour is the information, and one legend serves the whole document.** *Where a step happens*
+and *where a screen's data comes from* are the same question in two places — grey for the upstream
+system, blue for what this product adds, olive for what a person does with no system at all. A
+reader who learns the legend once reads every grid at a glance, and sees without reading a word
+how much of their day the product actually touches.
+
+**A grid beats a graph when the graph does not fit.** Twenty-three steps as nodes and edges is
+2860px wide and has to be scrolled; the same steps as cards, grouped by who does them and ordered
+by depth, fit any column. **A diagram that must be scrolled sideways is a diagram nobody sees
+whole, which is the only reason to draw one.**
+
+**Unconfirmed points are marked, never filled in with a plausible figure.** An open rule in its
+own colour, stated as open, is worth more than a confident number nobody agreed to — and it has to
+be visible where the work standing on it is, not filed in an assumptions register.
+
+What this replaced: 129 entries in eight registers, 20 325px of scrolling. What it became: a
+narrative in parts, each opening with one sentence and then a grid, with the registers moved to a
+closed appendix for the one reader in ten who wants to look up a code. 7 700px, and the first
+screen carries the argument instead of a table of contents.
