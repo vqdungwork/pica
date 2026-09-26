@@ -188,3 +188,44 @@ Measure from the rendered text — a `Range` around the glyphs, or the ink box �
 is about what a person sees. Container geometry answers layout questions; it does not answer
 perceptual ones, and the two are easy to confuse precisely because both produce a confident number.
 
+
+## A badge every row carries is not information
+
+<!-- enforced-by: none — judgement, not decidable by a script -->
+
+On a screen whose whole job is confirming work, every one of eleven rows carried a chip reading
+"Chưa xác nhận" — while the bar beneath them already read "11 việc chưa xác nhận". Eleven identical
+pills, distinguishing nothing, on the densest surface in the product. It read as information
+because it was words; it was the screen's own default state, repeated once per row.
+
+Before a badge ships, ask what it separates. If it appears on every instance in the default case,
+it separates nothing, and the signal is its opposite: the **presence** of the other state. Absence
+needs no ink. Render the state that is exceptional and let the common one be silent.
+
+## Finishing something must make the screen quieter
+
+<!-- enforced-by: none — judgement, not decidable by a script -->
+
+Confirming a row swapped a plain grey pill for the widest, most saturated element on the screen —
+a filled chip carrying a date and a time. Ten of eleven done, and the list was **busier** than when
+nothing had been done, with the one row still needing attention the quietest thing on it.
+
+Completed work recedes: lighter weight, muted ink, the marker dimmed. Remaining work stays at full
+weight and therefore comes forward without being made louder. A receipt is not an alarm, and the
+reward for finishing is a calmer screen — a person doing this every evening should be able to see
+what is left by squinting at it.
+
+## Never make the primary action scroll away inside its own sheet
+
+<!-- enforced-by: none — judgement, not decidable by a script -->
+
+A confirm sheet listed eleven items and put its commit button after them in normal flow. The one
+action the product exists to drive sat below the fold of a surface opened expressly to perform it,
+and nothing in the build reported this, because the sheet itself scrolled correctly.
+
+A sheet's commit control is pinned, and it carries the live count — the number is what the person
+is deciding about, so it belongs on the control, not only in the list above it. And a dialogue that
+re-lists rows the screen behind it already shows must not show them **worse**: the same sheet gave
+its titles a 195px column beside a right-aligned status, wrapping the longest to five lines, while
+the list underneath rendered the same title in three. Carry the row's anatomy into the sheet
+instead of inventing a second, narrower one.
