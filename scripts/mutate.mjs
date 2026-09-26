@@ -402,6 +402,15 @@ const M = [
             '<rect x="60" y="44" width="70" height="19" rx="9.5" fill="var(--fig-card, #fff)"/><text font-size="11">x</text></svg>\n' },
       ] }],
 
+  /* figure-edge-through-node — a router that reports it could not clear a box. */
+  ["figure-edge-through-node", "business-analyst/scripts/figure-placement-check.mjs",
+    [path.join(DIR, "__mut-fig7__.html"), path.join(DIR, "__mut-figs7__")], "always",
+    { files: [
+        { file: "__mut-fig7__.html", content: '<!doctype html><title>m</title><figure data-figure="rt" data-label="Routed"><svg viewBox="0 0 400 300"></svg></figure>\n' },
+        { file: path.join("__mut-figs7__", "rt.svg"), content:
+            '<svg data-route-conflicts="3" viewBox="0 0 400 300"><text font-size="12">x</text></svg>\n' },
+      ] }],
+
   /* figure-control-does-nothing — both live failures. One claims to be interrogable with no edges
    * at all; the other lights almost everything for the node you click. Each shipped, each looked
    * correct in the source, and each was a control the reader spent attention discovering was inert. */

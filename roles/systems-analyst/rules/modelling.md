@@ -296,3 +296,43 @@ graph shape, linear or cyclical, and it is the thing somebody points at on a cal
 
 A control that appears to do something and does not is worse than no control, because the reader
 spends attention finding out.
+
+
+## route by search, not by derivation
+
+<!-- enforced-by: figure-edge-through-node -->
+
+Five rounds of this were spent hand-deriving an edge geometry meant to be correct for every case,
+and each derivation was wrong for a different case: a horizontal run at the source's own centre
+height, then at the target's, then a fallback between adjacent rows that cut across the columns
+between them. Every one looked right in the source. Every one shipped a line through a box.
+
+The obstacles are all known at the moment the edge is drawn. So generate candidate routes — exit
+from the bottom or either side, enter at the top or either side, descend in any of a handful of
+corridors, turn in any of a handful of bands — **count what each one hits, and take the cleanest**.
+Bottom-out and top-in pay no tax and therefore win wherever they are clean, so the diagram stays
+consistent without a single special case.
+
+Edges are routed in order and each sees the ones already placed. Crossing another edge costs about
+a sixtieth of what cutting through a box costs, because a crossing is readable and a line through a
+label is not.
+
+Measured on one 23-step process: edges through unrelated boxes 8 → **0**, crossings 9 → 5.
+
+This is the same move that fixed the branch labels, and it is the general one. **When the geometry
+is hard, stop reasoning about placement and start scoring it.** A rule you derived is a hypothesis;
+a route you measured is a fact.
+
+## measure the thing you are shipping, not a model of it
+
+<!-- enforced-by: none — judgement about how to verify, which no script can hold -->
+
+The harness written to score these diagrams parsed cubic Béziers by hand. When the routes became
+orthogonal it silently dropped the eight it could not parse and reported a large improvement —
+part of which was edges disappearing from the measurement rather than from the drawing.
+
+A measurement that quietly ignores what it does not understand will confirm whatever you just did.
+Rewriting it to load the real SVG in a browser and walk each path with `getPointAtLength` removed
+the parser and its blind spot at once: eight edges reappeared, and two of the numbers got worse.
+
+If a harness cannot see everything it claims to score, it is not a harness. It is agreement.

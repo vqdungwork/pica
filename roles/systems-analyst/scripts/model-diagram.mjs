@@ -411,7 +411,7 @@ function processDiagram(toBe) {
     const k = used.get(`${li}:${d}`) || 0; used.set(`${li}:${d}`, k + 1);
     const cx = laneX[li] + (k % laneCols[li]) * nodeW + nodeW / 2 - 4;
     const cy = stageY[d] + Math.floor(k / laneCols[li]) * (rowH * 0.62);
-    pos.set(n.id, { x: cx, y: cy });
+    pos.set(n.id, { x: cx, y: cy, lane: li });
     const gateway = isGateway(n);
     const start = !hasIn.has(n.id), end = !hasOut.has(n.id);
     // a vertical box is wider than a horizontal one was, so three lines of 22 chars fit and the
@@ -449,6 +449,8 @@ function processDiagram(toBe) {
   };
 
   const branchLabels = [];
+  let routeConflicts = 0;     // edges the router could not clear of every box it does not touch
+  const placed = [];          // routes already chosen, so the next one can avoid crossing them
   for (const e of edges) {
     const a = pos.get(e.from), b = pos.get(e.to);
     if (!a || !b) continue;
@@ -461,7 +463,111 @@ function processDiagram(toBe) {
       continue;
     }
     const mid = (ay + by) / 2;
-    L.push(`<path data-edge="${esc(e.from)}|${esc(e.to)}" d="M${a.x} ${ay} C${a.x} ${mid} ${b.x} ${mid} ${b.x} ${by}" fill="none" stroke="${C.line}" stroke-width="1.4" marker-end="url(#pa)"/>`);
+    /* ROUND 1. An edge that stays in its column leaves the bottom and enters the top: a straight
+     * drop, nothing to get wrong. An edge that changes column must not do that, because directly
+     * below its source is the next step in the SAME lane, and the curve went straight through it.
+     * Seven of twenty-eight edges passed through a box they had nothing to do with.
+     *
+     * So a cross-lane edge leaves from the SIDE facing its target and enters the target's facing
+     * side. It travels in the horizontal band between rows instead of down a column somebody else
+     * occupies. */
+    /* ROUND 5. Rounds 1 through 4 each hand-derived a geometry meant to be correct for every
+     * case, and each was wrong for a different case: a horizontal run at the source's centre
+     * height, then at the target's, then a short-S fallback between rows that cut through
+     * whatever stood between the columns. Four confident derivations, four different collisions.
+     *
+     * Stop deriving. The obstacles are all known here, so generate a handful of candidate routes,
+     * COUNT what each one hits, and take the cleanest. It is the same move that fixed the branch
+     * labels: lay out, measure, choose — rather than reason and hope.
+     *
+     * Every candidate is an orthogonal polyline that leaves the bottom of its source and arrives
+     * at the top of its target, so whichever one wins, every arrowhead in the diagram reads the
+     * same way. */
+    const h2n = nodeH / 2, r = 9;
+    const boxes = [...pos.entries()]
+      .filter(([id]) => id !== e.from && id !== e.to)
+      .map(([, q]) => ({ x: q.x - (nodeW / 2 - 8), y: q.y - h2n, w: nodeW - 16, h: nodeH }));
+    const hitsBox = (pts) => {
+      let n = 0;
+      for (let i = 0; i < pts.length - 1; i++) {
+        const [x0, y0] = pts[i], [x1, y1] = pts[i + 1];
+        for (const bx of boxes) {
+          const lo = Math.min(x0, x1) - 2, hi = Math.max(x0, x1) + 2;
+          const lo2 = Math.min(y0, y1) - 2, hi2 = Math.max(y0, y1) + 2;
+          if (hi > bx.x && bx.x + bx.w > lo && hi2 > bx.y && bx.y + bx.h > lo2) n++;
+        }
+      }
+      return n;
+    };
+    const segInter = (p, q, u, v) => {
+      const o = (i, j, k) => Math.sign((j[0]-i[0])*(k[1]-i[1]) - (j[1]-i[1])*(k[0]-i[0]));
+      return o(p,q,u) !== o(p,q,v) && o(u,v,p) !== o(u,v,q);
+    };
+    const crossesPlaced = (pts) => {
+      let n = 0;
+      for (let i = 0; i < pts.length - 1; i++)
+        for (const pl of placed)
+          for (let j = 0; j < pl.length - 1; j++)
+            if (segInter(pts[i], pts[i+1], pl[j], pl[j+1])) n++;
+      return n;
+    };
+    const sv = b.y > a.y ? 1 : -1;
+    const w2 = nodeW / 2 - 8;
+    /* Leaving from the BOTTOM is not always possible. When the next step in the same column sits
+     * directly below the source, every route out of the bottom is already inside it before it can
+     * turn — which is why three edges kept cutting through a box however the corridors moved.
+     *
+     * So the exit side and the entry side become candidates too, and the scoring picks. Bottom-out
+     * and top-in still win wherever they are clean, because they are shorter, which keeps the
+     * diagram consistent without having to special-case anything. */
+    const exits = [
+      { p: [a.x, a.y + sv * h2n], bottom: true },
+      { p: [a.x - w2, a.y], bottom: false },
+      { p: [a.x + w2, a.y], bottom: false },
+    ];
+    const entries = [
+      { p: [b.x, b.y - sv * h2n], top: true },
+      { p: [b.x - w2, b.y], top: false },
+      { p: [b.x + w2, b.y], top: false },
+    ];
+    const corridors = [a.x, b.x,
+      a.x - nodeW / 2 - 7, a.x + nodeW / 2 + 7, b.x - nodeW / 2 - 7, b.x + nodeW / 2 + 7,
+      ...laneX.map((x) => x - 14),
+      laneX[laneX.length - 1] + laneCols[laneCols.length - 1] * nodeW + 14];
+    const bands = [a.y + sv * (h2n + r + 2), a.y + sv * (h2n + 20), b.y - sv * (h2n + 20), (a.y + b.y) / 2];
+
+    const dedupe = (pts) => pts.filter((q, i, A) => !i || Math.abs(q[0] - A[i-1][0]) > 1 || Math.abs(q[1] - A[i-1][1]) > 1);
+    let best = null;
+    for (const ex of exits) for (const en of entries) for (const c of corridors) for (const y1 of bands) {
+      const pts = [ex.p];
+      if (ex.bottom) { pts.push([ex.p[0], y1], [c, y1]); } else { pts.push([c, ex.p[1]]); }
+      if (en.top) { const y2 = en.p[1] - sv * 20; pts.push([c, y2], [en.p[0], y2]); }
+      else { pts.push([c, en.p[1]]); }
+      pts.push(en.p);
+      const P = dedupe(pts);
+      if (P.length < 2) continue;
+      const back = P.some(([, y]) => sv > 0 ? y < a.y - h2n - 4 : y > a.y + h2n + 4);
+      const len = P.reduce((t, q, i) => i ? t + Math.abs(q[0] - P[i-1][0]) + Math.abs(q[1] - P[i-1][1]) : 0, 0);
+      // bottom-out/top-in is the house style; the others pay a small tax so they win only on merit
+      const style = (ex.bottom ? 0 : 60) + (en.top ? 0 : 60);
+      const score = hitsBox(P) * 1000 + crossesPlaced(P) * 60 + (back ? 400 : 0) + len + style;
+      if (!best || score < best.score) best = { score, pts: P, hits: hitsBox(P) };
+    }
+
+    placed.push(best.pts);
+    if (best.hits) routeConflicts++;
+    const P = best.pts.filter((q, i, arr) => !i || Math.abs(q[0] - arr[i-1][0]) > 1 || Math.abs(q[1] - arr[i-1][1]) > 1);
+    let d = `M${P[0][0]} ${P[0][1]}`;
+    for (let i = 1; i < P.length; i++) {
+      const [x, y] = P[i];
+      if (i === P.length - 1) { d += ` L${x} ${y}`; continue; }
+      const [nx, ny] = P[i + 1];
+      const inD = [Math.sign(x - P[i-1][0]), Math.sign(y - P[i-1][1])];
+      const outD = [Math.sign(nx - x), Math.sign(ny - y)];
+      const rr = Math.min(r, Math.abs(x - P[i-1][0]) / 2 + Math.abs(y - P[i-1][1]) / 2, Math.abs(nx - x) / 2 + Math.abs(ny - y) / 2);
+      d += ` L${x - inD[0] * rr} ${y - inD[1] * rr} Q${x} ${y} ${x + outD[0] * rr} ${y + outD[1] * rr}`;
+    }
+    L.push(`<path data-edge="${esc(e.from)}|${esc(e.to)}" d="${d}" fill="none" stroke="${C.line}" stroke-width="1.4" marker-end="url(#pa)"/>`);
     const lab = branchLabel(e);
     if (lab) {
       /* Put the label ON its own curve, and stagger the siblings.
@@ -541,7 +647,7 @@ function processDiagram(toBe) {
   }
 
   return [
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" ${F} role="img" aria-label="Quy trình TO-BE">`,
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" ${F} role="img" aria-label="Quy trình TO-BE" data-route-conflicts="${routeConflicts}">`,
     L[0], L[1], L[2],          // defs and the two title lines
     ...laneBands,              // bands behind everything
     ...L.slice(3),

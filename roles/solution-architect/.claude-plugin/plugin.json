@@ -1,7 +1,7 @@
 {
   "name": "pica-solution-architect",
   "description": "pica solution architect: the stack layer by layer, a mechanism behind every non-functional requirement, a contract per integration including what happens when it is down, and the environments it runs in \u2014 written down before the demo decides them by default.",
-  "version": "3.9.0",
+  "version": "3.10.0",
   "author": {
     "name": "Dung Vuong"
   },
