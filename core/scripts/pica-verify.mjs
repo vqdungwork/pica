@@ -37,6 +37,26 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { execFile } from "child_process";
 
+/* Versions sort NUMERICALLY, never as strings.
+ *
+ * `["3.0.2","3.15.1","3.2.1"].sort()` ends on "3.2.1", because at the second character "2" beats
+ * "1". pica had thirteen releases in one day and then silently resolved to the one from the
+ * morning — every check read from a stale manifest, including four whose placeholders had since
+ * been fixed. Nothing reported a wrong version; the only symptom was a check failing on an
+ * argument nobody had written that way any more.
+ *
+ * An unparseable version sorts lowest rather than throwing: a stray directory must not decide
+ * which pica runs. */
+const vcmp = (a, b) => {
+  const pa = String(a).split(/[.-]/).map((x) => (/^\d+$/.test(x) ? Number(x) : -1));
+  const pb = String(b).split(/[.-]/).map((x) => (/^\d+$/.test(x) ? Number(x) : -1));
+  for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
+    const d = (pa[i] ?? -1) - (pb[i] ?? -1);
+    if (d) return d;
+  }
+  return 0;
+};
+
 const argv = process.argv.slice(2);
 const flag = (n) => argv.includes(n);
 const opt = (n, d = null) => { const i = argv.indexOf(n); return i >= 0 ? argv[i + 1] : d; };
@@ -116,16 +136,21 @@ const checks = [];
 const missingPackages = [];
 const unplaced = [];
 const elsewhere = [];
+const resolved = [];
 for (const entry of fs.readdirSync(PKG)) {
   const manifest = path.join(PKG, entry, "package.json");
   let dir = path.join(PKG, entry);
   if (!fs.existsSync(manifest)) {
     /* Installed layout: pica-ux-engineer/1.0.3/package.json */
     const versions = fs.existsSync(dir) && fs.statSync(dir).isDirectory()
-      ? fs.readdirSync(dir).filter((v) => fs.existsSync(path.join(dir, v, "package.json"))).sort()
+      ? fs.readdirSync(dir).filter((v) => fs.existsSync(path.join(dir, v, "package.json"))).sort(vcmp)
       : [];
     if (!versions.length) continue;
     dir = path.join(dir, versions[versions.length - 1]);
+    /* Say which one won, and say when others were passed over. A silently wrong version is the
+     * failure this whole file exists to prevent, and it is the one that actually happened: a
+     * string sort put 3.2.1 above 3.15.1 and every check ran from the morning's manifest. */
+    resolved.push({ pkg: entry, version: versions[versions.length - 1], others: versions.length - 1 });
   }
   let j;
   try { j = JSON.parse(fs.readFileSync(path.join(dir, "package.json"), "utf8")); } catch { continue; }
@@ -213,6 +238,19 @@ const argsOf = (c) => c.args.split(/\s+/).map((a) => {
 /* Matches the abstention notice the checks themselves emit. */
 const ABSTAINED_RE = /\bthis is an abstention,? not a pass\b|\bNOT a pass\b|\bdid NOT run\b|\bcould not be (read|parsed)\b/i;
 let internallyAbstained = 0;
+
+/* The versions this run is actually made of. Printed before any result, because a reader who
+ * cannot see which pica ran cannot tell a fixed defect from a stale one. */
+if (resolved.length) {
+  const stale = resolved.filter((r) => r.others > 0);
+  const vs = [...new Set(resolved.map((r) => r.version))];
+  console.log(`pica ${vs.length === 1 ? vs[0] : vs.join(" + ")} — ${resolved.length} package(s)` +
+    (stale.length ? `, ${stale.length} with older copies still on disk (highest wins)` : ""));
+  if (vs.length > 1)
+    console.log(`WARN  packages disagree on version: ${resolved.map((r) => `${r.pkg}@${r.version}`).join(", ")}. ` +
+      "A chain assembled from two releases is not a release.");
+  console.log("");
+}
 
 const scoped = checks.filter((c) => !ONLY_PHASE || c.phase === ONLY_PHASE);
 if (ONLY_PHASE && !PHASES.includes(ONLY_PHASE)) {
