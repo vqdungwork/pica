@@ -27,7 +27,8 @@
       "spacing-check.mjs",
       "state-coverage-check.mjs",
       "verify-html.mjs",
-      "visual-qa-check.mjs"
+      "visual-qa-check.mjs",
+      "url-param-guard.mjs"
     ],
     "agents": [
       "pica-ux-engineer.md"
@@ -186,6 +187,13 @@
       "needs": [
         "@html"
       ]
+    },
+    {
+      "run": "url-param-guard.mjs",
+      "passes": "0 findings",
+      "args": "--url <servedDemo> --valid <knownRoute>",
+      "phase": "design",
+      "needs": []
     }
   ],
   "definitionOfDone": [

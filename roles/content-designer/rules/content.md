@@ -114,3 +114,21 @@ Every restricted claim becomes a `copyRule` with a pattern, or it is not being e
 - [ ] Mock data bound to the nearest real name, relationship fields stripped first
 - [ ] Nullable fields shown in both states where both occur in the source
 - [ ] `copy-check.mjs` returns zero
+
+## The rule goes in the sentence; its identifier stays in the PRD
+
+<!-- enforced-by: internal-reference-check -->
+
+Analysis numbers its rules so they can be argued about — BR-06, FR-16a, NFR-02. The person writing
+the screen is reading the rule while they write the sentence, so the citation comes along, and on
+the page it feels like provenance. It is not. *"Quản lý không thể tự sửa gì ở đây (BR-06)"* tells a
+director nothing they can act on, and tells them what they are looking at was assembled out of a
+document they have never seen.
+
+Seven of these shipped into one demo, across five screens, each written weeks apart — which is the
+signature of a defect that needs a check rather than a reviewer: nobody writes them all in one
+sitting, so nobody ever sees them together, and each one looks defensible on its own.
+
+Cite the rule in a comment beside the code that implements it, where the citation earns its keep
+and no user meets it. `internal-reference-check.mjs` reads text nodes and the attributes a screen
+reader speaks, and deliberately ignores comments and props.

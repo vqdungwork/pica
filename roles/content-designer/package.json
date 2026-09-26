@@ -10,7 +10,8 @@
       "content.md"
     ],
     "scripts": [
-      "copy-check.mjs"
+      "copy-check.mjs",
+      "internal-reference-check.mjs"
     ],
     "agents": [
       "pica-content-designer.md"
@@ -42,12 +43,24 @@
       "needs": [
         "@.audit/html-reference.json"
       ]
+    },
+    {
+      "run": "internal-reference-check.mjs",
+      "passes": "0 findings",
+      "args": "<srcDir>",
+      "phase": "design",
+      "needs": []
     }
   ],
   "definitionOfDone": [
     {
       "type": "check",
       "run": "copy-check.mjs",
+      "passes": "0 findings"
+    },
+    {
+      "type": "check",
+      "run": "internal-reference-check.mjs",
       "passes": "0 findings"
     },
     {
