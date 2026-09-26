@@ -131,7 +131,9 @@ Three things it refuses to start without, each because skipping them once produc
 unverified file:
 
 - **`frameMap` in state**, as `{"<pkg>|<figma frame>": "<html screen>"}`. The html screen name is the
-  caption **without** its viewport suffix, because the viewport is matched separately
+  caption **without** its viewport suffix, because the viewport is matched separately. Where two HTML
+  files caption a frame the same way, qualify it as `"<file>|<html screen>"`; geometry-diff and
+  frame-inventory-check both refuse an unqualified name that more than one file carries
 - **A `font` per frame that matches the family the capture resolved.** Metrics differ per typeface, so a
   diff across two families measures the typeface rather than the layout. This is what
   `.audit/html-reference-forced.json` exists for

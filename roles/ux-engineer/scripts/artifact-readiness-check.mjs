@@ -88,9 +88,16 @@ if (!html) {
     fail("artifact-no-title", `${entry} has no <title>. The title names the artifact in the gallery and the browser tab`);
   if (!/<meta[^>]+name=["']viewport["']/.test(s))
     fail("artifact-not-responsive", `${entry} declares no viewport meta, so it will not lay out on a phone`);
-  // state carried in the query string never survives: only a bare #anchor reaches the page
+  /* State carried in the query string never survives: only a bare #anchor reaches the page. A page
+   * that ALSO routes on the anchor keeps its deep links working when published, and its query string
+   * serves the review tooling locally, so reading both is not the defect. Reading only the query is. */
+  /* Reading the anchor, not mentioning it: React DOM carries the word `hashchange` in its event
+   * priority table, so matching the bare word waved every React build through with a query-only
+   * router. A read of location.hash, or a listener registered for the event, is what counts. */
+  const readsAnchor = Object.values(src).some((t) =>
+    /location\.hash\b|addEventListener\(\s*["'`]hashchange|onhashchange\s*=/.test(t));
   for (const [f, t] of Object.entries(src))
-    if (/location\.search|URLSearchParams\s*\(\s*(?:window\.)?location\.search/.test(t)) {
+    if (!readsAnchor && /location\.search|URLSearchParams\s*\(\s*(?:window\.)?location\.search/.test(t)) {
       fail("artifact-state-in-the-url",
         `${f} reads the query string. An artifact link delivers only a bare #anchor — no query string and no #key=value — ` +
         "so every deep link into a screen or state will land on the default view");

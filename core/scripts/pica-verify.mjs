@@ -337,7 +337,11 @@ const undeclared = scoped.filter((c) => applicable(c) && c.missing.length);
  * reach yet, lacking a declaration is not this run's fault. */
 const unsubstituted = undeclared
   .flatMap((c) => c.missing.map((a) => `${c.pkg}/${c.run} needs ${a} — declare it in .pica/runners.json under "substitutions"`));
-const results = await Promise.all(todo.map(run));
+/* The build runs FIRST, alone. build-check empties and rewrites the build directory, and
+ * artifact-readiness-check reads that directory: run side by side, the second read a half-written or
+ * missing build and abstained, or passed over whatever the previous run had left. */
+const builds = todo.filter((c) => /<buildCmd>/.test(c.args));
+const results = [...await Promise.all(builds.map(run)), ...await Promise.all(todo.filter((c) => !builds.includes(c)).map(run))];
 
 /* Each check prints its own table of `pass  <id>  N finding(s)   (scope)` rows. Those
  * rows are the assertions, and they are what a green run should be able to show. */

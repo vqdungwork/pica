@@ -1,7 +1,16 @@
 {
-  "serve": { "cmd": "node scripts/serve.mjs 4173", "cwd": ".", "url": "http://127.0.0.1:4173/app-approvals.html" },
+  "serve": {
+    "cmd": "node scripts/serve.mjs 4173",
+    "cwd": ".",
+    "url": "http://127.0.0.1:4173/app-approvals.html"
+  },
+  "build": {
+    "cmd": "node scripts/build.mjs",
+    "cwd": ".",
+    "out": "dist"
+  },
   "substitutions": {
-    "<everyScreenAndState>": "scr=queue,scr=payment,scr=audit",
+    "<everyScreenAndState>": "scr=queue,scr=queue&state=held,scr=queue&state=empty,scr=payment,scr=audit",
     "<knownRoute>": "scr=payment",
     "<targetFloor>": "44",
     "<harnessChrome>": null,
@@ -10,9 +19,6 @@
     "<opener>": null,
     "<dialog>": null,
     "<baselines>": ".audit/baseline",
-    "<srcDir>": "html",
-    "<buildCmd>": null,
-    "<buildCwd>": null,
-    "<buildOut>": null
+    "<srcDir>": "html"
   }
 }

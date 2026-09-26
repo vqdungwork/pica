@@ -190,6 +190,9 @@ pica="${CLAUDE_PLUGIN_ROOT}/scripts/pica-run.mjs"
 # The capture first: it is produced, not checked, and eight checks abstain until it exists.
 # --url for the demo, --dir for the static boards. It refuses to write an unsettled capture.
 node "$pica" ux-engineer      capture-html-reference.mjs --dir html --out .audit
+# And the served demo, as the build build-diff compares against the boards: one --url per route
+# that carries a board's state. Without it build-diff abstains, and nothing compares the two.
+node "$pica" ux-engineer      capture-html-reference.mjs --url "<demo>?<route>" --out .audit --as demo-reference.json
 
 # Then everything applicable, in one table, phase by phase. pica-verify reads what to run
 # from each package's own manifest rather than from a list kept here, which is why this

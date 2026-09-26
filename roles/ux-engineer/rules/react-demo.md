@@ -193,7 +193,7 @@ when a route exists on one viewport and not another, name where the other one li
 first is called done, and put the header in one component so the answer has somewhere to go.
 
 The same header carried a second, quieter version of the same defect: it printed a different
-wordmark per area — "daylog" here, "reporting" there — which is what two apps look like, on a
+wordmark per area — one app's name here, another's there — which is what two apps look like, on a
 product whose shape decision was that there is one.
 
 ## Completing the primary action is a moment, not an absence
@@ -309,7 +309,7 @@ is not something to retrofit — it is how every state in the demo is addressed.
 
 ## a demo is walked, not only loaded
 
-<!-- enforced-by: blank-after-click, script-error -->
+<!-- enforced-by: blank-after-click, script-error, wrong-destination -->
 
 Every browser check loads a route fresh, measures it and leaves. The worked example's own prototype
 router went blank on its first navigation for months: it wrote the current screen to
@@ -318,9 +318,11 @@ document. Twelve checks passed over it, because none of them ever clicked.
 
 `flow-walk-check` clicks every distinct control on every route, then every control on the screen
 that produced, three deep, replaying each path from a fresh load. A click that leaves nothing
-readable, or takes every frame off screen without navigating, fails; so does any script error.
-It cannot tell a right screen from a wrong one. That is `flow-check`'s job and yours: click the main
-flow yourself before anyone else does.
+readable, or takes every frame off screen without navigating, fails; so does any script error. A
+control that declares where it goes (`data-go`, `data-tab`, a `?scr=` link) must land there, and back
+must return to the screen before it. **Declare destinations in a React demo too**: a control with no
+`data-go` is held only to leaving something standing. Whether the declared destination is the right
+one for the business is yours to click.
 
 ## the project declares what only the project knows
 

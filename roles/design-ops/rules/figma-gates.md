@@ -11,6 +11,8 @@ The gates the figma package owns. Medium-independent review discipline is in cor
 
 ## Match by text content, compare position only
 
+<!-- enforced-by: geometry -->
+
 To diff HTML against Figma without hand-mapping every element, key on **text content**. Strings are a
 strong natural key: normalise whitespace, lowercase, truncate to roughly 24 characters, then pair
 nearest matches within a frame.

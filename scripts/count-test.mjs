@@ -112,11 +112,11 @@ else ok(`${tableRows.length} scripts listed, summing to ${checks}`);
 
 /* Summing the table proved the badge agreed with the table, and nothing proved the table agreed with
  * the checks. Twenty-two declared checks were missing from it, so "All 156 checks" was the count of
- * the ones somebody had remembered to list. Every check a manifest declares is listed, except the
- * ones the README names as reporting a measured difference, and those that run inside Figma. */
+ * the ones somebody had remembered to list. Every check a manifest declares is listed, except the two
+ * that run inside Figma, which are proven by mock-figma.mjs rather than counted here. */
 {
   const listed = new Set([...tableText.matchAll(/^\| `([a-z0-9-]+)` \|/gm)].map((m) => m[1]));
-  const NOT_TABLED = new Set(["parity-check", "geometry-diff"]);
+  const NOT_TABLED = new Set();
   const unlisted = [];
   for (const p of pkgs) {
     const m = JSON.parse(fs.readFileSync(path.join(pkgPath(p), "package.json"), "utf8"));

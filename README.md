@@ -5,8 +5,8 @@
 **Describe the product you want. Get requirements your team recognises and a demo your client can use.**
 <br>An expert team for Claude Code, with the checking built in.
 
-[![version](https://img.shields.io/badge/version-3.18.0-1f2328)](https://github.com/vqdungwork/pica/releases)
-[![checks](https://img.shields.io/badge/checks-247%20fail--closed-1f2328)](#what-gets-checked)
+[![version](https://img.shields.io/badge/version-3.19.0-1f2328)](https://github.com/vqdungwork/pica/releases)
+[![checks](https://img.shields.io/badge/checks-251%20fail--closed-1f2328)](#what-gets-checked)
 [![agents](https://img.shields.io/badge/specialists-12-1f2328)](#who-does-the-work)
 [![sectors](https://img.shields.io/badge/industries-28-1f2328)](#it-already-knows-your-industry)
 [![licence](https://img.shields.io/badge/licence-MIT-1f2328)](LICENSE)
@@ -50,7 +50,7 @@ the requirements, the scope and a working thing to price against, and does not p
 | **Understands the work** | Turns your paragraph into requirements your team recognises: what happens today, what changes, the rules, and a document a non-technical reader can follow |
 | **Knows your industry** | 28 of them. Who can say no, which colours already mean something, what the field treats as a mistake no matter what you asked for |
 | **Shows you structure first** | Greyscale layout before anything is styled, so the conversation is about what goes where while that is still cheap to change |
-| **Checks it before you see it** | 247 automated checks: contrast, coverage, the words, the wiring. Nothing reaches you having only been looked at |
+| **Checks it before you see it** | 251 automated checks: contrast, coverage, the words, the wiring. Nothing reaches you having only been looked at |
 | **Has it reviewed by others** | Three to five independent reviewers, none of them seeing each other's findings |
 | **Knows who will use it** | Not just the industry: the age band, the region, the conditions of use. Older users set a floor on type size and contrast that no amount of sector convention gets to go under |
 | **Gives you something to click** | A React demo with mock data, served at a URL, where every state has its own link. Not a picture of a product |
@@ -150,7 +150,7 @@ wrong, and quietly makes design decisions that were never theirs to make.
 ---
 
 <details>
-<summary><b>All 247 checks, and what is enforced by a hook</b></summary>
+<summary><b>All 251 checks, and what is enforced by a hook</b></summary>
 
 
 <br>Listed so the number can be recounted rather than trusted.
@@ -205,22 +205,24 @@ wrong, and quietly makes design decisions that were never theirs to make.
 | `screenreader-check` | 6 | named in the tree, not hidden from it, tree order, no silent change, dialogs named, headings present |
 | `axe-check` | 1 | no axe violation on any route, and no route that could not be scanned |
 | `target-size-check` | 1 | every control's hit area clears the audience's floor, harness chrome excluded |
-| `flow-walk-check` | 2 | no click, up to three deep, leaves the page blank, and none throws |
+| `flow-walk-check` | 3 | no click, up to three deep, leaves the page blank or throws, and every declared destination and back lands where it says |
 | `visual-baseline-check` | 1 | every route matches its committed baseline, and a run that only wrote baselines is not a pass |
 | `build-check` | 2 | the build command succeeds, and produces an entry point |
+| `parity-check` | 2 | every screen at every declared viewport, and the same structure at each |
+| `geometry-diff` | 1 | every Figma text run within tolerance of where the HTML put it, pairing by the declared frame map |
 | `artifact-readiness-check` | 7 | no blocked resource, no inert control, no state in the URL, a title, responsive, under the size limit, an entry point |
-| | **247** | |
+| | **251** | |
 
-`parity-check` and `geometry-diff` report a measured difference rather than named check ids: nominal and
-structural parity wherever two or more viewports are declared, and Figma position against the HTML
-reference.
+`parity-check` runs wherever two or more viewports are declared, and `geometry-diff` and
+`frame-inventory-check` only where `figmaInScope` is true.
 
-Every check that runs in node has been seen to fail on the defect it was written for, except two that
-read a Figma dump the worked example cannot carry (`geometry-diff`, `frame-inventory-check`). `mutation-coverage-check` names them on every run and fails if
+Every check has been seen to fail on the defect it was written for. The ones that read a Figma port are
+proven against a faithful dump synthesised from the capture, and the two that run inside Figma by
+`mock-figma.mjs`, which implements the part of the plugin API they call. `mutation-coverage-check` names them on every run and fails if
 the list grows. You can watch the rest happen:
 
 ```bash
-node scripts/mutate.mjs --fixture            # 173 caught, 0 missed, 0 skipped
+node scripts/mutate.mjs --fixture            # 180 caught, 0 missed, 0 skipped
 node scripts/mutate.mjs <your-project-dir>
 node scripts/example-verify.mjs              # the worked example through pica-verify: 0 failed
 ```
@@ -267,7 +269,7 @@ loaded. Approvals live on disk, because a hook is a script and cannot know you s
 | **13 commands** | Deterministic once typed |
 | **27 rule modules** | Loaded per step, never all at once. 228 definition-of-done items across them |
 | **26 check scripts** | Plus the capture harness, the status tool, and a harness that runs the in-Figma scripts outside Figma |
-| **247 checks** | Every one fails closed. `/pica-verify` runs every applicable one in a single table, and an abstention is never counted as a pass |
+| **251 checks** | Every one fails closed. `/pica-verify` runs every applicable one in a single table, and an abstention is never counted as a pass |
 | **28 sectors** | 264 names resolving to them, 4 deliberately refused as ambiguous |
 | **12 specialists** | Each loads its own craft rules and the sector entry before it starts. The evaluator has **no write access**, because a reviewer that can fix cannot be trusted to report |
 | **2 hooks** | One loads the rules every session; one refuses a Figma write that has not earned it |

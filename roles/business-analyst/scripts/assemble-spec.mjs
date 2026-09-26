@@ -33,6 +33,15 @@ try { S = JSON.parse(readFileSync(file, "utf8")); }
 catch (e) { console.error(`assemble-spec: cannot read ${file} — ${e.message}`); process.exit(1); }
 
 const arr = (v) => (Array.isArray(v) ? v : []);
+/* The document's language is the PROJECT'S. Every heading in this file was Vietnamese, written on the
+ * engagement it was built for, so an English project got a Vietnamese specification. state.language
+ * decides; without it, a glossary carrying `vi` translations means Vietnamese, anything else English. */
+const LANG = String(S.language || S.locale || (arr(S.glossary).some((g) => g?.vi) ? "vi" : "en")).toLowerCase().startsWith("vi") ? "vi" : "en";
+const tr = (en, vi) => (LANG === "vi" ? vi : en);
+/* Who is who, from the state and nowhere else. The legend used to name the upstream product and the
+ * two applications of that engagement, in every project's specification. */
+const APPS = arr(S.applications).map((a) => String(a.name || a)).filter(Boolean);
+const SYSTEMS = arr(S.integrationsNamed).map((i) => String(i.system || i)).filter(Boolean);
 const esc = (s) => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 /* The reader's own language, and their own voice.
  *
@@ -40,7 +49,7 @@ const esc = (s) => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").
  * them: English nouns for entities the glossary already translates; text cut mid-word because a
  * slice was easier than a word boundary; and EMPHASIS BY SHOUTING, which is how a register gets
  * read back by someone who wrote it and not how anyone wants to be spoken to. */
-const GLOSS = arr(S.glossary).filter((g) => g.vi && g.term)
+const GLOSS = arr(S.glossary).filter((g) => LANG === "vi" && g.vi && g.term)
   .sort((a, b) => String(b.term).length - String(a.term).length);
 const toVi = (text) => {
   let out = String(text ?? "");
@@ -68,29 +77,29 @@ const ids = (v) => arr(v).map((x) => (typeof x === "string" ? x : x?.id)).filter
  * follows the standard split: why / what / how. An item may land in more than one — the brief is
  * both the business case and the product's own statement of intent — and the counts say so. */
 const REGISTERS = [
-  { key: "segments",   phase: "02 Research",      docs: ["BRD"],        title: "Phân khúc người dùng",
+  { key: "segments",   phase: "02 Research",      docs: ["BRD"],        title: tr("User segments", "Phân khúc người dùng"),
     rows: () => arr(S.discovery?.segments).map((x, i) => ({ id: `SEG-${String(i + 1).padStart(2, "0")}`, head: x.name, body: x.jobToBeDone, meta: [x.frequency, x.context].filter(Boolean) })) },
-  { key: "pains",      phase: "02 Research",      docs: ["BRD"],        title: "Nỗi đau",
-    rows: () => arr(S.discovery?.painPoints).map((x) => ({ id: x.id, head: x.segment, body: x.statement, meta: [x.class, x.severity && `mức ${x.severity}`, x.confidence && `tin cậy ${x.confidence}`].filter(Boolean), refs: [] })) },
-  { key: "problem",    phase: "03 Analysis",      docs: ["BRD", "PRD"], title: "Bài toán và chỉ số",
+  { key: "pains",      phase: "02 Research",      docs: ["BRD"],        title: tr("Pain points", "Nỗi đau"),
+    rows: () => arr(S.discovery?.painPoints).map((x) => ({ id: x.id, head: x.segment, body: x.statement, meta: [x.class, x.severity && `${tr("severity", "mức")} ${x.severity}`, x.confidence && `${tr("confidence", "tin cậy")} ${x.confidence}`].filter(Boolean), refs: [] })) },
+  { key: "problem",    phase: "03 Analysis",      docs: ["BRD", "PRD"], title: tr("The problem and its metric", "Bài toán và chỉ số"),
     rows: () => (S.problem ? [{ id: "PROB", head: S.problem.whose, body: S.problem.statement, meta: [S.problem.metric && `${S.problem.metric}: ${S.problem.baseline ?? "?"} ${S.problem.unit ?? ""}`].filter(Boolean) }] : []) },
-  { key: "rules",      phase: "03 Analysis",      docs: ["BRD", "FRD"], title: "Luật nghiệp vụ",
-    rows: () => arr(S.businessRules).map((x) => ({ id: x.id, head: x.status === "open" ? "CHƯA CHỐT" : (x.confirmed ? "đã xác nhận" : ""), body: x.rule, meta: [x.enforcedBy && `thực thi bởi: ${x.enforcedBy}`].filter(Boolean), open: x.status === "open" })) },
-  { key: "glossary",   phase: "03 Analysis",      docs: ["BRD", "PRD", "FRD"], title: "Từ điển", dense: true,
-    rows: () => arr(S.glossary).map((x, i) => ({ id: `G-${String(i + 1).padStart(2, "0")}`, head: `${x.term}${x.vi ? ` · ${x.vi}` : ""}`, body: x.means, meta: [x.notOurTerm?.length && `không phải: ${arr(x.notOurTerm).join(", ")}`].filter(Boolean) })) },
+  { key: "rules",      phase: "03 Analysis",      docs: ["BRD", "FRD"], title: tr("Business rules", "Luật nghiệp vụ"),
+    rows: () => arr(S.businessRules).map((x) => ({ id: x.id, head: x.status === "open" ? tr("OPEN", "CHƯA CHỐT") : (x.confirmed ? tr("confirmed", "đã xác nhận") : ""), body: x.rule, meta: [x.enforcedBy && `${tr("enforced by", "thực thi bởi")}: ${x.enforcedBy}`].filter(Boolean), open: x.status === "open" })) },
+  { key: "glossary",   phase: "03 Analysis",      docs: ["BRD", "PRD", "FRD"], title: tr("Glossary", "Từ điển"), dense: true,
+    rows: () => arr(S.glossary).map((x, i) => ({ id: `G-${String(i + 1).padStart(2, "0")}`, head: `${x.term}${x.vi && LANG === "vi" ? ` · ${x.vi}` : ""}`, body: x.means, meta: [x.notOurTerm?.length && `${tr("not", "không phải")}: ${arr(x.notOurTerm).join(", ")}`].filter(Boolean) })) },
   { key: "useCases",   phase: "03 Analysis",      docs: ["PRD"],        title: "Use case", dense: true,
     rows: () => arr(S.useCases).map((x) => ({ id: x.id, head: x.name, body: arr(x.mainFlow).slice(0, 3).join(" → "), meta: [x.app, arr(x.actors)[0]].filter(Boolean), refs: [...ids(x.addresses), ...ids(x.tracesTo)] })) },
-  { key: "reqs",       phase: "03 Analysis",      docs: ["PRD"],        title: "Yêu cầu", dense: true,
+  { key: "reqs",       phase: "03 Analysis",      docs: ["PRD"],        title: tr("Requirements", "Yêu cầu"), dense: true,
     rows: () => arr(S.requirements).map((x) => ({ id: x.id, head: x.class, body: x.statement, meta: [x.app].filter(Boolean), refs: ids(x.tracesTo) })) },
-  { key: "nfr",        phase: "03 Analysis",      docs: ["PRD", "FRD"], title: "Yêu cầu phi chức năng", dense: true,
+  { key: "nfr",        phase: "03 Analysis",      docs: ["PRD", "FRD"], title: tr("Non-functional requirements", "Yêu cầu phi chức năng"), dense: true,
     rows: () => arr(S.nfr).map((x) => ({ id: x.id, head: x.kind, body: x.requirement, meta: [x.condition, x.measuredBy].filter(Boolean) })) },
-  { key: "entities",   phase: "04 Specification", docs: ["FRD"],        title: "Mô hình miền",
-    rows: () => arr(S.domainModel).map((x) => ({ id: `ENT-${String(x.entity).replace(/\W+/g, "-").toLowerCase()}`, head: x.entity, body: `chủ sở hữu: ${x.owner ?? "—"}`, meta: [arr(x.states).length && `${arr(x.states).length} trạng thái`, arr(x.attributes).length && `${arr(x.attributes).length} thuộc tính`].filter(Boolean) })) },
-  { key: "screens",    phase: "05 Structure",     docs: ["PRD", "FRD"], title: "Màn hình",
-    rows: () => arr(S.screens).map((x) => ({ id: x.id, head: x.name, body: `${arr(x.states).length} trạng thái · ${x.application ?? ""}`, meta: arr(x.states), refs: ids(x.tracesTo) })) },
-  { key: "assumptions", phase: "01 Framing",      docs: ["BRD", "PRD"], title: "Giả định",
-    rows: () => arr(S.assumptions).map((x) => ({ id: x.id, head: `tin cậy: ${x.confidence}`, body: x.assumed, meta: arr(x.affects), open: /thấp|low/i.test(String(x.confidence)) })) },
-  { key: "exclusions", phase: "01 Framing",       docs: ["BRD", "SOW"], title: "Loại trừ",
+  { key: "entities",   phase: "04 Specification", docs: ["FRD"],        title: tr("Domain model", "Mô hình miền"),
+    rows: () => arr(S.domainModel).map((x) => ({ id: `ENT-${String(x.entity).replace(/\W+/g, "-").toLowerCase()}`, head: x.entity, body: `${tr("owner", "chủ sở hữu")}: ${x.owner ?? "—"}`, meta: [arr(x.states).length && `${arr(x.states).length} ${tr("states", "trạng thái")}`, arr(x.attributes).length && `${arr(x.attributes).length} ${tr("attributes", "thuộc tính")}`].filter(Boolean) })) },
+  { key: "screens",    phase: "05 Structure",     docs: ["PRD", "FRD"], title: tr("Screens", "Màn hình"),
+    rows: () => arr(S.screens).map((x) => ({ id: x.id, head: x.name, body: `${arr(x.states).length} ${tr("states", "trạng thái")} · ${x.application ?? ""}`, meta: arr(x.states), refs: ids(x.tracesTo) })) },
+  { key: "assumptions", phase: "01 Framing",      docs: ["BRD", "PRD"], title: tr("Assumptions", "Giả định"),
+    rows: () => arr(S.assumptions).map((x) => ({ id: x.id, head: `${tr("confidence", "tin cậy")}: ${x.confidence}`, body: x.assumed, meta: arr(x.affects), open: /thấp|low/i.test(String(x.confidence)) })) },
+  { key: "exclusions", phase: "01 Framing",       docs: ["BRD", "SOW"], title: tr("Exclusions", "Loại trừ"),
     rows: () => arr(S.exclusions).map((x, i) => ({ id: `EX-${String(i + 1).padStart(2, "0")}`, head: x.excluded, body: x.why, meta: [x.source].filter(Boolean) })) },
 ];
 
@@ -116,17 +125,17 @@ const diagrams = existsSync(diagDir)
   : [];
 
 const DOC_META = {
-  BRD: ["Why", "Business Analyst → người bảo trợ nghiệp vụ"],
-  PRD: ["What", "Product Manager → mọi người"],
-  FRD: ["How", "Systems Analyst → kỹ thuật"],
-  SOW: ["What it costs", "một bản mỗi đội · fixed price fixed time"],
+  BRD: ["Why", tr("Business Analyst → the business sponsor", "Business Analyst → người bảo trợ nghiệp vụ")],
+  PRD: ["What", tr("Product Manager → everyone", "Product Manager → mọi người")],
+  FRD: ["How", tr("Systems Analyst → engineering", "Systems Analyst → kỹ thuật")],
+  SOW: ["What it costs", tr("one per team · fixed price, fixed time", "một bản mỗi đội · fixed price fixed time")],
 };
 const docCount = (d) => built.filter((r) => r.docs.includes(d)).reduce((n, r) => n + r.items.length, 0);
 
 /* The product's own name, never the sector key. "Đặc tả — professional services" is a machine
  * field printed as a headline, and the first thing a reader meets: they look for their own
  * product and find an industry classification. */
-const title = arg("--title", S.specTitle || arr(S.applications).map((a) => a.name).join(" & ") || "Đặc tả");
+const title = arg("--title", S.specTitle || arr(S.applications).map((a) => a.name).join(" & ") || tr("Specification", "Đặc tả"));
 const openCount = built.reduce((n, r) => n + r.items.filter((i) => i.open).length, 0);
 
 /* The chain drawn as a chain. The first version made every id a link and called that "the matrix
@@ -136,18 +145,18 @@ const openCount = built.reduce((n, r) => n + r.items.filter((i) => i.open).lengt
  * this one go"; a map answers "how much is there and how does it divide", and that is the first
  * question anyone asks. */
 const CHAIN = [
-  { key: "segments", label: "phân khúc" },
-  { key: "pains",    label: "nỗi đau" },
+  { key: "segments", label: tr("segments", "phân khúc") },
+  { key: "pains",    label: tr("pains", "nỗi đau") },
   { key: "useCases", label: "use case" },
-  { key: "reqs",     label: "yêu cầu" },
-  { key: "rules",    label: "luật" },
-  { key: "entities", label: "thực thể" },
-  { key: "screens",  label: "màn hình" },
+  { key: "reqs",     label: tr("requirements", "yêu cầu") },
+  { key: "rules",    label: tr("rules", "luật") },
+  { key: "entities", label: tr("entities", "thực thể") },
+  { key: "screens",  label: tr("screens", "màn hình") },
 ];
 const chainHtml = () => {
   const hops = CHAIN.map((h) => ({ ...h, n: (built.find((b) => b.key === h.key)?.items.length) || 0 })).filter((h) => h.n);
   const max = Math.max(...hops.map((h) => h.n), 1);
-  return `<div class="chain"><div class="chain-head">Chuỗi truy vết — đi được cả hai chiều, không mục nào mồ côi</div>
+  return `<div class="chain"><div class="chain-head">${tr("The trace — walkable both ways, nothing orphaned", "Chuỗi truy vết — đi được cả hai chiều, không mục nào mồ côi")}</div>
   <ol class="hops">${hops.map((h, i) => `<li><button class="hop" data-hop="${h.key}">
     <span class="hopn">${h.n}</span><span class="hopl">${esc(h.label)}</span>
     <span class="hopbar" style="--f:${(h.n / max * 100).toFixed(0)}%"></span></button>${i < hops.length - 1 ? '<span class="arrow" aria-hidden="true">→</span>' : ""}</li>`).join("")}</ol></div>`;
@@ -162,8 +171,8 @@ const chainHtml = () => {
  *
  * So the page is a narrative in parts, and the parts that matter are GRIDS in which colour is the
  * information. One legend, used everywhere: where a step happens, and where a screen's data comes
- * from, are the same question in two places. A reader who learns "grey is Tracker, blue is this
- * app, olive is outside any system" can then read every grid on the page at a glance — and see,
+ * from, are the same question in two places. A reader who learns "grey is the upstream system, blue
+ * is this app, olive is outside any system" can then read every grid on the page at a glance — and see,
  * without reading a word, how much of their day this product actually touches.
  *
  * Nothing scrolls sideways. A diagram that has to be scrolled is a diagram nobody sees whole,
@@ -171,7 +180,7 @@ const chainHtml = () => {
  * and the one genuinely wide picture is drawn to the width available rather than to its own.
  *
  * COLOUR   paper #fbfaf8 · ink #1a1c1e · rule #e3e1dd. Four semantic hues and no others:
- *          slate #5c6166 (Tracker, mirrored), blue #005a8d (this app, owned),
+ *          slate #5c6166 (an upstream system, mirrored), blue #005a8d (this app, owned),
  *          olive #6b6420 (outside any system), amber #a15c00 (not settled).
  * TYPE     Source Serif 4 headings (a document somebody signs), IBM Plex Sans body,
  *          IBM Plex Mono for references. Prose held to 68 characters.
@@ -181,16 +190,43 @@ const chainHtml = () => {
 /* Where a thing happens, or where its data comes from — one vocabulary for both. */
 const laneKind = (lane) => {
   const s = String(lane || "").toLowerCase();
-  if (/Tracker|plane|upstream/.test(s)) return "mirror";
+  // "Tracker (Plane)" in the register, "Tracker" on the lane: the name without its bracket is enough
+  if (/upstream/.test(s) || SYSTEMS.some((x) => s.includes(x.replace(/\s*\(.*?\)\s*/g, "").trim().toLowerCase()))) return "mirror";
   if (/ngoài|ngoai|outside|manual/.test(s)) return "outside";
   return "app";
 };
 const KIND = {
-  mirror:  { label: "Tracker — nguồn ngoài, chỉ đọc", css: "k-mirror" },
-  app:     { label: "daylog / reporting — app này làm", css: "k-app" },
-  outside: { label: "Ngoài hệ thống — người làm, không app nào", css: "k-outside" },
-  open:    { label: "Chưa chốt", css: "k-open" },
+  mirror:  { label: `${SYSTEMS.join(" / ") || tr("External systems", "Hệ thống ngoài")} — ${tr("external source, read only", "nguồn ngoài, chỉ đọc")}`, css: "k-mirror" },
+  app:     { label: `${APPS.join(" / ") || tr("This system", "Hệ thống này")} — ${tr("what this system does", "app này làm")}`, css: "k-app" },
+  outside: { label: tr("Outside any system — people, no app", "Ngoài hệ thống — người làm, không app nào"), css: "k-outside" },
+  open:    { label: tr("Not settled", "Chưa chốt"), css: "k-open" },
 };
+/* Owned by the system being built: its owner names one of the project's applications, or says so. */
+const ownedHere = (owner) => { const o = String(owner || "").toLowerCase();
+  return /owned here|this app|app này/.test(o) || APPS.some((a) => o.includes(a.toLowerCase())); };
+const ents = arr(S.domainModel), entsOwned = ents.filter((e) => ownedHere(e.owner)).length;
+/* Only what the state says. "The rest are read-only copies, never written back" was true of the
+ * engagement this was written on and printed on every project's page, including one whose system
+ * writes to the very ledger it named. Read-only is claimed only when every named integration reads. */
+const declaredOwners = ents.filter((e) => e.owner).length;
+const readOnly = SYSTEMS.length && arr(S.integrationsNamed).every((i) => /^(read|reads|đọc)\b/i.test(String(i.direction || "")));
+const entDeck = () => {
+  if (!declaredOwners) return tr(`${ents.length} entities.`, `${ents.length} thực thể.`);
+  const rest = ents.length - entsOwned;
+  if (!rest) return tr(`${ents.length} entities, all owned by this system.`, `${ents.length} thực thể, tất cả do app này sở hữu.`);
+  return readOnly
+    ? tr(`${ents.length} entities. ${entsOwned} owned by this system; the rest are read-only copies from ${SYSTEMS.join(", ")}, never written back.`,
+         `${ents.length} thực thể. ${entsOwned} do app này sở hữu — phần còn lại là bản soi chỉ đọc từ ${SYSTEMS.join(", ")}, và app này không bao giờ ghi ngược lên.`)
+    : tr(`${ents.length} entities. ${entsOwned} owned by this system; ${rest} owned elsewhere, as each card says.`,
+         `${ents.length} thực thể. ${entsOwned} do app này sở hữu; ${rest} thuộc nơi khác, như ghi trên từng thẻ.`);
+};
+/* Three real ids, so the example is one the reader can find on this page. */
+const sampleIds = (() => {
+  const byPrefix = new Map();
+  for (const k of defined.keys()) { const m = /^([A-Z]{2,4})-\d/.exec(k); if (m && !byPrefix.has(m[1])) byPrefix.set(m[1], k); }
+  const order = ["BR", "UC", "FR", "PP"];
+  return [...order.filter((p) => byPrefix.has(p)), ...[...byPrefix.keys()].filter((p) => !order.includes(p))].slice(0, 3).map((p) => byPrefix.get(p));
+})();
 
 /* The journey: the TO-BE steps, ordered by depth, grouped by who does them. This is the
  * "what can a person do, and where do they go" picture, and it is a grid rather than a graph
@@ -238,7 +274,7 @@ const openThings = [
 const APPENDIX = new Set(["rules", "reqs", "nfr", "glossary", "useCases", "exclusions", "assumptions"]);
 const appendix = built.filter((r) => APPENDIX.has(r.key));
 
-const html = `<!doctype html><html lang="vi" data-theme="light"><head><meta charset="utf-8">
+const html = `<!doctype html><html lang="${LANG}" data-theme="light"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>${esc(title)}</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -344,7 +380,7 @@ section.part{margin-bottom:58px;scroll-margin-top:16px}
 .step.k-app{border-left-color:var(--app);background:var(--app-bg)}
 .step.k-outside{border-left-color:var(--outside);background:var(--outside-bg)}
 .step.gate{border-style:dashed}
-.step.gate .nm::after{content:" ↳ rẽ nhánh";color:var(--ink3);font-weight:400;font-size:11.5px}
+.step.gate .nm::after{content:" ↳ ${tr("branches", "rẽ nhánh")}";color:var(--ink3);font-weight:400;font-size:11.5px}
 
 .scr{background:var(--card);border:1px solid var(--rule);border-radius:9px;padding:13px 15px;display:flex;flex-direction:column;gap:7px}
 .scr .id{font:600 11px/1 var(--mono);color:var(--app)}
@@ -395,7 +431,7 @@ table.rtm tr.warn td{background:var(--open-bg)}
 @media (max-width:760px){
   .fig{overflow-x:auto;-webkit-overflow-scrolling:touch}
   .fig svg{width:auto;max-width:none;height:auto}
-  .fig figcaption::after{content:" · vuốt ngang để xem hết";color:var(--ink3)}
+  .fig figcaption::after{content:" · ${tr("swipe sideways to see it all", "vuốt ngang để xem hết")}";color:var(--ink3)}
 }
 .fig figcaption{font-size:11.5px;color:var(--ink3);margin-top:9px}
 .fig svg[data-interrogable="yes"] [data-node]{cursor:pointer}
@@ -436,47 +472,47 @@ details.app tr[data-open]{background:var(--open-bg)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
 </style></head><body><div class="wrap">
 
-<p class="eyebrow">Tài liệu tham chiếu · ${esc(S.applications?.length ?? 2)} ứng dụng</p>
+<p class="eyebrow">${tr("Reference document", "Tài liệu tham chiếu")} · ${APPS.length} ${tr(APPS.length === 1 ? "application" : "applications", "ứng dụng")}</p>
 <h1>${esc(title)}</h1>
 ${(S.specLede || S.problem?.statement || S.asIs || "").split("\n\n").map((para) =>
     `<p class="deck">${esc(para).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>")}</p>`).join("")}
-<p class="meta"><b>Phạm vi</b> ${arr(S.applications).map((a) => esc(a.name)).join(" · ") || "—"} &nbsp;·&nbsp; <b>Trạng thái</b> ${S.scopeFrozen ? "đã chốt phạm vi" : "chưa chốt phạm vi"}${openCount ? ` · ${openCount} điểm chưa xác nhận` : ""}</p>
+<p class="meta"><b>${tr("Scope", "Phạm vi")}</b> ${APPS.map(esc).join(" · ") || "—"} &nbsp;·&nbsp; <b>${tr("Status", "Trạng thái")}</b> ${S.scopeFrozen ? tr("scope frozen", "đã chốt phạm vi") : tr("scope not frozen", "chưa chốt phạm vi")}${openCount ? ` · ${openCount} ${tr("not yet confirmed", "điểm chưa xác nhận")}` : ""}</p>
 <hr>
 
 <div class="howto">
-  <p><b>Mọi mục đều có mã tham chiếu</b>, ví dụ <span class="ref">BR-01</span> <span class="ref">UC-04</span> <span class="ref">WL-02</span>. Góp ý có thể nêu theo mã thay vì mô tả bằng lời — một câu như <i>“BR-01: ngày tính từ 6 giờ sáng”</i> là đủ để sửa.</p>
-  <p><b>Điểm chưa xác nhận được tô cam</b>, không điền đại một con số nghe có lý.</p>
-  <p><b>Màu ở mọi lưới bên dưới mang cùng một nghĩa:</b> nơi một việc xảy ra, và nơi dữ liệu của một màn hình đến từ, là cùng một câu hỏi.</p>
+  <p><b>${tr("Every item has a reference", "Mọi mục đều có mã tham chiếu")}</b>${sampleIds.length ? `, ${tr("for example", "ví dụ")} ${sampleIds.map((i) => `<span class="ref">${esc(i)}</span>`).join(" ")}` : ""}. ${tr("Feedback can cite the reference instead of describing the item: one line naming the id and what should change is enough to fix it.", "Góp ý có thể nêu theo mã thay vì mô tả bằng lời — một câu nêu mã và điều cần sửa là đủ để sửa.")}</p>
+  <p><b>${tr("Anything not yet confirmed is marked amber", "Điểm chưa xác nhận được tô cam")}</b>, ${tr("rather than filled in with a plausible guess.", "không điền đại một con số nghe có lý.")}</p>
+  <p><b>${tr("Colour means the same thing in every grid below:", "Màu ở mọi lưới bên dưới mang cùng một nghĩa:")}</b> ${tr("where a step happens and where a screen's data comes from are the same question.", "nơi một việc xảy ra, và nơi dữ liệu của một màn hình đến từ, là cùng một câu hỏi.")}</p>
 </div>
 
 <div class="legend">
-  ${Object.entries(KIND).map(([k, v]) => `<span class="chip ${v.css}"><span class="dot ${v.css}"></span>${esc(v.label)}</span>`).join("")}
+  ${Object.entries(KIND).filter(([k]) => k !== "mirror" || SYSTEMS.length).map(([k, v]) => `<span class="chip ${v.css}"><span class="dot ${v.css}"></span>${esc(v.label)}</span>`).join("")}
 </div>
 
 ${diagrams.some((d) => d.name === "context") ? `<section class="part">
-  <p class="eyebrow">Bắt đầu từ đây</p>
-  <h2>Hệ thống này chạm vào những gì</h2>
-  <p class="deck">Ai dùng nó, nó nối với hệ thống nào, và dữ liệu đi theo chiều nào. Mọi thứ còn lại trong tài liệu nằm bên trong ô xanh.</p>
-  <figure class="fig" data-label="Sơ đồ bối cảnh" data-figure="context">${diagrams.find((d) => d.name === "context").svg}</figure>
+  <p class="eyebrow">${tr("Start here", "Bắt đầu từ đây")}</p>
+  <h2>${tr("What this system touches", "Hệ thống này chạm vào những gì")}</h2>
+  <p class="deck">${tr("Who uses it, which systems it connects to, and which way the data goes. Everything else in this document sits inside the blue box.", "Ai dùng nó, nó nối với hệ thống nào, và dữ liệu đi theo chiều nào. Mọi thứ còn lại trong tài liệu nằm bên trong ô xanh.")}</p>
+  <figure class="fig" data-label="${tr("Context diagram", "Sơ đồ bối cảnh")}" data-figure="context">${diagrams.find((d) => d.name === "context").svg}</figure>
 </section>` : ""}
 
 ${journey.length ? `<section class="part">
-  <p class="eyebrow">Phần 1</p>
-  <h2>Một ngày chạy thế nào</h2>
-  <p class="deck">${jNodes.length} bước, chia theo ai làm. Xám là việc Tracker đã làm sẵn; xanh là việc app này thêm vào; ô-liu là việc con người làm và không hệ thống nào chạm tới.</p>
-  <p class="deck" style="font-size:14px">Thẻ ghi <b>bắt đầu</b> là chỗ một chuỗi bắt đầu — không phải bước đầu tiên của mọi thứ. Các thẻ cùng <b>giai đoạn</b> xảy ra song song, không theo thứ tự trước sau.</p>
+  <p class="eyebrow">${tr("Part 1", "Phần 1")}</p>
+  <h2>${tr("How a day runs", "Một ngày chạy thế nào")}</h2>
+  <p class="deck">${jNodes.length} ${tr("steps, by who does them.", "bước, chia theo ai làm.")} ${SYSTEMS.length ? tr(`Grey is what ${SYSTEMS.join(", ")} already does; `, `Xám là việc ${SYSTEMS.join(", ")} đã làm sẵn; `) : ""}${tr("blue is what this system adds; olive is what people do that no system touches.", "xanh là việc app này thêm vào; ô-liu là việc con người làm và không hệ thống nào chạm tới.")}</p>
+  <p class="deck" style="font-size:14px">${tr("A card marked <b>starts</b> is where a chain begins, not the first step of everything. Cards at the same <b>stage</b> happen in parallel, not one after another.", "Thẻ ghi <b>bắt đầu</b> là chỗ một chuỗi bắt đầu — không phải bước đầu tiên của mọi thứ. Các thẻ cùng <b>giai đoạn</b> xảy ra song song, không theo thứ tự trước sau.")}</p>
   ${journey.map((g) => `<div class="lane">
-    <div class="lane-h"><span class="who">${esc(g.lane.name || g.lane.id)}</span><span class="n">${g.steps.length} bước</span></div>
+    <div class="lane-h"><span class="who">${esc(g.lane.name || g.lane.id)}</span><span class="n">${g.steps.length} ${tr("steps", "bước")}</span></div>
     <div class="grid">${g.steps.map((n) => {
       const nx = nextOf(n.id);
       /* The number is the STAGE, not the position in the list. Numbering cards 01..07 down a lane
-         told the reader that "việc bị xoá trong Tracker" happens after "việc được tạo" and before
-         "việc bị gán lại" — three independent triggers, presented as steps two, three and four of
+         told the reader that "a task is deleted upstream" happens after "a task is created" and before
+         "a task is reassigned" — three independent triggers, presented as steps two, three and four of
          a process. Things that can happen at the same time share a number, and the ones that
          start a chain say so. */
       const dep = depthOf.get(n.id) ?? 0;
       return `<div class="step ${KIND[g.kind].css}${isGateway(n) ? " gate" : ""}">
-        <span class="no">${dep === 0 ? "bắt đầu" : `giai đoạn ${dep}`}</span>
+        <span class="no">${dep === 0 ? tr("starts", "bắt đầu") : `${tr("stage", "giai đoạn")} ${dep}`}</span>
         <span class="nm">${esc(String(n.name || n.id).replace(/\s*\([^)]*\)\s*$/, ""))}</span>
         ${nx.length ? (() => {
           // One next step, written out whole, and a count for the rest. Two half-labels joined by
@@ -484,17 +520,17 @@ ${journey.length ? `<section class="part">
           // sentences broken in the middle, and every branching card carried a pair of them.
           const first = String(nx[0].name || nx[0].id).split(/[,(—-]/)[0].trim();
           const more = nx.length - 1;
-          return `<span class="tail">→ ${esc(first)}${more ? ` <span style="color:var(--ink3)">+${more} nhánh nữa</span>` : ""}</span>`;
-        })() : `<span class="tail">kết thúc</span>`}
+          return `<span class="tail">→ ${esc(first)}${more ? ` <span style="color:var(--ink3)">+${more} ${tr("more branches", "nhánh nữa")}</span>` : ""}</span>`;
+        })() : `<span class="tail">${tr("ends", "kết thúc")}</span>`}
       </div>`;
     }).join("")}</div>
   </div>`).join("")}
 </section>` : ""}
 
 ${arr(S.discovery?.segments).length ? `<section class="part">
-  <p class="eyebrow">Phần 2</p>
-  <h2>Ai dùng, và đau ở đâu</h2>
-  <p class="deck">Mỗi nhóm người dùng, việc họ cần xong, và những nỗi đau đã ghi nhận được cho nhóm đó.</p>
+  <p class="eyebrow">${tr("Part 2", "Phần 2")}</p>
+  <h2>${tr("Who uses it, and where it hurts", "Ai dùng, và đau ở đâu")}</h2>
+  <p class="deck">${tr("Each group of users, the job they need done, and the pain recorded for that group.", "Mỗi nhóm người dùng, việc họ cần xong, và những nỗi đau đã ghi nhận được cho nhóm đó.")}</p>
   <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(290px,1fr))">
   ${arr(S.discovery.segments).map((sg) => {
     const pains = arr(S.discovery.painPoints).filter((pp) => pp.segment === sg.name);
@@ -508,48 +544,48 @@ ${arr(S.discovery?.segments).length ? `<section class="part">
 </section>` : ""}
 
 ${diagrams.some((d) => d.name === "usecases") ? `<section class="part">
-  <p class="eyebrow">Phần 2b</p>
-  <h2>Ai làm được gì</h2>
-  <p class="deck">Mỗi đường là một việc một vai làm được. Không phải màn hình, không phải tính năng — là quyền làm một việc.</p>
-  <figure class="fig" data-label="Ai làm được gì" data-figure="usecases">${diagrams.find((d) => d.name === "usecases").svg}</figure>
+  <p class="eyebrow">${tr("Part 2b", "Phần 2b")}</p>
+  <h2>${tr("Who can do what", "Ai làm được gì")}</h2>
+  <p class="deck">${tr("Each line is one thing one role can do. Not a screen, not a feature: the right to do a job.", "Mỗi đường là một việc một vai làm được. Không phải màn hình, không phải tính năng — là quyền làm một việc.")}</p>
+  <figure class="fig" data-label="${tr("Who can do what", "Ai làm được gì")}" data-figure="usecases">${diagrams.find((d) => d.name === "usecases").svg}</figure>
 </section>` : ""}
 
 ${arr(S.screens).length ? `<section class="part">
-  <p class="eyebrow">Phần 3</p>
-  <h2>Những màn hình, và mỗi màn lấy dữ liệu từ đâu</h2>
-  <p class="deck">${arr(S.screens).length} màn, ${arr(S.screens).reduce((n, s) => n + arr(s.states).length, 0)} trạng thái. Chấm xám là dữ liệu soi từ Tracker; chấm xanh là dữ liệu app này sở hữu hoặc tự tính.</p>
+  <p class="eyebrow">${tr("Part 3", "Phần 3")}</p>
+  <h2>${tr("The screens, and where each one's data comes from", "Những màn hình, và mỗi màn lấy dữ liệu từ đâu")}</h2>
+  <p class="deck">${arr(S.screens).length} ${tr("screens", "màn")}, ${arr(S.screens).reduce((n, s) => n + arr(s.states).length, 0)} ${tr("states", "trạng thái")}. ${SYSTEMS.length ? tr(`A grey dot is data mirrored from ${SYSTEMS.join(", ")}; `, `Chấm xám là dữ liệu soi từ ${SYSTEMS.join(", ")}; `) : ""}${tr("a blue dot is data this system owns or works out.", "chấm xanh là dữ liệu app này sở hữu hoặc tự tính.")}</p>
   <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(250px,1fr))">
   ${arr(S.screens).map((s) => `<div class="scr">
     <span class="id">${esc(s.id)}</span>
     <span class="nm">${esc(s.name)}</span>
-    <span class="sts">${arr(s.states).length} trạng thái · ${esc(s.application || "")}</span>
-    <ul>${screenKinds(s).slice(0, 4).map((x) => `<li><span class="dot ${KIND[x.kind].css}"></span><span>${esc(human(x.text).replace(/\s*—\s*lọc theo [A-Z]{2,4}-\d+/i, "").slice(0, 64))}${x.computed ? " <i>(tính ra)</i>" : ""}</span></li>`).join("")}</ul>
+    <span class="sts">${arr(s.states).length} ${tr("states", "trạng thái")} · ${esc(s.application || "")}</span>
+    <ul>${screenKinds(s).slice(0, 4).map((x) => `<li><span class="dot ${KIND[x.kind].css}"></span><span>${esc(human(x.text).replace(/\s*—\s*(lọc theo|filtered by) [A-Z]{2,4}-\d+/i, "").slice(0, 64))}${x.computed ? ` <i>(${tr("worked out", "tính ra")})</i>` : ""}</span></li>`).join("")}</ul>
   </div>`).join("")}
   </div>
 </section>` : ""}
 
 ${diagrams.some((d) => d.name === "process") ? `<section class="part">
-  <p class="eyebrow">Phần 3b</p>
-  <h2>Cùng một ngày đó, vẽ đầy đủ</h2>
-  <p class="deck">Phần trên kể bằng lời. Đây là cùng một quy trình vẽ ra hết: mỗi hàng là một vai, mỗi cột là một mốc trong ngày. Dùng để soát xem có bước nào thiếu, hoặc có việc nào rơi vào sai người.</p>
-  <figure class="fig" data-label="Quy trình TO-BE" data-figure="process">${diagrams.find((d) => d.name === "process").svg}<figcaption>Quy trình TO-BE · mỗi hàng một vai</figcaption></figure>
+  <p class="eyebrow">${tr("Part 3b", "Phần 3b")}</p>
+  <h2>${tr("The same day, drawn in full", "Cùng một ngày đó, vẽ đầy đủ")}</h2>
+  <p class="deck">${tr("The part above tells it in words. This is the same process drawn out: one row per role, one column per point in the day. Use it to check for a missing step, or work that lands on the wrong person.", "Phần trên kể bằng lời. Đây là cùng một quy trình vẽ ra hết: mỗi hàng là một vai, mỗi cột là một mốc trong ngày. Dùng để soát xem có bước nào thiếu, hoặc có việc nào rơi vào sai người.")}</p>
+  <figure class="fig" data-label="${tr("TO-BE process", "Quy trình TO-BE")}" data-figure="process">${diagrams.find((d) => d.name === "process").svg}<figcaption>${tr("TO-BE process · one row per role", "Quy trình TO-BE · mỗi hàng một vai")}</figcaption></figure>
 </section>` : ""}
 
 ${diagrams.some((d) => d.name === "erd") ? `<section class="part">
-  <p class="eyebrow">Phần 4</p>
-  <h2>Dữ liệu, và cái gì liên quan cái gì</h2>
-  <p class="deck">Bốn thực thể. Chỉ một do app này sở hữu — phần còn lại là bản soi chỉ đọc của Tracker, và app này không bao giờ ghi ngược lên.</p>
-  <figure class="fig" data-label="Dữ liệu và quan hệ" data-figure="erd">${diagrams.find((d) => d.name === "erd").svg}</figure>
+  <p class="eyebrow">${tr("Part 4", "Phần 4")}</p>
+  <h2>${tr("The data, and what relates to what", "Dữ liệu, và cái gì liên quan cái gì")}</h2>
+  <p class="deck">${entDeck()}</p>
+  <figure class="fig" data-label="${tr("Data and how it relates", "Dữ liệu và quan hệ")}" data-figure="erd">${diagrams.find((d) => d.name === "erd").svg}</figure>
 </section>` : ""}
 
 ${arr(S.domainModel).length && !diagrams.some((d) => d.name === "erd") ? `<section class="part">
-  <p class="eyebrow">Phần 4</p>
-  <h2>Hệ thống giữ những gì</h2>
-  <p class="deck">Bốn thực thể. Chỉ một trong số đó do app này sở hữu — phần còn lại là bản soi của Tracker, và app này không bao giờ ghi ngược lên.</p>
+  <p class="eyebrow">${tr("Part 4", "Phần 4")}</p>
+  <h2>${tr("What the system holds", "Hệ thống giữ những gì")}</h2>
+  <p class="deck">${entDeck()}</p>
   <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(280px,1fr))">
   ${arr(S.domainModel).map((e) => `<div class="ent">
     <h3>${esc(e.entity)}</h3>
-    <div class="own"><span class="dot ${/daylog|app|này/i.test(String(e.owner)) ? "k-app" : "k-mirror"}" style="display:inline-block;margin-right:5px"></span>${esc(e.owner || "—")}</div>
+    <div class="own"><span class="dot ${ownedHere(e.owner) ? "k-app" : "k-mirror"}" style="display:inline-block;margin-right:5px"></span>${esc(e.owner || "—")}</div>
     <div class="attrs">${arr(e.attributes).slice(0, 9).map((a) => `<span>${esc(typeof a === "string" ? a : a.name || "")}</span>`).join("")}</div>
     ${arr(e.relationships).length ? `<div class="rel">${arr(e.relationships).slice(0, 3).map((r) => esc(typeof r === "string" ? r : `${r.to ?? ""} ${r.kind ?? ""}`)).join(" · ")}</div>` : ""}
   </div>`).join("")}
@@ -557,32 +593,32 @@ ${arr(S.domainModel).length && !diagrams.some((d) => d.name === "erd") ? `<secti
 </section>` : ""}
 
 ${diagrams.length ? `<section class="part">
-  <p class="eyebrow">Phần 5</p>
-  <h2>Vòng đời và quyền</h2>
-  <p class="deck">Một việc đi qua những trạng thái nào, và ai được làm gì với nó. Bấm một trạng thái để chỉ xem đường đi tiếp theo của nó.</p>
+  <p class="eyebrow">${tr("Part 5", "Phần 5")}</p>
+  <h2>${tr("Lifecycles and permissions", "Vòng đời và quyền")}</h2>
+  <p class="deck">${tr("Which states a thing passes through, and who may do what with it. Click a state to see only where it goes next.", "Một việc đi qua những trạng thái nào, và ai được làm gì với nó. Bấm một trạng thái để chỉ xem đường đi tiếp theo của nó.")}</p>
   ${diagrams.filter((d) => !["process", "erd", "usecases", "context"].includes(d.name)).map((d) => {
-    const label = d.name.startsWith("state-") ? `Vòng đời · ${human(d.name.replace(/^state-/, "").replace(/-/g, " "))}`
-      : d.name === "permissions" ? "Ma trận quyền · vai trò × đối tượng" : d.name;
+    const label = d.name.startsWith("state-") ? `${tr("Lifecycle", "Vòng đời")} · ${human(d.name.replace(/^state-/, "").replace(/-/g, " "))}`
+      : d.name === "permissions" ? tr("Permissions · role × object", "Ma trận quyền · vai trò × đối tượng") : d.name;
     return `<figure class="fig" data-label="${esc(label)}" data-figure="${d.name}">${d.svg}<figcaption>${esc(label)}</figcaption>
-      <div class="fbar"><span class="fname"></span><button data-back>← trước</button><button data-fwd>sau →</button><button data-clear>bỏ chọn</button></div></figure>`;
+      <div class="fbar"><span class="fname"></span><button data-back>← ${tr("previous", "trước")}</button><button data-fwd>${tr("next", "sau")} →</button><button data-clear>${tr("clear", "bỏ chọn")}</button></div></figure>`;
   }).join("")}
 </section>` : ""}
 
 ${openThings.length ? `<section class="part">
-  <p class="eyebrow">Phần 6</p>
-  <h2>Chưa chốt</h2>
-  <p class="deck">Ghi ra thay vì điền đại. Mọi thứ đứng trên những điểm này đều là tạm.</p>
+  <p class="eyebrow">${tr("Part 6", "Phần 6")}</p>
+  <h2>${tr("Not settled", "Chưa chốt")}</h2>
+  <p class="deck">${tr("Written down rather than guessed. Everything that rests on these is provisional.", "Ghi ra thay vì điền đại. Mọi thứ đứng trên những điểm này đều là tạm.")}</p>
   <div class="openlist">${openThings.map((o) => `<div class="openc"><span class="id">${esc(o.id)}</span><p>${esc(human(String(o.t)).slice(0, 240))}</p></div>`).join("")}</div>
 </section>` : ""}
 
 
 
 ${arr(S.requirements).length ? `<section class="part">
-  <p class="eyebrow">Tra cứu</p>
-  <h2>Mỗi yêu cầu đến từ đâu, và hiện ra ở màn nào</h2>
-  <p class="deck">Ma trận truy vết. Mỗi dòng đi được cả hai chiều: từ nỗi đau xuống tới màn hình, và ngược lại. Đây là thứ dàn xếp tranh chấp phạm vi — nếu một màn không có dòng nào trỏ tới, không ai đã yêu cầu nó.</p>
+  <p class="eyebrow">${tr("Reference", "Tra cứu")}</p>
+  <h2>${tr("Where each requirement comes from, and which screen shows it", "Mỗi yêu cầu đến từ đâu, và hiện ra ở màn nào")}</h2>
+  <p class="deck">${tr("The traceability matrix. Every row walks both ways, from the pain down to the screen and back. It settles scope disputes: a screen no row points at is a screen nobody asked for.", "Ma trận truy vết. Mỗi dòng đi được cả hai chiều: từ nỗi đau xuống tới màn hình, và ngược lại. Đây là thứ dàn xếp tranh chấp phạm vi — nếu một màn không có dòng nào trỏ tới, không ai đã yêu cầu nó.")}</p>
   <div style="overflow-x:auto"><table class="rtm"><thead><tr>
-    <th>Yêu cầu</th><th>Giải nỗi đau</th><th>Cho use case</th><th>Theo luật</th><th>Hiện ở màn</th>
+    <th>${tr("Requirement", "Yêu cầu")}</th><th>${tr("Solves pain", "Giải nỗi đau")}</th><th>${tr("For use case", "Cho use case")}</th><th>${tr("Under rule", "Theo luật")}</th><th>${tr("Shown on screen", "Hiện ở màn")}</th>
   </tr></thead><tbody>
   ${arr(S.requirements).map((r) => {
     const refs = ids(r.tracesTo);
@@ -600,9 +636,9 @@ ${arr(S.requirements).length ? `<section class="part">
 </section>` : ""}
 
 ${appendix.length ? `<section class="part">
-  <p class="eyebrow">Phụ lục</p>
-  <h2>Sổ tra cứu</h2>
-  <p class="deck">Danh sách đầy đủ theo mã, để tra khi cần.</p>
+  <p class="eyebrow">${tr("Appendix", "Phụ lục")}</p>
+  <h2>${tr("Registers", "Sổ tra cứu")}</h2>
+  <p class="deck">${tr("Every register in full, by reference, to look things up.", "Danh sách đầy đủ theo mã, để tra khi cần.")}</p>
   ${appendix.map((reg) => `<details class="app"><summary>${esc(reg.title)}<span class="n">${reg.items.length}</span></summary>
     <table><tbody>${reg.items.map((it) => `<tr id="${esc(it.id)}"${it.open ? " data-open" : ""}>
       <td><b>${esc(it.id)}</b></td>
@@ -639,7 +675,7 @@ document.querySelectorAll("figure.fig").forEach(fig => {
     const on = reach(seed); fig.setAttribute("data-focus","");
     nodes.forEach(n=>{ n.toggleAttribute("data-on", on.has(n.dataset.node)); n.toggleAttribute("data-seed", n.dataset.node===seed); });
     edges.forEach(e=>e.el.toggleAttribute("data-on", on.has(e.from)&&on.has(e.to)));
-    if (name) name.textContent = (nodes.find(n=>n.dataset.node===seed)?.getAttribute("aria-label")||seed) + " — " + (on.size-1) + " bước liền kề";
+    if (name) name.textContent = (nodes.find(n=>n.dataset.node===seed)?.getAttribute("aria-label")||seed) + " — " + (on.size-1) + " ${tr("adjacent steps", "bước liền kề")}";
   }
   nodes.forEach(n => { const go=()=>{ seed = seed===n.dataset.node ? null : n.dataset.node; paint(); };
     n.addEventListener("click", go);

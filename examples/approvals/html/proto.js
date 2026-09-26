@@ -141,7 +141,7 @@
   const unknown = [...params.keys()].filter((k) => !KNOWN.includes(k));
   const refusal = unknown.length ? `This prototype does not read ${unknown.map((k) => `"${k}"`).join(", ")}. It reads: ${KNOWN.join(", ")}.`
     : want && !byId(want) ? `There is no screen "${want}". Screens: ${[...new Set(screens().map((s) => s.dataset.scr))].join(", ")}.`
-    : "";
+    : document.documentElement.dataset.refuse || "";   // a page's own parameters refuse through here too
   if (refusal) {
     const main = document.createElement("main");
     main.setAttribute("role", "alert");
@@ -153,7 +153,17 @@
   }
 
   for (const s of sheets()) s.hidden = true;
-  if (want && byId(want)) {
+  /* A bare #screen lands deep too. It is the only deep link a published Claude Artifact delivers: the
+   * frame drops the query string and any #key=value, so ?scr= alone would open every shared link on
+   * the home screen. */
+  const anchor = decodeURIComponent(location.hash.slice(1));
+  const deep = want || (anchor && byId(anchor) ? anchor : null);
+  window.addEventListener("hashchange", () => {
+    const id = decodeURIComponent(location.hash.slice(1));
+    if (id && byId(id)) go(id);
+  });
+  if (deep && byId(deep)) {
+    const want = deep;
     const owner = byId(want).dataset.owner;
     stack = owner && owner !== want ? [owner, want] : [want];
   } else {

@@ -56,8 +56,13 @@ if (!declared.size) {
 }
 
 const suite = fs.readFileSync(path.join(ROOT, "scripts", "mutate.mjs"), "utf8");
+/* The two checks that run inside Figma are proven by mock-figma.mjs instead: it runs each against a
+ * fixture it should flag and one it should pass, which is a mutation in all but name, and CI runs it.
+ * Counted here only if that file still names them, so dropping a case there shows up here. */
+const mockFigma = path.join(ROOT, "roles", "design-ops", "scripts", "mock-figma.mjs");
+const figmaSuite = fs.existsSync(mockFigma) ? fs.readFileSync(mockFigma, "utf8") : "";
 const uncovered = [...declared.entries()]
-  .filter(([id]) => !suite.includes(id))
+  .filter(([id]) => !suite.includes(id) && !(/\.js$/.test(id) && figmaSuite.includes(id)))
   .map(([id, pkg]) => `${pkg}/${id}`)
   .sort();
 

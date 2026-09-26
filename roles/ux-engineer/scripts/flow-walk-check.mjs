@@ -16,20 +16,23 @@
  *   blank-after-click  a click left no visible text on the page, or took every frame off screen
  *                      without navigating anywhere. PASS: 0.
  *   script-error       the page threw, on load or after a click. PASS: 0.
+ *   wrong-destination  a control that DECLARES where it goes — data-go, data-tab, a ?scr= link — did
+ *                      not land there, or a back control did not return to the screen before. The
+ *                      stack rule is pica's own: data-go pushes, data-tab resets, back pops. PASS: 0.
  *
  *   node flow-walk-check.mjs --url <base> --routes "<q1>,<q2>" [--frame .frame] [--ignore .devbar]
  *       [--depth 3] [--max 200] [--viewport 1440x900]
  *
- * WHAT IT CANNOT DO: tell a right screen from a wrong one. A click that opens another role's
- * screen, or the empty state instead of the list, renders perfectly and passes here. flow-check
- * reads where each control is declared to go; this only proves that going there leaves something
- * standing.
+ * WHAT IT CANNOT DO: judge a destination nobody declared. A React control with no data-go is only
+ * held to "left something standing". And a declared destination can itself be the wrong one: that a
+ * row opens the right role's screen with the right record is a question about the business, and
+ * the person who knows it has to click it.
  *
  * SKIPPED (exit 0, and it says so) when playwright is absent or the URL does not answer.
  */
 
 /* The check ids this script reports, declared so rule-coverage-check can read them. */
-const CHECKS = ["blank-after-click", "script-error"];
+const CHECKS = ["blank-after-click", "script-error", "wrong-destination"];
 
 const args = process.argv.slice(2);
 const arg = (k, d) => (args.includes(k) ? args[args.indexOf(k) + 1] : d);
@@ -98,7 +101,17 @@ const controls = () => page.evaluate(({ IGNORE }) => {
     const sig = `${el.tagName.toLowerCase()}|${name}|${el.dataset.go || el.dataset.tab || el.getAttribute("href") || ""}`;
     if (seen.has(sig)) continue;
     seen.add(sig);
-    out.push({ sig, label: name || el.tagName.toLowerCase() });
+    /* Where the control SAYS it goes, in pica's prototype vocabulary. A control inside a row that
+     * declares data-go inherits it, because the click bubbles there. */
+    const owner = el.closest("[data-go],[data-tab],[data-popback]") || el;
+    let dest = null;
+    if (owner.dataset.go) dest = { kind: "go", to: owner.dataset.go };
+    else if (owner.dataset.tab) dest = { kind: "tab", to: owner.dataset.tab };
+    else if (owner.hasAttribute("data-popback")) dest = { kind: "back" };
+    else if (el.tagName === "A") {
+      try { const u = new URL(el.getAttribute("href"), location.href); if (u.searchParams.get("scr")) dest = { kind: "go", to: u.searchParams.get("scr"), page: u.pathname }; } catch {}
+    }
+    out.push({ sig, label: name || el.tagName.toLowerCase(), dest });
   }
   return out;
 }, { IGNORE });
@@ -123,7 +136,11 @@ const look = () => page.evaluate((FRAME) => {
   const frames = FRAME ? [...document.querySelectorAll(FRAME)].filter((f) => {
     const r = f.getBoundingClientRect(); return r.width > 0 && r.height > 0;
   }).length : 0;
-  return { text: text.length, frames, url: location.href, print: text.slice(0, 400) };
+  /* The screen on show: the router's own record if it keeps one, else the one visible [data-scr]. */
+  const shown = [...new Set([...document.querySelectorAll("[data-scr]")].filter((e) => e !== document.documentElement && e.getBoundingClientRect().height > 0).map((e) => e.dataset.scr))];
+  const screen = document.documentElement.dataset.current || (shown.length === 1 ? shown[0] : null);
+  const el = screen && [...document.querySelectorAll(`[data-scr="${screen}"]`)].find((e) => e !== document.documentElement);
+  return { text: text.length, frames, url: location.href, print: text.slice(0, 400), screen, owner: el?.dataset.owner || null };
 }, FRAME);
 
 async function load(q) {
@@ -136,10 +153,11 @@ async function load(q) {
 
 const findings = [];
 const add = (id, where, detail) => findings.push([id, where, detail]);
-let sequences = 0, capped = 0, unloaded = 0;
+let sequences = 0, capped = 0, unloaded = 0, declared = 0, lost = null;
 
 try {
   for (const q of routes.length ? routes : [""]) {
+    if (lost) break;
     const where = q || "index";
     try { await load(q); }
     catch (e) {
@@ -156,8 +174,14 @@ try {
       if (sequences >= MAX) { capped += queue.length; break; }
       const path = queue.shift();
       sequences++;
-      await load(q);
+      /* The server can stop answering mid-walk. That threw an uncaught stack trace in place of a
+       * result, and discarded every finding already made. It ends the walk instead, and says so. */
+      try { await load(q); }
+      catch (e) { lost = `${base} stopped answering after ${sequences - 1} path(s) (${String(e.message).split("\n")[0]})`; break; }
       let before = await look(), ok = true;
+      /* The stack the vocabulary promises, replayed alongside the clicks: go pushes, tab resets. */
+      // a deep link lands with its owning root beneath it, so back from it goes somewhere that makes sense
+      let stack = !before.screen ? [] : before.owner && before.owner !== before.screen ? [before.owner, before.screen] : [before.screen];
       for (const step of path) {
         const hit = await clickSig(step.sig);
         if (!hit) { ok = false; break; }                // the control went away on replay: not this path's defect
@@ -172,6 +196,21 @@ try {
             : "nothing readable is left on the page");
           ok = false; break;
         }
+        const d = step.dest;
+        if (d && after.screen !== null && before.screen !== null) {
+          declared++;
+          const want = d.kind === "back" ? (stack.length > 1 ? stack[stack.length - 2] : before.screen) : d.to;
+          const navigatedAway = d.page && !after.url.includes(d.page);
+          if (!navigatedAway && after.screen !== want) {
+            add("wrong-destination", trail, d.kind === "back"
+              ? `back should return to "${want}" and showed "${after.screen}"`
+              : `declares ${d.kind === "tab" ? "data-tab" : "data-go"}="${d.to}" and showed "${after.screen}"`);
+            ok = false; break;
+          }
+        }
+        if (d?.kind === "tab") stack = [after.screen];
+        else if (d?.kind === "back") { if (stack.length > 1) stack.pop(); }
+        else if (after.screen && after.screen !== stack[stack.length - 1]) stack.push(after.screen);
         before = after;
       }
       if (!ok || path.length >= DEPTH) continue;
@@ -188,14 +227,20 @@ try {
 
 /* One finding per distinct defect: the same blank reached by ten paths is one defect. */
 const uniq = [...new Map(findings.map((f) => [f[0] + f[2] + f[1].split(" :: ")[1]?.split(" → ").pop(), f])).values()];
+if (lost && !uniq.length) {
+  console.log(`flow-walk-check: SKIPPED — ${lost}. This is not a pass.`);
+  process.exit(0);
+}
 const n = (id) => uniq.filter((f) => f[0] === id).length;
 const scope = `${sequences} click path(s), up to ${DEPTH} deep, across ${routes.length || 1} route(s)`;
 console.log(`${n("blank-after-click") ? "FAIL" : "pass"}  blank-after-click  ${String(n("blank-after-click")).padStart(3)} finding(s)   (${scope})`);
 console.log(`${n("script-error") ? "FAIL" : "pass"}  script-error       ${String(n("script-error")).padStart(3)} finding(s)   (${scope})`);
+console.log(`${n("wrong-destination") ? "FAIL" : "pass"}  wrong-destination  ${String(n("wrong-destination")).padStart(3)} finding(s)   (${declared} declared destination(s) checked)`);
 if (uniq.length) {
   console.log("");
   for (const [id, where, detail] of uniq) console.log(`FINDING  [${id}] ${where}\n         ${detail}`);
 }
+if (lost) console.log(`\nNOTE  ${lost}; the findings above are what the walk reached before that.`);
 if (unloaded) console.log(`\nNOTE  ${unloaded} route(s) rendered nothing readable on load, so no walk started there.`);
 if (capped) console.log(`\nNOTE  stopped at --max ${MAX}; ${capped} path(s) were not walked. Raise --max to go further.`);
 if (!sequences && !findings.length) console.log("\nNOTE  nothing on any route was clickable, so nothing was walked.");

@@ -10,9 +10,9 @@
 
         <section class="scr" data-scr="queue" data-title="the queue">
           <h1>Held payments</h1>
-          <div class="row" data-go="payment"><span class="age">31</span><span class="name">Ridgeway Metals Ltd</span><button type="button">Release</button></div>
-          <div class="row" data-go="payment"><span class="age">18</span><span class="name">Calder Freight</span><button type="button">Release</button></div>
-          <div class="row" data-go="payment"><span class="age">4</span><span class="name">Ash Lane Dairy</span><button type="button">Release</button></div>
+          <div class="row"><span class="age">31</span><span class="name">Ridgeway Metals Ltd</span><button type="button" data-go="payment">Release</button></div>
+          <div class="row"><span class="age">18</span><span class="name">Calder Freight</span><button type="button" data-go="payment">Release</button></div>
+          <div class="row"><span class="age">4</span><span class="name">Ash Lane Dairy</span><button type="button" data-go="payment">Release</button></div>
           <p class="cap">Oldest first. Age in hours.</p>
         </section>
 
@@ -44,9 +44,9 @@
 
         <section class="scr" data-scr="queue" data-title="the queue">
           <h1>Held payments</h1>
-          <div class="row" data-go="payment"><span class="age">31</span><span class="name">Ridgeway Metals Ltd</span><button type="button">Release</button></div>
-          <div class="row" data-go="payment"><span class="age">18</span><span class="name">Calder Freight</span><button type="button">Release</button></div>
-          <div class="row" data-go="payment"><span class="age">4</span><span class="name">Ash Lane Dairy</span><button type="button">Release</button></div>
+          <div class="row"><span class="age">31</span><span class="name">Ridgeway Metals Ltd</span><button type="button" data-go="payment">Release</button></div>
+          <div class="row"><span class="age">18</span><span class="name">Calder Freight</span><button type="button" data-go="payment">Release</button></div>
+          <div class="row"><span class="age">4</span><span class="name">Ash Lane Dairy</span><button type="button" data-go="payment">Release</button></div>
           <p class="cap">Oldest first. Age in hours.</p>
         </section>
 
@@ -78,9 +78,9 @@
 
         <section class="scr" data-scr="queue" data-title="the queue">
           <h1>Held payments</h1>
-          <div class="row" data-go="payment"><span class="age">31</span><span class="name">Ridgeway Metals Ltd</span><button type="button">Release</button></div>
-          <div class="row" data-go="payment"><span class="age">18</span><span class="name">Calder Freight</span><button type="button">Release</button></div>
-          <div class="row" data-go="payment"><span class="age">4</span><span class="name">Ash Lane Dairy</span><button type="button">Release</button></div>
+          <div class="row"><span class="age">31</span><span class="name">Ridgeway Metals Ltd</span><button type="button" data-go="payment">Release</button></div>
+          <div class="row"><span class="age">18</span><span class="name">Calder Freight</span><button type="button" data-go="payment">Release</button></div>
+          <div class="row"><span class="age">4</span><span class="name">Ash Lane Dairy</span><button type="button" data-go="payment">Release</button></div>
           <p class="cap">Oldest first. Age in hours.</p>
         </section>
 
@@ -103,5 +103,21 @@
         </section>
     </div></div>
 
-<script src="proto.js" data-nav='[{"id":"queue"},{"id":"audit"}]' data-home="queue"></script>
+<script>
+  /* ?state= names the board a route reproduces: held (the queue with payments waiting) or empty (with
+   * none). They are what build-diff pairs the demo against. Any other value is refused, for the same
+   * reason proto.js refuses an unknown screen. */
+  (function () {
+    const want = new URLSearchParams(location.search).get("state");
+    if (!want) return;
+    if (want === "held") { for (const f of document.querySelectorAll(".frame")) f.dataset.state = "held"; return; }
+    if (want !== "empty") { document.documentElement.dataset.refuse = `There is no state "${want}". States: held, empty.`; return; }
+    for (const q of document.querySelectorAll('[data-scr="queue"]')) {
+      q.querySelectorAll(".row").forEach((r) => r.remove());
+      q.querySelector(".cap").textContent = "Nothing is waiting. Held payments appear here.";
+      q.closest(".frame").dataset.state = "empty";
+    }
+  })();
+</script>
+<script src="proto.js" data-nav='[{"id":"queue"},{"id":"audit"}]' data-home="queue" data-params="state"></script>
 </body></html>

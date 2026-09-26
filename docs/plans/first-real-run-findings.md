@@ -345,7 +345,7 @@ và không gác chính chỗ này.
 
 ### Ràng buộc mà research lẽ ra phải nêu
 
-Sản phẩm này **chỉ đọc** với Tracker (BR-06, BR-09). Affordance cốt lõi của kanban là **kéo thẻ
+Sản phẩm này **chỉ đọc** với hệ thống nguồn (BR-06, BR-09). Affordance cốt lõi của kanban là **kéo thẻ
 để đổi trạng thái** — bị cấm ở đây. Một kanban không kéo được thì tệ hơn một danh sách, và đó là
 kết luận mà năm phút nghiên cứu mô hình tương tác sẽ đưa ra. Không ai làm năm phút đó, nên câu hỏi
 đến từ client ở vòng thứ tư thay vì từ research ở phase 3.

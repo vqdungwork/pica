@@ -100,6 +100,24 @@ function makeFixture() {
      * only here, and example-verify deliberately does not make one, because a build compared
      * with itself would be a pass over nothing. */
     fs.copyFileSync(path.join(d, ".audit", "html-reference.json"), path.join(d, ".audit", "demo-reference.json"));
+    /* A faithful Figma port, synthesised from the capture, so geometry-diff and frame-inventory-check
+     * have a dump to read with no Figma session. Every frame is renamed the way a port renames it and
+     * mapped back file-qualified, because the example has two files that caption "approvals · desktop".
+     * Its own state file turns the port on, so every other check still sees figmaInScope unset. */
+    const ref = JSON.parse(fs.readFileSync(path.join(d, ".audit", "html-reference.json"), "utf8"));
+    const ALIGN = { start: "left", left: "left", center: "center", end: "right", right: "right", justify: "justified" };
+    const screenOf = (cap, vp) => String(cap).replace(new RegExp(`\\s*·\\s*${vp}\\b.*$`, "i"), "").trim();
+    const dump = [], frameMap = {};
+    for (const [pkg, list] of Object.entries(ref.frames || {}))
+      for (const f of list) {
+        const frame = `${f.cap} (Figma)`;
+        dump.push({ pkg, frame, vp: f.viewport, font: ref.meta?.font,
+          texts: (f.texts || []).map((t) => [t[0], t[1], t[2], t[3], ALIGN[t[8]] || "left"]) });
+        frameMap[`${pkg}|${frame}`] = `${pkg}|${screenOf(f.cap, f.viewport)}`;
+      }
+    fs.writeFileSync(path.join(d, ".audit", "figma-dump.json"), JSON.stringify(dump));
+    const st = JSON.parse(fs.readFileSync(path.join(d, ".pica", "state.json"), "utf8"));
+    fs.writeFileSync(path.join(d, ".pica", "state-figma.json"), JSON.stringify({ ...st, figmaInScope: true, frameMap }, null, 2));
   } catch {
     console.log("NOTE  the fixture's capture could not be produced, most likely because playwright is");
     console.log("      absent. The four capture-reading mutations will report SKIPPED below, and a");
@@ -462,6 +480,16 @@ const M = [
         { file: path.join("__mut-art2__", "a.js"), content: 'const p = new URLSearchParams(window.location.search);\n' },
       ] }],
 
+  // a bundle that only NAMES hashchange (React DOM's event table does) still reads only the query
+  ["artifact-state-in-the-url", "ux-engineer/scripts/artifact-readiness-check.mjs",
+    ["--dir", path.join(DIR, "__mut-art3__")], "always",
+    { files: [
+        { file: path.join("__mut-art3__", "index.html"), content:
+            '<!doctype html><title>Mutation page</title><meta name="viewport" content="width=device-width"><script src="a.js"></script>\n' },
+        { file: path.join("__mut-art3__", "a.js"), content:
+            'switch(e){case`focus`:case`hashchange`:case`popstate`:return 2}\nconst p = new URLSearchParams(window.location.search);\n' },
+      ] }],
+
   /* figure-node-has-no-hit-area / figure-structure-not-declared — both found by trying to use the
    * diagram rather than by looking at it. A stick figure with no fill cannot be clicked, and a
    * connector drawn without data-edge is invisible to every check in this file. */
@@ -676,6 +704,41 @@ const M = [
         '<!doctype html><html lang="en"><head><meta charset="utf-8"><title>w</title></head><body>' +
         '<div class="frame"><h1>Queue</h1><button type="button" onclick="undefinedRouter.go(1)">Open</button></div>' +
         '</body></html>\n' }] }],
+
+  // a control that declares its destination and opens another screen: it renders perfectly
+  ["wrong-destination", "ux-engineer/scripts/flow-walk-check.mjs",
+    ["--url", "file://" + path.join(DIR, "__mut-walk3__.html"), "--frame", ".frame"], "module:playwright",
+    { files: [{ file: "__mut-walk3__.html", content:
+        '<!doctype html><html lang="en"><head><meta charset="utf-8"><title>w</title></head><body><div class="frame">' +
+        '<section data-scr="a"><h1>A</h1><button type="button" data-go="b">Open B</button></section>' +
+        '<section data-scr="b" hidden><h1>B</h1></section><section data-scr="c" hidden><h1>C</h1></section></div>' +
+        '<script>document.addEventListener("click", (e) => { if (!e.target.closest("[data-go]")) return;' +
+        ' for (const s of document.querySelectorAll("[data-scr]")) s.hidden = s.dataset.scr !== "c"; });</script>' +
+        '</body></html>\n' }] }],
+
+  /* geometry-diff / frame-inventory-check — the port against the capture. Every one of these was
+   * unprovable until the fixture carried a dump; frame-inventory-check could not even read the frame
+   * map the port command documents. */
+  ...(() => {
+    const DUMP = path.join(DIR, ".audit", "figma-dump.json"), SF = path.join(DIR, ".pica", "state-figma.json");
+    if (!fs.existsSync(DUMP) || !fs.existsSync(SF)) return [];
+    const dump = (edit) => { const j = JSON.parse(fs.readFileSync(DUMP, "utf8")); edit(j); return JSON.stringify(j); };
+    const sf = (edit) => { const j = JSON.parse(fs.readFileSync(SF, "utf8")); edit(j); return JSON.stringify(j); };
+    const D = path.join(".audit", "figma-dump.json"), F = path.join(".pica", "state-figma.json");
+    return [
+      ["geometry", "design-ops/scripts/geometry-diff.mjs", [REF, DUMP, SF], "capture",
+        { files: [{ file: D, content: dump((j) => { const t = j.find((f) => f.texts.length).texts[0]; t[1] += 24; }) }] }],
+      ["frame-present", "design-ops/scripts/frame-inventory-check.mjs", [REF, DUMP, SF], "capture",
+        { files: [{ file: D, content: dump((j) => { j.pop(); }) }] }],
+      ["no-extra", "design-ops/scripts/frame-inventory-check.mjs", [REF, DUMP, SF], "capture",
+        { files: [{ file: D, content: dump((j) => { j.push({ ...j[0], frame: "a screen nobody designed" }); }) }] }],
+      // an unqualified screen two files carry pairs with both, and dropping one of them reads clean
+      ["paired-by-map", "design-ops/scripts/frame-inventory-check.mjs", [REF, DUMP, SF], "capture",
+        { files: [{ file: F, content: sf((j) => { for (const k of Object.keys(j.frameMap)) j.frameMap[k] = j.frameMap[k].split("|")[1]; }) }] }],
+      ["text-runs", "design-ops/scripts/frame-inventory-check.mjs", [REF, DUMP, SF], "capture",
+        { files: [{ file: D, content: dump((j) => { const f = j.reduce((a, b) => (b.texts.length > a.texts.length ? b : a)); f.texts = f.texts.slice(0, 1); }) }] }],
+    ];
+  })(),
 
   /* build-diff — a screen the design approved and the build dropped, and a radius the build
    * introduced. Both sides are captures; the fixture's build is a copy of its design. */

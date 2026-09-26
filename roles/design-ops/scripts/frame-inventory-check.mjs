@@ -75,30 +75,56 @@ const fail = (check, where, detail) => findings.push({ check, where, detail });
 
 /* reference-discipline.md settles the pairing channel: "Figma port, frame name plus the viewport
    section it sits in, declared in the frame map". The map is what makes this a lookup rather than a
-   guess, and a project that has not declared one is told so rather than silently name-matched. */
-const map = state.frameMap || {};
+   guess, and a project that has not declared one is told so rather than silently name-matched.
 
-/* The key is file + caption + viewport, not caption + viewport. Writing this check against the
-   caption alone found the exact defect reference-discipline.md warns about, in pica's own example
-   project: app-approvals.html and approvals.html both caption a frame "approvals · desktop". Two
-   reference frames collapsed onto one dump entry, so dropping two frames from the port reported
-   clean. "Names are not identity" is not a style note. */
-const mapped = (file, cap, vp) => map[`${file}|${cap}|${vp}`] || map[`${cap}|${vp}`] || null;
+   ONE FORMAT, the one /pica-port documents and geometry-diff reads:
+     frameMap: { "<pkg>|<figma frame>": "<html screen>" }   or   "<file>|<html screen>"
+   This check used to read a different shape keyed the other way round, so a map written the
+   documented way matched nothing here, and the two checks could not both be satisfied by one file.
+
+   The key is file + screen + viewport, not screen + viewport. Writing this check found the exact
+   defect reference-discipline.md warns about, in pica's own example: app-approvals.html and
+   approvals.html both caption a frame "approvals · desktop". An unqualified screen that names more
+   than one captured file is refused as ambiguous rather than paired with both. */
+const map = state.frameMap || {};
+const screenOf = (cap, vp) => String(cap).replace(new RegExp(`\\s*·\\s*${vp}\\b.*$`, "i"), "").trim();
 
 const refFrames = [];
 for (const [file, arr] of Object.entries(ref.frames || {}))
   for (const f of arr || [])
-    refFrames.push({ file, cap: String(f.cap ?? ""), vp: String(f.viewport ?? ""),
+    refFrames.push({ file, cap: String(f.cap ?? ""), vp: String(f.viewport ?? ""), screen: screenOf(f.cap ?? "", f.viewport ?? ""),
                      runs: Array.isArray(f.texts) ? f.texts.length : (f.textRuns ?? null) });
-
-const key = (pkg, cap, vp) => `${pkg}|${cap}|${vp}`;
-const figByKey = new Map();
-for (const f of fig) figByKey.set(key(String(f.pkg ?? ""), String(f.frame ?? ""), String(f.vp ?? "")), f);
+const refKey = (r) => `${r.file}|${r.screen}|${r.vp}`;
 
 let missingBad = 0, extraBad = 0, mapBad = 0, runsBad = 0, paired = 0;
+const usingMap = Object.keys(map).length > 0;
+
+/* Every dump frame, resolved to the reference frame it claims to be. */
+const claims = new Map();          // refKey -> dump frame
+const unclaimed = [];
+for (const f of fig) {
+  const vp = String(f.vp ?? "");
+  let targets;
+  if (usingMap) {
+    const v = map[`${f.pkg}|${f.frame}`];
+    if (!v) { unclaimed.push([f, "has no frameMap entry"]); continue; }
+    const [file, screen] = String(v).includes("|") ? String(v).split("|") : [null, String(v)];
+    targets = refFrames.filter((r) => r.vp === vp && r.screen === screen.trim() && (!file || r.file === file.trim()));
+    if (targets.length > 1) {
+      mapBad++;
+      fail("paired-by-map", `frameMap["${f.pkg}|${f.frame}"]`,
+        `names "${v}", which ${targets.length} captured files carry (${targets.map((t) => t.file).join(", ")}). ` +
+        `Qualify it as "<file>|${screen.trim()}" so it pairs with one of them, not all.`);
+      continue;
+    }
+  } else {
+    targets = refFrames.filter((r) => r.file === String(f.pkg ?? "") && r.cap === String(f.frame ?? "") && r.vp === vp);
+  }
+  if (!targets.length) { unclaimed.push([f, usingMap ? `maps to "${map[`${f.pkg}|${f.frame}`]}" at ${vp}, which no capture carries` : "matches no captured frame"]); continue; }
+  claims.set(refKey(targets[0]), f);
+}
 
 /* ---- 3. PAIRED BY MAP ---------------------------------------------------- */
-const usingMap = Object.keys(map).length > 0;
 if (!usingMap && refFrames.length) {
   mapBad++;
   fail("paired-by-map", "state.frameMap",
@@ -109,8 +135,7 @@ if (!usingMap && refFrames.length) {
 
 /* ---- 1. FRAME PRESENT & 4. TEXT RUNS ------------------------------------- */
 for (const r of refFrames) {
-  const want = mapped(r.file, r.cap, r.vp) || key(r.file, r.cap, r.vp);
-  const hit = figByKey.get(want);
+  const hit = claims.get(refKey(r));
   if (!hit) {
     missingBad++;
     fail("frame-present", `${r.file} · ${r.cap} · ${r.vp}`,
@@ -135,14 +160,11 @@ for (const r of refFrames) {
 }
 
 /* ---- 2. NO EXTRA --------------------------------------------------------- */
-const refKeys = new Set(refFrames.map((r) => mapped(r.file, r.cap, r.vp) || key(r.file, r.cap, r.vp)));
-for (const [k, f] of figByKey) {
-  if (refKeys.has(k)) continue;
+for (const [f, why] of unclaimed) {
   extraBad++;
   fail("no-extra", `${f.pkg} · ${f.frame} · ${f.vp}`,
-    "is in the Figma file and in no capture. Either the HTML it should have come from was never " +
-    "built, or this is scope nobody designed, and Figma is the derived artefact, so it does not " +
-    "get to add screens.");
+    `${why}. Either the HTML it should have come from was never built, or this is scope nobody ` +
+    "designed, and Figma is the derived artefact, so it does not get to add screens.");
 }
 
 const table = [

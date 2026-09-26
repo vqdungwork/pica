@@ -163,7 +163,7 @@ source:
 <!-- enforced-by: activity-laned, model-diagram -->
 
 A TO-BE process declared its lanes by display name and its nodes referenced them by slug —
-`Tracker (Plane)` against `Tracker`. Two vocabularies for one thing, in one object.
+`Upstream (Plane)` against `upstream`. Two vocabularies for one thing, in one object.
 
 `process-check` catches this. It has caught it since the check was written: point it at that state
 and `activity-laned` reports thirteen findings, one per activity with no lane it can resolve. The

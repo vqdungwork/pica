@@ -32,6 +32,9 @@
  */
 import fs from "fs";
 
+/* The check id this script reports, declared so rule-coverage-check can read it. */
+const CHECKS = ["geometry"];
+
 const [, , refPath, figPath, statePath] = process.argv;
 if (!refPath || !figPath || !statePath) {
   console.error("usage: node geometry-diff.mjs <html-reference.json> <figma-dump.json> <state.json>");
@@ -58,6 +61,12 @@ if (badFrames.length) {
   process.exit(2);
 }
 const state = JSON.parse(fs.readFileSync(statePath, "utf8"));
+/* The same gate frame-inventory-check has always applied. A project with no port has nothing to diff. */
+if (state.figmaInScope !== true) {
+  console.log("NOT APPLICABLE  figmaInScope is not true, so there is no port to diff.");
+  console.log("                Nothing was compared. This is an abstention, not a pass.");
+  process.exit(0);
+}
 
 /* Tolerance. 3px absorbs the difference between a glyph ink box and a line box
  * without absorbing a real misplacement. */
@@ -169,7 +178,7 @@ if ((state.fontMatch ?? "on") !== "off") {
 }
 if (!Object.keys(MAP).length) {
   console.error("FAIL  state.json declares no frameMap, so no Figma frame can be paired");
-  console.error("      with an HTML screen. Add frameMap as { \"<pkg>|<figma frame>\": \"<html screen>\" }.");
+  console.error("      with an HTML screen. Add frameMap as { \"<pkg>|<figma frame>\": \"<html screen>\" }, or \"<file>|<html screen>\" where two files share a screen name.");
   process.exit(2);
 }
 
@@ -183,9 +192,18 @@ const screenOf = (frame) => {
   return frame.cap.replace(new RegExp(`\\s*·\\s*${frame.viewport}\\b.*$`, "i"), "").trim();
 };
 
+/* Indexed by FILE as well as screen and viewport. Keyed on screen and viewport alone, two files that
+ * caption a frame "approvals · desktop" (a board and the prototype, in pica's own example) collapsed
+ * into whichever was read last, and a Figma frame was diffed against a screen it was never a port of.
+ * A map value may be "<file>|<screen>"; an unqualified one that more than one file carries is a
+ * finding, not a guess. */
 const html = new Map();
-for (const frames of Object.values(ref.frames)) {
-  for (const fr of frames) html.set(`${screenOf(fr)}|${fr.viewport}`, fr);
+for (const [file, frames] of Object.entries(ref.frames)) {
+  for (const fr of frames) {
+    const k = `${screenOf(fr)}|${fr.viewport}`;
+    html.set(`${file}|${k}`, fr);
+    html.set(k, html.has(k) ? null : fr);          // null marks an ambiguous unqualified name
+  }
 }
 
 let findings = 0, compared = 0, unmatched = 0, framesChecked = 0, noWidth = 0;
@@ -199,6 +217,11 @@ for (const f of fig) {
     continue;
   }
   const h = html.get(`${screen}|${f.vp}`);
+  if (h === null) {
+    rows.push({ level: "FINDING", msg: `frameMap["${f.pkg}|${f.frame}"] names "${screen}", which more than one captured file carries at ${f.vp}. Qualify it as "<file>|${screen}"` });
+    findings++;
+    continue;
+  }
   if (!h) {
     rows.push({ level: "FINDING", msg: `no HTML frame for ${screen} @ ${f.vp}` });
     findings++;
@@ -281,5 +304,8 @@ if (!compared) {
   console.error(`\nFAIL  0 text runs compared. Whatever this measured, it was not the design.`);
   process.exit(2);
 }
+/* The runner's row contract. Without it a clean diff was "0 assertion(s)" under pica-verify and a
+ * failing one a runner fault, because FINDING lines here carry no [id]. */
+console.log(`\n${findings ? "FAIL" : "pass"}  geometry         ${String(findings).padStart(3)} finding(s)   (${compared} run(s) across ${framesChecked} frame(s), ${TOL}px)`);
 console.log(`\n${findings} finding(s).`);
 process.exit(findings ? 1 : 0);

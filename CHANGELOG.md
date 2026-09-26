@@ -1,5 +1,60 @@
 # Changelog
 
+## 3.19.0
+
+### Every check proven, the example built, and a specification generator that was one project's
+
+**The specification generator was written for one engagement and printed it into every project.**
+`assemble-spec` and `model-diagram` produced every heading in Vietnamese whatever the project's
+language, and the legend named that engagement's upstream product and applications, with an example
+reference and sentence lifted from its rules, on every project's page, including an English banking
+example. Both now take their language from `state.language` (Vietnamese when the glossary carries
+`vi` translations, English otherwise) and their names from `state.applications` and
+`state.integrationsNamed`. They say what the state supports and no more: "read-only copies, never
+written back" only when every named integration reads, an entity count that is counted, ownership
+only where it is declared. On the project it was written for the output is unchanged apart from
+those names. Client identifiers left in comments, rules and a plan are gone from the tree.
+
+**flow-walk-check follows declared destinations.** A control that says where it goes (`data-go`,
+`data-tab`, a `?scr=` link) must land there, and back must return to the screen before, with the
+stack rules pica's own vocabulary promises (go pushes, tab resets, a deep link lands with its owner
+beneath it). `wrong-destination` is new, with a mutation.
+
+**The worked example is built, and nothing about the demo abstains any more.** It has a build
+(`scripts/build.mjs` into `dist/`), an empty state the demo actually renders (`?state=empty`), boards
+that draw the tab bar the demo has, and Release buttons that open the payment rather than whole rows
+that the design never made clickable, which is what build-diff reported the first time it could run.
+`proto.js` deep-links from a bare `#screen`, the only link a published Artifact delivers, so the build
+passes artifact-readiness-check; that check now accepts a query string when the page also routes on
+the anchor. `example-verify` generates the specification, captures the boards and the served demo,
+and runs everything: 51 checks pass, and build-check, artifact-readiness-check, build-diff,
+document-check and figure-placement-check run for real.
+
+**The anchor rule nearly waved every React build through.** Matching the word `hashchange` would
+have accepted any bundle, because React DOM carries it in its event table; found by running the new
+rule on a real React demo, whose query-only router it passed. It requires a read of `location.hash`
+or a registered listener, and a mutation holds that line.
+
+**flow-walk-check crashed when the server stopped answering mid-walk**, discarding every finding it
+had made. It reports what it reached, or abstains if that was nothing. On a real demo it found a back
+control labelled for one screen that returned there from a different one: the defect class it exists
+for, in a project whose every other check was green.
+
+**The runner ran the build and its reader side by side.** build-check empties and rewrites the build
+directory while artifact-readiness-check reads it; the build runs first, alone.
+
+**frame-inventory-check could not read the frame map `/pica-port` documents**, and geometry-diff
+collapsed two files that caption a frame the same way into one. Both read one format now,
+`{"<pkg>|<figma frame>": "<html screen>"}` or `"<file>|<html screen>"`, and refuse an unqualified
+screen more than one file carries. geometry-diff abstains without `figmaInScope`, like its sibling,
+and prints a row pica-verify can read.
+
+**No check is unproven.** The mutation fixture synthesises a faithful Figma port from its capture, so
+geometry-diff and frame-inventory-check are proven in both directions (five mutations). The two
+checks that run inside Figma were already proven by `mock-figma.mjs`, which nothing ran: CI runs it,
+and mutation-coverage-check counts them on that basis. 15 unproven at 3.16.1, 0 now. 180 caught,
+0 missed. The README table lists 251 checks.
+
 ## 3.18.0
 
 ### A demo is walked, not only loaded

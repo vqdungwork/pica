@@ -42,13 +42,20 @@ catch (e) { console.error(`model-diagram: cannot read ${file} — ${e.message}`)
  * a dense notation, it is an unanswered question printed twenty times.
  *
  * The English stays in brackets where a developer will need it, because both readers exist. */
+/* The drawing's language is the PROJECT'S. Every label in this file was Vietnamese, written for the
+ * engagement it was built on, so an English project's diagrams came out in Vietnamese. state.language
+ * decides ("vi", "en"); without it, a glossary that carries `vi` translations means Vietnamese, and
+ * anything else means English. */
+const LANG = String(state.language || state.locale || (Array.isArray(state.glossary) && state.glossary.some((g) => g?.vi) ? "vi" : "en"))
+  .toLowerCase().startsWith("vi") ? "vi" : "en";
+const tr = (en, vi) => (LANG === "vi" ? vi : en);
 const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 const arr = (v) => (Array.isArray(v) ? v : []);
 const F = `font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif"`;
 
 /* One palette, read from the project's own tokens when it has them: a diagram that invents its
  * own colours is a second design system nobody approved. */
-const GLOSS = new Map(arr(state.glossary).filter((g) => g.vi).map((g) => [String(g.term).toLowerCase(), g.vi]));
+const GLOSS = new Map(LANG === "vi" ? arr(state.glossary).filter((g) => g.vi).map((g) => [String(g.term).toLowerCase(), g.vi]) : []);
 const vi = (t) => {
   /* Exact match only. Substring replacement produced half-Vietnamese field names — "confirmed at"
    * became "đã xác nhận at", "project memberships" became "dự án memberships" — which is worse
@@ -58,7 +65,7 @@ const vi = (t) => {
   return GLOSS.get(raw.toLowerCase()) ?? raw;
 };
 /* CRUD letters, written out. `c r u d` is four words a reader already has. */
-const CRUD = { c: "tạo", r: "xem", u: "sửa", d: "xoá" };
+const CRUD = LANG === "vi" ? { c: "tạo", r: "xem", u: "sửa", d: "xoá" } : { c: "create", r: "read", u: "update", d: "delete" };
 const crud = (v) => {
   const t = String(v ?? "").trim();
   if (!t) return "";
@@ -171,7 +178,7 @@ function stateDiagram(entity) {
   L.push(`<defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="${C.line}"/></marker>
   <marker id="x" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="${C.warn}"/></marker></defs>`);
   L.push(`<text x="20" y="30" font-size="15" font-weight="700" fill="${C.ink}">${esc(vi(entity.entity || entity.name))}</text>`);
-  L.push(`<text x="20" y="50" font-size="12" fill="${C.muted}">${states.length} trạng thái · ${arr(entity.neverTransitions).length} chuyển đổi bị cấm</text>`);
+  L.push(`<text x="20" y="50" font-size="12" fill="${C.muted}">${tr(`${states.length} states · ${arr(entity.neverTransitions).length} forbidden transitions`, `${states.length} trạng thái · ${arr(entity.neverTransitions).length} chuyển đổi bị cấm`)}</text>`);
 
   for (const s of states) {
     const from = pos.get(s.name);
@@ -211,7 +218,7 @@ function stateDiagram(entity) {
   if (forbidden.length) {
     const px = 20, pw = 300;
     let py = 78;
-    L.push(`<text x="${px}" y="${py}" font-size="12" font-weight="700" fill="${C.warn}">Không bao giờ xảy ra</text>`);
+    L.push(`<text x="${px}" y="${py}" font-size="12" font-weight="700" fill="${C.warn}">${tr("Never happens", "Không bao giờ xảy ra")}</text>`);
     py += 8;
     for (const line of forbidden) {
       for (const ln of wrap(line, 44, 4)) { py += 15; L.push(`<text x="${px}" y="${py}" font-size="11" fill="${C.muted}">${esc(ln)}</text>`); }
@@ -231,9 +238,9 @@ function permissionsDiagram(rp) {
   if (!objects.length) return null;
   const colW = 150, rowH = 34, left = 210, top = 96;
   const W = left + objects.length * colW + 24, H = top + roles.length * rowH + 50;
-  const L = [`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" ${F} role="img" aria-label="Ma trận quyền">`];
-  L.push(`<text x="20" y="30" font-size="15" font-weight="700" fill="${C.ink}">Ma trận quyền</text>`);
-  L.push(`<text x="20" y="50" font-size="12" fill="${C.muted}">${roles.length} vai trò × ${objects.length} đối tượng — mọi ô phải có câu trả lời</text>`);
+  const L = [`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" ${F} role="img" aria-label="${tr("Permissions matrix", "Ma trận quyền")}">`];
+  L.push(`<text x="20" y="30" font-size="15" font-weight="700" fill="${C.ink}">${tr("Permissions matrix", "Ma trận quyền")}</text>`);
+  L.push(`<text x="20" y="50" font-size="12" fill="${C.muted}">${tr(`${roles.length} roles × ${objects.length} objects — every cell answered`, `${roles.length} vai trò × ${objects.length} đối tượng — mọi ô phải có câu trả lời`)}</text>`);
   objects.forEach((o, i) => {
     const x = left + i * colW + colW / 2;
     wrap(vi(o), 17, 2).forEach((ln, k) =>
@@ -251,13 +258,13 @@ function permissionsDiagram(rp) {
        * gap to chase and the other is a decision to respect. */
       const unanswered = v == null;
       const none = !unanswered && String(v).trim() === "";
-      const txt = unanswered ? "?" : none ? "không có quyền" : crud(Array.isArray(v) ? v.join("") : v);
+      const txt = unanswered ? "?" : none ? tr("no access", "không có quyền") : crud(Array.isArray(v) ? v.join("") : v);
       const empty = unanswered;
       L.push(`<rect x="${x + 4}" y="${y + 3}" width="${colW - 8}" height="${rowH - 6}" rx="5" fill="${empty ? "none" : C.card}" stroke="${empty ? C.warn : C.line}" ${empty ? 'stroke-dasharray="4 3"' : ""}/>`);
       L.push(`<text x="${x + colW / 2}" y="${y + 21}" text-anchor="middle" font-size="11" fill="${unanswered ? C.warn : none ? C.muted : C.ink}" font-style="${none ? "italic" : "normal"}">${esc(wrap(txt, 18, 1)[0])}</text>`);
     });
   });
-  L.push(`<text x="20" y="${H - 16}" font-size="11" fill="${C.muted}">“?” viền đứt = chưa ai trả lời. “không có quyền” = đã trả lời, và câu trả lời là không.</text>`);
+  L.push(`<text x="20" y="${H - 16}" font-size="11" fill="${C.muted}">${tr("“?” dashed = nobody has answered. “no access” = answered, and the answer is no.", "“?” viền đứt = chưa ai trả lời. “không có quyền” = đã trả lời, và câu trả lời là không.")}</text>`);
   L.push("</svg>");
   return L.join("\n");
 }
@@ -277,7 +284,7 @@ function processDiagram(toBe) {
   const laneIndex = (v) => {
     const i = laneDefs.findIndex((l) => l.id === v || l.name === v);
     if (i >= 0) return i;
-    laneDefs.push({ id: v ?? "(không khai báo)", name: `${v ?? "(không khai báo)"} — lane không có trong khai báo` });
+    laneDefs.push({ id: v ?? tr("(undeclared)", "(không khai báo)"), name: `${v ?? tr("(undeclared)", "(không khai báo)")} — ${tr("a lane that is not declared", "lane không có trong khai báo")}` });
     laneNames.push(laneDefs[laneDefs.length - 1].name);
     return laneDefs.length - 1;
   };
@@ -436,8 +443,8 @@ function processDiagram(toBe) {
 
   const L = [];
   L.push(`<defs><marker id="pa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="${C.line}"/></marker></defs>`);
-  L.push(`<text x="${left}" y="30" font-size="15" font-weight="700" fill="${C.ink}">Quy trình TO-BE${toBe?.notation ? ` · ${esc(toBe.notation)}` : ""}</text>`);
-  L.push(`<text x="${left}" y="50" font-size="12" fill="${C.muted}">${nodes.length} bước qua ${laneNames.length} vai trò · đọc từ trên xuống</text>`);
+  L.push(`<text x="${left}" y="30" font-size="15" font-weight="700" fill="${C.ink}">${tr("TO-BE process", "Quy trình TO-BE")}${toBe?.notation ? ` · ${esc(toBe.notation)}` : ""}</text>`);
+  L.push(`<text x="${left}" y="50" font-size="12" fill="${C.muted}">${tr(`${nodes.length} steps across ${laneNames.length} roles · read top to bottom`, `${nodes.length} bước qua ${laneNames.length} vai trò · đọc từ trên xuống`)}</text>`);
 
   const laneBands = [];
   laneNames.forEach((ln, li) => {
@@ -465,7 +472,7 @@ function processDiagram(toBe) {
     // a vertical box is wider than a horizontal one was, so three lines of 22 chars fit and the
     // mid-word truncation that made every label end in "…" disappears
     const label = wrap(n.name || n.id, 21, 3);
-    L.push(`<g data-node="${esc(n.id)}" tabindex="0" role="button" aria-label="${esc(seq.get(n.id))}. ${esc(n.name || n.id)}${gateway ? " (điểm rẽ)" : ""}">`);
+    L.push(`<g data-node="${esc(n.id)}" tabindex="0" role="button" aria-label="${esc(seq.get(n.id))}. ${esc(n.name || n.id)}${gateway ? tr(" (decision)", " (điểm rẽ)") : ""}">`);
     const w2 = nodeW / 2 - 8, h2 = nodeH / 2;
     if (gateway) {
       L.push(`<path d="M${cx} ${cy - h2 - 5} L${cx + w2} ${cy} L${cx} ${cy + h2 + 5} L${cx - w2} ${cy} z" fill="${C.card}" stroke="${C.accent}" stroke-width="1.5"/>`);
@@ -746,7 +753,7 @@ function processDiagram(toBe) {
   }
 
   return [
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" ${F} role="img" aria-label="Quy trình TO-BE" data-route-conflicts="${routeConflicts}">`,
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" ${F} role="img" aria-label="${tr("TO-BE process", "Quy trình TO-BE")}" data-route-conflicts="${routeConflicts}">`,
     L[0], L[1], L[2],          // defs and the two title lines
     ...laneBands,              // bands behind everything
     ...L.slice(3),
@@ -772,7 +779,11 @@ function processDiagram(toBe) {
 function erdDiagram(entities) {
   if (!entities.length) return null;
   const W = 900, boxW = 300, gapX = 180, gapY = 96;
-  const owned = (e) => /owned here|daylog|app này/i.test(String(e.owner || ""));
+  /* Owned by the system being built: its owner names one of the project's applications, or says so.
+   * This used to match the name of one engagement's application, hardcoded. */
+  const apps = arr(state.applications).map((a) => String(a.name || a).toLowerCase()).filter(Boolean);
+  const owned = (e) => { const o = String(e.owner || "").toLowerCase();
+    return /owned here|this app|app này/.test(o) || apps.some((a) => o.includes(a)); };
 
   // Owned entity last: it is the one the reader should end on, and putting it bottom-right keeps
   // its two relationships adjacent to their targets.
@@ -803,6 +814,7 @@ function erdDiagram(entities) {
     "referenced by": "được tham chiếu bởi", "references exactly": "tham chiếu đúng",
     "member of": "là thành viên của", "references": "tham chiếu",
   };
+  if (LANG !== "vi") for (const k of Object.keys(VERB)) VERB[k] = k;
   const verb = (txt) => {
     const v = String(txt).replace(/\s*(zero or one|zero or more|one or more|one|many|nhiều|một)\s.*$/i, "").trim();
     return VERB[v.toLowerCase()] || v;
@@ -837,9 +849,9 @@ function erdDiagram(entities) {
     return { x: cx, y: dy > 0 ? b.y + b.h : b.y };
   };
 
-  const L = [`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" ${F} role="img" aria-label="Mô hình dữ liệu">`];
-  L.push(`<text x="40" y="34" font-size="15" font-weight="700" fill="${C.ink}">Dữ liệu và quan hệ</text>`);
-  L.push(`<text x="40" y="54" font-size="12" fill="${C.muted}">Gạch ngang = một · chân quạ = nhiều · vòng tròn = có thể không có. Chỉ ${ordered.filter(owned).length} trong ${ordered.length} thực thể do app này sở hữu.</text>`);
+  const L = [`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" ${F} role="img" aria-label="${tr("Data model", "Mô hình dữ liệu")}">`];
+  L.push(`<text x="40" y="34" font-size="15" font-weight="700" fill="${C.ink}">${tr("Data and how it relates", "Dữ liệu và quan hệ")}</text>`);
+  L.push(`<text x="40" y="54" font-size="12" fill="${C.muted}">${tr("Bar = one · crow's foot = many · circle = may be none.", "Gạch ngang = một · chân quạ = nhiều · vòng tròn = có thể không có.")}${ordered.some((e) => e.owner) ? " " + tr(`${ordered.filter(owned).length} of ${ordered.length} entities are owned by this system.`, `Chỉ ${ordered.filter(owned).length} trong ${ordered.length} thực thể do app này sở hữu.`) : ""}</text>`);
 
   const drawn = new Set();
   for (const e of ordered) {
@@ -885,7 +897,7 @@ function erdDiagram(entities) {
       L.push(`<text x="${b.x + 12}" y="${b.y + 48 + i * 15}" font-size="10.5" fill="${C.muted}">${esc(String(nm).slice(0, 36))}</text>`);
     });
     if (arr(e.attributes).length > 6) {
-      L.push(`<text x="${b.x + 12}" y="${b.y + 48 + 6 * 15}" font-size="10" fill="${C.muted}">+${arr(e.attributes).length - 6} trường nữa</text>`);
+      L.push(`<text x="${b.x + 12}" y="${b.y + 48 + 6 * 15}" font-size="10" fill="${C.muted}">+${arr(e.attributes).length - 6} ${tr("more fields", "trường nữa")}</text>`);
     }
   }
   L.push("</svg>");
@@ -900,16 +912,21 @@ function erdDiagram(entities) {
 function useCaseDiagram(useCases) {
   const real = useCases.filter((u) => !/INT|SYS/.test(String(u.id)));
   if (!real.length) return null;
-  const human = (a) => !/hệ thống|system|Tracker|tiến trình/i.test(String(a));
+  /* A person, not a system. The systems are the ones the specification names as integrations, plus
+   * anything calling itself one. The list used to name the upstream product of the engagement this
+   * was written on. */
+  const systems = arr(state.integrationsNamed).map((i) => String(i.system || i).toLowerCase()).filter(Boolean);
+  const human = (a) => { const t = String(a).toLowerCase();
+    return !/hệ thống|system|tiến trình|process|scheduler|job\b/.test(t) && !systems.some((x) => t.includes(x)); };
   const actors = [...new Set(real.flatMap((u) => arr(u.actors).filter(human)))];
   if (!actors.length) return null;
   const byActor = actors.map((a) => ({ actor: a, ucs: real.filter((u) => arr(u.actors).includes(a)) }));
   const W = 900, ucW = 340, rowH = 44;
   const total = byActor.reduce((n, g) => n + g.ucs.length, 0);
   const H = 84 + total * rowH + byActor.length * 26 + 30;
-  const L = [`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" ${F} role="img" aria-label="Mô hình use case">`];
-  L.push(`<text x="30" y="34" font-size="15" font-weight="700" fill="${C.ink}">Ai làm được gì</text>`);
-  L.push(`<text x="30" y="54" font-size="12" fill="${C.muted}">${actors.length} vai · ${real.length} việc họ làm được. Mỗi đường là một quyền, không phải một màn hình.</text>`);
+  const L = [`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" ${F} role="img" aria-label="${tr("Use case model", "Mô hình use case")}">`];
+  L.push(`<text x="30" y="34" font-size="15" font-weight="700" fill="${C.ink}">${tr("Who can do what", "Ai làm được gì")}</text>`);
+  L.push(`<text x="30" y="54" font-size="12" fill="${C.muted}">${tr(`${actors.length} roles · ${real.length} things they can do. Each line is a permission, not a screen.`, `${actors.length} vai · ${real.length} việc họ làm được. Mỗi đường là một quyền, không phải một màn hình.`)}</text>`);
   let y = 86;
   for (const g of byActor) {
     const ay = y + (g.ucs.length * rowH) / 2 - 6;
@@ -962,10 +979,10 @@ function contextDiagram(state) {
   if (!apps.length) return null;
   const externals = [];
   for (const it of arr(state.integrationsNamed)) {
-    externals.push({ name: it.system, dir: String(it.direction || "đọc"), kind: "system" });
+    externals.push({ name: it.system, dir: String(it.direction || tr("reads", "đọc")), kind: "system" });
   }
   if (state.identity?.provider) {
-    externals.push({ name: `${state.identity.provider}${state.identity.sso ? ` (${state.identity.sso})` : ""}`, dir: "đăng nhập", kind: "system" });
+    externals.push({ name: `${state.identity.provider}${state.identity.sso ? ` (${state.identity.sso})` : ""}`, dir: tr("sign-in", "đăng nhập"), kind: "system" });
   }
   const actors = [...new Set(arr(state.stakeholders).map((s) => s.role).filter(Boolean))].slice(0, 5);
   if (!externals.length && !actors.length) return null;
@@ -977,14 +994,14 @@ function contextDiagram(state) {
   const cy = pad + (Math.max(leftN, rightN, 2) * rowH) / 2 - 10;
   const coreW = 250, coreH = Math.min(150, 64 + apps.length * 26);
 
-  const L = [`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" ${F} role="img" aria-label="Sơ đồ bối cảnh">`];
+  const L = [`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" ${F} role="img" aria-label="${tr("Context diagram", "Sơ đồ bối cảnh")}">`];
   L.push(`<defs><marker id="cx" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="${C.muted}"/></marker></defs>`);
-  L.push(`<text x="30" y="34" font-size="15" font-weight="700" fill="${C.ink}">Hệ thống này chạm vào những gì</text>`);
-  L.push(`<text x="30" y="54" font-size="12" fill="${C.muted}">${actors.length} vai người dùng · ${externals.length} hệ thống ngoài. Mũi tên chỉ chiều dữ liệu đi.</text>`);
+  L.push(`<text x="30" y="34" font-size="15" font-weight="700" fill="${C.ink}">${tr("What this system touches", "Hệ thống này chạm vào những gì")}</text>`);
+  L.push(`<text x="30" y="54" font-size="12" fill="${C.muted}">${tr(`${actors.length} user roles · ${externals.length} external systems. Arrows show which way data goes.`, `${actors.length} vai người dùng · ${externals.length} hệ thống ngoài. Mũi tên chỉ chiều dữ liệu đi.`)}</text>`);
 
   // the system under discussion, in the middle
   L.push(`<rect x="${cx - coreW / 2}" y="${cy - coreH / 2}" width="${coreW}" height="${coreH}" rx="10" fill="${C.accent}"/>`);
-  L.push(`<text x="${cx}" y="${cy - coreH / 2 + 26}" text-anchor="middle" font-size="13" font-weight="700" fill="${C.onAccent}">Hệ thống sẽ xây</text>`);
+  L.push(`<text x="${cx}" y="${cy - coreH / 2 + 26}" text-anchor="middle" font-size="13" font-weight="700" fill="${C.onAccent}">${tr("The system being built", "Hệ thống sẽ xây")}</text>`);
   apps.forEach((a, i) =>
     L.push(`<text x="${cx}" y="${cy - coreH / 2 + 52 + i * 24}" text-anchor="middle" font-size="14" font-weight="600" fill="${C.onAccent}">${esc(a)}</text>`));
 
@@ -1002,7 +1019,7 @@ function contextDiagram(state) {
     const mid = (from + to) / 2;
     L.push(`<path d="M${from} ${y} C${mid} ${y} ${mid} ${cy} ${to} ${cy}" fill="none" stroke="${C.line}" stroke-width="1.4" marker-end="url(#cx)"/>`);
   });
-  side(actors.map((a) => ({ name: a })), 30, "start", "dùng");
+  side(actors.map((a) => ({ name: a })), 30, "start", tr("uses", "dùng"));
   side(externals, W - 30, "end", "");
   L.push("</svg>");
   return L.join("\n");

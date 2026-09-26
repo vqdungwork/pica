@@ -188,6 +188,12 @@ jobs:
       # The other half of the claim. The mutation suite proves each check fires on a defect; this
       # proves the worked example passes the whole chain it is the example of, through the same
       # runner a project uses. 3.16.1 shipped with pica-verify reporting four failures on it.
+      # figma-audit.js and source-parity.js run inside Figma, so the mutation suite cannot reach
+      # them. mock-figma implements the part of the plugin API they call and runs each against a
+      # fixture it must flag and one it must pass. mutation-coverage-check counts them on that basis.
+      - name: the in-Figma checks, outside Figma
+        run: node roles/design-ops/scripts/mock-figma.mjs
+
       - name: verify the worked example
         run: node scripts/example-verify.mjs
 

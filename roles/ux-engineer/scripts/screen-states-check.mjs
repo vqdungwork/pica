@@ -17,7 +17,7 @@
  * That is the shape of the failure: a state is specified once, drawn once in lo-fi, and then
  * quietly lost at the fidelity the client actually sees. The screen a person judges is the one
  * showing a single happy path, and the eight states that carry every failure the analysis worked
- * to find — Tracker unreachable, a 24-hour-old cache, an employee with nothing assigned — arrive
+ * to find — the upstream system unreachable, a 24-hour-old cache, an employee with nothing assigned — arrive
  * in production never having been drawn.
  *
  * This holds the whole set: for every screen in state.screens, every state it declares must appear

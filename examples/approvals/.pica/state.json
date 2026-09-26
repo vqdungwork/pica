@@ -132,14 +132,22 @@
     {
       "entity": "payment",
       "attributes": [
-        "payment"
-      ]
+        "amount",
+        "recipient",
+        "fee",
+        "held since",
+        "status"
+      ],
+      "owner": "core banking ledger"
     },
     {
       "entity": "approval",
       "attributes": [
-        "approval"
-      ]
+        "approver",
+        "decided at",
+        "decision"
+      ],
+      "owner": "approvals"
     }
   ],
   "asIs": "Payments are approved by email and nobody can tell afterwards who approved which one.",
