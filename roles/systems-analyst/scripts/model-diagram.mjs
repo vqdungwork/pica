@@ -49,19 +49,13 @@ const F = `font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica
 /* One palette, read from the project's own tokens when it has them: a diagram that invents its
  * own colours is a second design system nobody approved. */
 const GLOSS = new Map(arr(state.glossary).filter((g) => g.vi).map((g) => [String(g.term).toLowerCase(), g.vi]));
-const GLOSS_SORTED = [...GLOSS.entries()].sort((a, b) => b[0].length - a[0].length);
 const vi = (t) => {
+  /* Exact match only. Substring replacement produced half-Vietnamese field names — "confirmed at"
+   * became "đã xác nhận at", "project memberships" became "dự án memberships" — which is worse
+   * than leaving them English: a reader cannot tell whether it is a term they do not know or a
+   * translation that broke. A field name is a field name; the ENTITY carries the translation. */
   const raw = String(t ?? "").trim();
-  const hit = GLOSS.get(raw.toLowerCase());
-  if (hit) return hit;
-  /* A compound the glossary does not hold whole — "snapshot state group" — still contains a term
-   * it does, and leaving it English because the exact string is missing reads as one translation
-   * somebody forgot. Longest match first, so "state group" wins over "state". */
-  for (const [term, viet] of GLOSS_SORTED) {
-    const rx = new RegExp(`\\b${term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "i");
-    if (rx.test(raw)) return raw.replace(rx, viet);
-  }
-  return raw;
+  return GLOSS.get(raw.toLowerCase()) ?? raw;
 };
 /* CRUD letters, written out. `c r u d` is four words a reader already has. */
 const CRUD = { c: "tạo", r: "xem", u: "sửa", d: "xoá" };
@@ -258,69 +252,98 @@ function processDiagram(toBe) {
     return d;
   };
   for (const n of nodes) depth(n.id);
-  let col = Math.max(0, ...order.values()) + 1;
-  const colW = 190, laneH = 96, left = 170;
-  const laneRows = new Map();
-  const W = left + col * colW + 30;
-  let H = 0;   // set once the lane heights are known, below
+  /* VERTICAL. A swimlane diagram is drawn horizontally by convention, and the convention assumes
+   * paper that is wider than it is tall. A web page is the opposite: it has one short axis and one
+   * unbounded one. Drawn sideways, a 23-step process is either cut off, scrolled sideways (which
+   * the reader will not do) or scaled down until the labels are unreadable — which is what
+   * happened: the figure was placed, and nobody could read a word of it.
+   *
+   * So the lanes are COLUMNS and the process runs DOWN the page. Width stays inside the column,
+   * height grows into the axis the page already has. The rule generalises: draw a diagram along
+   * the page's long axis, not along the tradition's. */
+  const stages = Math.max(0, ...order.values()) + 1;
+  const nodeW = 142, nodeH = 54, rowH = 96, left = 16, topPad = 96;
+  /* A lane is capped at TWO columns. Laying every simultaneous step side by side made the drawing
+   * 1538px wide, which the page then scaled to 60% and the labels became unreadable — the same
+   * failure as drawing it sideways, arrived at from the other direction. Width is the scarce axis;
+   * height is not. So the third and later step in one cell drops to a half-row below. */
+  const MAXCOL = 2;
+
+  // how many nodes share one (lane, stage) cell — that decides how wide the lane must be
+  const cell = new Map();
+  for (const n of nodes) {
+    const k = `${laneIndex(n.lane)}:${order.get(n.id)}`;
+    cell.set(k, (cell.get(k) || 0) + 1);
+  }
+  const laneCols = laneNames.map((_, li) =>
+    Math.min(MAXCOL, Math.max(1, ...[...cell.entries()].filter(([k]) => k.startsWith(`${li}:`)).map(([, v]) => v))));
+  // a cell that overflows its columns needs vertical room, so the stage it sits in grows
+  const stageRows = new Array(stages).fill(1);
+  for (const [k, v] of cell) {
+    const d = Number(k.split(":")[1]);
+    stageRows[d] = Math.max(stageRows[d], Math.ceil(v / MAXCOL));
+  }
+  const stageY = [];
+  let ay0 = topPad + 30;
+  stageRows.forEach((r, d) => { stageY[d] = ay0; ay0 += (r - 1) * (rowH * 0.62) + rowH; });
+  const laneX = [];
+  let ax = left;
+  laneCols.forEach((c, li) => { laneX[li] = ax; ax += c * nodeW + 28; });
+  const W = ax + left;
+  const H = ay0 + 20;
+
   const L = [];
   L.push(`<defs><marker id="pa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="${C.line}"/></marker></defs>`);
-  L.push(`<text x="20" y="30" font-size="15" font-weight="700" fill="${C.ink}">Quy trình TO-BE${toBe?.notation ? ` · ${esc(toBe.notation)}` : ""}</text>`);
-  L.push(`<text x="20" y="50" font-size="12" fill="${C.muted}">${nodes.length} bước qua ${laneNames.length} vai trò</text>`);
-  const pos = new Map();
+  L.push(`<text x="${left}" y="30" font-size="15" font-weight="700" fill="${C.ink}">Quy trình TO-BE${toBe?.notation ? ` · ${esc(toBe.notation)}` : ""}</text>`);
+  L.push(`<text x="${left}" y="50" font-size="12" fill="${C.muted}">${nodes.length} bước qua ${laneNames.length} vai trò · đọc từ trên xuống</text>`);
+
   const laneBands = [];
-  /* Two nodes at the same depth in the same lane would draw on top of each other, so they stack
-   * and the lane grows to fit. A lane whose height is fixed while its content is not is how a
-   * diagram comes to hide a step entirely. */
-  const slot = new Map();
+  laneNames.forEach((ln, li) => {
+    const w = laneCols[li] * nodeW + 16;
+    laneBands.push(`<rect x="${laneX[li] - 8}" y="${topPad - 34}" width="${w}" height="${H - topPad + 22}" rx="10" fill="${li % 2 ? "rgba(0,0,0,.028)" : "none"}"/>`);
+    wrap(ln, Math.floor(w / 7.2), 2).forEach((t, k) =>
+      laneBands.push(`<text x="${laneX[li] + w / 2 - 8}" y="${topPad - 14 + k * 14}" text-anchor="middle" font-size="12" font-weight="700" fill="${C.muted}">${esc(t)}</text>`));
+  });
+
+  const pos = new Map();
+  const used = new Map();
   for (const n of nodes) {
-    const li = laneIndex(n.lane);
-    const key = `${li}:${order.get(n.id)}`;
-    const k = slot.get(key) || 0;
-    slot.set(key, k + 1);
-    laneRows.set(li, Math.max(laneRows.get(li) || 1, k + 1));
-  }
-  const laneTop = new Map();
-  let acc = 80;
-  laneNames.forEach((_, li) => { laneTop.set(li, acc); acc += (laneRows.get(li) || 1) * 78 + 18; });
-  const slot2 = new Map();
-  for (const n of nodes) {
-    const li = laneIndex(n.lane);
-    const key = `${li}:${order.get(n.id)}`;
-    const k = slot2.get(key) || 0; slot2.set(key, k + 1);
-    const x = left + order.get(n.id) * colW, y = laneTop.get(li) + 34 + k * 78;
-    pos.set(n.id, { x: x + 78, y });
+    const li = laneIndex(n.lane), d = order.get(n.id);
+    const k = used.get(`${li}:${d}`) || 0; used.set(`${li}:${d}`, k + 1);
+    const cx = laneX[li] + (k % laneCols[li]) * nodeW + nodeW / 2 - 4;
+    const cy = stageY[d] + Math.floor(k / laneCols[li]) * (rowH * 0.62);
+    pos.set(n.id, { x: cx, y: cy });
     const gateway = /gateway|decision|xor/i.test(n.type || "");
-    const label = wrap(n.name || n.id, 20, 2);
-    /* `data-node` and `data-edge` are what turn a drawing into a graph a reader can interrogate:
-     * focus one step and everything not connected to it dims, so a 23-step process across three
-     * roles can be read one question at a time instead of all at once. Archify's own lesson, and
-     * the half that was skipped the first time — generating the SVG was the easy part. */
+    // a vertical box is wider than a horizontal one was, so three lines of 22 chars fit and the
+    // mid-word truncation that made every label end in "…" disappears
+    const label = wrap(n.name || n.id, 22, 3);
     L.push(`<g data-node="${esc(n.id)}" tabindex="0" role="button" aria-label="${esc(n.name || n.id)}">`);
     if (gateway) {
-      L.push(`<path d="M${x + 78} ${y - 26} L${x + 112} ${y} L${x + 78} ${y + 26} L${x + 44} ${y} z" fill="${C.card}" stroke="${C.accent}" stroke-width="1.4"/>`);
+      L.push(`<path d="M${cx} ${cy - nodeH / 2 - 4} L${cx + nodeW / 2 - 12} ${cy} L${cx} ${cy + nodeH / 2 + 4} L${cx - nodeW / 2 + 12} ${cy} z" fill="${C.card}" stroke="${C.accent}" stroke-width="1.4"/>`);
     } else {
-      L.push(`<rect x="${x + 16}" y="${y - 26}" width="124" height="52" rx="7" fill="${C.card}" stroke="${C.line}"/>`);
+      L.push(`<rect x="${cx - nodeW / 2 + 8}" y="${cy - nodeH / 2}" width="${nodeW - 16}" height="${nodeH}" rx="7" fill="${C.card}" stroke="${C.line}"/>`);
     }
+    const y0 = cy - (label.length - 1) * 6.5 + 4;
     label.forEach((l2, i) =>
-      L.push(`<text x="${x + 78}" y="${y - 4 + i * 14 + (label.length === 1 ? 5 : 0)}" text-anchor="middle" font-size="11" font-weight="600" fill="${C.ink}">${esc(l2)}</text>`));
+      L.push(`<text x="${cx}" y="${y0 + i * 13}" text-anchor="middle" font-size="11" font-weight="600" fill="${C.ink}">${esc(l2)}</text>`));
     L.push(`</g>`);
   }
+
   for (const e of edges) {
     const a = pos.get(e.from), b = pos.get(e.to);
     if (!a || !b) continue;
-    const mid = (a.x + b.x) / 2;
-    L.push(`<path data-edge="${esc(e.from)}|${esc(e.to)}" d="M${a.x + 62} ${a.y} C${mid} ${a.y} ${mid} ${b.y} ${b.x - 62} ${b.y}" fill="none" stroke="${C.line}" stroke-width="1.4" marker-end="url(#pa)"/>`);
+    const ay = a.y + nodeH / 2 + 2, by = b.y - nodeH / 2 - 2;
+    // an edge that goes UP (a loop back) leaves and re-enters from the side, so it never runs
+    // through the boxes between them
+    if (by < ay) {
+      const side = Math.max(a.x, b.x) + nodeW / 2 - 4;
+      L.push(`<path data-edge="${esc(e.from)}|${esc(e.to)}" d="M${a.x + nodeW / 2 - 10} ${a.y} C${side + 24} ${a.y} ${side + 24} ${b.y} ${b.x + nodeW / 2 - 10} ${b.y}" fill="none" stroke="${C.line}" stroke-width="1.3" stroke-dasharray="4 3" marker-end="url(#pa)"/>`);
+      continue;
+    }
+    const mid = (ay + by) / 2;
+    L.push(`<path data-edge="${esc(e.from)}|${esc(e.to)}" d="M${a.x} ${ay} C${a.x} ${mid} ${b.x} ${mid} ${b.x} ${by}" fill="none" stroke="${C.line}" stroke-width="1.4" marker-end="url(#pa)"/>`);
   }
-  /* The canvas is sized AFTER the lanes are measured, not before. A height guessed from
-   * `lanes.length * 96` clipped every lane that had to stack, and the clipped part looked like it
-   * did not exist. */
-  H = acc + 24;
-  laneNames.forEach((ln, li) => {
-    const y = laneTop.get(li) - 12, h = (laneRows.get(li) || 1) * 78 + 18;
-    laneBands.push(`<rect x="0" y="${y}" width="${W}" height="${h}" fill="${li % 2 ? "rgba(0,0,0,.025)" : "none"}"/>`);
-    laneBands.push(`<text x="20" y="${y + 22}" font-size="12" font-weight="700" fill="${C.muted}">${esc(wrap(ln, 20, 1)[0])}</text>`);
-  });
+
   return [
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" ${F} role="img" aria-label="Quy trình TO-BE">`,
     L[0], L[1], L[2],          // defs and the two title lines
@@ -332,90 +355,137 @@ function processDiagram(toBe) {
 
 
 /* ---- entity relationship diagram ------------------------------------------------------------
- * BABOK names four model types a specification owes its readers, and this is one of them: how
- * information is structured and RELATED. Attribute chips in a card are a list of field names; an
- * ERD is the sentence "a work item belongs to one project" drawn, which is the part a person who
- * knows the business can confirm or correct.
+ * Crow's foot notation, which is what a BA hands over and what a developer expects to receive:
+ * a dash for one, a crow's foot for many, a circle for optional. The first version invented its
+ * own `0..1` boxes floating on the line — a notation with an audience of one — and ran every line
+ * centre to centre so they crossed in the middle of the drawing.
  *
- * Relationships are recorded as prose — "belongs to one project", "assigned to zero or one
- * assignee" — so the cardinality is parsed out of the sentence and drawn on the line, and the
- * sentence stays as the label. Guessing a {from, to, kind} shape the model never used would draw
- * nothing, which is how the forbidden transitions were lost the first time.
+ * Published practice for making one readable is short: space the entities, minimise crossings,
+ * and put a VERB on the line. "belongs to one project" is the sentence a person who knows the
+ * business can confirm or correct; an unlabelled line between two boxes is not.
+ *
+ * Layout is fixed to four quadrants rather than computed, because with this many entities a
+ * chosen layout beats a generic one: the two ends of every relationship end up adjacent, and only
+ * one line is diagonal.
  */
 function erdDiagram(entities) {
   if (!entities.length) return null;
-  const W = 900;
-  const colW = W / Math.min(entities.length, 2) - 30;
-  const boxW = Math.min(340, colW), rowGap = 30;
-  const pos = new Map();
-  const rows = Math.ceil(entities.length / 2);
-  // Height must include the "+N more" line; without it that line drew BELOW the box and read
-  // as a stray caption belonging to nothing.
-  const heights = entities.map((e) => 56 + Math.min(arr(e.attributes).length, 6) * 16 + (arr(e.attributes).length > 6 ? 18 : 0));
-  let y = 84, H = 0;
-  entities.forEach((e, i) => {
-    const c = i % 2, r = Math.floor(i / 2);
-    const x = 30 + c * (boxW + 60);
-    const yy = 84 + r * (Math.max(...heights) + rowGap + 34);
-    pos.set(e.entity, { x, y: yy, w: boxW, h: heights[i] });
-    H = Math.max(H, yy + heights[i]);
-  });
-  void y; void rows;
-  H += 70;
-
+  const W = 900, boxW = 300, gapX = 180, gapY = 96;
   const owned = (e) => /owned here|worklog|app này/i.test(String(e.owner || ""));
-  const card = (txt) => {
-    const t = String(txt).toLowerCase();
-    if (/zero or one|0..1|không hoặc một/.test(t)) return "0..1";
-    if (/zero or more|0..\*|không hoặc nhiều/.test(t)) return "0..*";
-    if (/one or more|1..\*|một hoặc nhiều/.test(t)) return "1..*";
-    if (/\bone\b|một/.test(t)) return "1";
-    return "";
-  };
+
+  // Owned entity last: it is the one the reader should end on, and putting it bottom-right keeps
+  // its two relationships adjacent to their targets.
+  const ordered = [...entities].sort((a, b) => Number(owned(a)) - Number(owned(b)));
+  const heights = ordered.map((e) => 54 + Math.min(arr(e.attributes).length, 6) * 15 + (arr(e.attributes).length > 6 ? 16 : 0));
+  const rowH = Math.max(...heights);
+  const pos = new Map();
+  ordered.forEach((e, i) => {
+    const c = i % 2, r = Math.floor(i / 2);
+    pos.set(e.entity, { x: 40 + c * (boxW + gapX), y: 86 + r * (rowH + gapY), w: boxW, h: heights[i] });
+  });
+  const H = 86 + Math.ceil(ordered.length / 2) * (rowH + gapY) + 30;
+
   const target = (txt) => {
     const t = String(txt).toLowerCase();
-    return entities.map((e) => e.entity).find((n) => t.includes(String(n).toLowerCase()));
+    return ordered.map((e) => e.entity).find((n) => t.includes(String(n).toLowerCase()));
+  };
+  /* The sentence says the cardinality; the symbol draws it. */
+  const kind = (txt) => {
+    const t = String(txt).toLowerCase();
+    const many = /more|nhiều|\*/.test(t);
+    const optional = /zero|không|no\b/.test(t);
+    return { many, optional };
+  };
+  /* The verb, taken from the front of the sentence: "belongs to one project" → "belongs to". */
+  const VERB = {
+    "belongs to": "thuộc về", "assigned to": "được giao cho", "has": "có",
+    "referenced by": "được tham chiếu bởi", "references exactly": "tham chiếu đúng",
+    "member of": "là thành viên của", "references": "tham chiếu",
+  };
+  const verb = (txt) => {
+    const v = String(txt).replace(/\s*(zero or one|zero or more|one or more|one|many|nhiều|một)\s.*$/i, "").trim();
+    return VERB[v.toLowerCase()] || v;
+  };
+
+  /* Crow's foot, drawn at the target end of a line. */
+  const foot = (x, y, dx, dy, k) => {
+    const len = Math.hypot(dx, dy) || 1, ux = dx / len, uy = dy / len;
+    const px = -uy, py = ux;                                   // perpendicular
+    const out = [];
+    const tipX = x, tipY = y;
+    if (k.many) {
+      const bx = tipX - ux * 13, by = tipY - uy * 13;
+      out.push(`<path d="M${tipX.toFixed(1)} ${tipY.toFixed(1)} L${(bx + px * 7).toFixed(1)} ${(by + py * 7).toFixed(1)} M${tipX.toFixed(1)} ${tipY.toFixed(1)} L${bx.toFixed(1)} ${by.toFixed(1)} M${tipX.toFixed(1)} ${tipY.toFixed(1)} L${(bx - px * 7).toFixed(1)} ${(by - py * 7).toFixed(1)}" stroke="${C.ink}" stroke-width="1.3" fill="none"/>`);
+    } else {
+      const bx = tipX - ux * 13, by = tipY - uy * 13;
+      out.push(`<path d="M${(bx + px * 6).toFixed(1)} ${(by + py * 6).toFixed(1)} L${(bx - px * 6).toFixed(1)} ${(by - py * 6).toFixed(1)}" stroke="${C.ink}" stroke-width="1.3"/>`);
+    }
+    if (k.optional) {
+      const cx = tipX - ux * 21, cy = tipY - uy * 21;
+      out.push(`<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="4.5" fill="${C.card}" stroke="${C.ink}" stroke-width="1.3"/>`);
+    }
+    return out.join("");
+  };
+  /* Meet the box on its nearest edge, so no line runs through a neighbour. */
+  const edge = (b, tx, ty) => {
+    const cx = b.x + b.w / 2, cy = b.y + b.h / 2;
+    const dx = tx - cx, dy = ty - cy;
+    if (Math.abs(dx) / b.w > Math.abs(dy) / b.h) {
+      return { x: dx > 0 ? b.x + b.w : b.x, y: cy };
+    }
+    return { x: cx, y: dy > 0 ? b.y + b.h : b.y };
   };
 
   const L = [`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" ${F} role="img" aria-label="Mô hình dữ liệu">`];
-  L.push(`<text x="30" y="34" font-size="15" font-weight="700" fill="${C.ink}">Dữ liệu và quan hệ</text>`);
-  L.push(`<text x="30" y="54" font-size="12" fill="${C.muted}">${entities.length} thực thể · chỉ ${entities.filter(owned).length} do app này sở hữu, phần còn lại là bản soi chỉ đọc</text>`);
+  L.push(`<text x="40" y="34" font-size="15" font-weight="700" fill="${C.ink}">Dữ liệu và quan hệ</text>`);
+  L.push(`<text x="40" y="54" font-size="12" fill="${C.muted}">Gạch ngang = một · chân quạ = nhiều · vòng tròn = có thể không có. Chỉ ${ordered.filter(owned).length} trong ${ordered.length} thực thể do app này sở hữu.</text>`);
 
-  // lines first, so the boxes sit on top of them
-  for (const e of entities) {
+  const drawn = new Set();
+  for (const e of ordered) {
     const a = pos.get(e.entity); if (!a) continue;
     for (const rel of arr(e.relationships)) {
       const to = target(rel); if (!to || to === e.entity) continue;
       const b = pos.get(to); if (!b) continue;
-      const ax = a.x + a.w / 2, ay = a.y + a.h / 2, bx = b.x + b.w / 2, by = b.y + b.h / 2;
-      L.push(`<path d="M${ax} ${ay} L${bx} ${by}" stroke="${C.line}" stroke-width="1.3" fill="none"/>`);
-      const c = card(rel);
-      if (c) {
-        const mx = ax + (bx - ax) * 0.72, my = ay + (by - ay) * 0.72;
-        L.push(`<rect x="${mx - 17}" y="${my - 9}" width="34" height="17" rx="4" fill="${C.card}" stroke="${C.line}"/>`);
-        L.push(`<text x="${mx}" y="${my + 3}" text-anchor="middle" font-size="10" font-weight="600" fill="${C.muted}">${esc(c)}</text>`);
+      const key = [e.entity, to].sort().join("|");
+      if (drawn.has(key)) continue;
+      drawn.add(key);
+      const p1 = edge(a, b.x + b.w / 2, b.y + b.h / 2);
+      const p2 = edge(b, a.x + a.w / 2, a.y + a.h / 2);
+      /* A diagonal bows away from the middle. Five relationships between four entities cannot be
+       * drawn on a grid without a crossing — published practice says minimise, not eliminate —
+       * but two straight diagonals overlap along their shared centre, while two arcs bowing
+       * opposite ways cross once, cleanly, at a visible angle. */
+      const diag = Math.abs(p1.x - p2.x) > 20 && Math.abs(p1.y - p2.y) > 20;
+      const bow = diag ? (p1.x < p2.x ? 1 : -1) * 54 : 0;
+      const mx0 = (p1.x + p2.x) / 2 + bow, my0 = (p1.y + p2.y) / 2 - bow * 0.35;
+      L.push(`<path d="M${p1.x} ${p1.y} ${diag ? `Q${mx0.toFixed(0)} ${my0.toFixed(0)} ` : "L"}${p2.x} ${p2.y}" stroke="${C.line}" stroke-width="1.3" fill="none"/>`);
+      L.push(foot(p2.x, p2.y, p2.x - p1.x, p2.y - p1.y, kind(rel)));
+      L.push(foot(p1.x, p1.y, p1.x - p2.x, p1.y - p2.y, { many: false, optional: false }));
+      const v = verb(rel);
+      if (v) {
+        const mx = diag ? (p1.x + p2.x) / 2 + bow * 0.5 : (p1.x + p2.x) / 2;
+        const my = diag ? (p1.y + p2.y) / 2 - bow * 0.18 : (p1.y + p2.y) / 2;
+        const t = v.slice(0, 26);
+        L.push(`<rect x="${mx - t.length * 3.1 - 6}" y="${my - 9}" width="${t.length * 6.2 + 12}" height="18" rx="4" fill="${C.card}"/>`);
+        L.push(`<text x="${mx}" y="${my + 4}" text-anchor="middle" font-size="10.5" fill="${C.muted}">${esc(t)}</text>`);
       }
     }
   }
-  for (const e of entities) {
+  for (const e of ordered) {
     const b = pos.get(e.entity); if (!b) continue;
     const own = owned(e);
-    L.push(`<g data-node="${esc(e.entity)}" tabindex="0" role="button" aria-label="${esc(e.entity)}">`);
-    L.push(`<rect x="${b.x}" y="${b.y}" width="${b.w}" height="${b.h}" rx="8" fill="${own ? "#eaf2f8" : C.card}" stroke="${own ? C.accent : C.line}" stroke-width="${own ? 1.8 : 1.2}"/>`);
-    L.push(`<text x="${b.x + 14}" y="${b.y + 24}" font-size="13.5" font-weight="700" fill="${C.ink}">${esc(vi(e.entity))}</text>`);
-    if (vi(e.entity) !== e.entity) L.push(`<text x="${b.x + b.w - 14}" y="${b.y + 24}" text-anchor="end" font-size="10" fill="${C.muted}" font-family="ui-monospace,Menlo,monospace">${esc(e.entity)}</text>`);
-    L.push(`<text x="${b.x + 14}" y="${b.y + 41}" font-size="10.5" fill="${own ? C.accent : C.muted}">${own ? "app này sở hữu" : "bản soi từ 8project — chỉ đọc"}</text>`);
+    L.push(`<rect x="${b.x}" y="${b.y}" width="${b.w}" height="${b.h}" rx="6" fill="${own ? "#eaf2f8" : C.card}" stroke="${own ? C.accent : C.line}" stroke-width="${own ? 1.8 : 1.2}"/>`);
+    L.push(`<rect x="${b.x}" y="${b.y}" width="${b.w}" height="30" rx="6" fill="${own ? C.accent : "#f2f1ef"}"/>`);
+    L.push(`<rect x="${b.x}" y="${b.y + 22}" width="${b.w}" height="8" fill="${own ? C.accent : "#f2f1ef"}"/>`);
+    L.push(`<text x="${b.x + 12}" y="${b.y + 20}" font-size="12.5" font-weight="700" fill="${own ? "#fff" : C.ink}">${esc(vi(e.entity))}</text>`);
+    L.push(`<text x="${b.x + b.w - 12}" y="${b.y + 20}" text-anchor="end" font-size="9.5" fill="${own ? "rgba(255,255,255,.75)" : C.muted}" font-family="ui-monospace,Menlo,monospace">${esc(e.entity)}</text>`);
     arr(e.attributes).slice(0, 6).forEach((a, i) => {
-      // An attribute that names another entity is a reference to it, so it reads in the same
-      // language the entity does. A box headed "xác nhận cuối ngày" listing a field called
-      // "work item" reads as one translation somebody forgot.
       const nm = vi(typeof a === "string" ? a : (a.name || ""));
-      L.push(`<text x="${b.x + 14}" y="${b.y + 60 + i * 16}" font-size="11" fill="${C.muted}">${esc(String(nm).slice(0, 34))}</text>`);
+      L.push(`<text x="${b.x + 12}" y="${b.y + 48 + i * 15}" font-size="10.5" fill="${C.muted}">${esc(String(nm).slice(0, 36))}</text>`);
     });
     if (arr(e.attributes).length > 6) {
-      L.push(`<text x="${b.x + 14}" y="${b.y + 60 + 6 * 16}" font-size="10.5" fill="${C.muted}">+${arr(e.attributes).length - 6} thuộc tính nữa</text>`);
+      L.push(`<text x="${b.x + 12}" y="${b.y + 48 + 6 * 15}" font-size="10" fill="${C.muted}">+${arr(e.attributes).length - 6} trường nữa</text>`);
     }
-    L.push(`</g>`);
   }
   L.push("</svg>");
   return L.join("\n");
@@ -464,6 +534,68 @@ function useCaseDiagram(useCases) {
   return L.join("\n");
 }
 
+
+/* ---- context diagram ------------------------------------------------------------------------
+ * The first picture in a BA's pack and the one pica never had: the system in the middle, every
+ * external thing it touches around it, and the direction of each arrow. It answers, in one look
+ * and with no notation, the question an executive asks first — "what does this thing plug into,
+ * and what does it send where".
+ *
+ * It is also the cheapest check on scope there is. An external system nobody named is missing
+ * from the picture, and a picture with more boxes than the contract mentions is a scope dispute
+ * found early instead of late.
+ */
+function contextDiagram(state) {
+  const apps = arr(state.applications).map((a) => a.name || a).filter(Boolean);
+  if (!apps.length) return null;
+  const externals = [];
+  for (const it of arr(state.integrationsNamed)) {
+    externals.push({ name: it.system, dir: String(it.direction || "đọc"), kind: "system" });
+  }
+  if (state.identity?.provider) {
+    externals.push({ name: `${state.identity.provider}${state.identity.sso ? ` (${state.identity.sso})` : ""}`, dir: "đăng nhập", kind: "system" });
+  }
+  const actors = [...new Set(arr(state.stakeholders).map((s) => s.role).filter(Boolean))].slice(0, 5);
+  if (!externals.length && !actors.length) return null;
+
+  const W = 900, cx = W / 2;
+  const leftN = actors.length, rightN = externals.length;
+  const rowH = 74, pad = 110;
+  const H = pad + Math.max(leftN, rightN, 2) * rowH + 70;
+  const cy = pad + (Math.max(leftN, rightN, 2) * rowH) / 2 - 10;
+  const coreW = 250, coreH = Math.min(150, 64 + apps.length * 26);
+
+  const L = [`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" ${F} role="img" aria-label="Sơ đồ bối cảnh">`];
+  L.push(`<defs><marker id="cx" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="${C.muted}"/></marker></defs>`);
+  L.push(`<text x="30" y="34" font-size="15" font-weight="700" fill="${C.ink}">Hệ thống này chạm vào những gì</text>`);
+  L.push(`<text x="30" y="54" font-size="12" fill="${C.muted}">${actors.length} vai người dùng · ${externals.length} hệ thống ngoài. Mũi tên chỉ chiều dữ liệu đi.</text>`);
+
+  // the system under discussion, in the middle
+  L.push(`<rect x="${cx - coreW / 2}" y="${cy - coreH / 2}" width="${coreW}" height="${coreH}" rx="10" fill="${C.accent}"/>`);
+  L.push(`<text x="${cx}" y="${cy - coreH / 2 + 26}" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">Hệ thống sẽ xây</text>`);
+  apps.forEach((a, i) =>
+    L.push(`<text x="${cx}" y="${cy - coreH / 2 + 52 + i * 24}" text-anchor="middle" font-size="14" font-weight="600" fill="rgba(255,255,255,.92)">${esc(a)}</text>`));
+
+  const side = (items, x, anchor, dirLabel) => items.forEach((it, i) => {
+    const y = pad + i * rowH + 18;
+    const bw = 210, bx = anchor === "start" ? x : x - bw;
+    const nm = wrap(it.name ?? it, 26, 2);
+    const bh = nm.length > 1 ? 58 : 46;
+    L.push(`<rect x="${bx}" y="${y - bh / 2}" width="${bw}" height="${bh}" rx="8" fill="${C.card}" stroke="${C.line}"/>`);
+    nm.forEach((t, k) => L.push(`<text x="${bx + bw / 2}" y="${y - bh / 2 + 18 + k * 14}" text-anchor="middle" font-size="12" font-weight="600" fill="${C.ink}">${esc(t)}</text>`));
+    const lab = it.dir ?? dirLabel;
+    if (lab) L.push(`<text x="${bx + bw / 2}" y="${y + bh / 2 - 8}" text-anchor="middle" font-size="10.5" fill="${C.muted}">${esc(lab)}</text>`);
+    const from = anchor === "start" ? bx + bw : bx;
+    const to = anchor === "start" ? cx - coreW / 2 : cx + coreW / 2;
+    const mid = (from + to) / 2;
+    L.push(`<path d="M${from} ${y} C${mid} ${y} ${mid} ${cy} ${to} ${cy}" fill="none" stroke="${C.line}" stroke-width="1.4" marker-end="url(#cx)"/>`);
+  });
+  side(actors.map((a) => ({ name: a })), 30, "start", "dùng");
+  side(externals, W - 30, "end", "");
+  L.push("</svg>");
+  return L.join("\n");
+}
+
 const built = {};
 for (const e of arr(state.stateModel)) {
   const svg = stateDiagram(e);
@@ -473,6 +605,7 @@ const perm = permissionsDiagram(state.rolesPermissions); if (perm) built["permis
 const proc = processDiagram(state.toBe);                 if (proc) built["process"] = proc;
 const erd  = erdDiagram(arr(state.domainModel));         if (erd)  built["erd"] = erd;
 const ucd  = useCaseDiagram(arr(state.useCases));        if (ucd)  built["usecases"] = ucd;
+const ctx  = contextDiagram(state);                      if (ctx)  built["context"] = ctx;
 
 if (TO_STDOUT) {
   const key = Object.keys(built).find((k) => k.includes(ONLY)) || Object.keys(built)[0];

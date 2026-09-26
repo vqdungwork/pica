@@ -355,6 +355,33 @@ const M = [
         { file: path.join("__mutation-baseline__", "index.png"), base64: "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==" },
       ] }],
 
+  /* acceptance-check — a requirement nobody can test, then a criterion that only restates it.
+   * Both pass every other check in the suite: the requirement is well formed, traced in both
+   * directions and classified. Only "can a reviewer tell when this is done" catches them. */
+  ["acceptance-coverage-regressed", "business-analyst/scripts/acceptance-check.mjs", [S], "requirements",
+    (s) => s.requirements.push({ id: "FR-MUT", class: "functional", statement: "Một yêu cầu không ai kiểm được", tracesTo: [s.useCases[0].id] })],
+  ["acceptance-restates-the-requirement", "business-analyst/scripts/acceptance-check.mjs", [S], "requirements",
+    (s) => { const r = s.requirements.find((x) => x.class !== "nonFunctional"); r.acceptanceCriteria = ["Hệ thống phải làm đúng điều vừa nói ở trên"]; }],
+  ["acceptance-too-thin", "business-analyst/scripts/acceptance-check.mjs", [S], "requirements",
+    (s) => { const r = s.requirements.find((x) => x.class !== "nonFunctional"); r.acceptanceCriteria = ["xong"]; }],
+
+  /* figure-placement-check — the two ways a diagram is produced and still not seen. One is never
+   * placed in the assembled page; the other is placed and scaled to the width of the column until
+   * its labels are too small to read. Both report "wrote N diagram(s)" and pass everything else. */
+  ["figure-rendered-but-not-placed", "business-analyst/scripts/figure-placement-check.mjs",
+    [path.join(DIR, "__mut-fig__.html"), path.join(DIR, "__mut-figs__")], "@none",
+    { files: [
+        { file: "__mut-fig__.html", content: '<!doctype html><title>m</title><figure data-figure="kept" data-label="Kept"><svg viewBox="0 0 400 300"><text font-size="12">Kept</text></svg></figure>\n' },
+        { file: path.join("__mut-figs__", "kept.svg"), content: '<svg viewBox="0 0 400 300"><text font-size="12">Kept</text></svg>\n' },
+        { file: path.join("__mut-figs__", "orphan.svg"), content: '<svg viewBox="0 0 400 300"><text font-size="12">Nobody placed me</text></svg>\n' },
+      ] }],
+  ["figure-too-wide-to-read", "business-analyst/scripts/figure-placement-check.mjs",
+    [path.join(DIR, "__mut-fig2__.html"), path.join(DIR, "__mut-figs2__")], "@none",
+    { files: [
+        { file: "__mut-fig2__.html", content: '<!doctype html><title>m</title><figure data-figure="wide" data-label="Wide"><svg viewBox="0 0 2400 300"><text font-size="11">Wide</text></svg></figure>\n' },
+        { file: path.join("__mut-figs2__", "wide.svg"), content: '<svg viewBox="0 0 2400 300"><text font-size="11">Wide</text></svg>\n' },
+      ] }],
+
   /* screenreader-check — a page with no heading and a button the tree cannot name. Both are
    * invisible to every geometric check and to a screenshot: the button has a visible icon, and
    * the page looks perfectly structured to an eye. */

@@ -52,6 +52,12 @@ const toVi = (text) => {
 /* Shouting, turned back into emphasis. An id keeps its capitals; a word does not. */
 const unshout = (text) => String(text ?? "").replace(/\b(?![A-Z]{2,4}-\d)[A-ZÀ-Ỹ]{4,}(?:\s+[A-ZÀ-Ỹ]{2,})*\b/g,
   (m) => m.charAt(0) + m.slice(1).toLowerCase());
+const clip = (t, n) => {
+  if (t.length <= n) return t;
+  const cut = t.slice(0, n);
+  const at = Math.max(cut.lastIndexOf(" "), 0) || n;
+  return cut.slice(0, at).replace(/[\s,;:(\[–-]+$/, "") + "…";
+};
 const human = (text) => unshout(toVi(text));
 
 const bare = (x) => String(x).includes(":") ? String(x).split(":").pop() : String(x);
@@ -240,16 +246,39 @@ const html = `<!doctype html><html lang="vi"><head><meta charset="utf-8">
 <style>
 :root{
   color-scheme:light;
-  --paper:#fbfaf8; --card:#fff; --ink:#1a1c1e; --ink2:#4e5459; --ink3:#868b91;
-  --rule:#e3e1dd; --rule2:#efedea;
-  --mirror:#5c6166; --mirror-bg:#f3f2f0;
-  --app:#005a8d;    --app-bg:#eaf2f8;
-  --outside:#6b6420; --outside-bg:#f6f4e6;
-  --open:#a15c00;   --open-bg:#fdf3e6;
+  --paper:#ffffff; --card:#ffffff; --sunk:#f7f8f9;
+  --ink:#16181d; --ink2:#4a5058; --ink3:#767d86;
+  --rule:#e1e4e8; --rule2:#eef0f2;
+  --mirror:#6b7280; --mirror-bg:#f4f5f7;
+  --app:#1a56b8;    --app-bg:#eef3fc;
+  --outside:#8a6d1f; --outside-bg:#fbf6e8;
+  --open:#b45309;   --open-bg:#fdf5e9; --open-line:#f0dcb8;
   --serif:"Source Serif 4",Georgia,serif;
   --sans:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
   --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
   --measure:68ch;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --paper:#0f1115; --card:#171a20; --sunk:#14171c;
+    --ink:#e8eaed; --ink2:#a8aeb6; --ink3:#767d86;
+    --rule:#2a2e35; --rule2:#22262c;
+    --mirror:#9aa1ab; --mirror-bg:#1c2026;
+    --app:#63a4ff;    --app-bg:#152236;
+    --outside:#c9a84c; --outside-bg:#241f13;
+    --open:#e0913a;   --open-bg:#2a1f12; --open-line:#4a3418;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --paper:#0f1115; --card:#171a20; --sunk:#14171c;
+  --ink:#e8eaed; --ink2:#a8aeb6; --ink3:#767d86;
+  --rule:#2a2e35; --rule2:#22262c;
+  --mirror:#9aa1ab; --mirror-bg:#1c2026;
+  --app:#63a4ff;    --app-bg:#152236;
+  --outside:#c9a84c; --outside-bg:#241f13;
+  --open:#e0913a;   --open-bg:#2a1f12; --open-line:#4a3418;
 }
 *{box-sizing:border-box}
 body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.62 var(--sans);-webkit-font-smoothing:antialiased}
@@ -265,7 +294,7 @@ p{max-width:var(--measure)}
 .meta b{color:var(--ink2);font-weight:600}
 hr{border:0;border-top:2px solid var(--outside);margin:0 0 30px}
 
-.howto{background:#f6f5f2;border:1px solid var(--rule);border-radius:10px;padding:18px 22px;margin-bottom:54px}
+.howto{background:var(--sunk);border:1px solid var(--rule);border-radius:10px;padding:18px 22px;margin-bottom:54px}
 .howto p{margin:0 0 11px;font-size:14px;max-width:var(--measure)}
 .howto p:last-child{margin-bottom:0}
 .ref{display:inline-block;font:600 11px/1.5 var(--mono);background:var(--outside);color:#fff;padding:1px 7px;border-radius:4px}
@@ -309,7 +338,7 @@ section.part{margin-bottom:58px;scroll-margin-top:16px}
 .ent h3{margin-bottom:3px;font-size:15px}
 .ent .own{font-size:11.5px;color:var(--ink3);margin-bottom:9px}
 .ent .attrs{display:flex;flex-wrap:wrap;gap:4px}
-.ent .attrs span{font:500 11px/1 var(--mono);background:#f4f3f1;border-radius:4px;padding:4px 7px;color:var(--ink2)}
+.ent .attrs span{font:500 11px/1 var(--mono);background:var(--sunk);border-radius:4px;padding:4px 7px;color:var(--ink2)}
 .ent .rel{font-size:12px;color:var(--ink2);margin-top:9px;padding-top:9px;border-top:1px solid var(--rule2)}
 
 .seg{background:var(--card);border:1px solid var(--rule);border-radius:9px;padding:15px 17px}
@@ -318,16 +347,30 @@ section.part{margin-bottom:58px;scroll-margin-top:16px}
 .seg .pain{font-size:12.5px;color:var(--ink2);display:flex;gap:7px;padding:5px 0;border-top:1px solid var(--rule2)}
 .seg .pain .pid{font:600 10.5px/1.6 var(--mono);color:var(--ink3);flex:0 0 auto}
 
+table.rtm{width:100%;border-collapse:collapse;font-size:12.5px;min-width:660px}
+table.rtm th{text-align:left;font:600 10.5px/1 var(--sans);letter-spacing:.06em;text-transform:uppercase;color:var(--ink3);padding:0 10px 8px 0;border-bottom:1px solid var(--rule)}
+table.rtm td{padding:9px 10px 9px 0;vertical-align:top;border-top:1px solid var(--rule2)}
+table.rtm td b{font:600 11px/1.5 var(--mono);color:var(--app);display:block}
+table.rtm td .st{display:block;color:var(--ink2);font-size:12px;line-height:1.35;margin-top:2px;max-width:34ch}
+table.rtm a{font:600 10.5px/1.7 var(--mono);color:var(--app);text-decoration:none;margin-right:5px;white-space:nowrap}
+table.rtm a:hover{text-decoration:underline}
+table.rtm .none{color:var(--ink3)}
+table.rtm tr.warn td{background:var(--open-bg)}
 .openlist{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px}
-.openc{background:var(--open-bg);border:1px solid #f0dfc4;border-left:3px solid var(--open);border-radius:9px;padding:12px 14px}
+.openc{background:var(--open-bg);border:1px solid var(--open-line);border-left:3px solid var(--open);border-radius:9px;padding:12px 14px}
 .openc .id{font:600 10.5px/1 var(--mono);color:var(--open)}
 .openc p{margin:6px 0 0;font-size:12.5px;line-height:1.45;color:#6d4200}
 
 /* figures fit the column; nothing scrolls sideways */
 .fig{background:var(--card);border:1px solid var(--rule);border-radius:10px;padding:14px;margin:0 0 14px}
 .fig svg{width:100%;height:auto;display:block}
+/* The SVGs carry baked light colours. Rather than regenerate a second dark copy —
+   two sources that will drift — the figure keeps a light card under them in both
+   themes, which is what a printed diagram does on a dark page anyway. */
+:root[data-theme="dark"] .fig,@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .fig{background:#f7f8f9}}
 .fig figcaption{font-size:11.5px;color:var(--ink3);margin-top:9px}
-.fig svg [data-node]{cursor:pointer}
+.fig:not(.fig--static) svg [data-node]{cursor:pointer}
+.fig--static svg [data-node]{cursor:default}
 .fig svg [data-edge]{pointer-events:none}
 figure[data-focus] svg [data-node],figure[data-focus] svg [data-edge]{opacity:.15;transition:opacity .18s}
 figure[data-focus] svg [data-node][data-on],figure[data-focus] svg [data-edge][data-on]{opacity:1}
@@ -381,6 +424,13 @@ ${(S.specLede || S.problem?.statement || S.asIs || "").split("\n\n").map((para) 
   ${Object.entries(KIND).map(([k, v]) => `<span class="chip ${v.css}"><span class="dot ${v.css}"></span>${esc(v.label)}</span>`).join("")}
 </div>
 
+${diagrams.some((d) => d.name === "context") ? `<section class="part">
+  <p class="eyebrow">Bắt đầu từ đây</p>
+  <h2>Hệ thống này chạm vào những gì</h2>
+  <p class="deck">Ai dùng nó, nó nối với hệ thống nào, và dữ liệu đi theo chiều nào. Mọi thứ còn lại trong tài liệu nằm bên trong ô xanh.</p>
+  <figure class="fig fig--static" data-label="Sơ đồ bối cảnh" data-figure="context">${diagrams.find((d) => d.name === "context").svg}</figure>
+</section>` : ""}
+
 ${journey.length ? `<section class="part">
   <p class="eyebrow">Phần 1</p>
   <h2>Một ngày chạy thế nào</h2>
@@ -432,7 +482,7 @@ ${diagrams.some((d) => d.name === "usecases") ? `<section class="part">
   <p class="eyebrow">Phần 2b</p>
   <h2>Ai làm được gì</h2>
   <p class="deck">Mỗi đường là một việc một vai làm được. Không phải màn hình, không phải tính năng — là quyền làm một việc.</p>
-  <figure class="fig" data-label="Ai làm được gì">${diagrams.find((d) => d.name === "usecases").svg}</figure>
+  <figure class="fig fig--static" data-label="Ai làm được gì" data-figure="usecases">${diagrams.find((d) => d.name === "usecases").svg}</figure>
 </section>` : ""}
 
 ${arr(S.screens).length ? `<section class="part">
@@ -453,7 +503,14 @@ ${diagrams.some((d) => d.name === "erd") ? `<section class="part">
   <p class="eyebrow">Phần 4</p>
   <h2>Dữ liệu, và cái gì liên quan cái gì</h2>
   <p class="deck">Bốn thực thể. Chỉ một do app này sở hữu — phần còn lại là bản soi chỉ đọc của 8project, và app này không bao giờ ghi ngược lên.</p>
-  <figure class="fig" data-label="Dữ liệu và quan hệ">${diagrams.find((d) => d.name === "erd").svg}</figure>
+  <figure class="fig fig--static" data-label="Dữ liệu và quan hệ" data-figure="erd">${diagrams.find((d) => d.name === "erd").svg}</figure>
+</section>` : ""}
+
+${diagrams.some((d) => d.name === "process") ? `<section class="part">
+  <p class="eyebrow">Phần 3b</p>
+  <h2>Cùng một ngày đó, vẽ đầy đủ</h2>
+  <p class="deck">Phần trên kể bằng lời. Đây là cùng một quy trình vẽ ra hết: mỗi hàng là một vai, mỗi cột là một mốc trong ngày. Dùng để soát xem có bước nào thiếu, hoặc có việc nào rơi vào sai người.</p>
+  <figure class="fig" data-label="Quy trình TO-BE" data-figure="process">${diagrams.find((d) => d.name === "process").svg}<figcaption>Quy trình TO-BE · mỗi hàng một vai</figcaption></figure>
 </section>` : ""}
 
 ${arr(S.domainModel).length && !diagrams.some((d) => d.name === "erd") ? `<section class="part">
@@ -473,11 +530,11 @@ ${arr(S.domainModel).length && !diagrams.some((d) => d.name === "erd") ? `<secti
 ${diagrams.length ? `<section class="part">
   <p class="eyebrow">Phần 5</p>
   <h2>Vòng đời và quyền</h2>
-  <p class="deck">Một việc đi qua những trạng thái nào, ai được làm gì. Bấm một trạng thái để chỉ xem đường đi của nó.</p>
-  ${diagrams.filter((d) => !["process", "erd", "usecases"].includes(d.name)).map((d) => {
+  <p class="deck">Một việc đi qua những trạng thái nào, và ai được làm gì với nó. Bấm một trạng thái để chỉ xem đường đi tiếp theo của nó.</p>
+  ${diagrams.filter((d) => !["process", "erd", "usecases", "context"].includes(d.name)).map((d) => {
     const label = d.name.startsWith("state-") ? `Vòng đời · ${human(d.name.replace(/^state-/, "").replace(/-/g, " "))}`
       : d.name === "permissions" ? "Ma trận quyền · vai trò × đối tượng" : d.name;
-    return `<figure class="fig" data-label="${esc(label)}">${d.svg}<figcaption>${esc(label)}</figcaption>
+    return `<figure class="fig" data-label="${esc(label)}" data-figure="${d.name}">${d.svg}<figcaption>${esc(label)}</figcaption>
       <div class="fbar"><span class="fname"></span><button data-back>← trước</button><button data-fwd>sau →</button><button data-clear>bỏ chọn</button></div></figure>`;
   }).join("")}
 </section>` : ""}
@@ -489,10 +546,32 @@ ${openThings.length ? `<section class="part">
   <div class="openlist">${openThings.map((o) => `<div class="openc"><span class="id">${esc(o.id)}</span><p>${esc(human(String(o.t)).slice(0, 240))}</p></div>`).join("")}</div>
 </section>` : ""}
 
+${arr(S.requirements).length ? `<section class="part">
+  <p class="eyebrow">Phần 7</p>
+  <h2>Mỗi yêu cầu đến từ đâu, và hiện ra ở màn nào</h2>
+  <p class="deck">Ma trận truy vết. Mỗi dòng đi được cả hai chiều: từ nỗi đau xuống tới màn hình, và ngược lại. Đây là thứ dàn xếp tranh chấp phạm vi — nếu một màn không có dòng nào trỏ tới, không ai đã yêu cầu nó.</p>
+  <div style="overflow-x:auto"><table class="rtm"><thead><tr>
+    <th>Yêu cầu</th><th>Giải nỗi đau</th><th>Cho use case</th><th>Theo luật</th><th>Hiện ở màn</th>
+  </tr></thead><tbody>
+  ${arr(S.requirements).map((r) => {
+    const refs = ids(r.tracesTo);
+    const ucs = refs.filter((x) => /^UC-/.test(x));
+    const brs = refs.filter((x) => /^(BR|NFR)-/.test(x));
+    const pains = [...new Set(ucs.flatMap((u) => ids(arr(S.useCases).find((x) => x.id === u)?.addresses)))];
+    const scrs = arr(S.screens).filter((sc) => ids(sc.tracesTo).some((t) => ucs.includes(t))).map((sc) => sc.id);
+    const cell = (list) => list.length ? list.map((x) => `<a href="#${esc(x.split("#")[0])}">${esc(x)}</a>`).join(" ") : `<span class="none">—</span>`;
+    return `<tr${!scrs.length && r.class === "functional" ? ' class="warn"' : ""}>
+      <td><b>${esc(r.id)}</b><span class="st">${esc(clip(human(String(r.statement)), 92))}</span></td>
+      <td>${cell(pains)}</td><td>${cell(ucs)}</td><td>${cell(brs)}</td><td>${cell(scrs)}</td>
+    </tr>`;
+  }).join("")}
+  </tbody></table></div>
+</section>` : ""}
+
 ${appendix.length ? `<section class="part">
   <p class="eyebrow">Phụ lục</p>
   <h2>Sổ tra cứu</h2>
-  <p class="deck">Mở ra khi cần tra một mã cụ thể. Không ai phải đọc hết phần này.</p>
+  <p class="deck">Danh sách đầy đủ theo mã, để tra khi cần.</p>
   ${appendix.map((reg) => `<details class="app"><summary>${esc(reg.title)}<span class="n">${reg.items.length}</span></summary>
     <table><tbody>${reg.items.map((it) => `<tr id="${esc(it.id)}"${it.open ? " data-open" : ""}>
       <td><b>${esc(it.id)}</b></td>
@@ -502,7 +581,10 @@ ${appendix.length ? `<section class="part">
 
 </div>
 <script>
-document.querySelectorAll("figure.fig").forEach(fig => {
+// Only the lifecycle figures are interrogable: focus answers "what follows this", and a
+// use case or an entity has no route to follow. Making them clickable dimmed the page and
+// taught the reader nothing, which is a control that looks interactive and is not.
+document.querySelectorAll("figure.fig:not(.fig--static)").forEach(fig => {
   const svg = fig.querySelector("svg"); if (!svg) return;
   const nodes = [...svg.querySelectorAll("[data-node]")];
   const edges = [...svg.querySelectorAll("[data-edge]")].map(el => { const [from,to]=el.dataset.edge.split("|"); return {el,from,to}; });

@@ -120,6 +120,11 @@
           "entity": "approval",
           "ops": "cru"
         }
+      ],
+      "addresses": [
+        "PP-01",
+        "PP-02",
+        "PP-03"
       ]
     }
   ],
@@ -1254,23 +1259,39 @@
     {
       "id": "R-01",
       "class": "business",
-      "text": "every payment above the threshold carries a named approver"
+      "text": "every payment above the threshold carries a named approver",
+      "tracesTo": [
+        "UC-01",
+        "BR-01"
+      ]
     },
     {
       "id": "R-02",
       "class": "functional",
-      "text": "an approver can approve or return a payment with a reason"
+      "text": "an approver can approve or return a payment with a reason",
+      "tracesTo": [
+        "UC-01",
+        "BR-01"
+      ]
     },
     {
       "id": "R-03",
       "class": "non-functional",
-      "text": "see N-01"
+      "text": "see N-01",
+      "tracesTo": [
+        "UC-01",
+        "BR-01"
+      ]
     },
     {
       "id": "R-04",
       "class": "transition",
       "text": "import twelve months of historical approvals from the ledger export",
-      "untilWhen": "once the ledger integration is live the import screen is removed"
+      "untilWhen": "once the ledger integration is live the import screen is removed",
+      "tracesTo": [
+        "UC-01",
+        "BR-01"
+      ]
     }
   ],
   "stateModel": [
@@ -1385,6 +1406,11 @@
     {
       "state": "pending",
       "why": "an approval is pending only while the approver is on the decide screen, which has no separate structure"
+    },
+    {
+      "where": "state → screen",
+      "reason": "the modelled states are domain states on the payment and are drawn as data in a row; the screen state vocabulary describes load, emptiness and disablement. The two are deliberately different, by design.",
+      "by": "pica example"
     }
   ],
   "stateExemptions": [
@@ -1439,7 +1465,10 @@
         "empty",
         "held"
       ],
-      "name": "approvals queue"
+      "name": "approvals queue",
+      "tracesTo": [
+        "UC-01"
+      ]
     },
     {
       "id": "case",
@@ -1447,6 +1476,9 @@
       "role": "case",
       "states": [
         "default"
+      ],
+      "tracesTo": [
+        "UC-01"
       ]
     },
     {
@@ -1456,6 +1488,9 @@
       "states": [
         "default",
         "disabled"
+      ],
+      "tracesTo": [
+        "UC-01"
       ]
     },
     {
@@ -1464,6 +1499,9 @@
       "role": "history",
       "states": [
         "default"
+      ],
+      "tracesTo": [
+        "UC-01"
       ]
     }
   ]
