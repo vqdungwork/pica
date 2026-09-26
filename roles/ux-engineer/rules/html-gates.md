@@ -419,3 +419,32 @@ And the recurring one underneath all three: an equally specific rule written **e
 file** loses to one written later. That cost a divider, a row divider, and a two-column grid in
 one engagement — three separate silent losses, none visible in any diff, all of them found by
 rendering.
+
+
+## a check the runner cannot address is a check nobody will run
+
+<!-- enforced-by: none — a runner contract; pica-verify refuses a spaced placeholder and names every undeclared one -->
+
+Fifteen checks abstained on a finished project. Every one of them was running and passing: the
+project had wired them into its own `package.json` with a hardcoded `localhost` URL and a hardcoded
+path into the plugin cache, and ran them itself. The verification was real, the runner could not
+see it, and the closing report said twenty-one of twenty-nine design checks abstained.
+
+**Evidence that exists only in a side channel is evidence nobody will find.** A project declares
+what only the project knows — where its app runs, which selector is its dialog, which route is
+known-good — once, in `.pica/runners.json`, and the runner uses them. It is also the only way a
+placeholder like `<dialog>` could ever be filled: no convention can guess a selector.
+
+Two further defects fell out of writing it down:
+
+- four checks declared `<every screen>`, with a space inside the brackets. Arguments are split on
+  whitespace, so the halves became literal arguments and each check ran with a broken route list
+  while reporting normally. The runner now refuses a spaced placeholder where it is written
+- the runner said "abstained" for both "this project has nothing for this check to read" and "this
+  check applies and nobody said where the app is". The first is a fact about the project; the
+  second is a fact about the setup, and it is fixable in one line. They are counted separately now
+
+**A route list is a screen list crossed with its states.** A check that visits the screens and not
+their states has not visited the empty one, the error one, or the one the client argues about — so
+`--routes` takes the project's own shared module and expands it, rather than a list restated in a
+config that will drift from it.

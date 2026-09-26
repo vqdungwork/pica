@@ -26,7 +26,37 @@ const CHECKS = ["unnamed-in-tree", "hidden-from-tree", "tree-order", "silent-cha
 const args = process.argv.slice(2);
 const arg = (k, d) => (args.includes(k) ? args[args.indexOf(k) + 1] : d);
 const base = arg("--url");
-const routes = (arg("--routes", "") || "").split(",").map((s) => s.trim()).filter(Boolean);
+/* --routes takes a comma-separated list, OR a path to a module that exports one.
+ *
+ * A project that already keeps its route list in one shared module should not have to restate it
+ * in a runner config — restating it is how the two copies drift, and this project had deliberately
+ * collapsed them into one file earlier for exactly that reason. Given a path, import it and take
+ * whatever array it exports. */
+async function resolveRoutes(raw) {
+  const s = String(raw || "").trim();
+  if (!s) return [];
+  if (/[,=&]/.test(s)) return s.split(",").map((x) => x.trim()).filter(Boolean);
+  // self-contained: these scripts import nothing at the top level, so the helper must not either
+  const { existsSync } = await import("node:fs");
+  const nodePath = await import("node:path");
+  const { pathToFileURL } = await import("node:url");
+  if (!existsSync(s)) return s.split(",").map((x) => x.trim()).filter(Boolean);
+  const mod = await import(pathToFileURL(nodePath.resolve(s)).href);
+  const list = mod.ROUTES ?? mod.SCREENS ?? mod.routes ?? mod.screens ?? mod.default ?? [];
+  /* A screen with states is not one route, it is one route per state — which is the whole point of
+   * having the list: a check that visits "the screens" and not their states has not visited the
+   * empty one, the error one, or the one the client actually argues about. */
+  return (Array.isArray(list) ? list : Object.values(list)).flatMap((r) => {
+    if (typeof r === "string") return [r];
+    if (!r || typeof r !== "object") return [];
+    if (r.query ?? r.q ?? r.route) return [r.query ?? r.q ?? r.route];
+    const id = r.scr ?? r.screen ?? r.id;
+    if (!id) return [];
+    const states = Array.isArray(r.states) && r.states.length ? r.states : ["default"];
+    return states.map((st) => `scr=${encodeURIComponent(id)}&state=${encodeURIComponent(st)}`);
+  }).filter(Boolean);
+}
+const routes = await resolveRoutes(arg("--routes", ""));
 const FRAME = arg("--frame", ".frame");
 const ACT = arg("--act", "");
 const MODAL = arg("--modal", '[role="dialog"]');

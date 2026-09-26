@@ -167,9 +167,46 @@ const SUB = { "<state>": path.relative(PROJECT, path.resolve(statePath)) || ".pi
    * findings. A placeholder with no substitution is a bug in THIS file, so `argsOf`
    * now refuses rather than passing the angle brackets through as a filename. */
   "<designSystem>": "html/design-system.html", "<structureDir>": "html/structure" };
+
+/* THE PROJECT DECLARES WHAT ONLY THE PROJECT KNOWS.
+ *
+ * Fifteen checks abstained on a finished project — a served URL, a dialog selector, a known route,
+ * a baseline directory. Every one of them was RUNNING and PASSING: the project had wired them into
+ * its own package.json with a hardcoded localhost URL and a hardcoded path into the plugin cache,
+ * and ran them itself. So the verification was real, the runner could not see it, and the closing
+ * report said twenty-one of twenty-nine design checks abstained.
+ *
+ * Evidence that exists only in a side channel is evidence nobody will find. A project declares its
+ * substitutions once, in .pica/runners.json, and this runner uses them — which is also the only
+ * way a placeholder like <dialog> could ever be filled, since no convention can guess a selector.
+ *
+ *   { "substitutions": { "<servedDemo>": "http://localhost:5173/", "<dialog>": "[role=dialog]" },
+ *     "serve": { "cmd": "npm run dev", "cwd": "demo", "url": "http://localhost:5173/" } } */
+let RUNNERS = {};
+const runnersPath = path.join(PROJECT, ".pica", "runners.json");
+if (fs.existsSync(runnersPath)) {
+  try { RUNNERS = JSON.parse(fs.readFileSync(runnersPath, "utf8")); }
+  catch (e) { console.error(`FAIL  .pica/runners.json does not parse: ${e.message}`); process.exit(2); }
+}
+Object.assign(SUB, state.runners ?? {}, RUNNERS.substitutions ?? {});
 const unsubstituted = [];
+/* A placeholder with a SPACE in it — "<every screen>" — is split by the whitespace tokeniser into
+ * two fragments, neither of which matches a placeholder, so one is passed through as a literal
+ * argument and the check silently receives rubbish. Four checks were declared that way and each
+ * ran with a broken --routes value. Refuse it where it is written rather than at the far end. */
+for (const c of checks) {
+  const bad = (c.args || "").match(/<[^>]*\s[^>]*>/g);
+  if (bad) {
+    console.error(`FAIL  ${c.pkg}/${c.run} declares ${bad.join(", ")} — a placeholder may not contain a space, ` +
+      "because arguments are split on whitespace and the halves become literal arguments.");
+    process.exit(2);
+  }
+}
 const argsOf = (c) => c.args.split(/\s+/).map((a) => {
-  if (/^<[^>]+>$/.test(a) && !(a in SUB)) { unsubstituted.push(`${c.pkg}/${c.run} needs ${a}`); return null; }
+  if (/^<[^>]+>$/.test(a) && !(a in SUB)) {
+    unsubstituted.push(`${c.pkg}/${c.run} needs ${a} — declare it in .pica/runners.json under "substitutions"`);
+    return null;
+  }
   return SUB[a] ?? a;
 });
 
@@ -194,6 +231,31 @@ const run = (c) => new Promise((resolve) => {
       resolve({ ...c, code, out });
     });
 });
+
+/* If the project declares how to serve itself, serve it — a check that needs a running app and is
+ * skipped because nothing started the app is not a check, it is a gap with a green tick beside it. */
+let server = null;
+const serveCfg = RUNNERS.serve;
+const needsServer = scoped.some((c) => /<served|<url/.test(c.args || ""));
+if (serveCfg && needsServer) {
+  const { spawn } = await import("node:child_process");
+  const [cmd, ...rest] = String(serveCfg.cmd).split(/\s+/);
+  server = spawn(cmd, rest, { cwd: path.join(PROJECT, serveCfg.cwd ?? "."), stdio: "ignore", detached: false });
+  const deadline = Date.now() + (serveCfg.readyTimeoutMs ?? 30000);
+  let up = false;
+  while (Date.now() < deadline) {
+    try { const r = await fetch(serveCfg.url, { signal: AbortSignal.timeout(1500) }); if (r.ok || r.status < 500) { up = true; break; } }
+    catch { await new Promise((r) => setTimeout(r, 400)); }
+  }
+  if (!up) {
+    console.error(`FAIL  .pica/runners.json declares a server at ${serveCfg.url} and it never came up. ` +
+      "Checks that need it would abstain, which reads as \"not applicable\" rather than \"not started\".");
+    try { server.kill(); } catch {}
+    process.exit(2);
+  }
+}
+const stopServer = () => { if (server) { try { server.kill("SIGTERM"); } catch {} server = null; } };
+process.on("exit", stopServer);
 
 const todo = scoped.filter(applicable);
 const abstained = scoped.filter((c) => !applicable(c));
@@ -301,7 +363,19 @@ if (ADOPT && abstained.length) {
  * failure cannot be used to verify a fix to itself. */
 const runFaults = [];
 if (unsubstituted.length)
-  runFaults.push(`${unsubstituted.length} check(s) declare a placeholder this runner cannot substitute: ${unsubstituted.join("; ")}`);
+  /* Two different sentences, and the difference matters to whoever reads the closing report.
+   *
+   * "Not applicable" is a fact about the project: it built no static boards, so the checks that
+   * read a capture have nothing to read. "Not declared" is a fact about the SETUP: the check
+   * applies, it would run, and nobody told the runner where the app is. Reported as one number
+   * they look alike, and on one finished project fifteen checks that were running and passing
+   * under the project's own npm scripts were counted as abstentions — verification that existed
+   * and could not be seen. */
+  runFaults.push(
+    `${unsubstituted.length} check(s) APPLY and did not run for want of a declaration. This is not ` +
+    `"not applicable" — it is "nobody said where". Declare each in .pica/runners.json under ` +
+    `"substitutions", and a command under "serve" if the check needs the app running:\n      ` +
+    unsubstituted.join("\n      "));
 /* A check that failed and whose output this could not parse is a DIALECT MISMATCH, and
  * it erases the contents of a real failure: flow-check printed "  ok  <id>  N" and was
  * aggregated as "FAIL flow-check 0 finding(s) across 0 check(s)". Detecting it costs
