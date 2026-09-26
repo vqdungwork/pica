@@ -238,7 +238,7 @@ const openThings = [
 const APPENDIX = new Set(["rules", "reqs", "nfr", "glossary", "useCases", "exclusions", "assumptions"]);
 const appendix = built.filter((r) => APPENDIX.has(r.key));
 
-const html = `<!doctype html><html lang="vi"><head><meta charset="utf-8">
+const html = `<!doctype html><html lang="vi" data-theme="light"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>${esc(title)}</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -266,6 +266,10 @@ const html = `<!doctype html><html lang="vi"><head><meta charset="utf-8">
   --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
   --measure:68ch;
 }
+/* Guarded on :root:not([data-theme="light"]) — and the document pins data-theme="light" on the
+   html element, so a dark OS setting no longer reaches it. The block stays because the palette is
+   still what a reader gets by setting data-theme="dark" by hand, and because deleting it would
+   leave the [data-theme="dark"] block below defining colours nothing else balances. */
 @media (prefers-color-scheme:dark){
   :root:not([data-theme="light"]){
     color-scheme:dark;

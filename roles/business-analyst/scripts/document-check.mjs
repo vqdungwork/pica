@@ -1,4 +1,7 @@
 #!/usr/bin/env node
+// Two things about the assembled document that nothing else looks at: the order a reader counts
+// along in, and whether the document decided its own appearance.
+//
 // A document whose parts run 1, 2, 3, 4, 3b, 5 tells the reader their own sense of order is wrong.
 // It happens whenever a section is inserted by editing the generator rather than by reading the
 // rendered page — which is every time, because the generator is where the work is done.
@@ -12,7 +15,7 @@ const fails = [];
 const fail = (id, msg) => fails.push(`  [${id}] ${msg}`);
 
 if (!existsSync(page)) {
-  console.log(`section-order-check: ${page} does not exist yet`);
+  console.log(`document-check: ${page} does not exist yet`);
   process.exit(0);
 }
 const html = readFileSync(page, "utf8");
@@ -40,8 +43,22 @@ for (const { t, r } of numbered) {
 if (numbered.length && numbered[0].r >= 200)
   fail("sections-out-of-order", `the first numbered part is "${numbered[0].t}". Something before it was dropped`);
 
+/* A handover document is not an application. Two people reading the same spec on the same call
+ * must see the same page, and whether one of them has their laptop set to dark is not a fact
+ * about the document — it is a fact about their laptop. An app follows the reader's preference;
+ * a deliverable does not, any more than a PDF would.
+ *
+ * So the document pins a theme on its root element rather than inheriting one. It may pin dark if
+ * that is the decision; what it may not do is leave the answer to the reader's operating system
+ * and then be handed to a client who opens it somewhere unexpected. */
+const root = (html.match(/<html[^>]*>/i) || [""])[0];
+if (/prefers-color-scheme/.test(html) && !/data-theme\s*=\s*["'](light|dark)["']/i.test(root))
+  fail("document-theme-not-pinned",
+    "the page reacts to prefers-color-scheme and pins no data-theme on <html>, so what a client " +
+    "sees depends on their own system setting. A deliverable decides its own appearance");
+
 if (fails.length) {
-  console.error("section-order-check FAILED\n" + fails.join("\n"));
+  console.error("document-check FAILED\n" + fails.join("\n"));
   process.exit(1);
 }
-console.log(`section-order-check: ${numbered.length} numbered part(s), in order`);
+console.log(`document-check: ${numbered.length} numbered part(s) in order, theme pinned to ${(/data-theme\s*=\s*["\']([a-z]+)/i.exec(root) || [0, "nothing"])[1]}`);
