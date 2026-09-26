@@ -402,6 +402,27 @@ const M = [
             '<rect x="60" y="44" width="70" height="19" rx="9.5" fill="var(--fig-card, #fff)"/><text font-size="11">x</text></svg>\n' },
       ] }],
 
+  /* build-fails / artifact-* — a build command that exits non-zero, and a built page that depends
+   * on what the artifact frame refuses. Both were live: the demo had never been built, and its
+   * deep links used a query string that an artifact link never delivers. */
+  ["build-fails", "ux-engineer/scripts/build-check.mjs", [], "always",
+    // with no build declared the check SKIPS and says so, which is the clean baseline; declaring
+    // a build command that fails is the defect
+    { files: [{ file: path.join(".pica", "runners.json"),
+        content: JSON.stringify({ build: { cmd: "node -e process.exit(3)", cwd: "." } }, null, 2) + "\n" }] }],
+  ["artifact-blocked-resource", "ux-engineer/scripts/artifact-readiness-check.mjs",
+    ["--dir", path.join(DIR, "__mut-art__")], "always",
+    { files: [{ file: path.join("__mut-art__", "index.html"), content:
+        '<!doctype html><title>Mutation page</title><meta name="viewport" content="width=device-width">' +
+        '<script src="https://example.com/x.js"></script>\n' }] }],
+  ["artifact-state-in-the-url", "ux-engineer/scripts/artifact-readiness-check.mjs",
+    ["--dir", path.join(DIR, "__mut-art2__")], "always",
+    { files: [
+        { file: path.join("__mut-art2__", "index.html"), content:
+            '<!doctype html><title>Mutation page</title><meta name="viewport" content="width=device-width"><script src="a.js"></script>\n' },
+        { file: path.join("__mut-art2__", "a.js"), content: 'const p = new URLSearchParams(window.location.search);\n' },
+      ] }],
+
   /* figure-node-has-no-hit-area / figure-structure-not-declared — both found by trying to use the
    * diagram rather than by looking at it. A stick figure with no fill cannot be clicked, and a
    * connector drawn without data-edge is invisible to every check in this file. */

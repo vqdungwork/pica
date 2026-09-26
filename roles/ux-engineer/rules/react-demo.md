@@ -264,3 +264,44 @@ screen moves the layout instead of leaving it stale — the same reason the flow
 generated. And key the boards carefully: a register that permits two entries under one id will
 have one of them silently overwritten, which is how a canvas came to draw ten boards for eleven
 screens without a word. That belongs in a check (`duplicate-id`), not in a reviewer's memory.
+
+
+## nobody had ever built it
+
+<!-- enforced-by: build-fails, build-produces-nothing -->
+
+Eleven checks ran on one demo and passed: smoke, navigation, end-to-end, target sizes, copy, route
+guard, axe, layout coherence, visual baselines, and a 376-render sweep across every screen, state
+and viewport. Every one of them ran against `npm run dev`.
+
+`npm run build` had been failing for the entire engagement — a stray closing brace in a stylesheet,
+which the dev server tolerates and the bundler's minifier does not.
+
+A demo that does not build cannot be handed over, published, deployed or shared. It is not a
+deliverable, whatever the other checks say about it. **Build it, in the same run that tests it.**
+
+## the artifact frame refuses things, and refuses them silently
+
+<!-- enforced-by: artifact-blocked-resource, artifact-inert-control, artifact-state-in-the-url, artifact-no-title, artifact-not-responsive, artifact-too-large, artifact-no-entry -->
+
+A demo handed to a client as a Claude Artifact gets a comment thread attached to the thing itself,
+which is the cheapest correction loop this process has: a comment carries its own location, so
+"the confirm screen is wrong" never has to be matched back to a screen by hand.
+
+But the frame is locked down, and what it refuses it refuses with no error. The page looks right
+and one piece of it never arrives. Two catch a real demo every time:
+
+**State in the query string never arrives.** Only a bare `#anchor` reaches the page — no query
+string, no `#key=value`. A demo that deep-links as `?scr=WL-02&state=empty`, which is the obvious
+and otherwise correct way to make every state addressable, lands every one of those links on its
+default view. The client reports a screen they were never shown. Encode the route as one token:
+`#WL-02-empty`.
+
+**Cross-origin anything is refused** — scripts outside the CDN allowlist, stylesheets outside
+Google Fonts, any runtime `fetch` to another host. Mock data ships with the page.
+
+Also inert: `window.print()`, `alert`/`confirm`/`prompt`, download links, real form submissions,
+iframes, camera and microphone. None of them errors. They just do nothing.
+
+**Decide before building whether the demo will be handed over this way**, because the URL scheme
+is not something to retrofit — it is how every state in the demo is addressed.
