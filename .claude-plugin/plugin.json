@@ -1,7 +1,7 @@
 {
   "name": "pica",
   "description": "From the brief to a demo the client can use. Analyse the domain and its sector, settle the visual direction against what the sector already decided, build in code at every viewport you declare, verify by measurement rather than opinion, then hand over a PRD, a frozen scope and a working prototype. Twelve specialists, 156 checks that fail closed, three gates enforced by hook.",
-  "version": "3.3.2",
+  "version": "3.4.0",
   "author": {
     "name": "Dung Vuong"
   },

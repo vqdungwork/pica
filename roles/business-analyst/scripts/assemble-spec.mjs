@@ -123,196 +123,310 @@ const chainHtml = () => {
     <span class="hopn">${h.n}</span><span class="hopl">${esc(h.label)}</span>
     <span class="hopbar" style="--f:${(h.n / max * 100).toFixed(0)}%"></span></button>${i < hops.length - 1 ? '<span class="arrow" aria-hidden="true">→</span>' : ""}</li>`).join("")}</ol></div>`;
 };
-
+/* ---- the page -------------------------------------------------------------------------------
+ * Design plan, written before the markup, because the first version had none and looked it.
+ *
+ * SUBJECT  A specification that will be read by three different people for three different
+ *          reasons, mostly by consulting it rather than reading it through. The governing fact
+ *          from the research: design for someone who will read as little as possible.
+ *
+ * COLOUR   Warm neutrals, not the default grey — paper #fbfaf8, ink #1a1c1e, rule #e3e1dd. One
+ *          accent, the product's own Plane-derived blue #005a8d, and one semantic amber #a15c00
+ *          reserved for what is unresolved. Nothing else gets a colour.
+ *
+ * TYPE     Three roles. Source Serif 4 for headings, because this is a document somebody signs
+ *          and a serif says so. IBM Plex Sans for body, which holds up at small sizes and dense
+ *          line lengths. IBM Plex Mono for ids, because an id is data. Prose is held near 68
+ *          characters; tables use the full measure.
+ *
+ * LAYOUT   A sticky rail of registers with counts on the left — you jump, you do not scroll —
+ *          and the content as TABLES, not cards. The previous version gave every one of 129
+ *          entries a rounded white card with the same radius and shadow, which flattens hierarchy
+ *          into a stack of identical objects. A register is tabular data: one object with many
+ *          rows, not many objects. Cards are kept for the two things that are genuinely separate
+ *          objects — the map and the open items.
+ *
+ * Light only, by request. Colours are painted explicitly so the page does not borrow a host
+ * theme.
+ */
 const html = `<!doctype html><html lang="vi"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>${esc(title)}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&display=swap">
 <style>
-:root{--bg:#f4f5f6;--card:#fff;--ink:#16191d;--muted:#606670;--line:#dcdfe3;--strong:#c9ccd1;--accent:#006399;--warn:#c0392b;--r:10px}
-@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#0e1013;--card:#171a1f;--ink:#f2f3f5;--muted:#9aa1ab;--line:#262b32;--strong:#39404a;--accent:#3aa0de}}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
-.wrap{max-width:1100px;margin:0 auto;padding:32px 16px 96px}
-h1{font-size:clamp(24px,4vw,32px);margin:0 0 6px;letter-spacing:-.01em}
-.sub{color:var(--muted);margin:0 0 24px}
-.docs{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:28px}
-.doc{background:var(--card);border-radius:var(--r);padding:14px 16px;border:1px solid var(--line)}
-.doc b{display:block;font-size:18px}
-.doc .q{color:var(--accent);font-weight:600;font-size:13px}
-.doc .who{color:var(--muted);font-size:12px;margin-top:4px}
-.doc .n{float:right;font-size:22px;font-weight:700;font-variant-numeric:tabular-nums}
-.bar{position:sticky;top:0;z-index:5;background:var(--bg);padding:10px 0 12px;margin-bottom:8px;border-bottom:1px solid var(--line);display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-button.f{font:inherit;font-size:13px;padding:7px 13px;min-height:36px;border:1px solid var(--strong);background:var(--card);color:var(--ink);border-radius:999px;cursor:pointer}
-button.f[aria-pressed=true]{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
-.count{color:var(--muted);font-size:13px;margin-left:auto}
-section.reg{margin:26px 0}
-section.reg h2{font-size:15px;margin:0 0 2px;display:flex;align-items:baseline;gap:10px}
-section.reg .phase{color:var(--muted);font-weight:400;font-size:12px}
-section.reg .tags{margin-left:auto;display:flex;gap:5px}
-.tag{font-size:10px;font-weight:700;letter-spacing:.04em;padding:2px 7px;border-radius:4px;background:color-mix(in srgb,var(--accent) 14%,transparent);color:var(--accent)}
-ul.items{list-style:none;margin:10px 0 0;padding:0;background:var(--card);border-radius:var(--r);border:1px solid var(--line);overflow:hidden}
-li.item{padding:12px 16px;border-top:1px solid var(--line);display:grid;grid-template-columns:96px 1fr;gap:4px 14px}
-li.item:first-child{border-top:none}
-li.item[data-open=1]{background:color-mix(in srgb,var(--warn) 7%,transparent)}
-li.item:target,li.item[data-lit]{background:color-mix(in srgb,var(--accent) 12%,transparent)}
-.id{font:600 12px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--accent);cursor:pointer;align-self:start}
-.head{font-weight:600;font-size:13px;color:var(--muted)}
-.body{grid-column:2}
-.meta{grid-column:2;color:var(--muted);font-size:12px;display:flex;gap:6px;flex-wrap:wrap;margin-top:3px}
-.meta span{background:color-mix(in srgb,var(--ink) 6%,transparent);padding:1px 7px;border-radius:4px}
-.refs{grid-column:2;margin-top:5px;font-size:12px;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
-.refs a{font:600 11px/1.6 ui-monospace,Menlo,monospace;color:var(--accent);text-decoration:none;border:1px solid color-mix(in srgb,var(--accent) 35%,transparent);padding:1px 6px;border-radius:4px}
-.refs a:hover{background:color-mix(in srgb,var(--accent) 14%,transparent)}
-.refs .lbl{color:var(--muted)}
-.dia{margin:26px 0}
-.dia figure{margin:0 0 18px;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px;overflow-x:auto}
-/* A 23-step process across four lanes is ~1900px wide. Capping it at 100% of the column shrank
-   it into a grey smear: technically present, unreadable, and worse than absent because it looks
-   answered. Wide diagrams scroll sideways at their own size; narrow ones still fit.
-   (No backticks in comments inside this template literal — one ended the string an hour ago and
-   this is the second time.) */
-.dia svg{height:auto;display:block;max-width:none}
-.dia figure{scrollbar-width:thin}
-@media(min-width:900px){.dia svg{max-width:100%}.dia figure.wide svg{max-width:none}}
-.dia figcaption{color:var(--muted);font-size:12px;margin-top:8px}
-.note{background:var(--card);border-left:3px solid var(--accent);border-radius:0 var(--r) var(--r) 0;padding:12px 16px;margin:20px 0;font-size:14px}
-.warnnote{border-left-color:var(--warn)}
-.chain{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px;margin-bottom:22px}
-.chain-head{font-size:13px;color:var(--muted);margin-bottom:12px}
-ol.hops{list-style:none;margin:0;padding:0;display:flex;align-items:flex-end;gap:4px;flex-wrap:wrap}
-ol.hops li{display:flex;align-items:center;gap:4px}
-.hop{display:grid;gap:2px;justify-items:start;min-width:74px;padding:6px 9px;border:1px solid transparent;border-radius:8px;background:none;font:inherit;color:inherit;cursor:pointer;text-align:left}
-.hop:hover{border-color:var(--strong);background:color-mix(in srgb,var(--accent) 7%,transparent)}
-.hop:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.hopn{font-size:21px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
-.hopl{font-size:11px;color:var(--muted)}
-.hopbar{width:100%;height:3px;border-radius:2px;background:color-mix(in srgb,var(--accent) 18%,transparent);position:relative;margin-top:3px}
-.hopbar::after{content:"";position:absolute;inset:0 auto 0 0;width:var(--f);background:var(--accent);border-radius:2px}
-.arrow{color:var(--strong);font-size:13px}
-.more{display:block;width:100%;min-height:44px;border:none;border-top:1px solid var(--line);background:none;font:inherit;font-size:13px;color:var(--accent);cursor:pointer;padding:10px 16px;text-align:left}
-.more:hover{background:color-mix(in srgb,var(--accent) 8%,transparent)}
-section.reg[data-dense] li.item[data-over]{display:none}
-section.reg[data-dense][data-expanded] li.item[data-over]{display:grid}
-section.reg[data-dense][data-expanded] .more{color:var(--muted)}
-@media(max-width:620px){
-  li.item{grid-template-columns:1fr}.body,.meta,.refs{grid-column:1}
-  /* Four full-height cards ate the whole first screen on a phone: the reader met four labels and
-     no content. Two columns, compact, so the map is above the fold with them. */
-  .docs{grid-template-columns:1fr 1fr;gap:8px}
-  .doc{padding:10px 12px}.doc b{font-size:15px}.doc .n{font-size:18px}.doc .who{display:none}
-  .wrap{padding-top:20px}h1{font-size:22px}.sub{font-size:13px}
-  .hop{min-width:62px}.hopn{font-size:17px}
+:root{
+  color-scheme:light;
+  --paper:#fbfaf8; --card:#fff; --ink:#1a1c1e; --ink2:#5c6166; --ink3:#8b9096;
+  --rule:#e3e1dd; --rule2:#f0eeea; --accent:#005a8d; --accent-wash:#eef4f8;
+  --open:#a15c00; --open-wash:#fdf4e7;
+  --serif:"Source Serif 4",Georgia,"Times New Roman",serif;
+  --sans:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --measure:68ch;
 }
-</style></head><body><div class="wrap">
-<h1>${esc(title)}</h1>
-<p class="sub">Gom từ <code>.pica/state.json</code> — cùng một nguồn các check đọc, nên trang này không thể mâu thuẫn với chúng. Sinh lại là cập nhật; không có bản sao nào để lệch.</p>
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.6 var(--sans);-webkit-font-smoothing:antialiased}
+.page{display:grid;grid-template-columns:232px minmax(0,1fr);gap:48px;max-width:1180px;margin:0 auto;padding-block:40px 120px;padding-inline:24px;overflow-x:clip}
+main{min-width:0}
 
-<div class="docs">${Object.entries(DOC_META).map(([d, [q, who]]) => `
-  <div class="doc"><span class="n">${docCount(d) || "—"}</span><span class="q">${q}?</span><b>${d}</b><div class="who">${esc(who)}</div></div>`).join("")}</div>
+/* the rail: you jump, you do not scroll */
+.rail{position:sticky;top:env(safe-area-inset-top,0px);align-self:start;max-height:100vh;overflow-y:auto;padding-block:4px 24px}
+.rail h1{font:600 19px/1.25 var(--serif);margin:0 0 3px;letter-spacing:-.005em;text-wrap:balance}
+.rail .tag{font:500 10px/1 var(--sans);letter-spacing:.09em;text-transform:uppercase;color:var(--ink3);display:block;margin-bottom:22px}
+.rail nav{display:flex;flex-direction:column;gap:1px;margin-bottom:22px}
+.rail a{display:flex;align-items:baseline;gap:8px;padding:4px 8px;margin-inline:-8px;border-radius:5px;text-decoration:none;color:var(--ink2);font-size:13px}
+.rail a:hover{background:var(--accent-wash);color:var(--accent)}
+.rail a .n{margin-left:auto;font:500 11px/1 var(--mono);color:var(--ink3);font-variant-numeric:tabular-nums}
+.rail a[data-open] .n{color:var(--open)}
+.filters{display:flex;flex-wrap:wrap;gap:4px}
+.filters button{font:500 11px/1 var(--sans);padding:6px 9px;min-height:30px;border:1px solid var(--rule);background:var(--card);color:var(--ink2);border-radius:5px;cursor:pointer}
+.filters button[aria-pressed=true]{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.filters button:focus-visible,.rail a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 
-${openCount ? `<div class="note warnnote"><b>${openCount} mục chưa chốt.</b> Được tô riêng bên dưới. Một luật ghi là “chưa chốt” tốt hơn một luật bịa ra — nhưng nó phải được nhìn thấy, không nằm im trong sổ giả định.</div>` : ""}
+.lede{font:400 17px/1.5 var(--serif);color:var(--ink2);max-width:var(--measure);margin:0 0 30px}
+.lede b{color:var(--ink);font-weight:600}
 
-<div class="bar">
-  <button class="f" data-doc="ALL" aria-pressed="true">Tất cả</button>
-  ${Object.keys(DOC_META).map((d) => `<button class="f" data-doc="${d}" aria-pressed="false">${d}</button>`).join("")}
-  <button class="f" data-doc="OPEN" aria-pressed="false">Chưa chốt</button>
-  <span class="count" id="count"></span>
+/* the map — one of the two things that earns a card */
+.map{background:var(--card);border:1px solid var(--rule);border-radius:8px;padding:18px 20px 16px;margin-bottom:14px}
+.map-h{font:500 10px/1 var(--sans);letter-spacing:.09em;text-transform:uppercase;color:var(--ink3);margin-bottom:14px}
+.hops{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;align-items:flex-end;gap:2px}
+.hops li{display:flex;align-items:center;gap:2px}
+.hop{display:grid;gap:1px;justify-items:start;min-width:70px;padding:5px 8px;border:0;background:none;border-radius:5px;font:inherit;color:inherit;cursor:pointer;text-align:left}
+.hop:hover{background:var(--accent-wash)}
+.hop:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.hopn{font:600 20px/1 var(--serif);font-variant-numeric:tabular-nums}
+.hopl{font-size:11px;color:var(--ink3)}
+.hopbar{width:100%;height:2px;background:var(--rule);margin-top:4px;position:relative}
+.hopbar::after{content:"";position:absolute;inset:0 auto 0 0;width:var(--f);background:var(--accent)}
+.arrow{color:var(--ink3);font-size:11px;padding-bottom:9px}
+
+/* the other card: what is not settled */
+.open-note{background:var(--open-wash);border:1px solid #f0dfc4;border-radius:8px;padding:14px 18px;margin-bottom:34px;font-size:14px;color:#6d4200;max-width:var(--measure)}
+.open-note b{color:var(--open)}
+
+/* registers as TABLES */
+section.reg{margin-bottom:46px;scroll-margin-top:24px}
+section.reg h2{font:600 15px/1.3 var(--serif);margin:0 0 2px;display:flex;align-items:baseline;gap:10px}
+section.reg h2 .doc{margin-left:auto;font:500 9px/1 var(--sans);letter-spacing:.08em;color:var(--ink3);text-transform:uppercase}
+section.reg .why{font-size:12.5px;color:var(--ink3);margin:0 0 12px;max-width:var(--measure)}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+tbody tr{border-top:1px solid var(--rule2)}
+tbody tr:first-child{border-top:1px solid var(--rule)}
+tbody tr[data-open]{background:var(--open-wash)}
+tbody tr:target,tbody tr[data-lit]{background:var(--accent-wash)}
+td{padding:9px 10px 9px 0;vertical-align:top}
+td.c-id{width:104px;padding-left:0}
+td.c-id button{font:600 11.5px/1.5 var(--mono);color:var(--accent);background:none;border:0;padding:0;cursor:pointer;text-align:left}
+td.c-id button:hover{text-decoration:underline}
+td.c-id .tiny{display:block;font:400 10.5px/1.4 var(--sans);color:var(--ink3);margin-top:1px}
+td.c-body{max-width:0}
+td.c-body .t{display:block}
+td.c-body .m{display:block;color:var(--ink3);font-size:12px;margin-top:2px}
+td.c-refs{width:210px;text-align:right;padding-right:0}
+td.c-refs a{display:inline-block;font:600 10.5px/1.5 var(--mono);color:var(--accent);text-decoration:none;border-bottom:1px solid #cfe0ea;margin-left:5px}
+td.c-refs a:hover{border-bottom-color:var(--accent)}
+td.c-refs .lbl{font-size:10px;color:var(--ink3);letter-spacing:.03em}
+.more{margin-top:8px;font:500 12.5px/1 var(--sans);color:var(--accent);background:none;border:0;padding:8px 0;min-height:36px;cursor:pointer}
+.more:hover{text-decoration:underline}
+section.reg[data-dense] tr[data-over]{display:none}
+section.reg[data-dense][data-expanded] tr[data-over]{display:table-row}
+
+/* figures run to the full measure and scroll if wider */
+.dia{margin:0 0 46px}
+.dia figure{margin:0 0 14px;background:var(--card);border:1px solid var(--rule);border-radius:8px;padding:14px;overflow-x:auto}
+.dia svg{height:auto;display:block;max-width:none}
+.dia figcaption{font-size:11.5px;color:var(--ink3);margin-top:9px}
+/* Focus and trace. A diagram nobody can interrogate is a picture, and a 23-step process read all
+   at once is the same wall of text in another medium. Clicking a step dims everything not on its
+   route; the route is followed forward through the graph, so "what happens after this" is one
+   click instead of a traced finger. */
+.dia svg [data-node]{cursor:pointer}
+/* Edges are drawn after nodes, so they paint over them and — without this — swallow the
+   click. Several steps in the process simply did not respond, and a control that looks
+   interactive and is not is worse than one that never offered. Only nodes are targets. */
+.dia svg [data-edge]{pointer-events:none}
+.dia svg [data-node]:focus-visible rect,.dia svg [data-node]:focus-visible path{outline:2px solid var(--accent);outline-offset:2px}
+figure[data-focus] svg [data-node],figure[data-focus] svg [data-edge]{opacity:.16;transition:opacity .18s}
+figure[data-focus] svg [data-node][data-on],figure[data-focus] svg [data-edge][data-on]{opacity:1}
+figure[data-focus] svg [data-node][data-seed] rect,figure[data-focus] svg [data-node][data-seed] path{stroke:var(--accent);stroke-width:2}
+.dia .focusbar{display:none;align-items:center;gap:10px;margin-top:9px;font-size:12px;color:var(--ink2)}
+figure[data-focus] + .focusbar,.dia figure[data-focus] .focusbar{display:flex}
+.dia .focusbar button{font:500 11px/1 var(--sans);border:1px solid var(--rule);background:var(--card);color:var(--ink2);border-radius:5px;padding:5px 8px;min-height:28px;cursor:pointer}
+.dia .focusbar button:hover{border-color:var(--accent);color:var(--accent)}
+.dia .hint{font-size:11px;color:var(--ink3);margin-top:7px}
+@media (prefers-reduced-motion:reduce){figure[data-focus] svg [data-node],figure[data-focus] svg [data-edge]{transition:none}}
+
+@media (max-width:860px){
+  .page{grid-template-columns:1fr;gap:24px;padding-block:24px 80px;padding-inline:16px}
+  .rail{position:static;max-height:none;border-bottom:1px solid var(--rule);padding-bottom:18px}
+  .rail nav{display:grid;grid-template-columns:1fr 1fr;gap:0 14px;margin-bottom:16px}
+  .lede{font-size:15.5px}
+  .map{overflow-x:auto}
+  .hops{flex-wrap:nowrap;min-width:max-content}
+  table,tbody,tr,td{display:block}
+  tbody tr{padding:11px 0}
+  td{padding:0;max-width:none!important;width:auto!important;text-align:left!important}
+  td.c-id{margin-bottom:2px}
+  td.c-refs{margin-top:5px}
+  td.c-refs a{margin:0 5px 0 0}
+  .dia svg{max-width:none}
+}
+@media print{.rail nav,.filters,.more{display:none}body{background:#fff}}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+</style></head><body>
+<div class="page">
+
+<div class="rail">
+  <h1>${esc(title)}</h1>
+  <span class="tag">${built.reduce((n, r) => n + r.items.length, 0)} mục · ${diagrams.length} mô hình</span>
+  <nav>${built.map((r) => `<a href="#reg-${r.key}">${esc(r.title)}<span class="n">${r.items.length}</span></a>`).join("")}</nav>
+  <div class="filters">
+    <button class="f" data-doc="ALL" aria-pressed="true">Tất cả</button>
+    ${Object.keys(DOC_META).map((d) => `<button class="f" data-doc="${d}" aria-pressed="false">${d} ${docCount(d)}</button>`).join("")}
+    ${openCount ? `<button class="f" data-doc="OPEN" aria-pressed="false">Chưa chốt ${openCount}</button>` : ""}
+  </div>
 </div>
 
-${chainHtml()}
+<main>
+  <p class="lede">Gom từ <b>.pica/state.json</b> — cùng một nguồn các check đọc, nên trang này không thể mâu thuẫn với chúng. Sinh lại là cập nhật; không có bản sao nào để lệch.
+  <b>BRD</b> trả lời <i>vì sao</i>, <b>PRD</b> trả lời <i>cái gì</i>, <b>FRD</b> trả lời <i>hoạt động ra sao</i>.</p>
 
-${diagrams.length ? `<div class="dia">
-<p class="sub">Mô hình — vẽ từ chính dữ liệu các check đã kiểm, không có nguồn thứ hai.</p>
-${diagrams.map((d) => {
-  const w = Number((d.svg.match(/width="(\d+)"/) || [])[1] || 0);
-  const label = d.name.startsWith("state-")
-    ? `Vòng đời · ${d.name.replace(/^state-/, "").replace(/-/g, " ")}`
-    : d.name === "permissions" ? "Ma trận quyền · vai trò × đối tượng"
-    : d.name === "process" ? "Quy trình TO-BE · theo vai trò"
-    : d.name;
-  return `<figure${w > 900 ? ' class="wide"' : ""}>${d.svg}<figcaption>${esc(label)}${w > 900 ? " — cuộn ngang để xem hết" : ""}</figcaption></figure>`;
-}).join("")}</div>` : ""}
+  ${(() => {
+    const hops = CHAIN.map((h) => ({ ...h, n: (built.find((b) => b.key === h.key)?.items.length) || 0 })).filter((h) => h.n);
+    const max = Math.max(...hops.map((h) => h.n), 1);
+    return `<div class="map"><div class="map-h">Chuỗi truy vết · đi được cả hai chiều · không mục nào mồ côi</div>
+    <ol class="hops">${hops.map((h, i) => `<li><button class="hop" data-hop="${h.key}">
+      <span class="hopn">${h.n}</span><span class="hopl">${esc(h.label)}</span>
+      <span class="hopbar" style="--f:${(h.n / max * 100).toFixed(0)}%"></span></button>${i < hops.length - 1 ? '<span class="arrow" aria-hidden="true">→</span>' : ""}</li>`).join("")}</ol></div>`;
+  })()}
 
-${built.map((reg) => `
-<section class="reg" data-key="${reg.key}" data-docs="${reg.docs.join(" ")}"${reg.dense ? " data-dense" : ""}>
-  <h2>${esc(reg.title)} <span class="phase">${esc(reg.phase)}</span>
-    <span class="tags">${reg.docs.map((d) => `<span class="tag">${d}</span>`).join("")}</span></h2>
-  <ul class="items">${reg.items.map((it, idx) => {
-    const cites = arr(it.refs).filter((r) => defined.has(r));
-    const citedHere = citedBy.get(it.id) || [];
-    const over = reg.dense && idx >= 6 && !it.open;
-    return `<li class="item" id="${esc(it.id)}" data-id="${esc(it.id)}"${it.open ? ' data-open="1"' : ""}${over ? " data-over" : ""}>
-      <span class="id" data-jump="${esc(it.id)}">${esc(it.id)}</span>
-      ${it.head ? `<span class="head">${esc(it.head)}</span>` : "<span></span>"}
-      <div class="body">${esc(it.body)}</div>
-      ${arr(it.meta).length ? `<div class="meta">${arr(it.meta).map((m) => `<span>${esc(m)}</span>`).join("")}</div>` : ""}
-      ${(cites.length || citedHere.length) ? `<div class="refs">
-        ${cites.length ? `<span class="lbl">dựa trên</span>${cites.map((r) => `<a href="#${esc(r)}">${esc(r)}</a>`).join("")}` : ""}
-        ${citedHere.length ? `<span class="lbl">${cites.length ? "· " : ""}được dùng bởi</span>${[...new Set(citedHere)].map((r) => `<a href="#${esc(r)}">${esc(r)}</a>`).join("")}` : ""}
-      </div>` : ""}
-    </li>`;
-  }).join("")}${reg.dense && reg.items.length > 6 ? `<button class="more" data-more>Còn ${reg.items.length - Math.min(6, reg.items.filter((i) => !i.open).length ? 6 : 0)} mục nữa — mở ra</button>` : ""}</ul>
-</section>`).join("")}
+  ${openCount ? `<p class="open-note"><b>${openCount} mục chưa chốt.</b> Mọi thứ đứng trên chúng là tạm. Một luật ghi là “chưa chốt” tốt hơn một luật bịa ra — nhưng nó phải được nhìn thấy, không nằm im trong sổ giả định.</p>` : ""}
 
-</div><script>
-const items = [...document.querySelectorAll("li.item")];
-const secs  = [...document.querySelectorAll("section.reg")];
-const count = document.getElementById("count");
+  ${diagrams.length ? `<div class="dia">${diagrams.map((d) => {
+    const w = Number((d.svg.match(/width="(\d+)"/) || [])[1] || 0);
+    const label = d.name.startsWith("state-") ? `Vòng đời · ${d.name.replace(/^state-/, "").replace(/-/g, " ")}`
+      : d.name === "permissions" ? "Ma trận quyền · vai trò × đối tượng"
+      : d.name === "process" ? "Quy trình TO-BE · theo vai trò" : d.name;
+    return `<figure${w > 900 ? ' class="wide"' : ""} data-label="${esc(label)}">${d.svg}<figcaption>${esc(label)}</figcaption>
+      <div class="focusbar"><span class="fname"></span><button data-back>← bước trước</button><button data-fwd>bước sau →</button><button data-clear>bỏ chọn</button></div>
+      <p class="hint">Bấm một bước để chỉ xem đường đi của nó.</p></figure>`;
+  }).join("")}</div>` : ""}
+
+  ${built.map((reg) => `
+  <section class="reg" id="reg-${reg.key}" data-key="${reg.key}" data-docs="${reg.docs.join(" ")}"${reg.dense ? " data-dense" : ""}>
+    <h2>${esc(reg.title)}<span class="doc">${esc(reg.phase)} · ${reg.docs.join(" ")}</span></h2>
+    <table><tbody>${reg.items.map((it, idx) => {
+      const cites = arr(it.refs).filter((r) => defined.has(r));
+      const citedHere = [...new Set(citedBy.get(it.id) || [])];
+      const over = reg.dense && idx >= 6 && !it.open;
+      return `<tr id="${esc(it.id)}"${it.open ? " data-open" : ""}${over ? " data-over" : ""}>
+        <td class="c-id"><button data-jump="${esc(it.id)}">${esc(it.id)}</button>${it.head ? `<span class="tiny">${esc(it.head)}</span>` : ""}</td>
+        <td class="c-body"><span class="t">${esc(it.body)}</span>${arr(it.meta).length ? `<span class="m">${arr(it.meta).map(esc).join(" · ")}</span>` : ""}</td>
+        <td class="c-refs">${cites.length ? `<span class="lbl">dựa trên</span>${cites.map((r) => `<a href="#${esc(r)}">${esc(r)}</a>`).join("")}` : ""}${citedHere.length ? `${cites.length ? "<br>" : ""}<span class="lbl">dùng bởi</span>${citedHere.map((r) => `<a href="#${esc(r)}">${esc(r)}</a>`).join("")}` : ""}</td>
+      </tr>`;
+    }).join("")}</tbody></table>
+    ${reg.dense && reg.items.length > 6 ? `<button class="more" data-more>Còn ${reg.items.length - 6} mục — mở ra</button>` : ""}
+  </section>`).join("")}
+</main>
+</div>
+<script>
+const secs = [...document.querySelectorAll("section.reg")];
 function apply(doc){
   for (const b of document.querySelectorAll("button.f")) b.setAttribute("aria-pressed", String(b.dataset.doc === doc));
-  let shown = 0;
   for (const s of secs){
     const inDoc = doc === "ALL" || doc === "OPEN" || s.dataset.docs.split(" ").includes(doc);
     let any = false;
-    for (const li of s.querySelectorAll("li.item")){
-      const ok = inDoc && (doc !== "OPEN" || li.dataset.open === "1");
-      li.hidden = !ok; if (ok){ any = true; shown++; }
+    for (const tr of s.querySelectorAll("tbody tr")){
+      const ok = inDoc && (doc !== "OPEN" || tr.hasAttribute("data-open"));
+      tr.hidden = !ok; if (ok) any = true;
     }
     s.hidden = !any;
+    const more = s.querySelector("[data-more]"); if (more) more.hidden = doc === "OPEN" || !any;
   }
-  count.textContent = shown + " mục";
 }
 document.querySelectorAll("button.f").forEach(b => b.onclick = () => apply(b.dataset.doc));
-// Clicking an id lights every place that cites it — the matrix as navigation, both directions.
+document.querySelectorAll("[data-more]").forEach(btn => btn.onclick = () => {
+  const sec = btn.closest("section.reg");
+  if (sec.hasAttribute("data-expanded")) { sec.removeAttribute("data-expanded"); btn.textContent = btn.dataset.closed; }
+  else { btn.dataset.closed = btn.textContent; sec.setAttribute("data-expanded",""); btn.textContent = "Thu lại"; }
+});
+// An id lights every row that cites it — the matrix as navigation, both directions.
 document.addEventListener("click", e => {
   const j = e.target.closest("[data-jump]"); if (!j) return;
   const id = j.dataset.jump;
-  // An ATTRIBUTE, not a class. The classList.add(...) form is the exact shape pica's own
-  // rule-coverage extractor reads as a declared check id, so this page's highlight class was
-  // filed as a check with no rule behind it. A generated file has to stay out of the way of
-  // the tools that read generated files — including a backtick in this comment, which ended
-  // the template literal it lives inside.
-  items.forEach(li => li.removeAttribute("data-lit"));
-  document.querySelectorAll('a[href="#'+id+'"]').forEach(a => a.closest("li.item")?.setAttribute("data-lit",""));
+  document.querySelectorAll("[data-lit]").forEach(el => el.removeAttribute("data-lit"));
+  document.querySelectorAll('a[href="#'+id+'"]').forEach(a => a.closest("tr")?.setAttribute("data-lit",""));
   document.getElementById(id)?.setAttribute("data-lit","");
 });
-document.querySelectorAll("[data-more]").forEach(btn => btn.onclick = () => {
-  const sec = btn.closest("section.reg");
-  const open = sec.hasAttribute("data-expanded");
-  if (open) { sec.removeAttribute("data-expanded"); btn.textContent = btn.dataset.closed; }
-  else { btn.dataset.closed = btn.textContent; sec.setAttribute("data-expanded",""); btn.textContent = "Thu lại"; }
-});
-// A hop on the map jumps to its register and opens it — the map is a way IN, not an ornament.
+// A hop on the map opens its register and goes there.
 document.querySelectorAll(".hop").forEach(h => h.onclick = () => {
   apply("ALL");
-  const sec = [...secs].find(s => s.dataset.key === h.dataset.hop);
-  if (!sec) return;
+  const sec = secs.find(s => s.dataset.key === h.dataset.hop); if (!sec) return;
   sec.setAttribute("data-expanded","");
   const btn = sec.querySelector("[data-more]"); if (btn) btn.textContent = "Thu lại";
   sec.scrollIntoView({behavior:"smooth", block:"start"});
 });
-// Say "scroll sideways" only where it is TRUE, measured, and re-decided on resize. A fixed width
-// threshold captioned two diagrams that fitted comfortably as needing a scroll they did not need,
-// and left the one that did need it unmarked on a phone. A caption that tells a reader to do
-// something unnecessary is a caption they learn to disbelieve.
+// Say "scroll sideways" only where it is true, measured, and re-decided on resize.
 function hintScroll(){
   for (const f of document.querySelectorAll(".dia figure")){
     const over = f.scrollWidth > f.clientWidth + 1;
     f.querySelector("figcaption").textContent = f.dataset.label + (over ? " — cuộn ngang để xem hết" : "");
   }
 }
-addEventListener("resize", hintScroll);
-hintScroll();
+/* ---- focus and trace ------------------------------------------------------------------------
+ * Read the edges out of the SVG itself, so the viewer has no second copy of the graph to fall
+ * behind. Focusing a node lights it, everything reachable forward from it, and the edges between;
+ * the step buttons walk the route one hop at a time. */
+document.querySelectorAll(".dia figure").forEach(fig => {
+  const svg = fig.querySelector("svg"); if (!svg) return;
+  const nodes = [...svg.querySelectorAll("[data-node]")];
+  const edges = [...svg.querySelectorAll("[data-edge]")].map(el => {
+    const [from, to] = el.dataset.edge.split("|"); return { el, from, to };
+  });
+  if (!nodes.length) { fig.querySelector(".hint")?.remove(); return; }
+  const name = fig.querySelector(".fname");
+  let seed = null;
+
+  const reach = id => {
+    // Shift ONCE per round, not once per edge. Calling shift() inside a filter predicate runs it
+    // for every edge, so the queue drained on the first pass and every route reported exactly one
+    // step ahead of itself — a wrong number, stated confidently.
+    const seen = new Set([id]); const q = [id];
+    while (q.length) {
+      const cur = q.shift();
+      for (const e of edges) if (e.from === cur && !seen.has(e.to)) { seen.add(e.to); q.push(e.to); }
+    }
+    return seen;
+  };
+  function paint() {
+    if (!seed) {
+      fig.removeAttribute("data-focus");
+      nodes.forEach(n => { n.removeAttribute("data-on"); n.removeAttribute("data-seed"); });
+      edges.forEach(e => e.el.removeAttribute("data-on"));
+      return;
+    }
+    const on = reach(seed);
+    fig.setAttribute("data-focus", "");
+    nodes.forEach(n => {
+      n.toggleAttribute("data-on", on.has(n.dataset.node));
+      n.toggleAttribute("data-seed", n.dataset.node === seed);
+    });
+    edges.forEach(e => e.el.toggleAttribute("data-on", on.has(e.from) && on.has(e.to)));
+    const label = nodes.find(n => n.dataset.node === seed)?.getAttribute("aria-label") || seed;
+    name.textContent = label + " — " + (on.size - 1) + " bước phía sau";
+  }
+  nodes.forEach(n => {
+    const go = () => { seed = seed === n.dataset.node ? null : n.dataset.node; paint(); };
+    n.addEventListener("click", go);
+    n.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go(); } });
+  });
+  fig.querySelector("[data-clear]").onclick = () => { seed = null; paint(); };
+  fig.querySelector("[data-fwd]").onclick = () => { const nx = edges.find(e => e.from === seed); if (nx) { seed = nx.to; paint(); } };
+  fig.querySelector("[data-back]").onclick = () => { const pv = edges.find(e => e.to === seed); if (pv) { seed = pv.from; paint(); } };
+});
+
+addEventListener("resize", hintScroll); hintScroll();
 apply("ALL");
 </script></body></html>`;
 

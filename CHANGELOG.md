@@ -1,5 +1,54 @@
 # Changelog
 
+## 3.4.0
+
+### Learning archify's surface and skipping its substance
+
+3.3.0 generated SVG from typed data and called that "archify-style". It was the easy half.
+Archify's point is that a diagram can be **interrogated** — focus a node, trace a route, step
+through — and what shipped was a picture. A 23-step process read all at once is the same wall of
+text in another medium.
+
+Diagrams now carry `data-node` and `data-edge`, and the page that embeds them can focus a step:
+everything not reachable from it dims, the route can be walked one hop forward or back, and the
+count of steps ahead is stated. Three defects found by using it:
+
+- **Edges paint over nodes and swallow the click.** Several steps simply did not respond. A
+  control that looks interactive and is not is worse than one that never offered.
+- **The reachable-set walk drained its queue inside a filter predicate**, so every route reported
+  exactly one step ahead of itself — a wrong number, stated confidently.
+- **Column was array position, not topological depth.** A 23-step process became a 4570px
+  horizontal ribbon in which nothing was parallel and no branch rejoined, about a graph whose
+  whole point is that three roles act at once.
+
+### Drawing the model is a check the checks did not run
+
+The renderer put all twenty-three steps in the first lane and left two lanes visibly empty. The
+cause: lanes declared by display name, nodes referencing them by slug — two vocabularies for one
+thing.
+
+`process-check` catches exactly this, and has since it was written: point it at that state and
+`activity-laned` reports thirteen findings. **The check was correct, present, and never run**,
+because the chain stopped before the step that invokes it. A model that is only validated is
+validated against the rules somebody remembered to write; a model that is **drawn** is validated
+against everyone who sees it.
+
+And the renderer must never fall back to lane zero: `Math.max(0, indexOf(...))` turned an
+unresolved lane into a silent default, so a data defect rendered as a *design* — an odd-looking
+process rather than a broken one.
+
+### A specification is read by someone who will read as little as possible
+
+The assembled page was rebuilt against `artifact-design` and the published guidance on scannable
+technical documents. What was wrong: one system typeface, undeliberate greys, every one of 129
+entries in an identical rounded card so hierarchy was flat, and prose running the full 1100px.
+
+Now: three type roles (a serif for headings because this is a document somebody signs, a
+utilitarian sans for density, a mono for ids because an id is data), warm neutrals, prose held to
+68 characters, a sticky rail of registers with counts so a reader jumps instead of scrolling, and
+registers rendered as **tables** — a register is one object with many rows, not many objects.
+20 325px → 11 846px, and light-only by request.
+
 ## 3.3.2
 
 ### A long list is not a visualisation
