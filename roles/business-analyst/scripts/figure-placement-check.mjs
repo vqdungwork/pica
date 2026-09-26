@@ -212,25 +212,47 @@ for (const f of svgs) {
       "Height is the axis a page has to spare — give them room rather than crowding the width");
 }
 
-/* The same fact drawn twice.
+/* A step nobody can reach.
  *
- * A fork with a legend lists every branch and the step it leads to. Drawing the branch routes as
- * well says it again, in lines that have to travel down corridors and around boxes to get there —
- * and that duplication, not the branching, was most of what made the busiest region of a process
- * look tangled. Removing it took a third of the ink out and two crossings with it.
+ * This check exists because of a change that passed every other check here. A four-way fork had a
+ * legend naming each branch and its target, so the branch routes looked redundant and were
+ * removed: a third of the ink came out, crossings dropped, and every geometric measure improved.
+ * Four steps were then drawn with no incoming line at all. The legend became a dead end and the
+ * process visibly stopped in the middle.
  *
- * A reader does not check a picture against itself. Two representations of one fact are not
- * reassurance, they are clutter. */
+ * "The legend carries the step numbers" was true and useless. A number in a list is a REFERENCE;
+ * a reader following a process needs a CONNECTION. Nothing measuring ink, crossings or overlap
+ * could see it, because the drawing got tidier — it just stopped being a process.
+ *
+ * Reachability is about ids, not geometry, so this re-derives it in full. */
 for (const f of svgs) {
   const src = readFileSync(join(dir, f), "utf8");
-  const legends = [...src.matchAll(/data-legend="([^"]+)"/g)].map((m) => m[1]);
-  if (!legends.length) continue;
-  const dup = [...src.matchAll(/data-edge="([^"|]+)\|([^"]+)"/g)]
-    .filter((m) => legends.includes(m[1]) && m[2] !== "legend");
-  if (dup.length)
-    fail("figure-says-it-twice",
-      `${f}: ${dup.length} branch route(s) are drawn from a fork whose legend already names them ` +
-      `(${dup.slice(0, 3).map((m) => m[1] + "→" + m[2]).join(", ")}). Draw the legend or the lines, not both`);
+  const ids = [...src.matchAll(/<g data-node="([^"]+)"/g)].map((m) => m[1]);
+  if (ids.length < 2) continue;
+  const ed = [...src.matchAll(/data-edge="([^"|]+)\|([^"]+)"/g)].map((m) => [m[1], m[2]]);
+  if (!ed.length) continue;
+  const hasIn = new Set(ed.map((e) => e[1]));
+  let roots = ids.filter((i) => !hasIn.has(i));
+  /* A strongly connected graph has no node without an incoming edge — a lifecycle usually does not
+   * — and reporting every state in it as unreachable would be a false alarm on a correct diagram.
+   * With no root, seed from the first node: what matters then is whether the rest connect to it. */
+  if (!roots.length) roots = ids.slice(0, 1);
+  const seen = new Set(roots), q = [...roots];
+  while (q.length) {
+    const c = q.shift();
+    for (const [a, b] of ed) if (a === c && ids.includes(b) && !seen.has(b)) { seen.add(b); q.push(b); }
+  }
+  const touched = new Set(ed.flat());
+  const isolated = ids.filter((i) => !touched.has(i));
+  if (isolated.length)
+    fail("figure-step-unreachable",
+      `${f}: ${isolated.length} step(s) have no line in or out at all (${isolated.slice(0, 4).join(", ")}). ` +
+      "A box connected to nothing is not part of the process it is drawn inside");
+  const orphan = ids.filter((i) => !seen.has(i) && touched.has(i));
+  if (orphan.length)
+    fail("figure-step-unreachable",
+      `${f}: ${orphan.length} step(s) have no path from any start (${orphan.slice(0, 4).join(", ")}). ` +
+      "A step with no incoming line is a step the reader cannot get to, however tidy the drawing is");
 }
 
 // and the reverse: a figure the page frames but has no caption is a picture with no question

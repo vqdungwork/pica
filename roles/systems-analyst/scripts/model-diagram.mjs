@@ -372,11 +372,9 @@ function processDiagram(toBe) {
     stageRows[d] = Math.max(stageRows[d], Math.ceil(v / MAXCOL));
   }
   // a stage holding a legend needs room for it, or the legend lands on the next row of steps
+  // a legend used to reserve a band inside the flow, which is what pushed it between a fork and
+  // its targets in the first place. It sits beside the flow now and costs the layout nothing.
   const stageLegend = new Array(stages).fill(0);
-  for (const id of legendNodes) {
-    const d = order.get(id);
-    if (d !== undefined) stageLegend[d] = Math.max(stageLegend[d], (labelledOuts.get(id) || 0) * 16 + 14);
-  }
   const stageY = [];
   let ay0 = topPad + 30;
   stageRows.forEach((r, d) => { stageY[d] = ay0; ay0 += (r - 1) * (nodeH + 30) + rowH + stageLegend[d]; });
@@ -448,27 +446,22 @@ function processDiagram(toBe) {
     return vi(t) || t;
   };
 
-  /* A legend replaces the lines it describes.
+  /* The legend does NOT replace the lines. That was tried and it severed the process.
    *
-   * A four-way fork gets a legend under the diamond — "→ 17 trống việc, → 18 lệch trạng thái" —
-   * and then four curves were ALSO drawn, travelling down corridors and around boxes to say
-   * exactly what the legend had just said. The same fact drawn twice is most of what made that
-   * region look busy: the tangle was not four branches, it was four branches plus four redundant
-   * routes for them.
+   * Deleting the four branch routes under a fork whose legend named them took a third of the ink
+   * out and left steps 17 to 20 with no incoming line at all: the legend became a dead end and the
+   * flow visibly stopped. "The legend carries the step numbers" is true and useless — a number in
+   * a list is a REFERENCE, and a reader following a process needs a CONNECTION. An annotation may
+   * never cost the reader the flow.
    *
-   * So where a legend exists, the diamond gets one short line into the legend and the branch
-   * routes are not drawn. The legend carries the step numbers, and the steps it names sit
-   * directly below it. Nothing is lost except ink. */
-  const suppressed = new Set();
-  for (const id of legendNodes)
-    for (const e of edges)
-      if (e.from === id && String(e.label ?? e.condition ?? "").trim()) suppressed.add(e);
-
+   * The actual defect was where the legend sat: directly between a step and its successors, so the
+   * flow appeared to pass through it and the routes had to bend around it. An annotation belongs
+   * BESIDE the flow, never in it. Moved out of the way, the routes run straight and the legend
+   * still explains them. */
   const branchLabels = [];
   let routeConflicts = 0;     // edges the router could not clear of every box it does not touch
   const placed = [];          // routes already chosen, so the next one can avoid crossing them
   for (const e of edges) {
-    if (suppressed.has(e)) continue;
     const a = pos.get(e.from), b = pos.get(e.to);
     if (!a || !b) continue;
     const ay = a.y + nodeH / 2 + 2, by = b.y - nodeH / 2 - 2;
@@ -654,11 +647,36 @@ function processDiagram(toBe) {
       .map((e) => ({ t: vi(String(e.label ?? e.condition).trim()) || String(e.label ?? e.condition).trim(), n: seq.get(e.to), to: e.to }))
       .sort((a, b) => a.n - b.n);
     const lw = Math.max(...rows.map((r) => r.t.length)) * 6.1 + 60;
-    const lx = Math.max(12, Math.min(W - lw - 12, q.x - lw / 2));
-    const ly = q.y + nodeH / 2 + 14;
-    L.push(`<path data-edge="${esc(id)}|legend" d="M${q.x} ${q.y + nodeH / 2 + 4} V${ly}" fill="none" stroke="${C.accent}" stroke-width="1.4"/>`);
+    const lh = rows.length * 16 + 10;
+    /* Beside the fork, in the nearest place that is actually empty — searched, not assumed, the
+     * same way the routes and the branch labels are placed. Left is tried before right because a
+     * lane's own steps grow rightward, so the space to the left of a late lane is usually free. */
+    const occupied = [...pos.values()].map((n) => ({ x: n.x - nodeW / 2, y: n.y - nodeH / 2 - 14, w: nodeW, h: nodeH + 28 }));
+    const clash = (x, y) => occupied.filter((o) =>
+      x < o.x + o.w && o.x < x + lw && y < o.y + o.h && o.y < y + lh).length;
+    const spots = [];
+    for (const dx of [-lw - 34, nodeW / 2 + 24, -lw - 34 - nodeW, nodeW / 2 + 24 + nodeW])
+      for (const dy of [-lh / 2, 10, -lh - 10, nodeH, -lh - nodeH])
+        spots.push({ x: q.x + dx, y: q.y + dy });
+    let pick = null;
+    for (const sp of spots) {
+      const x = Math.max(10, Math.min(W - lw - 10, sp.x));
+      const y = Math.max(70, sp.y);
+      /* A lane band means "this is who does it". An annotation parked in a lane that is not its
+       * fork's own reads as belonging to that actor, which is a claim it is not making. Penalised,
+       * not forbidden: on a crowded diagram the only empty space may be in somebody else's lane,
+       * and an annotation that is slightly ambiguous beats one drawn on top of a step. */
+      const li = laneNames.findIndex((_, i) =>
+        x + lw / 2 >= laneX[i] - 14 && x + lw / 2 < laneX[i] + laneCols[i] * nodeW + 14);
+      const wrongLane = li >= 0 && li !== (pos.get(id)?.lane ?? li) ? 120 : 0;
+      const score = clash(x, y) * 1000 + wrongLane + Math.abs(x + lw / 2 - q.x) + Math.abs(y + lh / 2 - q.y);
+      if (!pick || score < pick.score) pick = { score, x, y };
+    }
+    const lx = pick.x, ly = pick.y;
+    const side = lx + lw / 2 < q.x ? lx + lw : lx;
+    L.push(`<path data-leader="${esc(id)}" d="M${side} ${ly + lh / 2} H${q.x + (side < q.x ? -nodeW / 2 + 12 : nodeW / 2 - 12)}" fill="none" stroke="${C.accent}" stroke-width="1" stroke-dasharray="3 3" opacity=".65"/>`);
     L.push(`<g data-legend="${esc(id)}">`);
-    L.push(`<rect x="${lx}" y="${ly}" width="${lw}" height="${rows.length * 16 + 10}" rx="8" fill="${C.card}" stroke="${C.accent}" stroke-width=".9"/>`);
+    L.push(`<rect x="${lx}" y="${ly}" width="${lw}" height="${lh}" rx="8" fill="${C.card}" stroke="${C.accent}" stroke-width=".9"/>`);
     rows.forEach((r, i) => {
       const y = ly + 18 + i * 16;
       L.push(`<text x="${lx + 11}" y="${y}" font-size="10.5" fill="${C.muted}">→</text>`);
