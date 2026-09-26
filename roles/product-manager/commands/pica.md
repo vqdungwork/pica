@@ -252,10 +252,8 @@ prevent.
 pica=$(find "${CLAUDE_PLUGIN_ROOT}/../.." -maxdepth 4 \
   \( -path "*/pica-core/*/scripts/pica-run.mjs" -o -path "*/core/scripts/pica-run.mjs" \) \
   -print 2>/dev/null | sort -V | tail -1)
-S=$(pica_find research schema-check.mjs)
-[ -n "$S" ] || echo "SKIPPED schema-check: pica-ui-designer is not installed. NOT a pass."
-if [ -f "$S" ]; then node "$S" docs/research/measured.json
-else echo "pica-ui-designer is not installed, so the measurement table was NOT verified. That is a stated limitation, not a pass."; fi
+# pica-run prints SKIPPED, and says it is not a pass, when pica-design-researcher is absent
+node "$pica" design-researcher schema-check.mjs docs/research/measured.json
 ```
 
 Six checks: sample size, all nine foundations, typography as roles, provenance, shipped-not-concept,

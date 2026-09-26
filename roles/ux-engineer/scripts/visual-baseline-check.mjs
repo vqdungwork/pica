@@ -164,6 +164,7 @@ if (!changed.length && !compared) {
     "Commit them and run again. This is an abstention, not a pass.");
   process.exit(0);
 }
+console.log(`${changed.length ? "FAIL" : "pass"}  visual-baseline      ${String(changed.length).padStart(3)} finding(s)   (${compared} route(s) compared)`);
 if (!changed.length) {
   console.log(`visual-baseline-check: ${compared} route(s) compared, 0 changed` +
     (missing.length ? ` (${missing.length} new baseline(s) written)` : ""));

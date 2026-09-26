@@ -128,6 +128,12 @@ if (process.argv.includes("--write-baseline")) {
   process.exit(0);
 }
 
+/* The runner's row contract: one `pass|FAIL  <id>  N finding(s)   (scope)` per assertion, so
+ * pica-verify counts what was verified rather than reporting a clean run as "0 assertion(s)". */
+{
+  const worse = findings.length > base.missing ? findings.length : 0;
+  console.log(`${worse ? "FAIL" : "pass"}  screen-states        ${String(worse).padStart(3)} finding(s)   (${screens.length} screen(s), baseline ${base.missing})`);
+}
 if (findings.length > base.missing) {
   console.error("");
   for (const f of findings) console.error(`FINDING  [${f.id}] ${f.where}\n         ${f.why}`);

@@ -1,5 +1,51 @@
 # Changelog
 
+## 3.18.0
+
+### A demo is walked, not only loaded
+
+Every browser check loaded a route fresh, measured it and left. That is how the worked example's
+router shipped going blank on its first navigation (3.17.0 said "second click"; it was the first,
+because the initial paint already put `data-scr` on `<html>`). **`flow-walk-check`** is new: from
+every route it clicks every distinct control, then every control on the screen that produced, three
+deep, replaying each path from a fresh load, and fails on a click that leaves nothing readable or
+takes every frame off screen without navigating (`blank-after-click`), and on any script error
+(`script-error`). Pointed at 3.16.1's `proto.js` it reports the blank at once. It runs under
+pica-verify from the placeholders a demo already declares.
+
+**`build-diff` could never have run under pica-verify.** Its manifest passed `<state>` where the
+script reads the built capture, it needed `.audit/demo-reference.json`, and the capture always wrote
+`html-reference.json`, so nothing could produce that file. The capture takes `--as` now, the manifest
+passes the build, `/pica-evaluate` writes it there, and two mutations prove it.
+
+**Twelve checks spoke a dialect pica-verify cannot read.** They printed `FINDING [id]` and a summary
+line but no `pass|FAIL  <id>  N finding(s)` rows, so a clean run was counted as "0 assertion(s)",
+`--evidence` had nothing to quote, and a failing run would have been reported as a runner fault
+rather than as its findings. All twelve print rows now (the browser checks, traceability, acceptance,
+document, figure placement, internal reference, screen states). The runner counts `FINDING` lines if a
+check ever regresses, and **the mutation suite scores a check that fires without a readable row as
+MISSED**, so the contract is held on every push.
+
+**Three checks passed over nothing.** document-check and figure-placement-check exited 0 with "does
+not exist yet" when there was no spec, which the runner counted as a pass; they say it is an
+abstention now, and their manifests need `@docs/spec/index.html`. internal-reference-check reported
+"0 requirement identifiers" over a tree with no markup in it, which on the worked example was every
+run; zero files read is an abstention, and the example points it at `html/`.
+
+**axe-check swallowed a route it could not scan.** It printed the finding and set the exit code, and
+then a run with no axe violations elsewhere exited 0. Unscannable routes count as findings.
+
+**Commands invoked scripts that did not exist.** `/pica-evaluate` called a shell function no block
+defines, naming a package deleted in 3.0.0; `/pica` did the same for schema-check; `/pica-analyse`
+ran domain-check from business-analyst, which does not ship it. `command-script-check` promised to
+fail on a form it could not read and passed over all of them. It fails on them now, and every
+command resolves its scripts through `node "$pica" <package> <script>`.
+
+**The README listed 156 checks. There are 247.** Twenty-two declared checks were missing from the
+table the count is summed from. `count-test` now fails when a declared check is not in it.
+
+173 caught, 0 missed. Four checks remain unproven: two run inside Figma, and two read a Figma dump.
+
 ## 3.17.0
 
 ### The example the README points at now passes the chain it is the example of

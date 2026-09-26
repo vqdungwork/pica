@@ -16,11 +16,12 @@
  * marketplace, `agents: ["./agents"]` in ux-researcher, and the seven-of-twelve agent list
  * in knowledge-gen. This is the fifth, and the first that was silent rather than red.
  *
- * It reads the two forms the commands use, and fails on a third it does not recognise
+ * It reads the three forms the commands use, and fails on any other it does not recognise
  * rather than passing over it:
  *
  *   node "$pica" <package> <script.mjs> [args]     via core/scripts/pica-run.mjs
  *   node .../<package>/scripts/<script.mjs>        a direct path
+ *   node ${CLAUDE_PLUGIN_ROOT}/scripts/<script.mjs>  the command's own package
  *
  * A package named here must exist under roles/ (or be "core"), and must ship the script.
  */
@@ -73,6 +74,15 @@ for (const file of commandFiles) {
       return;
     }
 
+    /* form 3: the command's own package, by ${CLAUDE_PLUGIN_ROOT}. */
+    m = line.match(/\$\{?CLAUDE_PLUGIN_ROOT\}?\/scripts\/([\w.-]+\.mjs)/);
+    if (m && !/pica-run\.mjs/.test(line)) {
+      checked++;
+      if (!fs.existsSync(path.join(path.dirname(path.dirname(file)), "scripts", m[1])))
+        findings.push(`${rel}:${i + 1} invokes ${m[1]} from its own package, which ships no such script`);
+      return;
+    }
+
     /* form 2: a direct path into a package's scripts directory. */
     m = line.match(/(?:roles\/)?([a-z][a-z-]*)\/scripts\/([\w.-]+\.mjs)/);
     if (m && !/pica-run\.mjs/.test(line)) {
@@ -80,7 +90,17 @@ for (const file of commandFiles) {
       const [, pkg, script] = m;
       if (fs.existsSync(pkgDir(pkg)) && !fs.existsSync(path.join(pkgDir(pkg), "scripts", script)))
         findings.push(`${rel}:${i + 1} invokes ${pkg}/scripts/${script}, which does not exist`);
+      return;
     }
+
+    /* Anything else that names a script is a form this file cannot read, and the header has always
+       promised to FAIL on one rather than pass over it. It passed over `pica_find html
+       capture-html-reference.mjs` for releases: a shell function no block defines, naming a package
+       deleted in 3.0.0, so /pica-evaluate's build-versus-design step could not have run. */
+    m = line.match(/([\w.-]+\.mjs)\b/);
+    if (m && !/pica-run\.mjs/.test(line))
+      findings.push(`${rel}:${i + 1} names ${m[1]} in a form this check cannot resolve. Invoke it as ` +
+        '`node "$pica" <package> <script.mjs>`, so a rename is caught here rather than on a user\'s machine');
   });
 }
 

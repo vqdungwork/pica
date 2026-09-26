@@ -11,11 +11,12 @@
 import { readFileSync, existsSync } from "node:fs";
 
 const page = process.argv[2] ?? "docs/spec/index.html";
+const CHECKS = ["document-theme-not-pinned", "duplicate-section-number", "sections-out-of-order"];
 const fails = [];
 const fail = (id, msg) => fails.push(`  [${id}] ${msg}`);
 
 if (!existsSync(page)) {
-  console.log(`document-check: ${page} does not exist yet`);
+  console.log(`document-check: ${page} does not exist yet, so nothing was read. This is an abstention, not a pass.`);
   process.exit(0);
 }
 const html = readFileSync(page, "utf8");
@@ -57,6 +58,12 @@ if (/prefers-color-scheme/.test(html) && !/data-theme\s*=\s*["'](light|dark)["']
     "the page reacts to prefers-color-scheme and pins no data-theme on <html>, so what a client " +
     "sees depends on their own system setting. A deliverable decides its own appearance");
 
+/* The runner's row contract: one `pass|FAIL  <id>  N finding(s)   (scope)` per assertion, so
+ * pica-verify counts what was verified rather than reporting a clean run as "0 assertion(s)". */
+for (const id of CHECKS) {
+  const n = fails.filter((x) => x.startsWith(`  [${id}]`)).length;
+  console.log(`${n ? "FAIL" : "pass"}  ${id.padEnd(28)} ${String(n).padStart(3)} finding(s)   (${"document-check"})`);
+}
 if (fails.length) {
   console.error("document-check FAILED\n" + fails.join("\n"));
   process.exit(1);

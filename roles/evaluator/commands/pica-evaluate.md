@@ -77,9 +77,10 @@ the issue.
 pica=$(find "${CLAUDE_PLUGIN_ROOT}/../.." -maxdepth 4 \
   \( -path "*/pica-core/*/scripts/pica-run.mjs" -o -path "*/core/scripts/pica-run.mjs" \) \
   -print 2>/dev/null | sort -V | tail -1)
-CAP=$(pica_find html capture-html-reference.mjs)
-node "$CAP" --url <live-url> --out .built
-node ${CLAUDE_PLUGIN_ROOT}/scripts/build-diff.mjs .audit/html-reference.json .built/html-reference.json
+# The build is captured next to the approved design, under the name pica-verify looks for, so
+# build-diff runs there too rather than only when somebody remembers this block.
+node "$pica" ux-engineer capture-html-reference.mjs --url <live-url> --out .audit --as demo-reference.json
+node "$pica" evaluator   build-diff.mjs .audit/html-reference.json .audit/demo-reference.json
 ```
 
 Pairing is by **`data-uc` plus viewport, never by caption**: a build's captions come from its own

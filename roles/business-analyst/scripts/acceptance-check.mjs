@@ -11,6 +11,7 @@ import { dirname, join } from "node:path";
 const statePath = process.argv[2] ?? ".pica/state.json";
 const S = JSON.parse(readFileSync(statePath, "utf8"));
 const basePath = join(dirname(statePath), "acceptance-baseline.json");
+const CHECKS = ["acceptance-coverage-regressed", "acceptance-restates-the-requirement", "acceptance-too-thin"];
 const fails = [];
 const fail = (id, msg) => fails.push(`  [${id}] ${msg}`);
 
@@ -50,6 +51,12 @@ if (baseline === null) {
   else console.log(`acceptance-check: ${baseline - missing.length} requirement(s) became testable since the baseline. Run with --adopt to lower it to ${missing.length}.`);
 }
 
+/* The runner's row contract: one `pass|FAIL  <id>  N finding(s)   (scope)` per assertion, so
+ * pica-verify counts what was verified rather than reporting a clean run as "0 assertion(s)". */
+for (const id of CHECKS) {
+  const n = fails.filter((x) => x.startsWith(`  [${id}]`)).length;
+  console.log(`${n ? "FAIL" : "pass"}  ${id.padEnd(28)} ${String(n).padStart(3)} finding(s)   (${`${testable.length} functional requirement(s)`})`);
+}
 if (fails.length) {
   console.error("acceptance-check FAILED\n" + fails.join("\n"));
   process.exit(1);

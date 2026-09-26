@@ -210,6 +210,12 @@ if (args.includes("--json")) {
 }
 
 const walked = `${segments.length} segment · ${pains.length} pain · ${useCases.length} use case · ${reqs.length} requirement · ${rules.length} rule · ${declared.size} state · ${screens.length} screen`;
+/* The runner's row contract: one `pass|FAIL  <id>  N finding(s)   (scope)` per assertion, so
+ * pica-verify counts what was verified rather than reporting a clean run as "0 assertion(s)". */
+for (const id of CHECKS) {
+  const n = findings.filter((x) => x.check === id).length;
+  console.log(`${n ? "FAIL" : "pass"}  ${id.padEnd(20)} ${String(n).padStart(3)} finding(s)   (${walked})`);
+}
 if (!findings.length) {
   console.log(`traceability-check: the chain closes in both directions (${walked})`);
   process.exit(0);

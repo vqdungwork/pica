@@ -1,10 +1,9 @@
 {
-  "uncovered": 5,
+  "uncovered": 4,
   "checks": [
     "design-ops/figma-audit.js",
     "design-ops/frame-inventory-check",
     "design-ops/geometry-diff",
-    "design-ops/source-parity.js",
-    "evaluator/build-diff"
+    "design-ops/source-parity.js"
   ]
 }

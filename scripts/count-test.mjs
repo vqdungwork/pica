@@ -110,6 +110,26 @@ console.log("\nthe enumeration table is the register");
 if (!tableRows.length) bad("the check table was not found: it is where the count comes from");
 else ok(`${tableRows.length} scripts listed, summing to ${checks}`);
 
+/* Summing the table proved the badge agreed with the table, and nothing proved the table agreed with
+ * the checks. Twenty-two declared checks were missing from it, so "All 156 checks" was the count of
+ * the ones somebody had remembered to list. Every check a manifest declares is listed, except the
+ * ones the README names as reporting a measured difference, and those that run inside Figma. */
+{
+  const listed = new Set([...tableText.matchAll(/^\| `([a-z0-9-]+)` \|/gm)].map((m) => m[1]));
+  const NOT_TABLED = new Set(["parity-check", "geometry-diff"]);
+  const unlisted = [];
+  for (const p of pkgs) {
+    const m = JSON.parse(fs.readFileSync(path.join(pkgPath(p), "package.json"), "utf8"));
+    for (const c of m.checks || []) {
+      if (c.runsIn && c.runsIn !== "node") continue;
+      const id = String(c.run).replace(/\.m?js$/, "");
+      if (!listed.has(id) && !NOT_TABLED.has(id)) unlisted.push(`${p}/${id}`);
+    }
+  }
+  if (unlisted.length) bad(`declared and not in the table, so not in the count: ${[...new Set(unlisted)].join(", ")}`);
+  else ok("every declared check is in the table");
+}
+
 /* ---- every place that states a number ----------------------------------- */
 console.log("\nREADME badges");
 claim("version badge", VERSION, README, /badge\/version-([0-9.]+)/g);

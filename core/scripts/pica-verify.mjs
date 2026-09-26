@@ -342,12 +342,21 @@ const results = await Promise.all(todo.map(run));
 /* Each check prints its own table of `pass  <id>  N finding(s)   (scope)` rows. Those
  * rows are the assertions, and they are what a green run should be able to show. */
 const ROW = /^(pass|FAIL)\s+([a-z][a-z0-9-]*)\s+(\d+)\s+finding/gm;
-const assertionsOf = (out) => [...out.matchAll(ROW)].map((m) => ({ verdict: m[1], id: m[2], n: Number(m[3]) }));
+/* A check that failed and printed no row is still not reported as zero. Its `FINDING  [id]` lines are
+ * counted instead, and the run still names it as a check that broke the row contract. */
+const FINDING = /^(?:FINDING\s+|\s+)\[([a-z][a-z0-9-]*)\]/gm;
+const assertionsOf = (out, code = 0) => {
+  const rows = [...out.matchAll(ROW)].map((m) => ({ verdict: m[1], id: m[2], n: Number(m[3]) }));
+  if (rows.length || code !== 1) return rows;
+  const n = new Map();
+  for (const m of out.matchAll(FINDING)) n.set(m[1], (n.get(m[1]) || 0) + 1);
+  return [...n].map(([id, k]) => ({ verdict: "FAIL", id, n: k, inferred: true }));
+};
 
 let passed = 0, failed = 0, assertPass = 0, assertFail = 0;
 const byPhase = new Map();
 for (const r of results) {
-  const a = assertionsOf(r.out);
+  const a = assertionsOf(r.out, r.code);
   assertPass += a.filter((x) => x.verdict === "pass").length;
   assertFail += a.filter((x) => x.verdict === "FAIL").length;
   /* A check that could not read its input says so and exits 0, because exiting non-zero
@@ -469,9 +478,10 @@ if (unsubstituted.length)
  * aggregated as "FAIL flow-check 0 finding(s) across 0 check(s)". Detecting it costs
  * nothing and catches any future check that drifts from the row format. */
 const mute = results.filter((r) => r.code === 1 && !r.abstainedInternally && !assertionsOf(r.out).length);
+/* Counted from FINDING lines above, so the number is right; still a defect in pica, and named. */
 if (mute.length)
   runFaults.push(`${mute.length} check(s) failed and printed no row this runner could parse, so their `
-    + `findings are reported as zero: ${mute.map((r) => r.run.replace(/\.mjs$/, "")).join(", ")}. `
+    + `findings were counted from their FINDING lines instead: ${mute.map((r) => r.run.replace(/\.mjs$/, "")).join(", ")}. `
     + `Every check prints \`pass|FAIL  <id>  N finding(s)   (scope)\``);
 if (rowsPrinted !== results.length + abstained.length + undeclared.length)
   runFaults.push(`${results.length + abstained.length + undeclared.length} check(s) resolved and ${rowsPrinted} row(s) printed. A check that is registered and never shown is indistinguishable from one that passed`);
