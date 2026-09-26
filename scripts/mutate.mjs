@@ -382,7 +382,7 @@ const M = [
         { file: path.join("__mut-figs2__", "wide.svg"), content: '<svg viewBox="0 0 2400 300"><text font-size="11">Wide</text></svg>\n' },
       ] }],
 
-  /* section-order-check — a part number that runs backwards, and two parts sharing one number.
+  /* document-check — a part number that runs backwards, and two parts sharing one number.
    * Both are invisible in the generator and obvious on the page, which is the whole point. */
   ["figure-hardcodes-a-colour", "business-analyst/scripts/figure-placement-check.mjs",
     [path.join(DIR, "__mut-fig3__.html"), path.join(DIR, "__mut-figs3__")], "always",
@@ -390,11 +390,15 @@ const M = [
         { file: "__mut-fig3__.html", content: '<!doctype html><title>m</title><figure data-figure="hard" data-label="Hard"><svg viewBox="0 0 400 300"><rect fill="#16191d"/><text font-size="12">Hard</text></svg></figure>\n' },
         { file: path.join("__mut-figs3__", "hard.svg"), content: '<svg viewBox="0 0 400 300"><rect fill="#16191d"/><text font-size="12">Hard</text></svg>\n' },
       ] }],
-  ["sections-out-of-order", "business-analyst/scripts/section-order-check.mjs",
+  ["document-theme-not-pinned", "business-analyst/scripts/document-check.mjs",
+    [path.join(DIR, "__mut-theme__.html")], "always",
+    { files: [{ file: "__mut-theme__.html", content:
+        '<!doctype html><html lang="vi"><title>m</title><style>@media (prefers-color-scheme:dark){:root{--x:1}}</style><p class="eyebrow">Phần 1</p></html>\n' }] }],
+  ["sections-out-of-order", "business-analyst/scripts/document-check.mjs",
     [path.join(DIR, "__mut-order__.html")], "always",
     { files: [{ file: "__mut-order__.html", content:
         '<!doctype html><title>m</title><p class="eyebrow">Phần 1</p><p class="eyebrow">Phần 4</p><p class="eyebrow">Phần 3b</p>\n' }] }],
-  ["duplicate-section-number", "business-analyst/scripts/section-order-check.mjs",
+  ["duplicate-section-number", "business-analyst/scripts/document-check.mjs",
     [path.join(DIR, "__mut-order2__.html")], "always",
     { files: [{ file: "__mut-order2__.html", content:
         '<!doctype html><title>m</title><p class="eyebrow">Phần 1</p><p class="eyebrow">Phần 2</p><p class="eyebrow">Phần 2</p>\n' }] }],

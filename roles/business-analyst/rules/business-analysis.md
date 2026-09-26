@@ -388,7 +388,7 @@ Horizontal scrolling is not the fix. The reader will not do it.
 
 ## read the assembled page, not the generator
 
-<!-- enforced-by: sections-out-of-order, duplicate-section-number -->
+<!-- enforced-by: sections-out-of-order, duplicate-section-number, document-theme-not-pinned -->
 
 The spec is produced by a script, so the natural way to add a section is to edit the script. A
 section inserted that way lands wherever the edit landed, and the rendered document came out
@@ -400,3 +400,20 @@ placed, a diagram placed and unreadable, a part number out of sequence. None was
 source; all three were obvious on the page.
 
 **How to know it is wrong:** open the page and read the part numbers in order.
+
+
+## a deliverable decides its own appearance
+
+<!-- enforced-by: document-theme-not-pinned -->
+
+An application follows the reader's theme preference, because it is their tool and they live in
+it. A handover document does not. Two people reading the same spec on the same call must see the
+same page, and whether one of them has their laptop set to dark is a fact about their laptop, not
+about the document. A PDF does not change colour on the way to a client and neither should this.
+
+So the page pins `data-theme` on its root element. Pinning dark is a legitimate decision; leaving
+the answer to `prefers-color-scheme` is not a decision at all, it is the absence of one, and it
+surfaces the first time somebody opens the file on a machine set up differently from yours.
+
+The dark palette still gets written and still gets measured. It is what a reader gets by asking
+for it, and a palette that only exists for that reader is not an excuse to leave it unchecked.

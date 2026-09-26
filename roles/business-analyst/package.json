@@ -22,7 +22,7 @@
       "assemble-spec.mjs",
       "acceptance-check.mjs",
       "figure-placement-check.mjs",
-      "section-order-check.mjs"
+      "document-check.mjs"
     ],
     "agents": [
       "pica-business-analyst.md"
@@ -142,7 +142,7 @@
       "needs": []
     },
     {
-      "run": "section-order-check.mjs",
+      "run": "document-check.mjs",
       "passes": "0 findings",
       "args": "docs/spec/index.html",
       "phase": "analyse",
