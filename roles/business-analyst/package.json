@@ -17,7 +17,9 @@
       "problem-check.mjs",
       "archetype-check.mjs",
       "audience-check.mjs",
-      "requirements-check.mjs"
+      "requirements-check.mjs",
+      "traceability-check.mjs",
+      "assemble-spec.mjs"
     ],
     "agents": [
       "pica-business-analyst.md"
@@ -53,7 +55,8 @@
       "requirements"
     ],
     "artifacts": [
-      "docs/prd.md"
+      "docs/prd.md",
+      "docs/spec/index.html"
     ]
   },
   "checks": [
@@ -111,6 +114,13 @@
       "needs": [
         "nfr|requirements|stateModel"
       ]
+    },
+    {
+      "run": "traceability-check.mjs",
+      "passes": "0 findings",
+      "args": "<state>",
+      "phase": "analyse",
+      "needs": []
     }
   ],
   "definitionOfDone": [

@@ -182,3 +182,52 @@ a client can judge correctly in three seconds.
 - [ ] `exclusionsConfirmed` is true
 - [ ] Every gap became an assumption with a confidence and a blast radius
 - [ ] `trace-check.mjs` returns zero
+
+## The chain is a check, not a chapter
+
+<!-- enforced-by: broken-link, orphan-segment, orphan-pain, orphan-usecase, orphan-requirement, orphan-rule, orphan-state, orphan-screen, dangling-ref -->
+
+**segment → pain → use case → feature → rule → entity/state → screen**, walkable in both
+directions. A screen with no use case, a pain nothing addresses, a rule nothing enforces, a state
+no screen draws: each is an orphan and each is a defect. It is the one artefact a machine can
+verify completely, which is exactly why it must not be written by hand — a traceability matrix
+typed into a document is a table that agrees with itself.
+
+Run on a finished engagement's analysis for the first time, it found four things no review had:
+
+- **A severed hop.** *No* use case carried any link to a pain point — not one of thirteen. Every
+  pain was unaddressed and every use case unmotivated, and neither fact was visible because the
+  field simply did not exist. Report a hop where nobody carries the field as **one** defect in the
+  method, not as forty orphans; the orphan list buries its own cause.
+- **A segment nothing hurts.** A whole audience — leadership — was in scope by one client
+  sentence, with no researched pain behind it, and three requirements standing on it. The honest
+  repair is to record that as what it is (`class: client-stated`, confidence low), never to invent
+  the pain that would have justified it.
+- **A citation to a rule that is not in the register.** The rule had been *correctly* left
+  unwritten — a cut-off time nobody had confirmed — and recorded only as an assumption. Correct to
+  refuse to invent it; wrong to leave it out of the register while three documents cite it. An
+  open rule belongs in the register **marked open**, so the gap is visible where rules are read.
+- **Two state vocabularies that never meet.** Entity lifecycle and screen render-state are
+  different things, and a project may say so — but it must *say* so. The check accepts a
+  declaration and refuses silence.
+
+Two distinctions the check itself had to learn. An id may be namespaced (`nfr:NFR-01`) because ids
+are unique only within their own register, and comparing whole strings reported six sound
+references as dangling. And a declared exemption must silence the **whole** hop: guarding only the
+headline swapped one accurate finding for seven inaccurate ones.
+
+## Assemble it, or nobody reads it
+
+<!-- enforced-by: assemble-spec -->
+
+Thirty-five documents is not a specification, it is a folder. A client asked to open something and
+was handed a directory; hunting a fact across twenty markdown files is grepping a spec, not
+reading one, and the reasonable conclusion is that nothing was ever assembled.
+
+Route every register to the document it belongs in — **BRD** answers *why*, **PRD** *what*, **FRD**
+*how* — make the routing filterable, and make every id a link that lights every place citing it,
+in both directions. The traceability matrix is then not a chapter; it is the navigation.
+
+Generate it from `state.json` and nothing else, so the page and the checks read one source and
+cannot disagree. A hand-written summary of a register is a second copy, and second copies drift —
+which is the same reason an SOW cites frozen ids rather than restating requirements.
