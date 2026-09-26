@@ -33,7 +33,8 @@
       "keyboard-check.mjs",
       "axe-check.mjs",
       "visual-baseline-check.mjs",
-      "screenreader-check.mjs"
+      "screenreader-check.mjs",
+      "canvas-plan.mjs"
     ],
     "agents": [
       "pica-ux-engineer.md"
@@ -66,7 +67,8 @@
     "artifacts": [
       "html/",
       ".audit/html-reference.json",
-      ".audit/html-reference-forced.json"
+      ".audit/html-reference-forced.json",
+      "canvas.json"
     ]
   },
   "checks": [

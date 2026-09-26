@@ -237,3 +237,30 @@ reserves its full height: the stage keeps a scrollbar for space that paints noth
 **painted** size on a wrapper, and let that wrapper be `display: contents` when no scaling is
 needed — a box with `width: auto` around a child sized `min(390px, 100%)` is circular, and it
 resolves to zero.
+
+## Give them the whole thing at once, not one address at a time
+
+<!-- enforced-by: canvas-plan -->
+
+A URL-addressable demo is the right instrument for judging a **flow**: open a state, click through
+it, argue about it. It is the wrong instrument for judging a **scope**, and scope is what a client
+asks about first. Nobody can see how much was designed, or how it divides, by visiting twelve
+addresses one after another — and a client who cannot see that concludes, reasonably, that not
+much was.
+
+Lay every screen out on one canvas, and let the arrangement carry the argument:
+
+- **Rows are requirement families, labelled with the ids.** A screen's position then states what
+  asked for it, and the canvas is the traceability view rather than a wall of pictures.
+- **Exclusions are a note pinned beside the boards**, not a document nobody opens. What was
+  deliberately not built is half of what a scope is, and it is invisible on any screen.
+- **Each open question is a note in its own colour**, saying what is provisional until it is
+  answered. A rule marked "not yet decided" must be visible where the work standing on it is.
+- **Every board stays live.** An artboard that is a screenshot answers a smaller question than one
+  that can be clicked.
+
+Compute the positions from the screen inventory rather than placing them by hand, so adding a
+screen moves the layout instead of leaving it stale — the same reason the flow diagram is
+generated. And key the boards carefully: a register that permits two entries under one id will
+have one of them silently overwritten, which is how a canvas came to draw ten boards for eleven
+screens without a word. That belongs in a check (`duplicate-id`), not in a reviewer's memory.
