@@ -379,7 +379,7 @@ function processDiagram(toBe) {
   }
   const stageY = [];
   let ay0 = topPad + 30;
-  stageRows.forEach((r, d) => { stageY[d] = ay0; ay0 += (r - 1) * (rowH * 0.62) + rowH + stageLegend[d]; });
+  stageRows.forEach((r, d) => { stageY[d] = ay0; ay0 += (r - 1) * (nodeH + 30) + rowH + stageLegend[d]; });
   const laneX = [];
   let ax = left;
   laneCols.forEach((c, li) => { laneX[li] = ax; ax += c * nodeW + 28; });
@@ -410,7 +410,7 @@ function processDiagram(toBe) {
     const li = laneIndex(n.lane), d = order.get(n.id);
     const k = used.get(`${li}:${d}`) || 0; used.set(`${li}:${d}`, k + 1);
     const cx = laneX[li] + (k % laneCols[li]) * nodeW + nodeW / 2 - 4;
-    const cy = stageY[d] + Math.floor(k / laneCols[li]) * (rowH * 0.62);
+    const cy = stageY[d] + Math.floor(k / laneCols[li]) * (nodeH + 30);
     pos.set(n.id, { x: cx, y: cy, lane: li });
     const gateway = isGateway(n);
     const start = !hasIn.has(n.id), end = !hasOut.has(n.id);
@@ -431,8 +431,8 @@ function processDiagram(toBe) {
     label.forEach((l2, i) =>
       L.push(`<text x="${cx}" y="${y0 + i * 13}" text-anchor="middle" font-size="11" font-weight="600" fill="${C.ink}">${esc(l2)}</text>`));
     // the number sits outside the shape so it never competes with the label for room
-    L.push(`<circle cx="${cx - w2}" cy="${cy - h2 + 2}" r="9" fill="${C.accent}"/>`);
-    L.push(`<text x="${cx - w2}" y="${cy - h2 + 5.5}" text-anchor="middle" font-size="10" font-weight="700" fill="${C.onAccent}">${seq.get(n.id)}</text>`);
+    L.push(`<circle cx="${cx - w2 + 4}" cy="${cy - h2 + 1}" r="9" fill="${C.accent}"/>`);
+    L.push(`<text x="${cx - w2 + 4}" y="${cy - h2 + 4.5}" text-anchor="middle" font-size="10" font-weight="700" fill="${C.onAccent}">${seq.get(n.id)}</text>`);
     L.push(`</g>`);
   }
 
@@ -583,40 +583,53 @@ function processDiagram(toBe) {
       const u = 1 - t;
       const lx = a.x * (u * u * u + 3 * u * u * t) + b.x * (3 * u * t * t + t * t * t);
       const ly = ay * u * u * u + mid * 3 * u * u * t + mid * 3 * u * t * t + by * t * t * t;
-      branchLabels.push({ from: e.from, to: e.to, text: lab, x: lx, y: ly, w: lab.length * 6.1 + 14, h: 19 });
+      branchLabels.push({ from: e.from, to: e.to, text: lab, x: lx, y: ly, w: lab.length * 6.1 + 14, h: 19, route: P });
     }
   }
 
-  /* Then separate them, here, where the coordinates are.
+  /* Then place each label ON ITS OWN LINE, by searching along it.
    *
-   * Staggering the siblings along their curves was not enough: at a four-way fork the branches
-   * converge again within a hundred pixels and three of the four labels still overlapped, plus two
-   * landed on top of a step box. Guessing a placement rule and hoping is not a method when the
-   * generator already knows every rectangle on the canvas. So: lay them out, then push apart until
-   * nothing intersects anything — the other labels, and the steps themselves.
+   * The previous pass pushed labels apart vertically until nothing intersected, which is a fine
+   * way to stop them colliding and a terrible way to keep them meaningful: a "Không" ended up
+   * floating in white space with no line touching it, while the branch it named ran somewhere
+   * else entirely. A label that is not on its edge is not a label.
    *
-   * Twenty passes, moving the lower one down by half the overlap each time. It converges because
-   * every move strictly reduces the total overlap, and if it somehow did not, a label slightly out
-   * of place beats a hang. */
-  const obstacles = [...pos.entries()].map(([, q]) => ({ x: q.x, y: q.y, w: nodeW - 14, h: nodeH + 14 }));
+   * So the only positions a label may take are points along its own route. Sample them, score
+   * each for collisions against the steps and the labels already placed, and take the cleanest —
+   * preferring positions near the fork, where the reader is looking when the path divides. */
+  const hitsAny = (box, others) =>
+    others.filter((o) => Math.abs(box.x - o.x) < (box.w + o.w) / 2 && Math.abs(box.y - o.y) < (box.h + o.h) / 2).length;
+  const stepBoxes = [...pos.values()].map((q) => ({ x: q.x, y: q.y, w: nodeW - 14, h: nodeH + 10 }));
   for (const id of legendNodes) {
     const q = pos.get(id);
-    if (q) obstacles.push({ x: q.x, y: q.y + nodeH / 2 + 14 + ((labelledOuts.get(id) || 0) * 16 + 10) / 2, w: nodeW, h: (labelledOuts.get(id) || 0) * 16 + 14 });
+    if (!q) continue;
+    const lh = (labelledOuts.get(id) || 0) * 16 + 14;
+    stepBoxes.push({ x: q.x, y: q.y + nodeH / 2 + 14 + lh / 2, w: nodeW, h: lh });
   }
-  const hits = (a, b) =>
-    Math.abs(a.x - b.x) < (a.w + b.w) / 2 && Math.abs(a.y - b.y) < (a.h + b.h) / 2;
-  for (let pass = 0; pass < 20; pass++) {
-    let moved = false;
-    for (let i = 0; i < branchLabels.length; i++) {
-      const a = branchLabels[i];
-      for (const b of [...branchLabels.slice(0, i), ...obstacles]) {
-        if (!hits(a, b)) continue;
-        a.y += ((a.h + b.h) / 2 - Math.abs(a.y - b.y)) / 2 + 1.5;
-        moved = true;
+  const placedLabels = [];
+  for (const lb of branchLabels) {
+    const R = lb.route || [];
+    const cand = [];
+    for (let i = 0; i < R.length - 1; i++) {
+      const [x0, y0] = R[i], [x1, y1] = R[i + 1];
+      const steps = Math.max(2, Math.round(Math.hypot(x1 - x0, y1 - y0) / 10));
+      for (let k = 0; k <= steps; k++) {
+        const t = k / steps;
+        cand.push({ x: x0 + (x1 - x0) * t, y: y0 + (y1 - y0) * t, along: i + t });
       }
     }
-    if (!moved) break;
+    if (!cand.length) { placedLabels.push(lb); continue; }
+    let best = null;
+    for (const c of cand) {
+      const box = { x: c.x, y: c.y, w: lb.w, h: lb.h };
+      // near the fork is better: the reader is already looking there when the path divides
+      const score = hitsAny(box, stepBoxes) * 1000 + hitsAny(box, placedLabels) * 800 + c.along * 12;
+      if (!best || score < best.score) best = { score, ...c };
+    }
+    lb.x = best.x; lb.y = best.y;
+    placedLabels.push(lb);
   }
+
   for (const id of legendNodes) {
     const q = pos.get(id);
     if (!q) continue;
@@ -927,6 +940,10 @@ for (const name of Object.keys(built)) {
   const ids = [...built[name].matchAll(/data-node="([^"]+)"/g)].map((m) => m[1]);
   const pairs = [...built[name].matchAll(/data-edge="([^"|]+)\|([^"]+)"/g)].map((m) => [m[1], m[2]]);
   built[name] = built[name].replace(/<svg /, `<svg data-interrogable="${interrogable(ids, pairs) ? "yes" : "no"}" `);
+  // a drawing wider than a phone column says so, and the page is expected to give it a scrollable
+  // frame rather than scale it down to nothing
+  const vw = Number((built[name].match(/viewBox="0 0 ([\d.]+)/) || [])[1] || 0);
+  if (vw > 420) built[name] = built[name].replace(/<svg /, `<svg data-scrolls-when-narrow="yes" `);
 }
 
 mkdirSync(OUT, { recursive: true });

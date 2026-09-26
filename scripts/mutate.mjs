@@ -402,6 +402,27 @@ const M = [
             '<rect x="60" y="44" width="70" height="19" rx="9.5" fill="var(--fig-card, #fff)"/><text font-size="11">x</text></svg>\n' },
       ] }],
 
+  /* figure-unreadable-on-a-phone — a wide drawing that does NOT declare a scrollable frame, so
+   * the page will scale it down until its labels are a texture. Everything about this diagram had
+   * been verified at 900px; at 358 its labels rendered at 3.7px and no check had looked. */
+  ["figure-unreadable-on-a-phone", "business-analyst/scripts/figure-placement-check.mjs",
+    [path.join(DIR, "__mut-fig9__.html"), path.join(DIR, "__mut-figs9__")], "always",
+    { files: [
+        { file: "__mut-fig9__.html", content: '<!doctype html><title>m</title><figure data-figure="ph" data-label="Phone"><svg viewBox="0 0 900 300"></svg></figure>\n' },
+        { file: path.join("__mut-figs9__", "ph.svg"), content: '<svg viewBox="0 0 900 300"><text font-size="11">wide</text></svg>\n' },
+      ] }],
+
+  /* figure-steps-overlap — two steps drawn on top of each other, which is what a too-tight
+   * half-row produced for real once the number badges were added. */
+  ["figure-steps-overlap", "business-analyst/scripts/figure-placement-check.mjs",
+    [path.join(DIR, "__mut-fig8__.html"), path.join(DIR, "__mut-figs8__")], "always",
+    { files: [
+        { file: "__mut-fig8__.html", content: '<!doctype html><title>m</title><figure data-figure="ov" data-label="Overlap"><svg viewBox="0 0 400 300"></svg></figure>\n' },
+        { file: path.join("__mut-figs8__", "ov.svg"), content:
+            '<svg viewBox="0 0 400 300"><g data-node="a"><rect x="40" y="40" width="120" height="54" rx="7"/></g>' +
+            '<g data-node="b"><rect x="60" y="80" width="120" height="54" rx="7"/></g><text font-size="12">x</text></svg>\n' },
+      ] }],
+
   /* figure-edge-through-node — a router that reports it could not clear a box. */
   ["figure-edge-through-node", "business-analyst/scripts/figure-placement-check.mjs",
     [path.join(DIR, "__mut-fig7__.html"), path.join(DIR, "__mut-figs7__")], "always",
