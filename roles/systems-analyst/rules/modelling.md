@@ -390,25 +390,29 @@ is handled: readable-and-scrollable beats shrunk-into-a-texture, and neither is 
 than reporting the narrow case as solved.
 
 
-## draw a fact once
+## an annotation belongs beside the flow, never in it
 
-<!-- enforced-by: figure-says-it-twice -->
+<!-- enforced-by: figure-step-unreachable -->
 
-The busiest corner of a process model had a four-way fork with a legend under it — "→ 17 trống
-việc, → 18 lệch trạng thái, → 19 gán lại, → 20 không lệch" — and then four routes were drawn as
-well, travelling down corridors and bending around boxes to arrive at exactly the four steps the
-legend had just named.
+A four-way fork got a legend under the diamond, between the fork and its four targets. That put an
+annotation in the flow's path: the routes had to bend around it, and the region looked tangled.
 
-Five rounds of routing had been spent making those four routes clean. They should not have
-existed. The tangle was never four branches; it was four branches plus four redundant statements
-of them.
+The conclusion drawn from that was wrong. The legend already named each branch and its target
+number, so the four routes looked redundant and were deleted — a third of the ink came out,
+crossings fell, every geometric measure improved, and **four steps were left with no incoming line
+at all.** The legend became a dead end and the process stopped in the middle of the page.
 
-Deleting them took **a third of the ink** out of the drawing and two crossings with it, and cost
-nothing: the legend carries the step numbers, and the steps it names sit directly beneath it. The
-diamond keeps one short line into its legend, so the fork still visibly leads somewhere.
+"The legend carries the step numbers" is true and useless. **A number in a list is a reference; a
+reader following a process needs a connection.** An annotation may never cost the reader the flow.
 
-A reader does not check a picture against itself. **Two representations of one fact are not
-reassurance, they are clutter** — and the effort spent making the second one tidy is the most
-expensive kind of wasted work, because it looks like progress the whole time.
+The defect was never the lines. It was where the annotation sat. Moved beside the fork — searched
+for the nearest genuinely empty space, connected by a thin dashed leader, penalised for landing in
+a lane that is not its own — the routes run straight, the legend still explains them, and the
+process is whole.
 
-Before optimising how something is drawn, ask whether it should be drawn.
+**Every measure got better when the change was wrong.** Ink, crossings, overlap and label
+placement all improved while the drawing stopped being a process. That is what a metric does when
+it measures the picture and not the thing the picture is for, and it is why reachability is checked
+separately and by id rather than by geometry.
+
+
