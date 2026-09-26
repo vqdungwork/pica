@@ -8,85 +8,85 @@
     {
       "name": "pica",
       "source": "./",
-      "version": "3.14.1",
+      "version": "3.15.0",
       "description": "From the brief to a demo the client can use. Analyse the domain and its sector, settle the visual direction against what the sector already decided, build in code at every viewport you declare, verify by measurement rather than opinion, then hand over a PRD, a frozen scope and a working prototype. Twelve specialists, 156 checks that fail closed, three gates enforced by hook."
     },
     {
       "name": "pica-core",
       "source": "./core",
-      "version": "3.14.1",
+      "version": "3.15.0",
       "description": "pica core: the state schema, the gates, the check runner and the orchestration every other package is built on."
     },
     {
       "name": "pica-product-manager",
       "source": "./roles/product-manager",
-      "version": "3.14.1",
+      "version": "3.15.0",
       "description": "pica product manager: the brief as a contract, the scope boundary and its exclusions, and the proof of delivery against the brief that was agreed."
     },
     {
       "name": "pica-ux-researcher",
       "source": "./roles/ux-researcher",
-      "version": "3.14.1",
+      "version": "3.15.0",
       "description": "pica UX researcher: who uses it and what actually hurts, who can veto it and what they fear, what the field charges, and a market size derived from factors rather than asserted."
     },
     {
       "name": "pica-business-analyst",
       "source": "./roles/business-analyst",
-      "version": "3.14.1",
+      "version": "3.15.0",
       "description": "pica business analyst: elicitation, the problem, the glossary, business rules, use cases and the requirements the business signs."
     },
     {
       "name": "pica-systems-analyst",
       "source": "./roles/systems-analyst",
-      "version": "3.14.1",
+      "version": "3.15.0",
       "description": "pica systems analyst: the four models \u2014 process, domain, state and permissions \u2014 that turn requirements into a specification."
     },
     {
       "name": "pica-solution-architect",
       "source": "./roles/solution-architect",
-      "version": "3.14.1",
+      "version": "3.15.0",
       "description": "pica solution architect: the stack layer by layer, a mechanism behind every non-functional requirement, a contract per integration including what happens when it is down, and the environments it runs in \u2014 written down before the demo decides them by default."
     },
     {
       "name": "pica-ux-designer",
       "source": "./roles/ux-designer",
-      "version": "3.14.1",
+      "version": "3.15.0",
       "description": "pica UX designer: information architecture, user flows and greyscale structure \u2014 every screen and every state named before anything is styled."
     },
     {
       "name": "pica-design-researcher",
       "source": "./roles/design-researcher",
-      "version": "3.14.1",
+      "version": "3.15.0",
       "description": "pica design researcher: one shipped product measured across the nine foundations, returning numbers with provenance per token. Never proposes a direction and never gives an impression."
     },
     {
       "name": "pica-ui-designer",
       "source": "./roles/ui-designer",
-      "version": "3.14.1",
+      "version": "3.15.0",
       "description": "pica UI designer: the visual direction argued against the sector's settled tradition, the palette proved against contrast before it is offered, and the style tiles the client chooses from."
     },
     {
       "name": "pica-ux-engineer",
       "source": "./roles/ux-engineer",
-      "version": "3.14.1",
+      "version": "3.15.0",
       "description": "pica UX engineer: the interactive demo in code \u2014 tokens as structured data, the component library, every screen at every viewport in every state, measured before anyone sees it."
     },
     {
       "name": "pica-content-designer",
       "source": "./roles/content-designer",
-      "version": "3.14.1",
+      "version": "3.15.0",
       "description": "pica content: the words. Glossary-bound terms, every state written, length-realistic copy, and mock data that is not quietly wrong."
     },
     {
       "name": "pica-evaluator",
       "source": "./roles/evaluator",
-      "version": "3.14.1",
+      "version": "3.15.0",
       "description": "pica design QA: heuristic evaluation fanned out to independent evaluators, cognitive walkthrough, and the build-versus-design comparison nobody owns."
     },
     {
       "name": "pica-design-ops",
       "source": "./roles/design-ops",
-      "version": "3.14.1",
+      "version": "3.15.0",
       "description": "pica design ops: the approved build ported to Figma and verified frame by frame by measurement, the prototype wired, and a file a developer who was in no meeting can build from."
     }
   ]

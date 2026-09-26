@@ -236,3 +236,49 @@ answerable by looking, and the expensive ones asked first.
 - [ ] S6 priced each use case in hours or days, never in points
 - [ ] S7 was asked in consequences, and `targets` records what the answer implies
 - [ ] The report said which slots a human still has to judge the quality of
+
+
+## what the design is standing on
+
+<!-- enforced-by: design-rests-on-unobserved-pain, built-past-an-unmade-decision, nothing-was-agreed, assumption-without-a-grade -->
+
+On one finished project the analyse phase reported thirteen checks passing and nothing failing,
+while discover, scope and close were all red: zero interviews, zero pain points carrying an
+observed evidence class, two proposals presented with no choice recorded, no frozen scope, no
+closeout.
+
+Every number was accurate. The picture they made together was false — a design verified to the
+pixel, standing on premises nobody had checked. And no check could see it, because each one is
+scoped to its own phase and this lives in the join.
+
+Four shapes, all of them about the client rather than the build:
+
+- **screens exist and nothing was observed.** The design relieves a pain that was reasoned about.
+  Report it as built, never as validated — evaluation methods find usability problems; they do not
+  find out whether anybody wants the thing
+- **a proposal was presented and no choice is recorded.** Either the client chose and nobody wrote
+  it down, or somebody on this side chose for them. Both are worth knowing before round three
+- **a deliverable with no frozen scope.** Everything built so far is an offer, and saying otherwise
+  in a closing report is exactly the claim that gets disputed
+- **an assumption with no confidence.** The register exists to be presented most-consequential
+  first; ungraded, it is a list nobody can triage
+
+None of these is a defect in the build. They are **the difference between what was verified and
+what was agreed**, and the closing report states both or it is not a closing report.
+
+## target size is a floor somebody set, not a default
+
+<!-- enforced-by: target-too-small -->
+
+The audience profile sets a target-size floor before any token exists — that is why the audience is
+measured first. Nothing enforced it for the whole life of the method.
+
+The project that revealed this had a "target size check": it printed the dimensions of seven
+hand-picked selectors and exited 0, joined into the chain with `&&` so it could not fail. A report
+a human must read is not a check.
+
+Two things the real one has to get right. **The hit area is not the glyph** — a 22px checkbox
+inside a 62px label is a 62px target, and measuring the input reports four defects that are not
+there. **The harness is not the product** — a demo carrying its own screen and state pickers puts a
+dozen 26px selects on every route, and measuring those reports fifteen defects in chrome the client
+never sees. The project declares which part is its harness; nothing can guess it.

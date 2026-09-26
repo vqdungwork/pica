@@ -337,6 +337,12 @@ the parser and its blind spot at once: eight edges reappeared, and two of the nu
 
 If a harness cannot see everything it claims to score, it is not a harness. It is agreement.
 
+**So mutate the harness, the way the checks are mutated.** Feed it something it must fail on before
+believing that it passed. Every one of those four failures would have been caught in a second by
+one deliberately broken input — a diagram with a known collision, a label known to overflow, a
+board known to be half empty. The suite proves each check fires on a defect; a measurement written
+for one afternoon deserves the same question asked once.
+
 
 ## a label that is not on its line is not a label
 

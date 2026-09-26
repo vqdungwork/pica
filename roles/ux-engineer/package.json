@@ -36,7 +36,8 @@
       "screenreader-check.mjs",
       "canvas-plan.mjs",
       "build-check.mjs",
-      "artifact-readiness-check.mjs"
+      "artifact-readiness-check.mjs",
+      "target-size-check.mjs"
     ],
     "agents": [
       "pica-ux-engineer.md"
@@ -251,6 +252,13 @@
       "run": "artifact-readiness-check.mjs",
       "passes": "0 findings",
       "args": "--dir <buildOut>",
+      "phase": "design",
+      "needs": []
+    },
+    {
+      "run": "target-size-check.mjs",
+      "passes": "0 findings",
+      "args": "--url <servedDemo> --routes <everyScreenAndState> --min <targetFloor> --ignore <harnessChrome>",
       "phase": "design",
       "needs": []
     }
