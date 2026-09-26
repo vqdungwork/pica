@@ -129,3 +129,31 @@ be shaped by.
 
 Per NFR: the id, the kind, the requirement as a number, the condition it holds under, and **how it
 would be measured**. An NFR nobody can measure is an adjective with an id.
+
+## Models are validated data — and then somebody has to see them
+
+<!-- enforced-by: model-diagram -->
+
+Keeping the TO-BE process, the domain model, the state model and the permissions matrix as
+*validated data rather than pictures* is right: a picture cannot be checked, and a hand-drawn one
+drifts while looking authoritative. But on one engagement the data then sat in `state.json` for
+the whole project and the only readers were the checks. A model nobody can see is a model nobody
+argues with, and the arguing is the point.
+
+So generate the pictures from the validated graph — no second source, so the diagram cannot
+disagree with the model, and regenerating it is the only way to update it.
+
+Three things learned by rendering the first ones to PNG and **looking**, none visible in the SVG
+source:
+
+- **Edges drawn centre-to-centre put the arrowhead under the node painted over it.** The lifecycle
+  rendered as a web of undirected lines — the one thing a lifecycle diagram must not be — while
+  every path carried its marker.
+- **Forbidden transitions were recorded as prose**, because the *reason* is the valuable half and
+  an arrow cannot carry it. Code that assumed a `{from, to}` shape drew nothing while the legend
+  announced "1 forbidden transition". Draw the arrow when the sentence names two real states, and
+  print the sentence regardless.
+- **A permissions cell must distinguish three states, not two.** A missing key is a question
+  nobody answered; an empty string is the answer "none", deliberately given. Drawing them alike
+  loses the distinction the matrix exists to record — one is a gap to chase, the other a decision
+  to respect. (The first version printed the literal word `undefined` in that cell.)

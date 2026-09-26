@@ -1,7 +1,7 @@
 {
   "name": "systems-analyst",
   "status": "stable",
-  "description": "pica systems analyst: the four models \u2014 process, domain, state and permissions \u2014 that turn requirements into a specification.",
+  "description": "pica systems analyst: the four models — process, domain, state and permissions — that turn requirements into a specification.",
   "owns": {
     "commands": [],
     "rules": [
@@ -11,7 +11,8 @@
       "domain-check.mjs",
       "process-check.mjs",
       "permissions-check.mjs",
-      "journey-check.mjs"
+      "journey-check.mjs",
+      "model-diagram.mjs"
     ],
     "agents": [
       "pica-systems-analyst.md"
@@ -38,7 +39,9 @@
       "toBe",
       "journeys"
     ],
-    "artifacts": []
+    "artifacts": [
+      "docs/spec/diagrams/*.svg"
+    ]
   },
   "checks": [
     {

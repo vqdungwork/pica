@@ -364,6 +364,17 @@ const M = [
       content: '<!doctype html><html lang="vi"><meta charset="utf-8"><title>m</title>' +
         '<div class="frame"><p>Không có tiêu đề nào</p><button><svg width="16" height="16"></svg></button></div></html>\n' }],
 
+  /* traceability-check — a screen that traces to a use case nobody wrote. The commonest real
+   * shape of a broken chain: an id renumbered upstream and its citation left behind. */
+  ["dangling-ref", "business-analyst/scripts/traceability-check.mjs", [S], "screens",
+    (s) => { s.screens[0].tracesTo = ["UC-DOES-NOT-EXIST"]; }],
+  ["orphan-screen", "business-analyst/scripts/traceability-check.mjs", [S], "screens",
+    (s) => { s.screens[0].tracesTo = []; }],
+  /* The severed hop: strip the pain link from every use case and the whole hop must be reported
+   * ONCE, not once per pain. */
+  ["broken-link", "business-analyst/scripts/traceability-check.mjs", [S], "useCases",
+    (s) => { for (const u of s.useCases) { delete u.addresses; delete u.painPoints; delete u.solves; delete u.pains; } }],
+
   // foundations-check
   ["contrast-floor",    "ux-engineer/scripts/foundations-check.mjs", ["html/design-system.html", "tokens/tokens.json", S], "direction", (s) => { s.audience.floors.contrastRatio = 21; }],
   ["state-covered",     "ux-engineer/scripts/foundations-check.mjs", ["html/design-system.html", "tokens/tokens.json", S], "direction", (s) => { s.direction.components[0].states.push("pressed"); }],

@@ -1,5 +1,62 @@
 # Changelog
 
+## 3.3.0
+
+### pica produced thirty-five documents and then stopped
+
+A client asked to read the specification and was handed a folder. Hunting a fact across twenty-odd
+markdown files is grepping a spec, not reading one, and the reasonable conclusion — theirs — was
+that nothing had ever been assembled. It had not. Every document was correct and none of them was
+the thing anyone asked for.
+
+**`business-analyst/assemble-spec`** routes every register to the document it belongs in — BRD
+answers *why*, PRD *what*, FRD *how* — makes the routing filterable, and makes every id a link
+that lights every place citing it, in both directions. The traceability matrix stops being a
+chapter and becomes the navigation. Generated from `state.json` and nothing else, so the page and
+the checks read one source and cannot disagree.
+
+**`business-analyst/traceability-check`** walks segment → pain → use case → feature → rule →
+entity/state → screen, both ways. Run on a finished engagement's analysis for the first time it
+found four things no review had:
+
+- **A severed hop.** Not one of thirteen use cases carried any link to a pain point. Every pain
+  unaddressed, every use case unmotivated, and neither visible because the field did not exist. A
+  hop nobody carries is reported as **one** defect in the method, not forty orphans — the orphan
+  list buries its own cause.
+- **A segment nothing hurts.** Leadership was in scope on one client sentence with no researched
+  pain and three requirements standing on it. Recorded as `class: client-stated`, never invented
+  into a pain that would have justified it.
+- **A citation to a rule not in the register.** The rule was *correctly* left unwritten — a
+  cut-off time nobody had confirmed — and recorded only as an assumption. Correct to refuse to
+  invent it; wrong to leave it out of the register while three documents cite it. An open rule
+  belongs in the register **marked open**.
+- **Two state vocabularies that never meet.** Legitimate, and the project must *say* so. The check
+  takes a declaration and refuses silence.
+
+**`systems-analyst/model-diagram`** draws the four models the checks already validate. Keeping
+them as validated data rather than pictures is right — but the data then sat in `state.json` for a
+whole project with only the checks as readers, and a model nobody can see is a model nobody argues
+with. Generated from the validated graph, so the picture cannot disagree with the model.
+
+### What the new work got wrong first
+
+Every one found by rendering and looking, none visible in the source:
+
+- Edges drawn centre-to-centre put the arrowhead **under** the node painted over it. A lifecycle
+  rendered as undirected lines while every path carried its marker.
+- Forbidden transitions are recorded as **prose**, because the reason is the valuable half. Code
+  assuming `{from, to}` drew nothing while the legend announced "1 forbidden transition".
+- A permissions cell needs **three** states: unanswered, answered-as-none, and a value. The first
+  version printed the literal word `undefined` where the answer was a deliberate "no rights".
+- The check compared whole strings and called six namespaced references (`nfr:NFR-01`) dangling.
+- A declared exemption silenced only the headline, swapping one accurate finding for seven wrong
+  ones.
+- The generated page called `classList.add("lit")` — the exact shape of pica's own check-id
+  extractor — and filed "lit" as an undocumented check. A generated file has to stay out of the
+  way of the tools that read generated files.
+- And both generators were declared as **checks**, so the coverage ratchet demanded a mutation
+  proving they fire on a defect they have none of. A generator is not a check; it produces.
+
 ## 3.2.1
 
 ### The viewport you are not looking at is the one that is broken
