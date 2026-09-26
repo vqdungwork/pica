@@ -141,6 +141,25 @@ for (const f of svgs) {
       "A control that dims almost nothing answers no question — make the figure a drawing and say so");
 }
 
+/* An edge drawn through a box it has nothing to do with.
+ *
+ * This reads a count the ROUTER reports rather than re-deriving it, and that is a weaker check
+ * than the others here — it verifies that the generator noticed, not that the generator was
+ * right. Re-deriving it means parsing arbitrary SVG path commands, and a hand-written parser for
+ * that is exactly what silently dropped eight orthogonal routes from the measurement harness
+ * during this work and reported an improvement that was partly edges vanishing.
+ *
+ * The honest version of this check runs in a browser with getPointAtLength. Until it does, this
+ * catches a router that gives up, and says plainly that it cannot catch a router that lies. */
+for (const f of svgs) {
+  const src = readFileSync(join(dir, f), "utf8");
+  const n = Number((src.match(/data-route-conflicts="(\d+)"/) || [])[1]);
+  if (n > 0)
+    fail("figure-edge-through-node",
+      `${f}: the router could not clear ${n} edge(s) of a box they do not touch. A line drawn ` +
+      "through an unrelated step reads as a connection to it");
+}
+
 // and the reverse: a figure the page frames but has no caption is a picture with no question
 const framed = [...html.matchAll(/<figure[^>]*>/g)];
 for (const tag of framed) {
