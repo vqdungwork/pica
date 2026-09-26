@@ -734,3 +734,34 @@ loads differs from one taken after, every time — and state the viewport explic
 inheriting it. A small per-pixel tolerance absorbs anti-aliasing without absorbing regressions.
 Commit an updated baseline in the same change as the code that moved it, so a reviewer sees the
 visual diff beside the diff that caused it; a baseline updated on its own proves nothing.
+
+## Read the tree a screen reader is handed, and watch what it would be told
+
+<!-- enforced-by: unnamed-in-tree, hidden-from-tree, tree-order, silent-change, dialog-unnamed, no-headings -->
+
+axe reads the DOM and the keyboard check operates it. Neither reads the **accessibility tree** —
+the structure VoiceOver, NVDA and JAWS actually consume — and neither watches what a live region
+would announce. Those are two more channels, and defects hide in both.
+
+On a build that had already passed axe with zero violations and a full keyboard walk with zero
+findings, reading the tree found that **the product exposed no heading at all.** Most screen reader
+users move through a page by heading first; the rotor had nothing to land on, so the only route
+through eleven rows was to read them one at a time from the top. Nothing on screen looks wrong —
+the group labels *are* visually headings, they were simply `div`s.
+
+Watching live regions found the other one: the one irreversible action in the product completed,
+drew a receipt, and **announced nothing**. A screen reader user pressed it and heard silence. That
+is the same defect as a confirm bar vanishing without a trace, in the channel nobody had checked.
+
+Resolve controls to their own tree node by `backendNodeId`, never by matching text. A first version
+matched on strings and produced confident nonsense — a row button whose `textContent` is an avatar
+initial plus a name plus a project does not equal the platform's computed name, so two correct rows
+were reported missing from the tree. **An assertion about the tree has to be made against the
+tree.** Scope it to the product frame, too, or the review harness's own controls get filed as
+product defects.
+
+**And say what this is not.** It cannot listen. Whether an announcement is the *right* one, whether
+the reading order makes sense in the product's own language, and whether a widget behaves the way
+its role promises all need a person with the software on. Driving VoiceOver from a script needs
+interactive permission and takes over the machine's audio and focus — ask before doing that to
+somebody, and until they say yes, report the tree as the tree and the gap as a gap.

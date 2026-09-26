@@ -32,7 +32,8 @@
       "layout-coherence-check.mjs",
       "keyboard-check.mjs",
       "axe-check.mjs",
-      "visual-baseline-check.mjs"
+      "visual-baseline-check.mjs",
+      "screenreader-check.mjs"
     ],
     "agents": [
       "pica-ux-engineer.md"
@@ -224,6 +225,13 @@
       "run": "visual-baseline-check.mjs",
       "passes": "0 changed",
       "args": "--url <servedDemo> --routes <every screen> --dir <baselines>",
+      "phase": "design",
+      "needs": []
+    },
+    {
+      "run": "screenreader-check.mjs",
+      "passes": "0 findings",
+      "args": "--url <servedDemo> --routes <every screen> --act <primary> --modal <dialog>",
       "phase": "design",
       "needs": []
     }
