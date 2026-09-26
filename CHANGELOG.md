@@ -1,5 +1,64 @@
 # Changelog
 
+## 3.0.3
+
+Everything here came out of one engagement: a brief taken to `--to design`, then six rounds of the
+client saying the screens were not good enough. The findings are not about that project. They are
+about what pica could not see.
+
+### Five craft rules, from looking at one phone screen instead of sweeping it
+
+One screen passed every automated check — 376 screen×state×viewport renders, zero overflow, zero
+console errors, every target ≥48px — and was still not usable. Each defect below was found by
+rendering it at 390×844 and looking at the image, one state at a time.
+
+- **A badge every row carries is not information.** Eleven rows, eleven identical "not yet
+  confirmed" chips, above a bar already reading "11 not yet confirmed". It read as information
+  because it was words; it was the screen's default state repeated once per row.
+- **Finishing something must make the screen quieter.** Confirming a row swapped a grey pill for
+  the widest, most saturated element on screen, so ten of eleven done left the list *busier* than
+  nothing done, with the one row still needing attention the quietest thing on it.
+- **Never let the primary action scroll away inside its own sheet.** A confirm sheet listed eleven
+  items and put its commit button after them in flow. Nothing reported it, because the sheet
+  scrolled correctly. The same sheet gave titles a 195px column beside a right-aligned status,
+  wrapping the longest to five lines where the list behind it rendered the same title in three.
+- **An unrecognised URL parameter must fail loudly** (now also a check, below).
+- **A rule in the stylesheet is not a rule on the screen.** A row divider that existed in the
+  source, and would be quoted in any summary of what was built, lost a cascade it was never
+  checked against and drew nothing. Reading the CSS confirmed it was there; only rendering showed
+  it was not.
+
+### Two checks
+
+**`content-designer/internal-reference-check`** — requirement identifiers in text a user reads.
+Seven of them shipped into one demo across five screens, written weeks apart. Nobody writes them
+all in one sitting, so nobody ever sees them together and each looks defensible alone: the
+signature of a defect that needs a check rather than a reviewer. Reads text nodes and the
+attributes a screen reader speaks; deliberately ignores comments and props, because a citation
+beside the code that implements the rule is where it belongs.
+
+**`ux-engineer/url-param-guard`** — a demo addressed by URL is reviewed by URL, and an instrument
+that silently substitutes its default is worse than one that breaks. `?viewport=mobile`, on an app
+reading `vp`, returned the desktop frame at a narrow window and was captured, looked at and
+reasoned about as the phone — three times in one engagement, twice while the reviewer was checking
+a claim that mobile had never been reviewed. The harness defect manufactured the exact false
+conclusion the review existed to test.
+
+### Mutations can now break a file, not only `state.json`
+
+Registering those two exposed it: the suite could mutate `.pica/state.json` and nothing else, so
+every check that reads an artefact — a source tree, a rendered page, a token file — was unprovable
+by construction, and its absence from the suite read as an author's oversight rather than a missing
+capability. A mutation may now be `{ file, content }`, written before the run and restored after.
+
+Both new checks were fixed by pica's own gates before landing: `rule-coverage-check` refused their
+markers, because printing an id inside a template literal is not a declaration anything can read;
+the mutation suite's baseline gate refused `url-param-guard`, because an unreachable URL threw
+instead of abstaining — its docstring had promised SKIPPED and its code crashed.
+
+Coverage: 42 checks declared (was 39), 27 with a mutation (was 24), 15 proven in neither direction
+— unchanged, because both new checks arrived with their mutations.
+
 ## 3.0.2
 
 ### The command that could not run, and had never been read as code
