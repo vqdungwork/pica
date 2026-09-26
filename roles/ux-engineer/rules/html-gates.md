@@ -359,3 +359,28 @@ not be more precise than seeing.** And it took a `--list` selector, defaulted it
 passed clean, and missed the one screen whose rows live in `.sheet-list` — the confirm screen,
 which was the screen that had actually broken. **A check that only looks where it is pointed
 inherits the blind spot of whoever pointed it.** Containers are discovered now, innermost first.
+
+## Measure CSS pixels, and prove the harness is not in the number
+
+<!-- enforced-by: none — judgement, not decidable by a script -->
+
+A demo harness scaled its device frame down to fit short review windows. Reasonable, labelled, and
+argued as safe for measurement "because every measurement script sets its own viewport, so nothing
+measured reads the browser at a human's window size."
+
+That was wrong, and the way it was wrong is the point: a measurement script sets a **short**
+viewport, which is exactly the condition that triggers the scaling. `getBoundingClientRect` then
+returns painted pixels, so a correct 48px tap target measured 44 and the target-size gate reported
+a floor violation that did not exist anywhere in the CSS. The check was reading the harness and
+calling it the product.
+
+Two things follow.
+
+**Any transform between the CSS and the pixels must be switchable off, and everything that reads
+geometry must switch it off.** The demo takes `fit=off`; the target-size gate, the visual baselines
+and the end-to-end flows all pass it, because all three assert in CSS pixels. Only the check that
+exists to test the fitting itself runs with it on.
+
+**And the general form: when a number disagrees with the source, suspect the instrument before the
+source.** A build whose stylesheet says 48 and whose check says 44 has one defect, and it is not
+necessarily in the stylesheet.

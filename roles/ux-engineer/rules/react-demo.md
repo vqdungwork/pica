@@ -212,3 +212,28 @@ the list, so the reward for finishing is also more room.
 
 Under `prefers-reduced-motion` the settled state is the initial state: reduced motion means
 arriving without the journey, never losing the destination.
+
+## The review harness must not change the thing being reviewed
+
+<!-- enforced-by: framed-viewport -->
+
+A demo harness carried a bar with the current route printed in it. On one screen the query string
+was short and the bar was one line; on the next it wrapped to two. That bar's height was an input
+to the frame's fit scale, so **the phone itself changed size when the person switched area** — 98%
+on one, 95% on the other, resizing under them every time. They reported it before any of the
+checks did, because no check asks whether two screens agree about how big the device is.
+
+Fix the harness's own geometry: one line, fixed height, its own overflow. Anything the harness
+measures about itself and feeds back into the product's layout is a loop waiting to happen, and
+three variants of that loop shipped in one afternoon — the bar's height feeding the scale, the
+scale's label making the bar wrap, and a wrapper measuring the frame it was constraining until the
+frame collapsed to a single pixel in three frames.
+
+**Read declared values, never measured ones, when the measurement is downstream of the thing you
+are setting.** The declared numbers live in tokens or CSS variables and do not move.
+
+And `transform: scale()` leaves the layout box at its declared size, so a scaled frame still
+reserves its full height: the stage keeps a scrollbar for space that paints nothing. Reserve the
+**painted** size on a wrapper, and let that wrapper be `display: contents` when no scaling is
+needed — a box with `width: auto` around a child sized `min(390px, 100%)` is circular, and it
+resolves to zero.

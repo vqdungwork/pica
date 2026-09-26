@@ -1,7 +1,7 @@
 {
   "name": "pica-systems-analyst",
   "description": "pica systems analyst: the four models \u2014 process, domain, state and permissions \u2014 that turn requirements into a specification.",
-  "version": "3.1.1",
+  "version": "3.2.0",
   "author": {
     "name": "Dung Vuong"
   },
