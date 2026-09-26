@@ -157,3 +157,33 @@ source:
   nobody answered; an empty string is the answer "none", deliberately given. Drawing them alike
   loses the distinction the matrix exists to record — one is a gap to chase, the other a decision
   to respect. (The first version printed the literal word `undefined` in that cell.)
+
+## Drawing the model is a check the checks did not run
+
+<!-- enforced-by: activity-laned, model-diagram -->
+
+A TO-BE process declared its lanes by display name and its nodes referenced them by slug —
+`8project (Plane)` against `8project`. Two vocabularies for one thing, in one object.
+
+`process-check` catches this. It has caught it since the check was written: point it at that state
+and `activity-laned` reports thirteen findings, one per activity with no lane it can resolve. The
+check was correct, present, and **never run on this project**, because the chain stopped before
+the step that invokes it and nothing downstream noticed.
+
+What surfaced it was the renderer. Drawing the process put all twenty-three steps into the first
+lane and left two lanes visibly, embarrassingly empty — a picture of a process in which one role
+does everything, which nobody who knew the business could look at for two seconds. **A model that
+is only ever validated is validated against the rules somebody remembered to write; a model that
+is drawn is validated against everyone who sees it.** That is the argument for rendering, and it
+is stronger than "it looks nice".
+
+Three things the renderer must not do, each learned by looking at what it produced:
+
+- **Never fall back to lane zero.** `Math.max(0, indexOf(...))` turned an unresolved lane into a
+  silent default, so the data defect rendered as a *design* — an odd-looking process rather than a
+  broken one. An unmatched lane gets its own band and says so in the band's label.
+- **Column is topological depth, not array position.** One column per node made a 23-step process
+  a 4570px horizontal ribbon in which nothing was parallel and no branch rejoined, about a graph
+  whose entire point is that three roles act at once.
+- **Size the canvas after measuring the content.** A height computed from `lanes.length × 96`
+  clips any lane that has to stack, and a clipped step looks exactly like a step that is not there.
