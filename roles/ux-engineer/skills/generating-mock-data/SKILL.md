@@ -69,3 +69,34 @@ implausible.
 
 Every generator traces to an entity, every state in the model appears, and the six edge cases
 above are present in the dataset.
+
+## Data that is correct and still looks broken
+
+Generating from the entity model stops the demo showing a state the specification forbids. It does
+not stop the demo showing something a person reads as a bug.
+
+Two rows on one engagement:
+
+> *Chuẩn hoá bảng giá cho 12 nhà phân phối khu vực miền Trung và miền Nam trước đợt khuyến mãi cuối năm*
+> *Chuẩn hoá bảng giá cho 12 nhà phân phối khu vực miền Trung*
+
+Both valid. Both generated correctly from the model. And anyone opening that screen concludes the
+data is duplicated or the demo is broken — which costs the same as a real defect, because the
+viewer stops evaluating the design and starts debugging the fixture.
+
+The generator was seeded and correlated, which is right. What it lacked was **lexical distance**:
+no two records a person sees together should be mistakable for each other at a glance. Shared
+prefixes are the usual culprit, because a reader recognises rows by their first few words.
+
+So, alongside the constraints the model gives you:
+
+- **No two visible records share a long leading substring.** Vary the opening, not only the tail.
+- **Cover the length range on purpose** — the shortest plausible value, the longest, and something
+  in between — rather than letting the generator cluster around a mean.
+- **A duplicate that is real must look deliberate.** If the domain genuinely allows two similar
+  items, give them something that distinguishes them on screen, or the fixture is arguing against
+  the design rather than exercising it.
+
+A fixture's job is to make the design judgeable. Data that draws attention to itself has failed
+that job however correct it is.
+
