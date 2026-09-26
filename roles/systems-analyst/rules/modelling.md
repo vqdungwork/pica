@@ -208,3 +208,59 @@ that shape, not the theme. But the ink that sits on the accent is not one of the
 a dark blue and fails on a light one, and the accent is exactly what flips between the two. That
 gets its own token, `--fig-on-accent`, or it is a contrast failure waiting for the reader to
 change their system setting.
+
+
+## a branch nobody labelled is a branch nobody can follow
+
+<!-- enforced-by: branch-unlabelled, branch-half-labelled, branch-conditions -->
+
+Eight edges in one process carried `label: "co"` and `label: "khong"`. Not one was drawn. The
+reader saw a step with two arrows leaving it and nothing to say which was yes — which is the only
+thing a decision exists to communicate. The answer had been in the data the whole time.
+
+**A decision is a node whose branches are named.** Two unlabelled edges leaving a step mean both
+things happen: that is parallel work, and drawing a diamond there tells the reader to choose when
+nobody chooses. Reading "more than one edge out" as a decision turned six nodes into diamonds
+where three were real. A declared `type` confirms it; it is not the only evidence, because on that
+project not a single node carried a type at all and every diamond was drawn as a plain box.
+
+So: **infer the shape from the graph, and treat the declared type as confirmation.** A model is
+data before it is a picture, and a renderer that only believes what the author remembered to
+annotate will draw a different process from the one the author wrote down.
+
+## two branches on the curves, three or more in a legend
+
+<!-- enforced-by: figure-labels-collide -->
+
+Four branches leaving one diamond reconverge within a hundred pixels, so four labels placed on
+four curves collide however they are staggered. Pushing them apart moves each one away from the
+curve it belongs to, until one lands under a step three rows down and appears to label that step
+instead. No placement rule fixes a fork that crowded: the drawing is the wrong shape for it.
+
+Two branches get their labels on the curves, where the eye already is. Three or more get a legend
+under the diamond — one line per branch, the condition and the number of the step it leads to. It
+always fits, it never collides, and the reader can compare the branches against each other instead
+of chasing four curves across the page.
+
+## number the steps, and say where the process starts
+
+<!-- enforced-by: none — judgement; a diagram can be correct without numbers, only harder to talk about -->
+
+Without a number the only way to say "this step" out loud is to read its whole label, and a client
+on a call cannot point. Number by the order a reader meets them: down the page, then across the
+lanes.
+
+Start and end are facts about the graph — nothing arrives, or nothing leaves — so the renderer
+knows them without being told. Draw them as pills and everything between as rectangles. A reader
+who cannot see where a process begins finds it by elimination.
+
+## resolve collisions where the coordinates are
+
+<!-- enforced-by: figure-labels-collide -->
+
+Guessing a placement rule and hoping is not a method when the generator already knows every
+rectangle on the canvas. Lay the labels out, then push them apart until nothing intersects
+anything — the other labels, and the steps themselves — and only then emit.
+
+Three attempts at this were made by eye and each left a different collision. The one that worked
+was measured: lay out, detect, separate, re-check.

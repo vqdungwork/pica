@@ -390,6 +390,26 @@ const M = [
         { file: "__mut-fig3__.html", content: '<!doctype html><title>m</title><figure data-figure="hard" data-label="Hard"><svg viewBox="0 0 400 300"><rect fill="#16191d"/><text font-size="12">Hard</text></svg></figure>\n' },
         { file: path.join("__mut-figs3__", "hard.svg"), content: '<svg viewBox="0 0 400 300"><rect fill="#16191d"/><text font-size="12">Hard</text></svg>\n' },
       ] }],
+  /* figure-labels-collide — two label pills drawn on top of each other. Three separate placement
+   * attempts each left a different version of this, and every one of them looked right in the
+   * source. Arithmetic on the rectangles is the only thing that caught it. */
+  ["figure-labels-collide", "business-analyst/scripts/figure-placement-check.mjs",
+    [path.join(DIR, "__mut-fig4__.html"), path.join(DIR, "__mut-figs4__")], "always",
+    { files: [
+        { file: "__mut-fig4__.html", content: '<!doctype html><title>m</title><figure data-figure="clash" data-label="Clash"><svg viewBox="0 0 400 300"></svg></figure>\n' },
+        { file: path.join("__mut-figs4__", "clash.svg"), content:
+            '<svg viewBox="0 0 400 300"><rect x="40" y="40" width="70" height="19" rx="9.5" fill="var(--fig-card, #fff)"/>' +
+            '<rect x="60" y="44" width="70" height="19" rx="9.5" fill="var(--fig-card, #fff)"/><text font-size="11">x</text></svg>\n' },
+      ] }],
+
+  /* branch-unlabelled / branch-half-labelled — a decision whose branches carry no condition, and
+   * a fork where only some do. The second is worse: the renderer has to guess whether it is a
+   * choice or parallel work, and it will guess consistently and wrongly. */
+  ["branch-unlabelled", "systems-analyst/scripts/process-check.mjs", [S], "toBe",
+    (s) => { for (const e of s.toBe.edges) delete e.label; }],
+  ["branch-half-labelled", "systems-analyst/scripts/process-check.mjs", [S], "toBe",
+    (s) => { const g = s.toBe.edges.filter((e) => e.label); delete g[0].label; }],
+
   ["document-theme-not-pinned", "business-analyst/scripts/document-check.mjs",
     [path.join(DIR, "__mut-theme__.html")], "always",
     { files: [{ file: "__mut-theme__.html", content:

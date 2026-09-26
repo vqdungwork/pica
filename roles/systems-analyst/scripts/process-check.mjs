@@ -62,6 +62,7 @@ const NOTATIONS = ["bpmn", "flowchart"];
 const useCaseIds = new Set((state.useCases || []).map((u) => String(u.id || "").toUpperCase()));
 
 let notationBad = 0, lanedBad = 0, gatewayBad = 0, deadBad = 0, tracedBad = 0;
+let branchBad = 0;
 let activities = 0, gateways = 0;
 
 for (const [which, m] of models) {
@@ -89,10 +90,13 @@ for (const [which, m] of models) {
 
   const byId = new Map(nodes.map((x) => [String(x.id), x]));
   const out = new Map();
+  const outEdges = new Map();
   for (const e of edges) {
     const f = String(e.from ?? e.source ?? "");
     if (!out.has(f)) out.set(f, []);
     out.get(f).push(String(e.to ?? e.target ?? ""));
+    if (!outEdges.has(f)) outEdges.set(f, []);
+    outEdges.get(f).push(e);
   }
 
   for (const node of nodes) {
@@ -135,6 +139,29 @@ for (const [which, m] of models) {
       }
     }
 
+    /* ---- 3b. BRANCHES CARRY THEIR CONDITIONS ----
+     * A renderer decides whether a node is a decision or a fan-out by whether its branches are
+     * NAMED: two unlabelled edges mean both things happen, two labelled ones mean one is chosen.
+     * So a half-labelled fork is genuinely ambiguous — the picture will be wrong either way, and
+     * on one project it was: eight conditions sat in the data and the reader saw two blank arrows
+     * leaving a box that was not even drawn as a diamond. */
+    const outs = outEdges.get(id) || [];
+    if (outs.length > 1) {
+      const named = outs.filter((e) => String(e.label ?? e.condition ?? "").trim());
+      if (kind === "gateway" && !named.length) {
+        branchBad++;
+        fail("branch-unlabelled", `${which}/${id}`,
+          `is a decision with ${outs.length} way(s) out and not one of them says under what condition it is taken. ` +
+          "A reader sees arrows and cannot tell which is yes.");
+      } else if (named.length && named.length < outs.length) {
+        branchBad++;
+        fail("branch-half-labelled", `${which}/${id}`,
+          `has ${outs.length} way(s) out, ${named.length} of them labelled. Either all of them are conditions ` +
+          "and this is a choice, or none of them are and the work happens in parallel. Half-labelled is neither, " +
+          "and the drawing has to guess.");
+      }
+    }
+
     /* ---- 4. NO DEAD END ---- */
     if (kind !== "end" && !(out.get(id) || []).length) {
       deadBad++;
@@ -157,6 +184,7 @@ const table = [
   ["activity-laned", lanedBad, `${activities} activity(ies)`],
   ["gateway-forks", gatewayBad, `${gateways} gateway(s)`],
   ["no-dead-end", deadBad, `${models.length} model(s)`],
+  ["branch-conditions", branchBad, "every fork with more than one way out"],
   ["activity-traced", tracedBad, useCaseIds.size ? `${useCaseIds.size} use case(s) to trace to`
     : "no use cases in state, so only the presence of a trace was checked"],
 ];

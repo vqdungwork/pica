@@ -1,7 +1,7 @@
 {
   "name": "pica-product-manager",
   "description": "pica product manager: the brief as a contract, the scope boundary and its exclusions, and the proof of delivery against the brief that was agreed.",
-  "version": "3.7.1",
+  "version": "3.8.0",
   "author": {
     "name": "Dung Vuong"
   },
