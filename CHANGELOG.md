@@ -1,5 +1,47 @@
 # Changelog
 
+## 3.5.0
+
+### The reader who decides is the one who does not know the notation
+
+A specification is signed by someone who knows the business and not the method. They are not
+trying to *find* a fact; they are trying to **see** what a person can do, where they go, and what
+the system holds. A register dump asks them to read every line and assemble the picture
+themselves. They will not, and they are right not to.
+
+BABOK names four models a specification owes its readers — process, use case, data, state. pica
+held all four as validated data and **drew none of them**. The data was right and unread.
+
+`model-diagram` now renders a **use case diagram** (actors and what each can do: the only picture
+that answers "what can this person actually do", with no notation to learn) and an **ERD** with
+relationships and cardinality drawn from the prose the model records them in. The assembled page
+leads with them.
+
+### Three things that separate a diagram from a picture of one
+
+**Colour is the information, and one legend serves the whole document.** Where a step happens and
+where a screen's data comes from are the same question in two places: grey for the upstream
+system, blue for what this product adds, olive for what a person does with no system at all. Learn
+it once, read every grid at a glance — and see without reading a word how much of a working day
+the product actually touches.
+
+**A grid beats a graph when the graph does not fit.** Twenty-three steps as nodes and edges is
+2860px wide and must be scrolled; the same steps as cards, grouped by who does them and ordered by
+depth, fit any column. **A diagram that must be scrolled sideways is a diagram nobody sees whole,
+which is the only reason to draw one.**
+
+**Unconfirmed points are marked, never filled in with a plausible figure** — in their own colour,
+where the work standing on them is, not filed in an assumptions register.
+
+The assembled page went from 129 entries in eight registers over 20 325px, to a narrative in parts
+— each opening with one sentence and then a grid — at 7 700px, with the registers in a closed
+appendix for the one reader in ten who wants to look up a code.
+
+### And the data the pictures exposed
+
+Drawing it found what reading it had not: every label in the TO-BE process was written in
+**unaccented Vietnamese**, on the one model that was ever going to be shown as a picture.
+
 ## 3.4.0
 
 ### Learning archify's surface and skipping its substance
