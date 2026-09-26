@@ -136,3 +136,26 @@ the problem this whole change exists to fix, one level up.
 - [ ] `state-coverage-check` returns zero, or every gap is excused by name with a reason
 - [ ] Mock data comes from one source and is written at the audience's text expansion
 - [ ] The client has a URL, and the boards beside it are still static
+
+## A declared viewport has two numbers; the harness must use both
+
+<!-- enforced-by: none — judgement, not decidable by a script -->
+
+`state.viewports` declares `{ w, h }`. A demo harness that sets only the width does not render a
+viewport — it renders a column, and the page grows to whatever the content needs.
+
+Measured on one engagement: a mobile frame declared 390×844 rendered at 390×**1598**. Nearly double
+the height, so **the fold did not exist**. Every claim the project had made about what a person sees
+before scrolling — how many rows are above the fold, whether the sticky commit bar stays reachable
+while the list scrolls under it, whether a disclosure banner costs too much of the screen — had been
+computed by slicing 844px out of a 1598px frame. That is arithmetic about a screenshot, not
+observation of a screen, and the difference is the whole reason the demo exists.
+
+So: frame the declared viewport at **both** dimensions, with the frame's own overflow scrolling
+inside it rather than the page scrolling around it. Then a sticky element is actually sticky, an
+empty state actually looks empty, a long list actually scrolls, and the fold is a place rather than
+a number someone worked out.
+
+A phone-shaped frame also makes the review honest in a way a tall column cannot: a client opening
+the demo sees what a person holding a phone sees, instead of a layout they have to imagine cropped.
+
