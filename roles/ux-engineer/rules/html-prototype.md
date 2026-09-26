@@ -765,3 +765,31 @@ the reading order makes sense in the product's own language, and whether a widge
 its role promises all need a person with the software on. Driving VoiceOver from a script needs
 interactive permission and takes over the machine's audio and focus — ask before doing that to
 somebody, and until they say yes, report the tree as the tree and the gap as a gap.
+
+
+## a baseline records what was rendering, not what is correct
+
+<!-- enforced-by: build-fails -->
+
+One stylesheet carried a stray `}`. A dev server tolerates it; a strict parser does not. The
+browser's error recovery discarded exactly one rule — `.banner` — so every banner in the demo
+rendered as unstyled text jammed against the edge of its container, with no padding and no
+background, for the entire engagement.
+
+Nothing caught it. Axe does not mind padding. Target sizes, layout coherence, the keyboard walk
+and the screen-reader tree all passed. And the visual baselines had been captured from the same
+broken CSS, so they reported **0 changed across 94 routes on both viewports** — which read as
+proof that the demo looked right and was proof only that it looked the same as last time.
+
+**"0 changed" means identical to the last capture. It does not mean correct.** A baseline is a
+regression net, not a verdict, and the moment it is captured it inherits every defect present. The
+corollary is the dangerous one: when a real fix lands, the baseline reports it as 49 regressions,
+and the cheapest way to make the suite green again is to re-capture without looking — which blesses
+the defect permanently.
+
+So: **look at what changed before updating a baseline**, and look at the thing itself, not the
+diff count. Two screenshots of one banner, before and after, settled in seconds what the numbers
+had been actively obscuring.
+
+The check that found it was `build-check`, and it found it by building. The failure was not
+cosmetic — the dead rule and the broken build were the same defect seen from two ends.
