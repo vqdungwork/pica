@@ -16,7 +16,7 @@
  *
  * Usage:
  *   node capture-html-reference.mjs --dir <html-dir> --out <out-dir> [--font "<family>"] [--sel ".frame-wrap"]
- *   node capture-html-reference.mjs --url <live-url> [--url <another>] --out <out-dir>
+ *   node capture-html-reference.mjs --url <live-url> [--url <another>] --out <out-dir> [--as demo-reference.json]
  *
  * --url captures a running build rather than prototype files, which is what step 7.10
  * compares against the approved design. Pass it more than once for several routes.
@@ -70,6 +70,12 @@ const chromium = await loadChromium();
 
 const DIR = get("--dir", process.cwd());
 const OUT = get("--out", path.join(DIR, ".cmp"));
+/* The file name, so a capture of the BUILD can sit beside the approved one. Every capture used to
+ * be html-reference.json, so the build had to go to another directory, and build-diff's manifest
+ * asked for .audit/demo-reference.json, a file nothing could produce: it never ran under
+ * pica-verify. `--url <demo> --out .audit --as demo-reference.json` is that file. */
+const AS = get("--as", "html-reference.json");
+if (!/^[\w.-]+\.json$/.test(AS)) { console.error(`FAIL  --as ${AS}: a file name ending in .json, with no directory`); process.exit(2); }
 const FONT = get("--font", null);
 const WRAP = get("--sel", ".frame-wrap");
 /* The frame selector defaults to the viewport tag, not to a device class.
@@ -786,8 +792,8 @@ if (unsettled.length) {
 
 const meta = { capturedAt: new Date().toISOString(), forcedFont: FONT,
                font: resolvedFont, dir: DIR, settled: settled.length };
-fs.writeFileSync(path.join(OUT, "html-reference.json"), JSON.stringify({ meta, widthMedia, containerQueries, frames: all }));
-console.log("\nwrote " + path.join(OUT, "html-reference.json"));
+fs.writeFileSync(path.join(OUT, AS), JSON.stringify({ meta, widthMedia, containerQueries, frames: all }));
+console.log("\nwrote " + path.join(OUT, AS));
 console.log(FONT ? `font forced to ${FONT}, re-run without --font once Figma uses the same family`
                  : "rendered native");
 console.log(`settled: ${settled.length} source(s) reached a stable layout before measurement`);

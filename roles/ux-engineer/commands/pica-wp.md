@@ -128,24 +128,24 @@ verification the work will ever get; for a Figma project, finding these defects 
 finding them after the port costs a rebuild.
 
 ```bash
-S=${CLAUDE_PLUGIN_ROOT}/scripts
-node $S/capture-html-reference.mjs --dir html --out .audit
-node $S/contrast-check.mjs .audit/html-reference.json .pica/state.json
-node $S/spacing-check.mjs  .audit/html-reference.json .pica/state.json
-node $S/shell-check.mjs    html/review.html .pica/state.json
-node $S/verify-html.mjs   .audit/html-reference.json .pica/state.json
-node $S/parity-check.mjs  .audit/html-reference.json .pica/state.json   # 2+ viewports only
-node $S/flow-check.mjs    --dir html --state .pica/state.json
-node $S/coverage-check.mjs .audit/html-reference.json .pica/state.json
+pica=$(find "${CLAUDE_PLUGIN_ROOT}/../.." -maxdepth 4 \
+  \( -path "*/pica-core/*/scripts/pica-run.mjs" -o -path "*/core/scripts/pica-run.mjs" \) \
+  -print 2>/dev/null | sort -V | tail -1)
+node "$pica" ux-engineer capture-html-reference.mjs --dir html --out .audit
+node "$pica" ux-engineer contrast-check.mjs .audit/html-reference.json .pica/state.json
+node "$pica" ux-engineer spacing-check.mjs  .audit/html-reference.json .pica/state.json
+node "$pica" ux-engineer shell-check.mjs    html/review.html .pica/state.json
+node "$pica" ux-engineer verify-html.mjs    .audit/html-reference.json .pica/state.json
+node "$pica" ux-engineer parity-check.mjs   .audit/html-reference.json .pica/state.json   # 2+ viewports only
+node "$pica" ux-engineer flow-check.mjs     --dir html --state .pica/state.json
+node "$pica" ux-engineer coverage-check.mjs .audit/html-reference.json .pica/state.json
 ```
 
 **If `figmaInScope` is true in `.pica/state.json`, capture a second, forced-font reference**, to a
 distinct artefact so both exist side by side:
 
 ```bash
-node $S/capture-html-reference.mjs --dir html --out .audit/.forced-font --font "<the family Figma resolves>"
-mv .audit/.forced-font/html-reference.json .audit/html-reference-forced.json
-rm -rf .audit/.forced-font
+node "$pica" ux-engineer capture-html-reference.mjs --dir html --out .audit --as html-reference-forced.json --font "<the family Figma resolves>"
 ```
 
 Forcing the family Figma resolves isolates layout differences from typeface metrics: metrics differ per

@@ -307,6 +307,21 @@ iframes, camera and microphone. None of them errors. They just do nothing.
 is not something to retrofit — it is how every state in the demo is addressed.
 
 
+## a demo is walked, not only loaded
+
+<!-- enforced-by: blank-after-click, script-error -->
+
+Every browser check loads a route fresh, measures it and leaves. The worked example's own prototype
+router went blank on its first navigation for months: it wrote the current screen to
+`<html data-scr>`, the root then matched every `[data-scr]` query, and the next move hid the
+document. Twelve checks passed over it, because none of them ever clicked.
+
+`flow-walk-check` clicks every distinct control on every route, then every control on the screen
+that produced, three deep, replaying each path from a fresh load. A click that leaves nothing
+readable, or takes every frame off screen without navigating, fails; so does any script error.
+It cannot tell a right screen from a wrong one. That is `flow-check`'s job and yours: click the main
+flow yourself before anyone else does.
+
 ## the project declares what only the project knows
 
 <!-- enforced-by: none — pica-verify names every undeclared placeholder and refuses a spaced one -->

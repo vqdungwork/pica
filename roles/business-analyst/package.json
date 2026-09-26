@@ -139,14 +139,18 @@
       "passes": "0 findings",
       "args": "docs/spec/index.html docs/spec/diagrams",
       "phase": "analyse",
-      "needs": []
+      "needs": [
+        "@docs/spec/index.html"
+      ]
     },
     {
       "run": "document-check.mjs",
       "passes": "0 findings",
       "args": "docs/spec/index.html",
       "phase": "analyse",
-      "needs": []
+      "needs": [
+        "@docs/spec/index.html"
+      ]
     }
   ],
   "definitionOfDone": [

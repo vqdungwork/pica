@@ -55,7 +55,7 @@ function userVisible(src) {
  * row — and pica's runner reported it as "FAIL, 0 findings", which reads as a check that failed
  * for no reason. A check that cannot say what is wrong is worse than one that is absent. */
 function walk(dir, acc = []) {
-  if (!existsSync(dir)) { console.log(`internal-reference-check: ${dir} does not exist — nothing to read`); process.exit(0); }
+  if (!existsSync(dir)) { console.log(`internal-reference-check: ${dir} does not exist — nothing to read. This is an abstention, not a pass.`); process.exit(0); }
   if (!statSync(dir).isDirectory()) return EXT.has(extname(dir)) ? [dir] : [];
   for (const name of readdirSync(dir)) {
     if (name === "node_modules" || name.startsWith(".")) continue;
@@ -67,7 +67,14 @@ function walk(dir, acc = []) {
 }
 
 const findings = [];
-for (const file of walk(root)) {
+const files = walk(root);
+/* A tree with no markup in it was read and found clean: "0 requirement identifiers" over zero files.
+ * On the worked example, whose src holds TypeScript rules and no view, that was every run. */
+if (!files.length) {
+  console.log(`internal-reference-check: ${root} holds no ${[...EXT].join(", ")} file, so no text a user reads was scanned. This is an abstention, not a pass.`);
+  process.exit(0);
+}
+for (const file of files) {
   const src = readFileSync(file, "utf8");
   const lineOf = (text) => {
     const at = src.indexOf(text);
@@ -80,6 +87,9 @@ for (const file of walk(root)) {
   }
 }
 
+/* The runner's row contract: one `pass|FAIL  <id>  N finding(s)   (scope)` per assertion, so
+ * pica-verify counts what was verified rather than reporting a clean run as "0 assertion(s)". */
+console.log(`${findings.length ? "FAIL" : "pass"}  internal-reference-check ${String(findings.length).padStart(3)} finding(s)   (${prefixes.join(", ")})`);
 if (findings.length === 0) {
   console.log(`internal-reference-check: 0 requirement identifiers in user-visible text (${prefixes.join(", ")})`);
   process.exit(0);

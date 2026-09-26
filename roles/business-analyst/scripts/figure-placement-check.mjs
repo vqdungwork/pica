@@ -8,15 +8,16 @@ import { join, basename } from "node:path";
 
 const page = process.argv[2] ?? "docs/spec/index.html";
 const dir = process.argv[3] ?? "docs/spec/diagrams";
+const CHECKS = ["figure-control-does-nothing", "figure-edge-through-node", "figure-hardcodes-a-colour", "figure-labels-collide", "figure-node-has-no-hit-area", "figure-rendered-but-not-placed", "figure-step-unreachable", "figure-steps-overlap", "figure-structure-not-declared", "figure-too-wide-to-read", "figure-unreadable-on-a-phone", "figure-without-a-caption", "no-figures"];
 const fails = [];
 const fail = (id, msg) => fails.push(`  [${id}] ${msg}`);
 
 if (!existsSync(page)) {
-  console.log(`figure-placement-check: ${page} does not exist yet — nothing to place into`);
+  console.log(`figure-placement-check: ${page} does not exist yet — nothing to place into. This is an abstention, not a pass.`);
   process.exit(0);
 }
 if (!existsSync(dir)) {
-  console.log(`figure-placement-check: ${dir} does not exist yet — no figures rendered`);
+  console.log(`figure-placement-check: ${dir} does not exist yet — no figures rendered. This is an abstention, not a pass.`);
   process.exit(0);
 }
 
@@ -307,6 +308,12 @@ for (const tag of framed) {
     fail("figure-without-a-caption", `a <figure> carries no label, so the reader must infer what it answers`);
 }
 
+/* The runner's row contract: one `pass|FAIL  <id>  N finding(s)   (scope)` per assertion, so
+ * pica-verify counts what was verified rather than reporting a clean run as "0 assertion(s)". */
+for (const id of CHECKS) {
+  const n = fails.filter((x) => x.startsWith(`  [${id}]`)).length;
+  console.log(`${n ? "FAIL" : "pass"}  ${id.padEnd(28)} ${String(n).padStart(3)} finding(s)   (${"figure-placement-check"})`);
+}
 if (fails.length) {
   console.error("figure-placement-check FAILED\n" + fails.join("\n"));
   process.exit(1);

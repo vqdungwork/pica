@@ -108,6 +108,10 @@ const page = await browser.newPage({ viewport: { width: VW, height: VH } });
 const byRule = new Map();       // rule id -> { impact, help, nodes, routes:Set }
 let scanned = 0;
 const wholePage = [];
+/* Routes that could not be scanned at all. They set exitCode = 1 and printed a FINDING, and then a
+ * run with no axe violations elsewhere called process.exit(0): a route serving nothing was reported
+ * as a clean scan. They are counted now, and they count. */
+let unscannable = 0;
 const sep = (u) => (u.includes("?") ? "&" : "?");
 
 try {
@@ -121,7 +125,7 @@ try {
     const dead = await pageIsDead(page, INCLUDE || "");
     if (dead) {
       console.error(`FINDING  [axe-violations] ${url}\n         this route rendered nothing to scan: ${dead}`);
-      process.exitCode = 1;
+      unscannable++;
       continue;
     }
     await page.addScriptTag({ content: AXE });
@@ -141,7 +145,7 @@ try {
       );
     } catch (e) {
       console.error(`FINDING  [axe-violations] ${url}\n         axe could not run here: ${String(e).split("\n")[0]}`);
-      process.exitCode = 1;
+      unscannable++;
       continue;
     }
     scanned++;
@@ -161,7 +165,9 @@ const LIMIT =
   "      to about half of the success criteria. The rest needs a person, and a page that passes every\n" +
   "      rule here can still be unusable with a screen reader. This is a floor, not a result.";
 
-if (!byRule.size) {
+const nFound = byRule.size + unscannable;
+console.log(`${nFound ? "FAIL" : "pass"}  axe-violations       ${String(nFound).padStart(3)} finding(s)   (${scanned} route(s) scanned${unscannable ? `, ${unscannable} could not be` : ""})`);
+if (!nFound) {
   console.log(`axe-check: ${scanned} route(s), 0 violations (${TAGS.join(", ")})`);
   if (wholePage.length) console.log(`NOTE  ${wholePage.length} route(s) carry no "${INCLUDE}" and were scanned whole, harness chrome included.`);
   console.log(LIMIT);
@@ -178,6 +184,6 @@ for (const [id, v] of [...byRule].sort((a, b) => (order[a[1].impact] ?? 9) - (or
                 [...v.routes].slice(0, 3).map((r) => `         at ${r}`).join("\n") +
                 (v.routes.size > 3 ? `\n         … and ${v.routes.size - 3} more route(s)` : ""));
 }
-console.error(`\n${byRule.size} rule(s) violated across ${scanned} route(s).`);
+console.error(`\n${byRule.size} rule(s) violated across ${scanned} route(s)${unscannable ? `, and ${unscannable} route(s) could not be scanned` : ""}.`);
 console.error(LIMIT);
 process.exit(1);

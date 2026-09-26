@@ -95,6 +95,11 @@ function makeFixture() {
       args.push("--playwright", path.dirname(createRequire(import.meta.url).resolve("playwright")));
     } catch {}
     execFileSync("node", args, { cwd: d, stdio: "ignore" });
+    /* A build identical to the approved design, so build-diff has two captures to compare and a
+     * clean baseline to be broken. The worked example has no separate build; this copy exists
+     * only here, and example-verify deliberately does not make one, because a build compared
+     * with itself would be a pass over nothing. */
+    fs.copyFileSync(path.join(d, ".audit", "html-reference.json"), path.join(d, ".audit", "demo-reference.json"));
   } catch {
     console.log("NOTE  the fixture's capture could not be produced, most likely because playwright is");
     console.log("      absent. The four capture-reading mutations will report SKIPPED below, and a");
@@ -657,6 +662,36 @@ const M = [
         ? fs.readFileSync(path.join(DIR, "html", "review.html"), "utf8")
             .replace(/<button[^>]*data-zoom="screen"[^>]*>[^<]*<\/button>/, "")
         : "" }] }],
+  /* flow-walk-check — the two ways a click can leave a demo unusable. The first is the defect the
+   * worked example's own proto.js shipped: a navigation that hid the document root. */
+  ["blank-after-click", "ux-engineer/scripts/flow-walk-check.mjs",
+    ["--url", "file://" + path.join(DIR, "__mut-walk__.html"), "--frame", ".frame"], "module:playwright",
+    { files: [{ file: "__mut-walk__.html", content:
+        '<!doctype html><html lang="en"><head><meta charset="utf-8"><title>w</title></head><body>' +
+        '<div class="frame"><h1>Queue</h1><button type="button" onclick="document.documentElement.hidden = true">Open</button></div>' +
+        '</body></html>\n' }] }],
+  ["script-error", "ux-engineer/scripts/flow-walk-check.mjs",
+    ["--url", "file://" + path.join(DIR, "__mut-walk2__.html"), "--frame", ".frame"], "module:playwright",
+    { files: [{ file: "__mut-walk2__.html", content:
+        '<!doctype html><html lang="en"><head><meta charset="utf-8"><title>w</title></head><body>' +
+        '<div class="frame"><h1>Queue</h1><button type="button" onclick="undefinedRouter.go(1)">Open</button></div>' +
+        '</body></html>\n' }] }],
+
+  /* build-diff — a screen the design approved and the build dropped, and a radius the build
+   * introduced. Both sides are captures; the fixture's build is a copy of its design. */
+  ...(() => {
+    const BUILT = path.join(DIR, ".audit", "demo-reference.json");
+    if (!fs.existsSync(BUILT)) return [];
+    const built = (edit) => { const j = JSON.parse(fs.readFileSync(BUILT, "utf8")); edit(j); return JSON.stringify(j); };
+    const firstPkg = (j) => Object.keys(j.frames)[0];
+    return [
+      ["frame-paired", "evaluator/scripts/build-diff.mjs", [REF, BUILT], "capture",
+        { files: [{ file: path.join(".audit", "demo-reference.json"), content: built((j) => { j.frames[firstPkg(j)].shift(); }) }] }],
+      ["radius", "evaluator/scripts/build-diff.mjs", [REF, BUILT], "capture",
+        { files: [{ file: path.join(".audit", "demo-reference.json"), content: built((j) => {
+            const f = j.frames[firstPkg(j)][0]; f.census = f.census || {}; f.census.radii = [...(f.census.radii || []), [13, 1]]; }) }] }],
+    ];
+  })(),
   ["raw-colour",       "ux-engineer/scripts/code-tokens-check.mjs", [SRC, "tokens/tokens.json", S], "@" + SRC,
     { files: [{ file: path.join(SRC, "__mut-colour__.ts"), content: 'export const warning = "#ff00ff";\n' }] }],
 ];
@@ -770,7 +805,12 @@ for (const [check, script, argv, need, mutate] of M) {
   if (restoreFile) restoreFile();
   const fired = new RegExp(`\\[${check}\\]|^FAIL\\s+${check}\\b`, "m").test(out);
   const others = [...out.matchAll(/^FAIL\s+([a-z-]+)/gm)].map((m) => m[1]).filter((c) => c !== check);
-  if (fired) { caught++; results.push(["caught", name, others.length ? `also fired: ${[...new Set(others)].join(", ")}` : ""]); }
+  /* Firing is not enough: pica-verify reads `pass|FAIL  <id>  N finding(s)` rows, and a check that
+   * fires in any other voice was counted by it as "0 assertion(s)" when clean and as a runner fault
+   * when not. Twelve checks did, while this suite scored every one of them caught. */
+  const readable = /^(pass|FAIL)\s+[a-z][a-z0-9-]*\s+\d+\s+finding/m.test(out);
+  if (fired && !readable) { missed++; results.push(["MISSED", name, "fired, but printed no pass|FAIL row pica-verify can read"]); }
+  else if (fired) { caught++; results.push(["caught", name, others.length ? `also fired: ${[...new Set(others)].join(", ")}` : ""]); }
   else { missed++; results.push(["MISSED", name, out.trim().split("\n").slice(-1)[0] || "(no output)"]); }
 }
 fs.writeFileSync(S, base);

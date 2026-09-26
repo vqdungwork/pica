@@ -267,6 +267,13 @@ const LIMIT =
 if (ACT && unacted.length)
   console.log(`NOTE  ${ACT} matched nothing visible and clickable on ${unacted.length} route(s) (${unacted.join(", ")}), ` +
     "so silent-change and dialog-unnamed were not measured there.");
+/* The runner's row contract: one `pass|FAIL  <id>  N finding(s)   (scope)` per assertion. Without it
+ * pica-verify counted a clean run as "0 assertion(s)", --evidence had nothing to quote, and a failing
+ * run was reported as a runner fault instead of as its findings. */
+for (const id of CHECKS) {
+  const n = new Set(findings.filter((f) => f[0] === id).map((f) => f.join("|"))).size;
+  console.log(`${n ? "FAIL" : "pass"}  ${id.padEnd(20)} ${String(n).padStart(3)} finding(s)   (${routes.length || 1} route(s))`);
+}
 if (!findings.length) {
   console.log(`screenreader-check: ${routes.length || 1} route(s), 0 findings (${CHECKS.join(", ")})`);
   console.log(LIMIT);

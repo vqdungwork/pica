@@ -229,10 +229,13 @@ two are the blast radius: without them, correcting one assumption rebuilds every
 ## Verify before handing back
 
 ```bash
-node ${CLAUDE_PLUGIN_ROOT}/scripts/problem-check.mjs .pica/state.json
-node ${CLAUDE_PLUGIN_ROOT}/scripts/trace-check.mjs  .pica/state.json
-node ${CLAUDE_PLUGIN_ROOT}/scripts/domain-check.mjs   .pica/state.json
-node ${CLAUDE_PLUGIN_ROOT}/scripts/industry-check.mjs .pica/state.json
+pica=$(find "${CLAUDE_PLUGIN_ROOT}/../.." -maxdepth 4 \
+  \( -path "*/pica-core/*/scripts/pica-run.mjs" -o -path "*/core/scripts/pica-run.mjs" \) \
+  -print 2>/dev/null | sort -V | tail -1)
+node "$pica" business-analyst problem-check.mjs  .pica/state.json
+node "$pica" business-analyst trace-check.mjs    .pica/state.json
+node "$pica" systems-analyst  domain-check.mjs   .pica/state.json
+node "$pica" business-analyst industry-check.mjs .pica/state.json
 ```
 
 Zero findings, or fix. Then report what you checked, what you found, and **which assumptions are low

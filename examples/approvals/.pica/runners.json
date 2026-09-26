@@ -10,7 +10,7 @@
     "<opener>": null,
     "<dialog>": null,
     "<baselines>": ".audit/baseline",
-    "<srcDir>": "src",
+    "<srcDir>": "html",
     "<buildCmd>": null,
     "<buildCwd>": null,
     "<buildOut>": null

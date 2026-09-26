@@ -86,6 +86,7 @@ try {
   await browser.close();
 }
 
+console.log(`${findings.length ? "FAIL" : "pass"}  url-param-guard      ${String(findings.length).padStart(3)} finding(s)   (${bogus.length} unknown parameter(s)${valid ? " and 1 unknown value" : ""})`);
 if (findings.length === 0) {
   console.log(`url-param-guard: every unrecognised parameter and value refused to render "${sel}"`);
   process.exit(0);

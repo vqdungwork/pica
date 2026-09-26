@@ -42,7 +42,7 @@
     {
       "run": "build-diff.mjs",
       "passes": "0 findings, the React demo against the approved reference",
-      "args": "<ref> <state>",
+      "args": "<ref> .audit/demo-reference.json",
       "phase": "design",
       "needs": [
         "@.audit/html-reference.json",
