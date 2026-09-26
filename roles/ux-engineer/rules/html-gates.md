@@ -384,3 +384,38 @@ exists to test the fitting itself runs with it on.
 **And the general form: when a number disagrees with the source, suspect the instrument before the
 source.** A build whose stylesheet says 48 and whose check says 44 has one defect, and it is not
 necessarily in the stylesheet.
+
+## The viewport you are not looking at is the one that is broken
+
+<!-- enforced-by: none — judgement, not decidable by a script -->
+
+> `ragged-rows` catches one member of this family — a marker centred against a block that
+> grew a third line, which was wrong on desktop and right on mobile for exactly this reason.
+> The orphan divider, the centred phone layout and the shrink-wrapped banner were all found
+> by rendering and looking. Nothing here is decidable.
+
+A report was rebuilt on a phone across an afternoon: summary tiles deleted, exception groups
+introduced, a hairline removed because it now divided a card from nothing. Every one of those
+decisions was correct and every one was applied to the mobile rule only. On desktop the same
+hairline survived, pointing at 480 pixels of empty space — **a violation of a rule written that
+same day, in the same stylesheet, by the same hand.**
+
+It went further. The content sat in a 700px column inside a 1440px device with 350px of dead
+space on each side: a phone layout that had been centred rather than a desktop layout that had
+been designed. A banner shrink-wrapped to 485px above a 925px list, two elements in one column
+disagreeing about where the column ends. None of it was visible on the viewport being worked on.
+
+Three habits, in order of how often they are skipped:
+
+1. **Every change gets looked at on every declared viewport, the same day.** Not swept — looked
+   at. A sweep reports overflow; it does not report a divider with nothing behind it.
+2. **When a rule is deleted for one breakpoint, search for its siblings.** `border-bottom` was
+   removed inside a container query while `border-right` sat forty lines above it, outside.
+3. **A wide viewport is not a narrow one with margins.** If the layout has independent parts —
+   and an exception report's groups are independent answers — put them side by side. Otherwise a
+   desktop screen shows one answer where it had room for four.
+
+And the recurring one underneath all three: an equally specific rule written **earlier in the
+file** loses to one written later. That cost a divider, a row divider, and a two-column grid in
+one engagement — three separate silent losses, none visible in any diff, all of them found by
+rendering.

@@ -1,5 +1,31 @@
 # Changelog
 
+## 3.2.1
+
+### The viewport you are not looking at is the one that is broken
+
+A report was rebuilt on a phone across an afternoon. Summary tiles deleted, exception groups
+introduced, a hairline removed because it now divided a card from nothing. Every decision correct;
+every decision applied to the **mobile rule only**.
+
+On desktop the same hairline survived, pointing at 480 pixels of empty space — a violation of a
+rule written that same day, in the same stylesheet, by the same hand. Content sat in a 700px
+column inside a 1440px device with 350px of dead space each side: a phone layout that had been
+centred, not a desktop layout that had been designed. A banner shrink-wrapped to 485px above a
+925px list. None of it was visible on the viewport being worked on, and none of it was caught by a
+sweep — a sweep reports overflow, not a divider with nothing behind it.
+
+Three habits, in the order they get skipped: look at every declared viewport the same day, not
+sweep it; when a rule is deleted for one breakpoint, search for its siblings (`border-bottom` was
+removed inside a container query while `border-right` sat forty lines above it, outside); and a
+wide viewport is not a narrow one with margins — if the layout has independent parts, put them
+side by side.
+
+And the one underneath all three, now three-for-three in a single engagement: **an equally
+specific rule written earlier in the file loses to one written later.** It cost a card divider, a
+row divider, and a two-column grid — three silent losses, none visible in any diff, all found by
+rendering.
+
 ## 3.2.0
 
 ### A report is not a ranked list of everyone
