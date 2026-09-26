@@ -275,3 +275,15 @@ third binding.
 If two parts are long enough to wrap, they are not one sentence. Give them a line each and let
 weight carry the difference — the context quiet, the reason in ink. The fix is in the shape, not
 in the glue.
+
+
+## a disabled control still has to be readable
+
+<!-- enforced-by: none — contrast checks exempt disabled controls, which is why this needs saying -->
+
+WCAG exempts inactive components from the contrast floor, so every automated check will pass a
+disabled button nobody can read. On one project the disabled confirm button was grey-on-grey at
+3.1:1 — legal, and the person looking at it cannot tell what they are being stopped from doing.
+
+Disabled is a state that must still communicate. Dim it by weight and by the absence of an
+affordance, not by making the words disappear.

@@ -402,6 +402,29 @@ const M = [
             '<rect x="60" y="44" width="70" height="19" rx="9.5" fill="var(--fig-card, #fff)"/><text font-size="11">x</text></svg>\n' },
       ] }],
 
+  /* target-too-small — a page with a control under the floor, and one whose hit area clears it via
+   * the label that wraps it. The second is the false positive that made the naive version report
+   * four defects that were not there. */
+  ["target-too-small", "ux-engineer/scripts/target-size-check.mjs",
+    ["--url", "file://" + path.join(DIR, "__mut-tgt__.html"), "--min", "44"], "always",
+    { files: [{ file: "__mut-tgt__.html", content:
+        '<!doctype html><html lang="en"><head><meta charset="utf-8"><title>t</title></head><body>' +
+        '<label style="display:block;min-height:48px"><input type="checkbox" style="width:20px;height:20px"> ok, the label is the target</label>' +
+        '<a href="#x" style="display:block;height:20px">too small</a>' +
+        '</body></html>\n' }] }],
+
+  /* premise-check — the four shapes that only appear when two phases are read together. Each was
+   * live on a finished project whose analyse phase was 13/13 green. */
+  ["design-rests-on-unobserved-pain", "product-manager/scripts/premise-check.mjs", [S], "screens",
+    (s) => { for (const p of (s.discovery?.painPoints ?? s.painPoints ?? [])) { delete p.evidence; delete p.evidenceClass; }
+             for (const g of (s.discovery?.segments ?? s.segments ?? [])) g.interviews = 0; }],
+  ["built-past-an-unmade-decision", "product-manager/scripts/premise-check.mjs", [S], "screens",
+    (s) => { s.proposals = [{ id: "S9", presented: true }]; }],
+  ["nothing-was-agreed", "product-manager/scripts/premise-check.mjs", [S], "screens",
+    (s) => { delete s.scopeFrozen; }],
+  ["assumption-without-a-grade", "product-manager/scripts/premise-check.mjs", [S], "screens",
+    (s) => { s.assumptions = [{ id: "A-99", assumed: "something nobody graded" }]; }],
+
   /* build-fails / artifact-* — a build command that exits non-zero, and a built page that depends
    * on what the artifact frame refuses. Both were live: the demo had never been built, and its
    * deep links used a query string that an artifact link never delivers. */

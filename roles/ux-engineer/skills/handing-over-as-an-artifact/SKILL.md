@@ -73,6 +73,39 @@ Three things, in this order, and no more:
 3. **That nobody has used it yet** — evaluation is not user testing, and saying so is what keeps
    the comments honest
 
+## Two forms, and they are not interchangeable
+
+**The built application.** The demo itself, published so the client works it. It carries every
+state, the interactions are real, and the frame's refusals apply in full — run
+`artifact-readiness-check` first.
+
+**The design canvas.** One artboard per screen laid out on an infinite canvas, from the Design
+Artifact type: `project/canvas.json` as the index and one `.dc.html` per board, joined by
+`<a href="Other.dc.html">` so a flow is clickable in Play. Section titles and sticky notes sit
+beside the boards.
+
+Pick the canvas when the conversation is about the DESIGN — which screens exist, what each state
+looks like, what is still undecided. A client sees twelve screens at once and points at one. Pick
+the built app when the conversation is about the BEHAVIOUR. Most engagements want the canvas
+first and the app second.
+
+**The canvas is a second copy of the screens, and a second copy diverges.** Say in the handover
+which one is the source of truth — the repository is — and never fix a defect on the canvas alone.
+A canvas whose screens no longer match the build is worse than no canvas, because the client
+reviews the one they were given.
+
+## Sizing an artboard
+
+An artboard is the size of the DESIGN, not of a device. A 1280×800 frame holding 572px of content
+shows the client a quarter-screen of nothing and reads as unfinished, however truthful "that is
+what the viewport looks like" may be.
+
+Measure where the ink actually ends and cut the frame to it, keeping the width — the width is a
+layout decision and carries meaning; the trailing height carries none. Phone boards are the
+exception: 390×844 is the design, because a phone screen's edges are part of it.
+
+Keep `$preview` in each file equal to its `boards` entry. They drift silently.
+
 ## Reading the comments back
 
 A comment is a finding with a location. Triage it the way a review finding is triaged:
@@ -85,6 +118,18 @@ A comment is a finding with a location. Triage it the way a review finding is tr
 
 Answer every thread, including the ones you disagree with. A thread with no reply reads as a
 finding that was ignored, and it is the cheapest way to lose a client's trust in the loop.
+
+## When the type says not to verify
+
+The Design type's own instructions end with "never verify unless the user asked" — do not render,
+screenshot or open the canvas after publishing. Follow that: it is the type's contract, and the
+canvas is theirs to look at.
+
+It also means the artboards ship unmeasured, so **measure them before publishing**, locally: render
+each `.dc.html` with its `<helmet>` styles in a browser at the declared frame, and check the frame
+matches `boards`, nothing spills out, nothing overflows, every hit area clears the floor and every
+text clears contrast. Four of nine boards failed that on a first pass, and three of the four were
+real.
 
 ## Done when
 

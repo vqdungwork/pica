@@ -124,3 +124,31 @@ marker sits at the same offset, whether a scroll region behaves the same way.
 Every pass before this one looks at one screen. A defect that only exists as a **difference
 between** screens is invisible to all of them, and it is the defect a person notices first,
 because switching is what they do with the product and looking is what a reviewer does to it.
+
+
+## Pass 7 — the whole-chain pass
+
+Every pass above reviews a work product. This one reviews the CHAIN, and it is the one that found
+the worst defects on a finished project — each invisible from inside the phase that owned it.
+
+Run every phase, read the three numbers together, and ask what their shape says:
+
+- **passed** — verified
+- **failed** — a defect, with a finding
+- **abstained** — and this is the one that hides things. It means two different sentences: "this
+  project has nothing for that check to read", which is a fact about the project, and "that check
+  applies and nobody told the runner where the app is", which is fixable in one line. Fifteen
+  checks were running and passing under a project's own npm scripts while the closing report
+  counted them as abstentions
+
+Then look for the shapes that no single check can see:
+
+- a phase green while the phase upstream of it is red — a design verified to the pixel on premises
+  nobody checked (`premise-check`)
+- a check in the chain that asserts nothing: it prints numbers, exits 0, and is joined with `&&`
+  so it can never fail. One "target size check" measured seven hand-picked selectors and reported
+  nothing at all
+- a build command nobody has run, while eleven checks pass against the dev server
+
+Do this once before the handover, not at the end. Everything it finds is cheap then and expensive
+after.
