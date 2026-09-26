@@ -402,6 +402,30 @@ const M = [
             '<rect x="60" y="44" width="70" height="19" rx="9.5" fill="var(--fig-card, #fff)"/><text font-size="11">x</text></svg>\n' },
       ] }],
 
+  /* figure-node-has-no-hit-area / figure-structure-not-declared — both found by trying to use the
+   * diagram rather than by looking at it. A stick figure with no fill cannot be clicked, and a
+   * connector drawn without data-edge is invisible to every check in this file. */
+  ["figure-node-has-no-hit-area", "business-analyst/scripts/figure-placement-check.mjs",
+    [path.join(DIR, "__mut-figB__.html"), path.join(DIR, "__mut-figsB__")], "always",
+    { files: [
+        { file: "__mut-figB__.html", content: '<!doctype html><title>m</title><figure data-figure="hit" data-label="Hit"><svg viewBox="0 0 400 300"></svg></figure>\n' },
+        { file: path.join("__mut-figsB__", "hit.svg"), content:
+            '<svg data-interrogable="yes" viewBox="0 0 400 300">' +
+            '<g data-node="a"><path d="M10 10 L30 30" stroke="#333" fill="none"/></g>' +
+            '<g data-node="b"><rect x="60" y="10" width="40" height="20" fill="#fff"/></g>' +
+            '<path data-edge="a|b"/><text font-size="12">x</text></svg>\n' },
+      ] }],
+  ["figure-structure-not-declared", "business-analyst/scripts/figure-placement-check.mjs",
+    [path.join(DIR, "__mut-figC__.html"), path.join(DIR, "__mut-figsC__")], "always",
+    { files: [
+        { file: "__mut-figC__.html", content: '<!doctype html><title>m</title><figure data-figure="ink" data-label="Ink"><svg viewBox="0 0 400 300"></svg></figure>\n' },
+        { file: path.join("__mut-figsC__", "ink.svg"), content:
+            '<svg viewBox="0 0 400 300">' +
+            [1,2,3,4].map((i) => `<g data-node="n${i}"><rect x="${i*40}" y="10" width="30" height="20" fill="#fff"/></g>`).join("") +
+            [1,2,3].map((i) => `<path d="M${i*40} 40 L${i*40+30} 60" stroke="#999" fill="none"/>`).join("") +
+            '<text font-size="12">x</text></svg>\n' },
+      ] }],
+
   /* figure-step-unreachable — a step drawn with no path from any start. This is the mutation for
    * a regression that passed every other check in this file while severing the process. */
   ["figure-step-unreachable", "business-analyst/scripts/figure-placement-check.mjs",
