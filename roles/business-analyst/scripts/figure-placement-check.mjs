@@ -77,6 +77,35 @@ for (const f of svgs) {
       `light drawing on whatever background the reader has. Use var(--fig-<role>, <light hex>)`);
 }
 
+/* Labels that sit on top of each other.
+ *
+ * Three attempts at placing branch labels were made by eye and each left a different collision:
+ * two labels stacked into one line of gibberish, then a label sitting on an unrelated step three
+ * rows down and appearing to name it. Every one of them looked fine in the code.
+ *
+ * The rectangles are in the file, so the overlap is arithmetic rather than opinion. This reads the
+ * SVG's own rounded rects — which is what every label in these diagrams is drawn as — and reports
+ * any pair that intersects. It cannot see text that overflows its box, and says so rather than
+ * claiming more than it checked. */
+for (const f of svgs) {
+  const src = readFileSync(join(dir, f), "utf8");
+  const boxes = [...src.matchAll(/<rect x="(-?[\d.]+)" y="(-?[\d.]+)" width="([\d.]+)" height="([\d.]+)" rx="([\d.]+)"/g)]
+    .map((m) => ({ x: +m[1], y: +m[2], w: +m[3], h: +m[4], r: +m[5] }))
+    // only the pill-shaped ones: a label is a rect whose corner radius is half its height. A lane
+    // band and a step box are not labels and are allowed to contain things.
+    .filter((b) => b.r >= b.h / 2 - 0.6 && b.w < 340);
+  let clashes = 0;
+  for (let i = 0; i < boxes.length; i++)
+    for (let j = i + 1; j < boxes.length; j++) {
+      const a = boxes[i], b = boxes[j];
+      if (a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h) clashes++;
+    }
+  if (clashes)
+    fail("figure-labels-collide",
+      `${f} draws ${clashes} pair(s) of labels on top of each other. A label that overlaps another ` +
+      `reads as neither of them. Separate them where the coordinates are, before emitting`);
+}
+
 // and the reverse: a figure the page frames but has no caption is a picture with no question
 const framed = [...html.matchAll(/<figure[^>]*>/g)];
 for (const tag of framed) {

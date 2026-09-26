@@ -566,8 +566,10 @@ ${openThings.length ? `<section class="part">
   <div class="openlist">${openThings.map((o) => `<div class="openc"><span class="id">${esc(o.id)}</span><p>${esc(human(String(o.t)).slice(0, 240))}</p></div>`).join("")}</div>
 </section>` : ""}
 
+
+
 ${arr(S.requirements).length ? `<section class="part">
-  <p class="eyebrow">Phần 7</p>
+  <p class="eyebrow">Tra cứu</p>
   <h2>Mỗi yêu cầu đến từ đâu, và hiện ra ở màn nào</h2>
   <p class="deck">Ma trận truy vết. Mỗi dòng đi được cả hai chiều: từ nỗi đau xuống tới màn hình, và ngược lại. Đây là thứ dàn xếp tranh chấp phạm vi — nếu một màn không có dòng nào trỏ tới, không ai đã yêu cầu nó.</p>
   <div style="overflow-x:auto"><table class="rtm"><thead><tr>

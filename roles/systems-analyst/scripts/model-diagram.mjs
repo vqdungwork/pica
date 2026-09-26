@@ -282,6 +282,47 @@ function processDiagram(toBe) {
    * So the lanes are COLUMNS and the process runs DOWN the page. Width stays inside the column,
    * height grows into the axis the page already has. The rule generalises: draw a diagram along
    * the page's long axis, not along the tradition's. */
+  const outs = new Map();
+  const labelledOuts = new Map();
+  for (const e of edges) {
+    outs.set(e.from, (outs.get(e.from) || 0) + 1);
+    if (String(e.label ?? e.condition ?? "").trim()) labelledOuts.set(e.from, (labelledOuts.get(e.from) || 0) + 1);
+  }
+  /* A node with two ways out is not automatically a decision. Two unlabelled edges leaving a step
+   * mean both things happen — parallel work, and drawing a diamond there tells the reader to
+   * choose when nobody chooses. What makes it a choice is that the branches are NAMED: "có" and
+   * "không" are the conditions under which each is taken.
+   *
+   * The first version of this read "more than one edge out" and turned six nodes into diamonds
+   * where three were real. Labelled branches, or a declared type, and nothing else. */
+  const isGateway = (n) => /gateway|decision|xor/i.test(n.type || "") || (labelledOuts.get(n.id) || 0) > 1;
+
+  /* Start and end are likewise facts about the graph: nothing arrives, or nothing leaves. A reader
+   * who cannot see where a process begins has to find it by elimination. */
+  const hasIn = new Set(edges.map((e) => e.to));
+  const hasOut = new Set(edges.map((e) => e.from));
+
+  /* Two branches get their labels on the curves, where the eye already is. THREE OR MORE DO NOT.
+   *
+   * Four branches leaving one diamond reconverge within a hundred pixels, so four labels on four
+   * curves collide however they are staggered — and pushing them apart moves each one away from
+   * the curve it belongs to, until one ends up below a step three rows further down and appears
+   * to label that. No placement rule fixes a fork that crowded; the drawing is the wrong shape
+   * for it.
+   *
+   * So a fork of three or more gets a legend under the diamond: one line per branch, the condition
+   * and the number of the step it leads to. It always fits, it never collides, and a reader can
+   * check the branches against each other instead of chasing four curves. */
+  const LEGEND_AT = 3;
+  const legendNodes = new Set([...labelledOuts.entries()].filter(([, n]) => n >= LEGEND_AT).map(([id]) => id));
+
+  /* Steps are numbered by the order a reader meets them: down the page, then across the lanes.
+   * Without a number the only way to say "this step" out loud is to read its whole label. */
+  const seq = new Map();
+  [...nodes]
+    .sort((a, b) => (order.get(a.id) - order.get(b.id)) || (laneIndex(a.lane) - laneIndex(b.lane)))
+    .forEach((n, i) => seq.set(n.id, i + 1));
+
   const stages = Math.max(0, ...order.values()) + 1;
   const nodeW = 142, nodeH = 54, rowH = 96, left = 16, topPad = 96;
   /* A lane is capped at TWO columns. Laying every simultaneous step side by side made the drawing
@@ -304,9 +345,15 @@ function processDiagram(toBe) {
     const d = Number(k.split(":")[1]);
     stageRows[d] = Math.max(stageRows[d], Math.ceil(v / MAXCOL));
   }
+  // a stage holding a legend needs room for it, or the legend lands on the next row of steps
+  const stageLegend = new Array(stages).fill(0);
+  for (const id of legendNodes) {
+    const d = order.get(id);
+    if (d !== undefined) stageLegend[d] = Math.max(stageLegend[d], (labelledOuts.get(id) || 0) * 16 + 14);
+  }
   const stageY = [];
   let ay0 = topPad + 30;
-  stageRows.forEach((r, d) => { stageY[d] = ay0; ay0 += (r - 1) * (rowH * 0.62) + rowH; });
+  stageRows.forEach((r, d) => { stageY[d] = ay0; ay0 += (r - 1) * (rowH * 0.62) + rowH + stageLegend[d]; });
   const laneX = [];
   let ax = left;
   laneCols.forEach((c, li) => { laneX[li] = ax; ax += c * nodeW + 28; });
@@ -326,6 +373,11 @@ function processDiagram(toBe) {
       laneBands.push(`<text x="${laneX[li] + w / 2 - 8}" y="${topPad - 14 + k * 14}" text-anchor="middle" font-size="12" font-weight="700" fill="${C.muted}">${esc(t)}</text>`));
   });
 
+  /* A decision is a node with more than one way out — that is what makes it a decision, and it is
+   * true whether or not anybody set `type: "gateway"` on it. On one project not a single node
+   * carried a type, so every diamond in a 23-step process was drawn as a plain box and the reader
+   * had no way to see where the process branched. Read the shape from the graph, and treat the
+   * declared type as confirmation rather than as the only evidence. */
   const pos = new Map();
   const used = new Map();
   for (const n of nodes) {
@@ -334,22 +386,43 @@ function processDiagram(toBe) {
     const cx = laneX[li] + (k % laneCols[li]) * nodeW + nodeW / 2 - 4;
     const cy = stageY[d] + Math.floor(k / laneCols[li]) * (rowH * 0.62);
     pos.set(n.id, { x: cx, y: cy });
-    const gateway = /gateway|decision|xor/i.test(n.type || "");
+    const gateway = isGateway(n);
+    const start = !hasIn.has(n.id), end = !hasOut.has(n.id);
     // a vertical box is wider than a horizontal one was, so three lines of 22 chars fit and the
     // mid-word truncation that made every label end in "…" disappears
-    const label = wrap(n.name || n.id, 22, 3);
-    L.push(`<g data-node="${esc(n.id)}" tabindex="0" role="button" aria-label="${esc(n.name || n.id)}">`);
+    const label = wrap(n.name || n.id, 21, 3);
+    L.push(`<g data-node="${esc(n.id)}" tabindex="0" role="button" aria-label="${esc(seq.get(n.id))}. ${esc(n.name || n.id)}${gateway ? " (điểm rẽ)" : ""}">`);
+    const w2 = nodeW / 2 - 8, h2 = nodeH / 2;
     if (gateway) {
-      L.push(`<path d="M${cx} ${cy - nodeH / 2 - 4} L${cx + nodeW / 2 - 12} ${cy} L${cx} ${cy + nodeH / 2 + 4} L${cx - nodeW / 2 + 12} ${cy} z" fill="${C.card}" stroke="${C.accent}" stroke-width="1.4"/>`);
+      L.push(`<path d="M${cx} ${cy - h2 - 5} L${cx + w2} ${cy} L${cx} ${cy + h2 + 5} L${cx - w2} ${cy} z" fill="${C.card}" stroke="${C.accent}" stroke-width="1.5"/>`);
     } else {
-      L.push(`<rect x="${cx - nodeW / 2 + 8}" y="${cy - nodeH / 2}" width="${nodeW - 16}" height="${nodeH}" rx="7" fill="${C.card}" stroke="${C.line}"/>`);
+      // a start and an end are pills; everything between them is a rectangle. Shape alone tells
+      // the reader where to put their finger down and where the process is finished.
+      const r = start || end ? h2 : 7;
+      L.push(`<rect x="${cx - w2}" y="${cy - h2}" width="${w2 * 2}" height="${nodeH}" rx="${r}" fill="${C.card}" stroke="${start || end ? C.accent : C.line}" stroke-width="${start || end ? 1.5 : 1}"/>`);
     }
     const y0 = cy - (label.length - 1) * 6.5 + 4;
     label.forEach((l2, i) =>
       L.push(`<text x="${cx}" y="${y0 + i * 13}" text-anchor="middle" font-size="11" font-weight="600" fill="${C.ink}">${esc(l2)}</text>`));
+    // the number sits outside the shape so it never competes with the label for room
+    L.push(`<circle cx="${cx - w2}" cy="${cy - h2 + 2}" r="9" fill="${C.accent}"/>`);
+    L.push(`<text x="${cx - w2}" y="${cy - h2 + 5.5}" text-anchor="middle" font-size="10" font-weight="700" fill="${C.onAccent}">${seq.get(n.id)}</text>`);
     L.push(`</g>`);
   }
 
+  /* THE BRANCH LABELS. Eight edges carried `label: "co"` / `"khong"` and not one was drawn. The
+   * reader saw a decision with two arrows leaving it and nothing to say which was yes — which is
+   * the single thing a decision exists to communicate. The data had the answer the whole time.
+   *
+   * Only branches are labelled. Putting a label on every edge, including the twenty that just say
+   * "then", is how a diagram turns back into a wall of text. */
+  const branchLabel = (e) => {
+    const t = String(e.label ?? e.condition ?? e.name ?? "").trim();
+    if (!t || (labelledOuts.get(e.from) || 0) < 2 || legendNodes.has(e.from)) return "";
+    return vi(t) || t;
+  };
+
+  const branchLabels = [];
   for (const e of edges) {
     const a = pos.get(e.from), b = pos.get(e.to);
     if (!a || !b) continue;
@@ -363,6 +436,82 @@ function processDiagram(toBe) {
     }
     const mid = (ay + by) / 2;
     L.push(`<path data-edge="${esc(e.from)}|${esc(e.to)}" d="M${a.x} ${ay} C${a.x} ${mid} ${b.x} ${mid} ${b.x} ${by}" fill="none" stroke="${C.line}" stroke-width="1.4" marker-end="url(#pa)"/>`);
+    const lab = branchLabel(e);
+    if (lab) {
+      /* Put the label ON its own curve, and stagger the siblings.
+       *
+       * Placing every branch of one decision at the same fraction of its curve stacked them: at a
+       * three-way fork the three labels landed within a few pixels of each other and read as one
+       * line of gibberish. They have to be evaluated on the actual Bézier — the curve is what the
+       * reader's eye follows — and each sibling pushed a little further along than the last, so
+       * they separate exactly where the branches themselves separate.  */
+      const sibs = edges.filter((x) => x.from === e.from && branchLabel(x));
+      const i = sibs.indexOf(e);
+      const t = Math.min(0.72, 0.34 + i * 0.13);
+      const u = 1 - t;
+      const lx = a.x * (u * u * u + 3 * u * u * t) + b.x * (3 * u * t * t + t * t * t);
+      const ly = ay * u * u * u + mid * 3 * u * u * t + mid * 3 * u * t * t + by * t * t * t;
+      branchLabels.push({ from: e.from, to: e.to, text: lab, x: lx, y: ly, w: lab.length * 6.1 + 14, h: 19 });
+    }
+  }
+
+  /* Then separate them, here, where the coordinates are.
+   *
+   * Staggering the siblings along their curves was not enough: at a four-way fork the branches
+   * converge again within a hundred pixels and three of the four labels still overlapped, plus two
+   * landed on top of a step box. Guessing a placement rule and hoping is not a method when the
+   * generator already knows every rectangle on the canvas. So: lay them out, then push apart until
+   * nothing intersects anything — the other labels, and the steps themselves.
+   *
+   * Twenty passes, moving the lower one down by half the overlap each time. It converges because
+   * every move strictly reduces the total overlap, and if it somehow did not, a label slightly out
+   * of place beats a hang. */
+  const obstacles = [...pos.entries()].map(([, q]) => ({ x: q.x, y: q.y, w: nodeW - 14, h: nodeH + 14 }));
+  for (const id of legendNodes) {
+    const q = pos.get(id);
+    if (q) obstacles.push({ x: q.x, y: q.y + nodeH / 2 + 14 + ((labelledOuts.get(id) || 0) * 16 + 10) / 2, w: nodeW, h: (labelledOuts.get(id) || 0) * 16 + 14 });
+  }
+  const hits = (a, b) =>
+    Math.abs(a.x - b.x) < (a.w + b.w) / 2 && Math.abs(a.y - b.y) < (a.h + b.h) / 2;
+  for (let pass = 0; pass < 20; pass++) {
+    let moved = false;
+    for (let i = 0; i < branchLabels.length; i++) {
+      const a = branchLabels[i];
+      for (const b of [...branchLabels.slice(0, i), ...obstacles]) {
+        if (!hits(a, b)) continue;
+        a.y += ((a.h + b.h) / 2 - Math.abs(a.y - b.y)) / 2 + 1.5;
+        moved = true;
+      }
+    }
+    if (!moved) break;
+  }
+  for (const id of legendNodes) {
+    const q = pos.get(id);
+    if (!q) continue;
+    const rows = edges.filter((e) => e.from === id && String(e.label ?? e.condition ?? "").trim())
+      .map((e) => ({ t: vi(String(e.label ?? e.condition).trim()) || String(e.label ?? e.condition).trim(), n: seq.get(e.to), to: e.to }))
+      .sort((a, b) => a.n - b.n);
+    const lw = Math.max(...rows.map((r) => r.t.length)) * 6.1 + 60;
+    const lx = Math.max(12, Math.min(W - lw - 12, q.x - lw / 2));
+    const ly = q.y + nodeH / 2 + 14;
+    L.push(`<g data-legend="${esc(id)}">`);
+    L.push(`<rect x="${lx}" y="${ly}" width="${lw}" height="${rows.length * 16 + 10}" rx="8" fill="${C.card}" stroke="${C.accent}" stroke-width=".9"/>`);
+    rows.forEach((r, i) => {
+      const y = ly + 18 + i * 16;
+      L.push(`<text x="${lx + 11}" y="${y}" font-size="10.5" fill="${C.muted}">→</text>`);
+      // the step number is right-aligned in its own column, so a two-digit number does not run
+      // into the condition beside it
+      L.push(`<text x="${lx + 40}" y="${y}" text-anchor="end" font-size="10.5" font-weight="700" fill="${C.accent}">${r.n}</text>`);
+      L.push(`<text x="${lx + 48}" y="${y}" font-size="10.5" fill="${C.ink}">${esc(r.t)}</text>`);
+    });
+    L.push(`</g>`);
+  }
+
+  for (const b of branchLabels) {
+    L.push(`<g data-branch="${esc(b.from)}|${esc(b.to)}">`);
+    L.push(`<rect x="${b.x - b.w / 2}" y="${b.y - b.h / 2}" width="${b.w}" height="${b.h}" rx="9.5" fill="${C.card}" stroke="${C.accent}" stroke-width=".9"/>`);
+    L.push(`<text x="${b.x}" y="${b.y + 4}" text-anchor="middle" font-size="10.5" font-weight="600" fill="${C.ink}">${esc(b.text)}</text>`);
+    L.push(`</g>`);
   }
 
   return [

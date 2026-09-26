@@ -203,11 +203,13 @@
       },
       {
         "from": "decide",
-        "to": "record"
+        "to": "record",
+        "label": "approve"
       },
       {
         "from": "decide",
-        "to": "amend"
+        "to": "amend",
+        "label": "return for amendment"
       },
       {
         "from": "amend",
