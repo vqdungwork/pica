@@ -1,5 +1,188 @@
 # Changelog
 
+## 3.16.1
+
+### A check that fails on every push is a check nobody reads
+
+CI on `main` had been red for twenty pushes and every release from 3.3.1 on had failed with it,
+so the newest GitHub release was still 3.5.1 while the tags ran to v3.16.0. Nothing was wrong
+with the code. Three things had drifted, and each one alone was enough:
+
+- **The README version badge still read 3.0.2.** `count-test` said so on every run, and it
+  stops the job at the first failure, so it also hid the two below.
+- **`assets/flow.svg` was stale.** The check counts per specialist had grown (business-analyst
+  4 → 8, ux-engineer 11 → 21) and the drawing still showed the old numbers.
+- **The CHANGELOG stopped at 3.5.1.** `release-check` refuses a tag with no section, so even
+  a green suite could not have published 3.6.0 to 3.16.0. Those sections are written below from
+  the commit that cut each version. The tags stay as they are: re-tagging a version in place is
+  what `release-check` exists to prevent. 3.16.1 is the first release since 3.5.1 to carry all
+  of them.
+- **And behind all three, the mutation suite could never have passed.** Seven browser-driven
+  mutations were gated on `@demo`, which the generated fixture has never carried, so they
+  skipped on every run and the CI gate treats any skip as a failure. They ship their own pages
+  and ask nothing of the project. What they actually need is the toolchain the check imports, so
+  they are gated on that now (`module:playwright`, `module:playwright+axe-core`, and so on). CI
+  installs axe-core, pngjs and pixelmatch next to playwright, and the source-reading mutation
+  uses the example's `src` when there is no `demo/src`. 140 caught, 0 missed, 0 skipped.
+
+The habit this points at: run `node scripts/count-test.mjs` and `node scripts/flow-diagram.mjs
+--check` before tagging, not only the checks you just changed.
+
+## 3.16.0
+
+### Say which version ran
+
+pica had been resolving its own packages with a string sort. `["3.0.2","3.15.1","3.2.1"].sort()`
+ends on "3.2.1", so after thirteen releases in one day the runner would have gone back to the one
+from the morning and read every check from a stale manifest. The only symptom was one check
+failing on a placeholder that had been fixed hours earlier. **A tool that silently runs an old copy
+of itself is worse than one that fails to start.**
+
+Versions now compare numerically, and an unparseable one sorts lowest rather than throwing. Every
+run prints the versions it is made of before any result, names how many packages have older
+copies still on disk, and warns when packages disagree, because a chain assembled from two
+releases is not a release.
+
+## 3.15.1
+
+### Declare the runners on day one
+
+`.pica/runners.json` turned fifteen invisible abstentions into real checks in 3.14.0, and no
+skill, rule or command mentioned it. It is now in `scaffolding-the-demo`, written the day the demo
+first serves. The same skill now says that every script a check chain calls must be able to fail:
+the chain is joined with `&&`, so a script that always exits 0 is a gap with a green tick beside it.
+
+## 3.15.0
+
+### What the design is standing on
+
+- **Target size was never enforced.** `target-size-check` measures the hit area rather than the
+  glyph (a 22px checkbox in a 62px label is a 62px target), and a project declares which part of
+  the demo is its own harness so that chrome the client never sees is not measured.
+- **Premise and product were never joined.** Each check is scoped to its own phase, so a design
+  could be verified to the pixel on premises nobody had checked. `premise-check` is scoped to the
+  join and reports the gap between what was verified and what was agreed.
+- **The canvas form of handover.** `handing-over-as-an-artifact` now covers the Design canvas: an
+  artboard is the size of the design, not of a device, and the canvas is a second copy of the
+  screens, so the handover must say which copy is the source of truth.
+- **Pass 7, the whole-chain pass**, which reviews the chain rather than a work product.
+
+133 mutations caught, 0 missed.
+
+## 3.14.1
+
+### A baseline records what was rendering, not what is correct
+
+A stray `}` made the browser discard exactly one rule, `.banner`, for the entire engagement, and the
+visual baselines had been captured from that broken CSS. Fixing it reported 49 regressions. The
+"regression" was the design finally applying. **Look at what changed before updating a baseline,
+and look at the thing itself rather than at the count.**
+
+## 3.14.0
+
+### The verification existed and the runner could not see it
+
+- **Fifteen abstentions were checks that were running and passing** in the project's own
+  `package.json`. A project now declares what only it knows in `.pica/runners.json`, and
+  `pica-verify` uses it, starting the project's server when a check needs the app running.
+- **Nobody had ever built the demo.** `npm run build` had failed for the whole engagement on a
+  stray brace a dev server tolerates. `build-check` runs the declared build.
+- **Artifact handover.** `artifact-readiness-check` found that a demo addressing states by query
+  string cannot be deep-linked from an artifact, which only delivers a `#anchor`.
+
+New: `handing-over-as-an-artifact`, `build-check`, `artifact-readiness-check`. 128 mutations
+caught, 0 missed.
+
+## 3.13.0
+
+### Spend width where the branching is, and measure every diagram
+
+Columns are a budget now: lanes that only run two steps in parallel stack, and the lane that
+branches spends the width they saved, so a fan lands in one row. Crossings went from 5 to 3. Review
+then found that six diagrams in the same document had never been measured, because the harness had
+only ever been pointed at one file. Three times the harness itself was what was wrong. **Before
+believing a measurement that tells you to change something, check that it can see what it claims
+to score.** 125 mutations caught, 0 missed.
+
+## 3.12.1
+
+### An annotation belongs beside the flow, never in it
+
+3.12.0 removed four branch routes because a legend already named their targets. Every metric got
+better, and four steps were left with no incoming line. Reverted. The legend now sits beside its
+fork in the nearest empty space, joined by a dashed leader. `figure-step-unreachable` replaces
+`figure-says-it-twice` and checks reachability by id, not by geometry. 123 mutations caught, 0 missed.
+
+## 3.12.0
+
+### Draw a fact once
+
+Removed branch routes that repeated a fork's legend (`figure-says-it-twice`). This was reverted in
+3.12.1: see there for why.
+
+## 3.11.0
+
+### Measure the boxes and the labels, not only the lines
+
+A branch label may now only sit on a point along its own route. Stacked steps get enough room for
+the step-number badge. Wide figures scroll inside their own frame below 760px, so the smallest label
+on a phone went from 3.7px back to 10px. New: `figure-steps-overlap`. 122 mutations caught, 0 missed.
+
+## 3.10.0
+
+### Route by search, not by derivation
+
+Four hand-derived edge geometries were each wrong for a different case. The router now generates
+candidate routes, counts what each one hits and takes the cleanest. Edges through a box went from 8
+to 0. The measuring harness had been silently dropping paths it could not parse. It now walks the
+real SVG in a browser. New: `figure-edge-through-node`. 120 mutations caught, 0 missed.
+
+## 3.9.0
+
+### Whether a figure is clickable is a measurement, not a kind
+
+The generator measures how far focusing a node narrows each diagram, and marks it
+`data-interrogable` only when that narrows it. A click now lights the immediate neighbourhood rather
+than everything reachable. New: `figure-control-does-nothing`. 119 mutations caught, 0 missed.
+
+## 3.8.0
+
+### A branch nobody labelled is a branch nobody can follow
+
+Branch labels are drawn. A node becomes a decision diamond when its branches are named. Forks of
+three or more branches get a legend. Steps are numbered, and start and end are drawn as pills. New:
+`branch-unlabelled`, `branch-half-labelled`, `figure-labels-collide`. The traceability matrix moves
+to the reference section. 117 mutations caught, 0 missed.
+
+## 3.7.1
+
+### A deliverable decides its own appearance
+
+The generated specification pins `data-theme="light"`, so two readers on one call see the same page.
+New: `document-theme-not-pinned`. `section-order-check` becomes `document-check`. 114 mutations
+caught, 0 missed.
+
+## 3.7.0
+
+### A generated drawing has no theme of its own
+
+Every colour in the generated diagrams is now `var(--fig-<role>, <light hex>)`, so diagrams follow
+the page into dark mode instead of rendering black on black. New: `figure-hardcodes-a-colour`,
+`section-order-check`. Four mutations from 3.6.0 had been silently skipped and now run. 113
+mutations caught, 0 missed.
+
+## 3.6.0
+
+### The four artefacts a top-tier BA hands over, and the axis a diagram is drawn on
+
+- **Context diagram** (systems-analyst) and **requirements traceability matrix** (business-analyst).
+- **`acceptance-check`**: a requirement nobody can test is a wish.
+- **`figure-placement-check`**: a diagram that is rendered but not placed, or placed but unreadable.
+  Swimlanes are now drawn along the page's long axis, so 23 steps render at 968px wide instead of
+  1538px with 6.7px labels.
+
+108 mutations caught, 0 missed.
+
 ## 3.5.1
 
 ### Reading it as the person who receives it
