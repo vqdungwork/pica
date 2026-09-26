@@ -1,5 +1,33 @@
 # Changelog
 
+## 3.3.1
+
+### A demo answers "does it work". A canvas answers "how much is there"
+
+A URL-addressable demo is the right instrument for judging a flow and the wrong one for judging a
+**scope** — and scope is what a client asks about first. Nobody sees how much was designed, or how
+it divides, by visiting twelve addresses one after another, and a client who cannot see it
+concludes, reasonably, that not much was.
+
+**`ux-engineer/canvas-plan`** lays every screen out on one canvas and lets the arrangement carry
+the argument. Rows are requirement families labelled with the ids, so a screen's position states
+what asked for it and the canvas *is* the traceability view. Exclusions become a note pinned
+beside the boards rather than a document nobody opens. Each open rule and low-confidence
+assumption becomes a note in its own colour, saying what is provisional until it is answered.
+Positions are computed from the screen inventory, so adding a screen moves the layout instead of
+leaving it stale.
+
+### No id may name two things
+
+Writing it surfaced a defect nothing had caught. A screen register carried one id **twice** —
+deliberately, with a note explaining the second entry existed so an archetype check would see a
+second role. The intent was sound and the mechanism was not: anything keyed by id drops all but
+one entry silently, and the canvas drew **ten boards for eleven screens without a word**. Every
+citation of that id was also ambiguous about which of the two it meant.
+
+`traceability-check` now reports `duplicate-id` across every register. A variant takes its own id
+and a `variantOf` pointing home: one thing in two views, rather than two things under one name.
+
 ## 3.3.0
 
 ### pica produced thirty-five documents and then stopped

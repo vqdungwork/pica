@@ -185,7 +185,7 @@ a client can judge correctly in three seconds.
 
 ## The chain is a check, not a chapter
 
-<!-- enforced-by: broken-link, orphan-segment, orphan-pain, orphan-usecase, orphan-requirement, orphan-rule, orphan-state, orphan-screen, dangling-ref -->
+<!-- enforced-by: duplicate-id, broken-link, orphan-segment, orphan-pain, orphan-usecase, orphan-requirement, orphan-rule, orphan-state, orphan-screen, dangling-ref -->
 
 **segment → pain → use case → feature → rule → entity/state → screen**, walkable in both
 directions. A screen with no use case, a pain nothing addresses, a rule nothing enforces, a state
@@ -210,6 +210,13 @@ Run on a finished engagement's analysis for the first time, it found four things
 - **Two state vocabularies that never meet.** Entity lifecycle and screen render-state are
   different things, and a project may say so — but it must *say* so. The check accepts a
   declaration and refuses silence.
+
+**And no id may name two things.** A screen register carried one id twice, deliberately, with a
+note explaining that the second entry existed so an archetype check would see a second role. The
+intent was sound; the mechanism was not. Anything keyed by id drops all but one entry silently —
+a canvas generator drew ten boards for eleven screens without a word — and every citation of that
+id is ambiguous about which of the two it means. A variant takes its own id and a `variantOf`
+pointing home: one thing in two views, rather than two things under one name.
 
 Two distinctions the check itself had to learn. An id may be namespaced (`nfr:NFR-01`) because ids
 are unique only within their own register, and comparing whole strings reported six sound

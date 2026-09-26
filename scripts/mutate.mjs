@@ -375,6 +375,10 @@ const M = [
   ["broken-link", "business-analyst/scripts/traceability-check.mjs", [S], "useCases",
     (s) => { for (const u of s.useCases) { delete u.addresses; delete u.painPoints; delete u.solves; delete u.pains; } }],
 
+  /* Two screens under one id — the defect that drew ten boards for eleven screens in silence. */
+  ["duplicate-id", "business-analyst/scripts/traceability-check.mjs", [S], "screens",
+    (s) => { s.screens.push({ ...s.screens[0] }); }],
+
   // foundations-check
   ["contrast-floor",    "ux-engineer/scripts/foundations-check.mjs", ["html/design-system.html", "tokens/tokens.json", S], "direction", (s) => { s.audience.floors.contrastRatio = 21; }],
   ["state-covered",     "ux-engineer/scripts/foundations-check.mjs", ["html/design-system.html", "tokens/tokens.json", S], "direction", (s) => { s.direction.components[0].states.push("pressed"); }],

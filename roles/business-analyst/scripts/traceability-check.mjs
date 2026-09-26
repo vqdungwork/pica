@@ -24,7 +24,7 @@
  */
 
 /* The check ids this script reports, declared so rule-coverage-check can read them. */
-const CHECKS = ["broken-link", "orphan-segment", "orphan-pain", "orphan-usecase",
+const CHECKS = ["duplicate-id", "broken-link", "orphan-segment", "orphan-pain", "orphan-usecase",
   "orphan-requirement", "orphan-rule", "orphan-state", "orphan-screen", "dangling-ref"];
 
 import { readFileSync } from "node:fs";
@@ -71,6 +71,24 @@ const reqIds  = new Set(reqs.map((r) => r.id).filter(Boolean));
 /* Non-functional requirements live in their own register and are cited from the functional
  * one; a reference that resolves there is not dangling. */
 const nfrIds  = new Set(arr(state.nfr).map((n) => n.id).filter(Boolean));
+
+/* ---- every register is keyed by id, so no id may name two things -------------------------
+ * Found the hard way: a screen register carried "RP-02" twice — deliberately, with a note
+ * explaining that the second entry existed so an archetype check would see a second role. The
+ * intent was sound and the mechanism was not: a canvas generator keyed boards by id and drew ten
+ * boards for eleven screens without a word. A variant needs its own id (`RP-02#nguoi`) and a
+ * `variantOf` pointing home; then it is one thing in two views rather than two things with one
+ * name. */
+for (const [label, list] of [["screen", screens], ["use case", useCases], ["requirement", reqs], ["business rule", rules], ["pain point", pains]]) {
+  const seen = new Map();
+  for (const it of list) {
+    if (!it?.id) continue;
+    seen.set(it.id, (seen.get(it.id) || 0) + 1);
+  }
+  for (const [id, n] of seen) {
+    if (n > 1) fail("duplicate-id", id, `${n} ${label} entries share this id — every citation of it is ambiguous, and anything keyed by id drops all but one silently`);
+  }
+}
 
 /* ---- hop 1: segment → pain ------------------------------------------------------------- */
 for (const s of segments) {
