@@ -113,3 +113,14 @@ node <pica>/roles/ux-engineer/scripts/screen-states-check.mjs .pica/state.json
 ```
 
 A report whose five passes all succeeded is a report that ran pass zero five times.
+
+## Pass 6 — the two-screen pass
+
+Added after a client, not a check, found that a phone frame changed size between two screens of
+the same product. Open **two** screens of the build side by side and ask what differs that should
+not: the device's own dimensions, the header's height, where the first row starts, whether a
+marker sits at the same offset, whether a scroll region behaves the same way.
+
+Every pass before this one looks at one screen. A defect that only exists as a **difference
+between** screens is invisible to all of them, and it is the defect a person notices first,
+because switching is what they do with the product and looking is what a reviewer does to it.

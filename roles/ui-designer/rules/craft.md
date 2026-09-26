@@ -229,3 +229,49 @@ re-lists rows the screen behind it already shows must not show them **worse**: t
 its titles a 195px column beside a right-aligned status, wrapping the longest to five lines, while
 the list underneath rendered the same title in three. Carry the row's anatomy into the sheet
 instead of inventing a second, narrower one.
+
+## A ranked list of everyone is not a report
+
+<!-- enforced-by: none — judgement, not decidable by a script -->
+
+A manager's screen listed twenty-one people, ordered by an attention score. Twelve of the
+twenty-one rows carried no signal at all: they existed to be scrolled past. Above them sat the
+headline — *"7 of 21 confirmed in full"* — measured on a completely different axis from the order
+beneath it, so a reader who trusted the number and read down was hunting for a group that did not
+exist. Nothing was wrong with any single row. The screen was a wall of text because it answered
+"rank everyone" when the question was "what do I do".
+
+Group exceptions by the **response they need**, and say the response in the header: *needs a
+conversation*, *silent for days*, *not confirmed yet*, *nothing assigned*. Put each person in
+exactly one group so the counts add to the roster and a reader can check the arithmetic. Collapse
+the ones with nothing outstanding behind a single line — and make that set the same set the
+headline counts, so the two agree by construction rather than by coincidence.
+
+Then delete the summary tiles. A card reading "▲6 idle ◆1 drift ■1 reassigned" above a list that
+then names those eight people one at a time says the same thing twice, and the card cannot be
+acted on. Once the group headers carry the counts, the tiles are a second place for the report to
+drift out of agreement with itself.
+
+**Separate groups with space, not rules.** Related things grouped, unrelated things spaced; a
+hairline between two groups says they are two halves of one thing.
+
+## A badge inside a group its header already named
+
+<!-- enforced-by: none — judgement, not decidable by a script -->
+
+The same defect as a badge on every row, one level down: under a heading reading *"Trống việc · 6"*,
+a "Trống việc" chip on each of the six rows separates nothing. What belongs on the row is the part
+that **differs** — how many days, which project, which kind of mismatch. The header says what they
+have in common; the row says what makes this one this one.
+
+## A separator between two clauses that both wrap cannot win
+
+<!-- enforced-by: none — judgement, not decidable by a script -->
+
+A middot between a project name and a reason was shipped twice, wrong both times: bound to the
+left it ended a wrapped line with nothing after it, bound to the right it began one. There is no
+third binding.
+
+If two parts are long enough to wrap, they are not one sentence. Give them a line each and let
+weight carry the difference — the context quiet, the reason in ink. The fix is in the shape, not
+in the glue.

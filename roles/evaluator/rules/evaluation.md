@@ -232,3 +232,18 @@ large share of usability problems; it cannot tell you whether anybody wants the 
 walkthrough written up as "tested" is worse than one never run.
 
 See `running-a-cognitive-walkthrough`.
+
+## Check that the headline and the list are measured on the same axis
+
+<!-- enforced-by: none — judgement, not decidable by a script -->
+
+A report's lead figure and the rows beneath it must answer the same question. One screen led with
+*"7 of 21 confirmed in full"* and then listed all twenty-one ranked by an unrelated attention
+score — so the fourteen the number was about appeared nowhere as a group, and twelve rows carried
+no signal at all. Every heuristic passed. The contrast, the spacing, the ordering rule and the
+sort were all defensible on their own terms.
+
+It is a cheap thing to check and nothing else catches it: read the lead figure, then predict what
+the first group under it should be. If the screen does not have that group, the two halves were
+built from different questions, and a reader who trusts the top and reads down is hunting for
+something that is not there.

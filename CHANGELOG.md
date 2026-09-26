@@ -1,5 +1,59 @@
 # Changelog
 
+## 3.2.0
+
+### A report is not a ranked list of everyone
+
+A client called a manager's screen a wall of text. It was: twenty-one people ordered by an
+attention score, **twelve of them carrying no signal at all** — rows that existed to be scrolled
+past. And above them a headline, *"7 of 21 confirmed in full"*, measured on a different axis from
+the order beneath it, so a reader who trusted the number and read down was hunting for a group
+that did not exist. Every heuristic passed. Every geometric check passed. Nothing was wrong with
+any single row.
+
+Four rules, all from that screen:
+
+- **A ranked list of everyone is not a report.** Group exceptions by the response they need and
+  say the response in the header. One person per group, so the counts add to the roster and the
+  arithmetic is checkable. Collapse the ones with nothing outstanding — and make that set the same
+  set the headline counts, so the two agree by construction. Then delete the summary tiles: once
+  the headers carry the counts, the tiles are a second place for the report to disagree with
+  itself. Separate groups with space, not rules.
+- **A badge inside a group its header already named** separates nothing. What belongs on the row
+  is what *differs*.
+- **A separator between two clauses that both wrap cannot win** — bound left it ends a line with
+  nothing after it, bound right it begins one. Both shipped, one after the other. If two parts
+  wrap, they are not one sentence: a line each, and let weight carry the difference.
+- **The headline and the list must be measured on the same axis** (evaluator). Read the lead
+  figure, predict the first group under it. If that group is absent, the two halves were built
+  from different questions.
+
+### The harness was changing the thing being reviewed
+
+A demo bar printed the current route. On one screen the query string was short and the bar was one
+line; on the next it wrapped. That bar's height fed the frame's fit scale, so **the phone changed
+size when the person switched area** — 98% on one screen, 95% on the other. The client reported it;
+no check asks whether two screens agree about how big the device is. `reviewing-your-own-work`
+gains a **two-screen pass** for exactly that class: a defect that exists only as a *difference
+between* screens is invisible to every pass that looks at one.
+
+Three variants of the same feedback loop shipped in one afternoon: the bar's height feeding the
+scale, the scale's own label making the bar wrap, and a wrapper measuring the frame it was
+constraining — that one collapsed the frame to a single pixel in three frames. **Read declared
+values, never measured ones, when the measurement is downstream of the thing you are setting.**
+
+### And the instrument was in the number
+
+The scaling was argued as safe for measurement "because every measurement script sets its own
+viewport". Wrong, and instructively so: a measurement script sets a **short** viewport, which is
+precisely what triggers the scaling. `getBoundingClientRect` returns painted pixels, so a correct
+48px tap target measured 44 and the target-size gate reported a floor violation that existed
+nowhere in the CSS.
+
+Any transform between the CSS and the pixels must be switchable off, and everything asserting in
+CSS pixels must switch it off. **When a number disagrees with the source, suspect the instrument
+before the source.**
+
 ## 3.1.1
 
 ### A third accessibility channel, and it was not empty
