@@ -1,7 +1,7 @@
 {
   "name": "pica-design-researcher",
   "description": "pica design researcher: one shipped product measured across the nine foundations, returning numbers with provenance per token. Never proposes a direction and never gives an impression.",
-  "version": "3.2.0",
+  "version": "3.2.1",
   "author": {
     "name": "Dung Vuong"
   },
