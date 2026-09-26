@@ -175,3 +175,40 @@ Unknown parameters are a hard error: render a full-bleed panel naming the parame
 the ones that exist, and log it. An unknown **value** for a known parameter is the same defect —
 `state=sucess` must not fall through to the default. The cost of a loud failure is one re-run; the
 cost of a quiet one is a review of a screen nobody asked to see, presented as fact.
+
+## A navigation decision applies to every viewport, or it was not made
+
+<!-- enforced-by: none — judgement, not decidable by a script -->
+
+A client settled the product shape — one app, two areas — and the build answered it with a bottom
+tab bar. On a phone that is right. On desktop the bar is hidden by the same container query that
+makes it a phone convention, so the decision evaporated at 640px and every screen in the second
+area became a one-way door for anyone not on a phone. Nobody reported it, because the screens that
+needed the route were reached by a link from the first area and still had their back button.
+
+Two things make this easy to ship. The convention *is* viewport-specific, so hiding it feels
+correct rather than incomplete; and the header was copied into seven screens, so adding the desktop
+route meant seven edits — the kind of change nobody makes. Both halves belong to one decision:
+when a route exists on one viewport and not another, name where the other one lives before the
+first is called done, and put the header in one component so the answer has somewhere to go.
+
+The same header carried a second, quieter version of the same defect: it printed a different
+wordmark per area — "worklog" here, "reporting" there — which is what two apps look like, on a
+product whose shape decision was that there is one.
+
+## Completing the primary action is a moment, not an absence
+
+<!-- enforced-by: none — judgement, not decidable by a script -->
+
+When the last item was confirmed, a 134px bar carrying the count and the commit button stopped
+being rendered. Between two frames the screen lost a region and said nothing — the one action the
+product exists to drive, finished, acknowledged by a gap.
+
+Mount the bar through the finish instead of unmounting it: hold it one slow beat in a done state
+where the count and the button are replaced by a receipt, then collapse it to the slim line it
+keeps for the rest of the day. Sequenced, because re-labelling and collapsing in the same frame
+reads as a glitch rather than as the control reporting back. Here it gave 85px straight back to
+the list, so the reward for finishing is also more room.
+
+Under `prefers-reduced-motion` the settled state is the initial state: reduced motion means
+arriving without the journey, never losing the destination.
