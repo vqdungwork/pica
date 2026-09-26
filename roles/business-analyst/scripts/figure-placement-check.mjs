@@ -212,6 +212,27 @@ for (const f of svgs) {
       "Height is the axis a page has to spare — give them room rather than crowding the width");
 }
 
+/* The same fact drawn twice.
+ *
+ * A fork with a legend lists every branch and the step it leads to. Drawing the branch routes as
+ * well says it again, in lines that have to travel down corridors and around boxes to get there —
+ * and that duplication, not the branching, was most of what made the busiest region of a process
+ * look tangled. Removing it took a third of the ink out and two crossings with it.
+ *
+ * A reader does not check a picture against itself. Two representations of one fact are not
+ * reassurance, they are clutter. */
+for (const f of svgs) {
+  const src = readFileSync(join(dir, f), "utf8");
+  const legends = [...src.matchAll(/data-legend="([^"]+)"/g)].map((m) => m[1]);
+  if (!legends.length) continue;
+  const dup = [...src.matchAll(/data-edge="([^"|]+)\|([^"]+)"/g)]
+    .filter((m) => legends.includes(m[1]) && m[2] !== "legend");
+  if (dup.length)
+    fail("figure-says-it-twice",
+      `${f}: ${dup.length} branch route(s) are drawn from a fork whose legend already names them ` +
+      `(${dup.slice(0, 3).map((m) => m[1] + "→" + m[2]).join(", ")}). Draw the legend or the lines, not both`);
+}
+
 // and the reverse: a figure the page frames but has no caption is a picture with no question
 const framed = [...html.matchAll(/<figure[^>]*>/g)];
 for (const tag of framed) {

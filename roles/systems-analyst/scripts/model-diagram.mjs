@@ -448,10 +448,27 @@ function processDiagram(toBe) {
     return vi(t) || t;
   };
 
+  /* A legend replaces the lines it describes.
+   *
+   * A four-way fork gets a legend under the diamond — "→ 17 trống việc, → 18 lệch trạng thái" —
+   * and then four curves were ALSO drawn, travelling down corridors and around boxes to say
+   * exactly what the legend had just said. The same fact drawn twice is most of what made that
+   * region look busy: the tangle was not four branches, it was four branches plus four redundant
+   * routes for them.
+   *
+   * So where a legend exists, the diamond gets one short line into the legend and the branch
+   * routes are not drawn. The legend carries the step numbers, and the steps it names sit
+   * directly below it. Nothing is lost except ink. */
+  const suppressed = new Set();
+  for (const id of legendNodes)
+    for (const e of edges)
+      if (e.from === id && String(e.label ?? e.condition ?? "").trim()) suppressed.add(e);
+
   const branchLabels = [];
   let routeConflicts = 0;     // edges the router could not clear of every box it does not touch
   const placed = [];          // routes already chosen, so the next one can avoid crossing them
   for (const e of edges) {
+    if (suppressed.has(e)) continue;
     const a = pos.get(e.from), b = pos.get(e.to);
     if (!a || !b) continue;
     const ay = a.y + nodeH / 2 + 2, by = b.y - nodeH / 2 - 2;
@@ -639,6 +656,7 @@ function processDiagram(toBe) {
     const lw = Math.max(...rows.map((r) => r.t.length)) * 6.1 + 60;
     const lx = Math.max(12, Math.min(W - lw - 12, q.x - lw / 2));
     const ly = q.y + nodeH / 2 + 14;
+    L.push(`<path data-edge="${esc(id)}|legend" d="M${q.x} ${q.y + nodeH / 2 + 4} V${ly}" fill="none" stroke="${C.accent}" stroke-width="1.4"/>`);
     L.push(`<g data-legend="${esc(id)}">`);
     L.push(`<rect x="${lx}" y="${ly}" width="${lw}" height="${rows.length * 16 + 10}" rx="8" fill="${C.card}" stroke="${C.accent}" stroke-width=".9"/>`);
     rows.forEach((r, i) => {

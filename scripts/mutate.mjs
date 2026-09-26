@@ -402,6 +402,16 @@ const M = [
             '<rect x="60" y="44" width="70" height="19" rx="9.5" fill="var(--fig-card, #fff)"/><text font-size="11">x</text></svg>\n' },
       ] }],
 
+  /* figure-says-it-twice — a legend that names its branches, plus the branch routes drawn anyway. */
+  ["figure-says-it-twice", "business-analyst/scripts/figure-placement-check.mjs",
+    [path.join(DIR, "__mut-figA__.html"), path.join(DIR, "__mut-figsA__")], "always",
+    { files: [
+        { file: "__mut-figA__.html", content: '<!doctype html><title>m</title><figure data-figure="tw" data-label="Twice"><svg viewBox="0 0 400 300"></svg></figure>\n' },
+        { file: path.join("__mut-figsA__", "tw.svg"), content:
+            '<svg viewBox="0 0 400 300"><g data-legend="gw"><rect x="10" y="10" width="100" height="40" rx="8"/></g>' +
+            '<path data-edge="gw|n1"/><path data-edge="gw|n2"/><text font-size="12">x</text></svg>\n' },
+      ] }],
+
   /* figure-unreadable-on-a-phone — a wide drawing that does NOT declare a scrollable frame, so
    * the page will scale it down until its labels are a texture. Everything about this diagram had
    * been verified at 900px; at 358 its labels rendered at 3.7px and no check had looked. */

@@ -388,3 +388,27 @@ own frame, on screens too narrow to hold it.
 And that is a mitigation, not a fix. A three-lane swimlane on a phone is a poor artefact however it
 is handled: readable-and-scrollable beats shrunk-into-a-texture, and neither is good. Say so rather
 than reporting the narrow case as solved.
+
+
+## draw a fact once
+
+<!-- enforced-by: figure-says-it-twice -->
+
+The busiest corner of a process model had a four-way fork with a legend under it — "→ 17 trống
+việc, → 18 lệch trạng thái, → 19 gán lại, → 20 không lệch" — and then four routes were drawn as
+well, travelling down corridors and bending around boxes to arrive at exactly the four steps the
+legend had just named.
+
+Five rounds of routing had been spent making those four routes clean. They should not have
+existed. The tangle was never four branches; it was four branches plus four redundant statements
+of them.
+
+Deleting them took **a third of the ink** out of the drawing and two crossings with it, and cost
+nothing: the legend carries the step numbers, and the steps it names sit directly beneath it. The
+diamond keeps one short line into its legend, so the fork still visibly leads somewhere.
+
+A reader does not check a picture against itself. **Two representations of one fact are not
+reassurance, they are clutter** — and the effort spent making the second one tidy is the most
+expensive kind of wasted work, because it looks like progress the whole time.
+
+Before optimising how something is drawn, ask whether it should be drawn.
