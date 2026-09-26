@@ -49,9 +49,13 @@ jobs:
       # suite's own words: a skipped mutation is not a passed one. A green tick over four
       # unproven checks is the failure mode this whole workflow exists to end, so the
       # browser is installed and the run is held to 89.
+      #
+      # axe-core, pngjs and pixelmatch for the same reason: axe-check and
+      # visual-baseline-check import them, and without them those two mutations skip, and a
+      # skip fails this run below.
       - name: install playwright
         run: |
-          npm install --no-save playwright@1.62.1
+          npm install --no-save playwright@1.62.1 axe-core@4.13.0 pngjs@7.0.0 pixelmatch@7.2.0
           npx playwright install --with-deps chromium
 
       - name: validate packages

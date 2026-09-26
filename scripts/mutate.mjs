@@ -126,6 +126,17 @@ const run = (script, argv) => {
   catch (e) { return (e.stdout || "") + (e.stderr || ""); }
 };
 
+/* The browser-driven mutations below ship their own pages and ask nothing of the project. What
+ * they need is the toolchain the check loads, so that is what they are gated on. They used to
+ * be gated on `@demo`, which the fixture has never carried: seven mutations skipped on every CI
+ * run, the gate turned that into a failure, and nothing said the cause was this list. A check
+ * whose tool is missing SKIPS with exit 0, which would score as MISSED, so the gate has to name
+ * every module the check imports. */
+const REQ = createRequire(import.meta.url);
+const resolves = (m) => { try { return REQ.resolve(m); } catch { return null; } };
+/* A real project keeps its source in demo/src; the worked example keeps it in src. */
+const SRC = fs.existsSync(path.join(DIR, "demo", "src")) ? "demo/src" : "src";
+
 /* ---- the mutations -------------------------------------------------------- *
  * `check` is the id the named script must report. `needs` says what the project has to
  * carry for the mutation to be meaningful, so a thin fixture reports SKIPPED rather than
@@ -291,8 +302,8 @@ const M = [
    * mutation deliberately ALSO puts one in a comment, because the check's whole guarantee is
    * that it distinguishes the two: a check that flagged the comment would push a team into
    * deleting the provenance that belongs beside the code. */
-  ["internal-reference-check", "content-designer/scripts/internal-reference-check.mjs", ["demo/src"], "@demo/src",
-    { file: "demo/src/__mutation__.jsx",
+  ["internal-reference-check", "content-designer/scripts/internal-reference-check.mjs", [SRC], "@" + SRC,
+    { file: SRC + "/__mutation__.jsx",
       content: '{/* provenance: BR-06 belongs here */}\n<div>Quản lý không sửa được (BR-06).</div>\n' }],
 
   /* url-param-guard — a page that renders its screen no matter what the URL says. A static
@@ -300,7 +311,7 @@ const M = [
    * silently ignored and every route returns the same frame. Driven over file://, which needs no
    * server, so this mutation runs wherever playwright does. */
   ["url-param-guard", "ux-engineer/scripts/url-param-guard.mjs",
-    ["--url", "file://" + path.join(DIR, "__mutation__.html"), "--valid", "vp=mobile"], "@demo",
+    ["--url", "file://" + path.join(DIR, "__mutation__.html"), "--valid", "vp=mobile"], "module:playwright",
     { file: "__mutation__.html",
       content: '<!doctype html><meta charset="utf-8"><title>m</title><div class="frame">renders regardless of the URL</div>\n' }],
 
@@ -309,7 +320,7 @@ const M = [
    * title outdented back to the row's edge, which is exactly what a broken grid produces and
    * exactly what no overflow, token or target-size check can see. file://, so no server. */
   ["ragged-rows", "ux-engineer/scripts/layout-coherence-check.mjs",
-    ["--url", "file://" + path.join(DIR, "__mutation-layout__.html"), "--viewport", "390x844"], "@demo",
+    ["--url", "file://" + path.join(DIR, "__mutation-layout__.html"), "--viewport", "390x844"], "module:playwright",
     { file: "__mutation-layout__.html",
       content: '<!doctype html><meta charset="utf-8"><title>m</title>' +
         '<style>.frame{width:390px;height:844px}.list{padding:8px}.row{padding:8px}' +
@@ -324,7 +335,7 @@ const M = [
    * a static capture cannot see, because every control in it is individually correct. */
   ["escape-closes", "ux-engineer/scripts/keyboard-check.mjs",
     ["--url", "file://" + path.join(DIR, "__mutation-kb__.html"), "--frame", ".frame",
-     "--open", "#opener", "--modal", '[role="dialog"]', "--viewport", "390x844"], "@demo",
+     "--open", "#opener", "--modal", '[role="dialog"]', "--viewport", "390x844"], "module:playwright",
     { file: "__mutation-kb__.html",
       content: '<!doctype html><meta charset="utf-8"><title>m</title>' +
         '<style>.frame{width:390px;height:844px}button:focus{outline:2px solid #06c}</style>' +
@@ -336,7 +347,7 @@ const M = [
    * violation and one that every geometric check in this repo is blind to. */
   ["axe-violations", "ux-engineer/scripts/axe-check.mjs",
     ["--url", "file://" + path.join(DIR, "__mutation-axe__.html"), "--include", ".frame",
-     "--axe", path.join(DIR, "demo", "node_modules", "axe-core", "axe.min.js"), "--viewport", "390x844"], "@demo/node_modules/axe-core",
+     "--axe", resolves("axe-core/axe.min.js") || "", "--viewport", "390x844"], "module:playwright+axe-core",
     { file: "__mutation-axe__.html",
       content: '<!doctype html><html lang="vi"><meta charset="utf-8"><title>m</title>' +
         '<div class="frame"><button></button><img src="data:image/gif;base64,R0lGODlhAQABAAAAACw="></div></html>\n' }],
@@ -347,7 +358,7 @@ const M = [
    * else". This is the mutation that made the harness learn multi-file and binary fixtures. */
   ["visual-baseline", "ux-engineer/scripts/visual-baseline-check.mjs",
     ["--url", "file://" + path.join(DIR, "__mutation-vis__.html"), "--clip", ".frame",
-     "--dir", path.join(DIR, "__mutation-baseline__"), "--modules", path.join(DIR, "demo"), "--viewport", "390x844"], "@demo",
+     "--dir", path.join(DIR, "__mutation-baseline__"), "--modules", path.join(ROOT, "scripts"), "--viewport", "390x844"], "module:playwright+pngjs+pixelmatch",
     { files: [
         { file: "__mutation-vis__.html",
           content: '<!doctype html><meta charset="utf-8"><title>m</title>' +
@@ -566,7 +577,7 @@ const M = [
    * invisible to every geometric check and to a screenshot: the button has a visible icon, and
    * the page looks perfectly structured to an eye. */
   ["no-headings", "ux-engineer/scripts/screenreader-check.mjs",
-    ["--url", "file://" + path.join(DIR, "__mutation-sr__.html"), "--frame", ".frame", "--viewport", "390x844"], "@demo",
+    ["--url", "file://" + path.join(DIR, "__mutation-sr__.html"), "--frame", ".frame", "--viewport", "390x844"], "module:playwright",
     { file: "__mutation-sr__.html",
       content: '<!doctype html><html lang="vi"><meta charset="utf-8"><title>m</title>' +
         '<div class="frame"><p>Không có tiêu đề nào</p><button><svg width="16" height="16"></svg></button></div></html>\n' }],
@@ -626,6 +637,7 @@ const have = (need) => {
      "the project has no material for this", which is a sentence about the project. It was a
      sentence about this list. Four checks were reported as covered while never having run. */
   if (need === "always") return true;
+  if (need.startsWith("module:")) return need.slice(7).split("+").every((m) => resolves(m));
   const v = baseState[need];
   return Array.isArray(v) ? v.length > 0 : v !== undefined && v !== null;
 };
