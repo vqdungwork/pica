@@ -238,3 +238,35 @@ in both directions. The traceability matrix is then not a chapter; it is the nav
 Generate it from `state.json` and nothing else, so the page and the checks read one source and
 cannot disagree. A hand-written summary of a register is a second copy, and second copies drift —
 which is the same reason an SOW cites frozen ids rather than restating requirements.
+
+## A long list is not a visualisation
+
+<!-- enforced-by: assemble-spec -->
+
+The first assembled spec was 129 items in one linear column: **eighteen and a half screens of
+scrolling**, filterable but not navigable, with the diagrams at the very bottom where nobody
+reaches them and every register rendered identically — a glossary entry looking exactly like a
+screen. On a phone the first screenful was four labels and no content at all.
+
+It was, precisely, the wall of text this project had spent a week diagnosing on somebody else's
+report screen: everything shown, in sequence, nothing grouped by what the reader needs. Writing
+the rule does not exempt the next thing you build from it.
+
+Four things fix it, and they are the same four every time:
+
+- **Lead with a map, not with the data.** The chain drawn as a chain — *3 segments → 9 pains → 13
+  use cases → 29 requirements → 13 rules → 4 entities → 11 screens*, each hop a proportional bar
+  and a way in. Navigation answers "where does this one go"; a map answers "how much is there and
+  how does it divide", which is the question anyone asks first.
+- **Put the pictures where they are read**, not after eighteen screens of list.
+- **Collapse the reference registers.** A glossary of seventeen and a requirements list of
+  twenty-nine are things to *consult*, not to read through; six visible and a line saying how many
+  are behind it. Open items never collapse.
+- **On a phone the first screen must carry content.** Four stacked summary cards are four labels.
+
+And two smaller lessons with wider reach. A wide diagram must **scroll, not shrink**: capped at
+the column width, a 23-step process became a grey smear — present, unreadable, and worse than
+absent because it looks answered. And the "scroll sideways" hint is decided by **measuring at
+runtime**, never by a width threshold guessed in the generator: the guess captioned two diagrams
+that fitted as needing a scroll they did not, and left the one that did unmarked on a phone. A
+caption that asks a reader to do something unnecessary is a caption they learn to disbelieve.
