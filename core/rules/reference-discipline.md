@@ -180,3 +180,25 @@ record and the check keeps firing with nothing to say why.
 handover is one the client inherits without being told.
 
 Raising none is a valid state. It is not evidence the checks are right.
+
+
+## say which version ran
+
+<!-- enforced-by: none — the runner prints its resolved versions; nothing can check a number it is not told -->
+
+pica resolved its installed packages by sorting version directories with `.sort()`. That is a
+string sort, so `3.2.1` beat `3.15.1` — at the second character, "2" beats "1". After thirteen
+releases in one day the runner silently went back to the one from the morning, read every check
+from a stale manifest, and the only symptom was one check failing on an argument nobody had
+written that way for hours.
+
+**Nothing reported a wrong version.** That is the real defect; the sort was just how it happened.
+
+Every run now prints the versions it is made of before any result, names how many packages had
+older copies still on disk, and warns when packages disagree with each other — a chain assembled
+from two releases is not a release.
+
+Two things follow for anyone shipping this. Versions compare **numerically**, never as strings,
+everywhere a version is chosen. And after an update, **prune the old versions**: a resolver that
+has to pick is a resolver that can pick wrong, and 58 stale directories sat on one machine waiting
+to be chosen.
