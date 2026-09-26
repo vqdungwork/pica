@@ -249,6 +249,14 @@ const html = `<!doctype html><html lang="vi"><head><meta charset="utf-8">
   --paper:#ffffff; --card:#ffffff; --sunk:#f7f8f9;
   --ink:#16181d; --ink2:#4a5058; --ink3:#767d86;
   --rule:#e1e4e8; --rule2:#eef0f2;
+  /* The diagrams are generated SVG whose every colour is var(--fig-*, <light hex>). Defining the
+     variables here is what makes a generated drawing follow the page's theme instead of carrying
+     a light palette into a dark document. Opened as a standalone .svg, nothing defines them and
+     the fallback keeps that file a correct light drawing. */
+  --fig-card:#ffffff; --fig-line:#c9ccd1; --fig-ink:#16191d; --fig-muted:#606670;
+  --fig-accent:#006399; --fig-warn:#c0392b; --fig-band:rgba(0,0,0,.028);
+  --fig-own:#eaf2f8;   --fig-head:#f2f1ef;
+  --fig-on-accent:#ffffff; --fig-on-accent-2:rgba(255,255,255,.78);
   --mirror:#6b7280; --mirror-bg:#f4f5f7;
   --app:#1a56b8;    --app-bg:#eef3fc;
   --outside:#8a6d1f; --outside-bg:#fbf6e8;
@@ -268,6 +276,10 @@ const html = `<!doctype html><html lang="vi"><head><meta charset="utf-8">
     --app:#63a4ff;    --app-bg:#152236;
     --outside:#c9a84c; --outside-bg:#241f13;
     --open:#e0913a;   --open-bg:#2a1f12; --open-line:#4a3418;
+    --fig-card:#1d212a; --fig-line:#424a59; --fig-ink:#e8eaed; --fig-muted:#a2a9b5;
+    --fig-accent:#4da3dd; --fig-warn:#ff8a7a; --fig-band:rgba(255,255,255,.045);
+    --fig-own:#1b3347;   --fig-head:#252a34;
+    --fig-on-accent:#0b1620; --fig-on-accent-2:rgba(11,22,32,.72);
   }
 }
 :root[data-theme="dark"]{
@@ -279,6 +291,10 @@ const html = `<!doctype html><html lang="vi"><head><meta charset="utf-8">
   --app:#63a4ff;    --app-bg:#152236;
   --outside:#c9a84c; --outside-bg:#241f13;
   --open:#e0913a;   --open-bg:#2a1f12; --open-line:#4a3418;
+  --fig-card:#1d212a; --fig-line:#424a59; --fig-ink:#e8eaed; --fig-muted:#a2a9b5;
+  --fig-accent:#4da3dd; --fig-warn:#ff8a7a; --fig-band:rgba(255,255,255,.045);
+  --fig-own:#1b3347;   --fig-head:#252a34;
+  --fig-on-accent:#0b1620; --fig-on-accent-2:rgba(11,22,32,.72);
 }
 *{box-sizing:border-box}
 body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.62 var(--sans);-webkit-font-smoothing:antialiased}
@@ -367,7 +383,7 @@ table.rtm tr.warn td{background:var(--open-bg)}
 /* The SVGs carry baked light colours. Rather than regenerate a second dark copy —
    two sources that will drift — the figure keeps a light card under them in both
    themes, which is what a printed diagram does on a dark page anyway. */
-:root[data-theme="dark"] .fig,@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .fig{background:#f7f8f9}}
+
 .fig figcaption{font-size:11.5px;color:var(--ink3);margin-top:9px}
 .fig:not(.fig--static) svg [data-node]{cursor:pointer}
 .fig--static svg [data-node]{cursor:default}
@@ -499,18 +515,18 @@ ${arr(S.screens).length ? `<section class="part">
   </div>
 </section>` : ""}
 
-${diagrams.some((d) => d.name === "erd") ? `<section class="part">
-  <p class="eyebrow">Phần 4</p>
-  <h2>Dữ liệu, và cái gì liên quan cái gì</h2>
-  <p class="deck">Bốn thực thể. Chỉ một do app này sở hữu — phần còn lại là bản soi chỉ đọc của 8project, và app này không bao giờ ghi ngược lên.</p>
-  <figure class="fig fig--static" data-label="Dữ liệu và quan hệ" data-figure="erd">${diagrams.find((d) => d.name === "erd").svg}</figure>
-</section>` : ""}
-
 ${diagrams.some((d) => d.name === "process") ? `<section class="part">
   <p class="eyebrow">Phần 3b</p>
   <h2>Cùng một ngày đó, vẽ đầy đủ</h2>
   <p class="deck">Phần trên kể bằng lời. Đây là cùng một quy trình vẽ ra hết: mỗi hàng là một vai, mỗi cột là một mốc trong ngày. Dùng để soát xem có bước nào thiếu, hoặc có việc nào rơi vào sai người.</p>
   <figure class="fig" data-label="Quy trình TO-BE" data-figure="process">${diagrams.find((d) => d.name === "process").svg}<figcaption>Quy trình TO-BE · mỗi hàng một vai</figcaption></figure>
+</section>` : ""}
+
+${diagrams.some((d) => d.name === "erd") ? `<section class="part">
+  <p class="eyebrow">Phần 4</p>
+  <h2>Dữ liệu, và cái gì liên quan cái gì</h2>
+  <p class="deck">Bốn thực thể. Chỉ một do app này sở hữu — phần còn lại là bản soi chỉ đọc của 8project, và app này không bao giờ ghi ngược lên.</p>
+  <figure class="fig fig--static" data-label="Dữ liệu và quan hệ" data-figure="erd">${diagrams.find((d) => d.name === "erd").svg}</figure>
 </section>` : ""}
 
 ${arr(S.domainModel).length && !diagrams.some((d) => d.name === "erd") ? `<section class="part">

@@ -21,7 +21,8 @@
       "traceability-check.mjs",
       "assemble-spec.mjs",
       "acceptance-check.mjs",
-      "figure-placement-check.mjs"
+      "figure-placement-check.mjs",
+      "section-order-check.mjs"
     ],
     "agents": [
       "pica-business-analyst.md"
@@ -137,6 +138,13 @@
       "run": "figure-placement-check.mjs",
       "passes": "0 findings",
       "args": "docs/spec/index.html docs/spec/diagrams",
+      "phase": "analyse",
+      "needs": []
+    },
+    {
+      "run": "section-order-check.mjs",
+      "passes": "0 findings",
+      "args": "docs/spec/index.html",
       "phase": "analyse",
       "needs": []
     }

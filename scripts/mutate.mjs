@@ -369,18 +369,35 @@ const M = [
    * placed in the assembled page; the other is placed and scaled to the width of the column until
    * its labels are too small to read. Both report "wrote N diagram(s)" and pass everything else. */
   ["figure-rendered-but-not-placed", "business-analyst/scripts/figure-placement-check.mjs",
-    [path.join(DIR, "__mut-fig__.html"), path.join(DIR, "__mut-figs__")], "@none",
+    [path.join(DIR, "__mut-fig__.html"), path.join(DIR, "__mut-figs__")], "always",
     { files: [
         { file: "__mut-fig__.html", content: '<!doctype html><title>m</title><figure data-figure="kept" data-label="Kept"><svg viewBox="0 0 400 300"><text font-size="12">Kept</text></svg></figure>\n' },
         { file: path.join("__mut-figs__", "kept.svg"), content: '<svg viewBox="0 0 400 300"><text font-size="12">Kept</text></svg>\n' },
         { file: path.join("__mut-figs__", "orphan.svg"), content: '<svg viewBox="0 0 400 300"><text font-size="12">Nobody placed me</text></svg>\n' },
       ] }],
   ["figure-too-wide-to-read", "business-analyst/scripts/figure-placement-check.mjs",
-    [path.join(DIR, "__mut-fig2__.html"), path.join(DIR, "__mut-figs2__")], "@none",
+    [path.join(DIR, "__mut-fig2__.html"), path.join(DIR, "__mut-figs2__")], "always",
     { files: [
         { file: "__mut-fig2__.html", content: '<!doctype html><title>m</title><figure data-figure="wide" data-label="Wide"><svg viewBox="0 0 2400 300"><text font-size="11">Wide</text></svg></figure>\n' },
         { file: path.join("__mut-figs2__", "wide.svg"), content: '<svg viewBox="0 0 2400 300"><text font-size="11">Wide</text></svg>\n' },
       ] }],
+
+  /* section-order-check — a part number that runs backwards, and two parts sharing one number.
+   * Both are invisible in the generator and obvious on the page, which is the whole point. */
+  ["figure-hardcodes-a-colour", "business-analyst/scripts/figure-placement-check.mjs",
+    [path.join(DIR, "__mut-fig3__.html"), path.join(DIR, "__mut-figs3__")], "always",
+    { files: [
+        { file: "__mut-fig3__.html", content: '<!doctype html><title>m</title><figure data-figure="hard" data-label="Hard"><svg viewBox="0 0 400 300"><rect fill="#16191d"/><text font-size="12">Hard</text></svg></figure>\n' },
+        { file: path.join("__mut-figs3__", "hard.svg"), content: '<svg viewBox="0 0 400 300"><rect fill="#16191d"/><text font-size="12">Hard</text></svg>\n' },
+      ] }],
+  ["sections-out-of-order", "business-analyst/scripts/section-order-check.mjs",
+    [path.join(DIR, "__mut-order__.html")], "always",
+    { files: [{ file: "__mut-order__.html", content:
+        '<!doctype html><title>m</title><p class="eyebrow">Phần 1</p><p class="eyebrow">Phần 4</p><p class="eyebrow">Phần 3b</p>\n' }] }],
+  ["duplicate-section-number", "business-analyst/scripts/section-order-check.mjs",
+    [path.join(DIR, "__mut-order2__.html")], "always",
+    { files: [{ file: "__mut-order2__.html", content:
+        '<!doctype html><title>m</title><p class="eyebrow">Phần 1</p><p class="eyebrow">Phần 2</p><p class="eyebrow">Phần 2</p>\n' }] }],
 
   /* screenreader-check — a page with no heading and a button the tree cannot name. Both are
    * invisible to every geometric check and to a screenshot: the button has a visible icon, and
@@ -441,6 +458,11 @@ const have = (need) => {
      mutation on a check that reads a directory rather than state was skipped for want of a
      state key it never wanted, and a skip reads as "no material" rather than as a bug here. */
   if (need.startsWith("@")) return fs.existsSync(path.join(DIR, need.slice(1)));
+  /* `always` is for a mutation that ships its own fixture files and asks nothing of the project.
+     Before it existed these were written as `@none` and silently SKIPPED — and a skip reads as
+     "the project has no material for this", which is a sentence about the project. It was a
+     sentence about this list. Four checks were reported as covered while never having run. */
+  if (need === "always") return true;
   const v = baseState[need];
   return Array.isArray(v) ? v.length > 0 : v !== undefined && v !== null;
 };

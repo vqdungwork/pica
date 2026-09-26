@@ -187,3 +187,24 @@ Three things the renderer must not do, each learned by looking at what it produc
   whose entire point is that three roles act at once.
 - **Size the canvas after measuring the content.** A height computed from `lanes.length × 96`
   clips any lane that has to stack, and a clipped step looks exactly like a step that is not there.
+
+
+## a generated drawing has no theme of its own
+
+<!-- enforced-by: figure-hardcodes-a-colour -->
+
+A diagram generator writes colours into the SVG. Inlined into a page that switched to dark, those
+colours do not switch with it: #16191d text on a #ffffff card, and the dark surface behind renders
+both as black on black. The page was right, every contrast check passed — they read CSS, and this
+is a presentation attribute — and not one diagram was legible.
+
+Every colour is `var(--fig-<role>, <light hex>)`. The host page defines the variables in each of
+its three theme blocks; opened as a standalone file nothing defines them and the fallback keeps
+that .svg a correct light drawing. `var()` reaches a presentation attribute only when the SVG is
+inline in the document, which is how a spec page carries it.
+
+Two colours are exempt, and only two: white and black sitting **on** a coloured shape. They follow
+that shape, not the theme. But the ink that sits on the accent is not one of them — white works on
+a dark blue and fails on a light one, and the accent is exactly what flips between the two. That
+gets its own token, `--fig-on-accent`, or it is a contrast failure waiting for the reader to
+change their system setting.

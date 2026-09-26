@@ -19,7 +19,7 @@
  *
  *   node internal-reference-check.mjs <dir> [--prefixes BR,FR,NFR,UC,PP]
  */
-import { readdirSync, readFileSync, statSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join, extname } from "node:path";
 
 /* The check ids this script reports, declared so rule-coverage-check can read them. */
@@ -51,7 +51,12 @@ function userVisible(src) {
   return out;
 }
 
+/* A path may be a single file. Given one, this used to crash with ENOTDIR before printing a single
+ * row — and pica's runner reported it as "FAIL, 0 findings", which reads as a check that failed
+ * for no reason. A check that cannot say what is wrong is worse than one that is absent. */
 function walk(dir, acc = []) {
+  if (!existsSync(dir)) { console.log(`internal-reference-check: ${dir} does not exist — nothing to read`); process.exit(0); }
+  if (!statSync(dir).isDirectory()) return EXT.has(extname(dir)) ? [dir] : [];
   for (const name of readdirSync(dir)) {
     if (name === "node_modules" || name.startsWith(".")) continue;
     const p = join(dir, name);
