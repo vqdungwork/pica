@@ -287,6 +287,23 @@ const M = [
      holds the wireframes, and nothing held what replaced them. */
   ["screen-states",   "ux-engineer/scripts/screen-states-check.mjs", ["html", S], "@html", (s) => { (s.screens?.[0]?.states || []).push("a-state-nothing-draws"); }],
 
+  /* internal-reference-check — a requirement id written into a text node a user reads. The
+   * mutation deliberately ALSO puts one in a comment, because the check's whole guarantee is
+   * that it distinguishes the two: a check that flagged the comment would push a team into
+   * deleting the provenance that belongs beside the code. */
+  ["internal-reference-check", "content-designer/scripts/internal-reference-check.mjs", ["demo/src"], "@demo/src",
+    { file: "demo/src/__mutation__.jsx",
+      content: '{/* provenance: BR-06 belongs here */}\n<div>Quản lý không sửa được (BR-06).</div>\n' }],
+
+  /* url-param-guard — a page that renders its screen no matter what the URL says. A static
+   * fixture IS that defect in its purest form: it has no router at all, so every parameter is
+   * silently ignored and every route returns the same frame. Driven over file://, which needs no
+   * server, so this mutation runs wherever playwright does. */
+  ["url-param-guard", "ux-engineer/scripts/url-param-guard.mjs",
+    ["--url", "file://" + path.join(DIR, "__mutation__.html"), "--valid", "vp=mobile"], "@demo",
+    { file: "__mutation__.html",
+      content: '<!doctype html><meta charset="utf-8"><title>m</title><div class="frame">renders regardless of the URL</div>\n' }],
+
   // foundations-check
   ["contrast-floor",    "ux-engineer/scripts/foundations-check.mjs", ["html/design-system.html", "tokens/tokens.json", S], "direction", (s) => { s.audience.floors.contrastRatio = 21; }],
   ["state-covered",     "ux-engineer/scripts/foundations-check.mjs", ["html/design-system.html", "tokens/tokens.json", S], "direction", (s) => { s.direction.components[0].states.push("pressed"); }],
@@ -360,6 +377,25 @@ const exercised = (script, argv) => M.some(([, s, a, need]) =>
   }
 }
 
+/* A mutation may break a FILE instead of state.json: `{ file, content }` writes that file
+ * (relative to the project) for the duration of one run and restores it afterwards, deleting it
+ * if it did not exist. Until this existed the suite could only mutate `.pica/state.json`, so
+ * every check that reads an artefact — a source tree, a rendered page, a token file — was
+ * unprovable by construction, and its absence from the suite looked like an author's oversight
+ * rather than a missing capability. Two checks added on one day both landed in that gap, which
+ * is what finally made it visible. */
+function applyFileMutation(m) {
+  const target = path.join(DIR, m.file);
+  const existed = fs.existsSync(target);
+  const prior = existed ? fs.readFileSync(target) : null;
+  fs.mkdirSync(path.dirname(target), { recursive: true });
+  fs.writeFileSync(target, m.content);
+  return () => {
+    if (existed) fs.writeFileSync(target, prior);
+    else fs.rmSync(target, { force: true });
+  };
+}
+
 for (const [check, script, argv, need, mutate] of M) {
   if (ONLY && !script.includes(ONLY)) continue;
   const name = `${path.basename(script, ".mjs")} · ${check}`;
@@ -368,10 +404,17 @@ for (const [check, script, argv, need, mutate] of M) {
     results.push(["skip", name, `the project carries no ${need}, so this mutation has nothing to break`]);
     continue;
   }
-  const s = JSON.parse(base);
-  try { mutate(s); } catch { skipped++; results.push(["skip", name, "the mutation did not apply to this project's shape"]); continue; }
-  fs.writeFileSync(S, JSON.stringify(s, null, 2));
+  let restoreFile = null;
+  if (typeof mutate === "object" && mutate !== null && mutate.file) {
+    try { restoreFile = applyFileMutation(mutate); }
+    catch { skipped++; results.push(["skip", name, "the file mutation could not be written"]); continue; }
+  } else {
+    const s = JSON.parse(base);
+    try { mutate(s); } catch { skipped++; results.push(["skip", name, "the mutation did not apply to this project's shape"]); continue; }
+    fs.writeFileSync(S, JSON.stringify(s, null, 2));
+  }
   const out = run(script, argv);
+  if (restoreFile) restoreFile();
   const fired = new RegExp(`\\[${check}\\]|^FAIL\\s+${check}\\b`, "m").test(out);
   const others = [...out.matchAll(/^FAIL\s+([a-z-]+)/gm)].map((m) => m[1]).filter((c) => c !== check);
   if (fired) { caught++; results.push(["caught", name, others.length ? `also fired: ${[...new Set(others)].join(", ")}` : ""]); }
