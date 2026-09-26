@@ -637,3 +637,34 @@ no npm install to view a screen.
 
 The prototype's job is to be opened instantly by a designer and measured by a script. Both get harder
 with tooling in the way.
+
+## Mobile web is not desktop made narrow
+
+<!-- enforced-by: none — judgement, not decidable by a script -->
+
+pica's rule set has been bimodal: desktop web, and `native-mobile.md` for a shipped app. The most
+common case falls between them — **a responsive web app that someone opens on a phone every day** —
+and it inherits neither set.
+
+On one engagement that gap produced a mobile view which was the desktop layout narrowed: zero
+bottom navigation, zero safe-area handling, top tabs carried straight down from desktop, and a
+frame with no height so the phone screen never ended. `native-mobile.md` was read and correctly set
+aside — its subject is store assets, signing keys and release asymmetry, none of which applies to a
+web build. So the role did the right thing with the rules it had and still produced something
+nobody would recognise as a phone application.
+
+What transfers from app convention to mobile web, and is not native-only:
+
+- **Primary navigation sits at the bottom**, in the thumb zone, when a person uses the product
+  daily and moves between two or more areas. Top tabs are a desktop inheritance; on a phone the
+  top of the screen is the hardest place to reach and the worst place for the thing used most.
+- **A sheet, not a modal.** It rises from the bottom edge, it is dismissible by gesture as well as
+  by a control, and it does not ask a thumb to reach a corner.
+- **Safe areas are real on web too.** `env(safe-area-inset-*)` exists precisely because a fixed
+  bottom bar lands under the home indicator otherwise.
+- **The fold is a place.** Frame the declared viewport at both its dimensions and let the frame
+  scroll inside itself, or nothing about reach, stickiness or above-the-fold is observable.
+
+The test is not whether it works at 390px. It is whether someone holding a phone would recognise
+it as an application rather than a page.
+
