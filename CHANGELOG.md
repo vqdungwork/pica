@@ -1,5 +1,76 @@
 # Changelog
 
+## 3.17.0
+
+### The example the README points at now passes the chain it is the example of
+
+`/pica-verify` on `examples/approvals` reported four failures on 3.16.1, and CI was green, because
+CI never ran it. Two of the four were the runner's own defects. Going through the rest turned up
+eight more, and every one had the same shape: something reported as checked that could not have
+been.
+
+**The runner handed checks the string "null".** A check with an undeclared placeholder was run
+anyway, with `null` in its place. build-check tried to execute a program called `null` and
+reported a build **failure**; six browser checks loaded `null?null` and reported that nothing
+answered. Arguments are now resolved before anything runs. A check with an undeclared placeholder
+is not run, is shown as **`UNSET`** with what it lacks, and the run exits non-zero. A substitution
+declared as `null` means *this project has none*: the option is left off the command line, the
+check says what it did not measure, and the run prints the declaration. `serve.url` now fills
+`<servedDemo>` and the `build` block fills `<buildCmd>`, `<buildCwd>` and `<buildOut>`, which is
+how the scaffolding skill had always told projects to write them. `--phase build` is accepted: the
+table printed a BUILD heading that the flag refused.
+
+**Two checks could never find the sector base.** proposal-check looked for `roles/analyst`, a
+directory renamed long ago, and in the cache sorted versions as strings, the defect 3.16.0 fixed in
+the runner. palette-check looked relative to the working directory, which is the project, so on
+every real project `reserved-respected` compared nothing. Both now resolve the sibling package from
+where they are installed, highest version by number.
+
+**architecture-check's `integrations` could not fire.** It read `domainConstraints.integrations`,
+and domainConstraints is an array. It reads `integrationsNamed` now, the list the context diagram
+already draws its external systems from, matched on `system`. The example declares one integration
+with its contract, so the matching path runs on every CI build and not only the failing one.
+
+**Four checks passed over nothing or crashed instead of reporting.**
+- visual-baseline-check reported "0 changed" on a run that had only just written every baseline.
+  That run compared nothing, and now says so as an abstention.
+- screenreader-check and keyboard-check clicked the first match of `--act` / `--open`. In a
+  prototype that keeps every screen in the page, that is often a hidden element: click() waited
+  thirty seconds and threw. They click the first visible match, and name any route where nothing
+  could be activated.
+- artifact-readiness-check said "no --dir does not exist".
+
+**The worked example itself.** Its controls were 40px against a 44px floor. Its flow had no failure
+branch, its navigation cited no evidence, its approved package had no pre-gate lens, and it carried
+no directions and no architecture, so five checks either failed or abstained on it. Its prototype
+router answered `?viewport=mobile` and `?scr=typo` with the home screen, which is the defect
+url-param-guard exists for, and it changed screens without announcing anything. All of it is fixed
+in the example, including `proto.js`, which projects copy. It now declares `.pica/runners.json` and
+serves itself with a builtin-only `scripts/serve.mjs`.
+
+**`proto.js` went blank on its second click.** It wrote the current screen to `<html data-scr>`,
+and `<html>` then matched every `[data-scr]` query in the router: after the first move `byId()`
+returned the document root and `paint()` hid it. It writes `data-current` now. The same click
+showed the second defect: a task screen hides the tab bar, and the tab bar stayed, because
+`.tabbar{display:flex}` beats the browser's `[hidden]` rule and only the first frame's bar was
+touched. Every check passed over both, because each loads a route fresh and none clicks twice. They
+were found by clicking the flow, which is rule 1, and no check yet does it for you.
+
+**Proof, both directions.** 29 new mutations cover ten checks that `mutation-coverage-check` listed
+as proven in neither direction: architecture, flow-paths, pre-gate-lens, palette, a11y, parity,
+copy, flow, shell and code-tokens. 15 uncovered becomes 5, and those five are the two that run inside
+Figma and three that need a Figma dump or a built demo's capture. 169 caught, 0 missed. CI also runs
+`scripts/example-verify.mjs`: the example, captured and put through `pica-verify`, fails the build on
+any failure or `UNSET`.
+
+`assets/flow.svg` ran seven design packages in one row, under the stop card and off the right
+edge, while `flow-diagram --check` called it current. Boxes wrap inside their lane now, sized to
+their longer line.
+
+The session banner advertised `--to product` and four stops. picaflow has had `--to design|figma` and
+three stops since 2.0.0, and the banner says so now. `state-schema.md` documents `flows` with both
+halves, `navigation`, `directions`, `workPackages.preGateLens` and `architecture`.
+
 ## 3.16.1
 
 ### A check that fails on every push is a check nobody reads

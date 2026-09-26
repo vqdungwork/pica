@@ -185,6 +185,12 @@ jobs:
             exit 1
           fi
 
+      # The other half of the claim. The mutation suite proves each check fires on a defect; this
+      # proves the worked example passes the whole chain it is the example of, through the same
+      # runner a project uses. 3.16.1 shipped with pica-verify reporting four failures on it.
+      - name: verify the worked example
+        run: node scripts/example-verify.mjs
+
 # Deliberately NOT run here: the mutation suite against examples/approvals.
 #
 # impl-check's branch-age reads the git branches of the ENCLOSING repository, and the

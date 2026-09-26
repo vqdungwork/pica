@@ -24,6 +24,7 @@ node ${CLAUDE_PLUGIN_ROOT}/scripts/pica-verify.mjs .pica/state.json
 | `pass` | the check ran and found nothing |
 | `FAIL` | the check ran and found something |
 | `abstain` | the project does not carry what the check reads, so it did not run |
+| `UNSET` | the check applies and was not run, because `.pica/runners.json` does not say where the app is, which selector is the dialog, how to build it. **This is a fault in the setup, and the run exits non-zero** |
 
 **An abstention is never counted as a pass.** It is counted, named, and told what would
 make it run. Confusing the last two is how a project that has not reached a phase comes
@@ -37,8 +38,8 @@ Every check, its arguments, its phase and what it needs are declared in the owni
 package's `package.json`, under `checks`:
 
 ```json
-{ "run": "value-check.mjs", "args": "<state> --gate", "phase": "value",
-  "needs": ["value"], "passes": "0 findings" }
+{ "run": "flow-paths-check.mjs", "args": "<state>", "phase": "design",
+  "needs": ["flows"], "passes": "0 findings" }
 ```
 
 `needs` is a state key, or an `@path` on disk, and `a|b` means either will do.
@@ -50,9 +51,8 @@ itself, and the copy is always the one nothing reads.
 
 ## The flags
 
-**`--phase <name>`** scopes to one phase: `intake`, `discover`, `research`, `value`,
-`analyse`, `design`, `scope`, `estimate`, `architect`, `build`, `close`. This is what
-`picaflow` calls at the end of each phase.
+**`--phase <name>`** scopes to one phase: `intake`, `discover`, `research`, `analyse`,
+`design`, `scope`, `build`, `close`. This is what `picaflow` calls at the end of each phase.
 
 **`--adopt`** prints what a project would have to record to stop abstaining, in the order
 the chain asks for it. This is the path for a project that predates a check: **it has not
@@ -63,6 +63,20 @@ otherwise prints `0 findings`, which is the least informative true thing availab
 is the output a client review quotes.
 
 **`--json`** for a pipeline.
+
+---
+
+## What only the project knows: `.pica/runners.json`
+
+Checks that drive the served demo take placeholders no convention can fill: `<servedDemo>`,
+`<dialog>`, `<buildCmd>`. The project declares them once, in `.pica/runners.json`. `serve.url`
+fills `<servedDemo>` and the `build` block fills `<buildCmd>`, `<buildCwd>` and `<buildOut>`,
+unless a substitution says otherwise.
+
+A substitution set to **`null`** means *this project has none*: no dialog, no build. The
+option is left off the check's command line, the check says for itself what it therefore did
+not measure, and the run lists every placeholder declared as none. That is a decision made in
+writing. A placeholder nobody declared is `UNSET`, and a check is never handed one.
 
 ---
 

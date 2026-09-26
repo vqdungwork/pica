@@ -61,7 +61,10 @@ Written by `design-researcher` · read by `schema-check`
 
 ### `architecture`
 
-*not in the worked example*
+`{ stack: [ { layer, choice, because, replaceable } ], meets: [ { nfr, metBy } ], integrations: [ { system, direction, protocol, onFailure } ], environments: [ { name, host, purpose } ], excludes, data: [ { entity, owner, location, retention } ] }`
+
+The systems the specification names are listed in `integrationsNamed: [ { system, direction } ]`,
+and every one of them needs a contract in `architecture.integrations`.
 
 Written by `solution-architect` · read by `architecture-check`
 
@@ -155,9 +158,24 @@ Written by `business-analyst` · read by `coverage-check`, `trace-check`
 
 ### `flows`
 
-`[ { app, entry, home, owns } ]`
+`[ { app, entry, home, owns, name, steps: [ { name, state, completes } ], branches: [ { name, when, kind, exit } ] } ]`
+
+One entry carries both halves: `flow-check` reads the application (`app`, `entry`, `home`, `owns`)
+and `flow-paths-check` reads the path through it (`steps`, `branches`).
 
 Written by `product-manager` · read by `flow-check`, `flow-paths-check`
+
+### `navigation`
+
+`{ <app>: { structure, destinations }, cardSort | treeTest | evidence | noEvidenceBecause }`
+
+Written by `ux-designer` · read by `flow-paths-check`
+
+### `directions`
+
+`[ { id, name, tradition, isSectorBaseline, palette: { role: hex }, pairs: [ { fg, bg, use } ], tile, servesBadly } ]`
+
+Written by `ui-designer` · read by `palette-check`
 
 ### `proposals`
 
@@ -173,7 +191,7 @@ Written by `product-manager` · read by `verify-html`
 
 ### `workPackages`
 
-`{ approvals }`
+`{ <package>: { tier, htmlApproved, approvedOn, preGateLens: { lens, on, findings, report }, concepts } }`
 
 Written by `evaluator` · read by `concept-check`, `pre-gate-lens-check`
 

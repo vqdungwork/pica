@@ -1,10 +1,10 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 836" width="1180" height="836" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">
-<rect width="1180" height="836" fill="#0d1117"/>
-<text x="40" y="46" fill="#e6edf3" font-size="22" font-weight="600">pica 13 packages · 12 agents · 7 phases</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 1060" width="1180" height="1060" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">
+<rect width="1180" height="1060" fill="#0d1117"/>
+<text x="40" y="46" fill="#e6edf3" font-size="22" font-weight="600">pica 13 packages · 12 agents · 8 phases</text>
 <text x="40" y="70" fill="#8b949e" font-size="13">Generated from the package manifests. Lanes are phases, boxes are packages, stops are where a human decides.</text>
 <line x1="40" y1="96" x2="1140" y2="96" stroke="#21262d" stroke-width="1"/>
 <text x="40" y="122" fill="#7d8590" font-size="11" letter-spacing="1.4">INTAKE</text>
-<rect x="172" y="108" width="202" height="52" rx="4" fill="#161b22" stroke="#30363d"/>
+<rect x="172" y="108" width="203" height="52" rx="4" fill="#161b22" stroke="#30363d"/>
 <text x="186" y="129" fill="#e6edf3" font-size="13" font-weight="600">business-analyst</text>
 <text x="186" y="147" fill="#7d8590" font-size="11">business-analyst · 1 check</text>
 <rect x="908" y="110" width="232" height="48" rx="4" fill="#2d1618" stroke="#8b3a3a"/>
@@ -12,78 +12,83 @@
 <text x="920" y="147" fill="#8b949e" font-size="11">engagement scope</text>
 <line x1="40" y1="188" x2="1140" y2="188" stroke="#21262d" stroke-width="1"/>
 <text x="40" y="214" fill="#7d8590" font-size="11" letter-spacing="1.4">DISCOVER</text>
-<rect x="172" y="200" width="202" height="52" rx="4" fill="#161b22" stroke="#30363d"/>
+<rect x="172" y="200" width="203" height="52" rx="4" fill="#161b22" stroke="#30363d"/>
 <text x="186" y="221" fill="#e6edf3" font-size="13" font-weight="600">business-analyst</text>
 <text x="186" y="239" fill="#7d8590" font-size="11">business-analyst · 1 check</text>
-<rect x="388" y="200" width="175" height="52" rx="4" fill="#161b22" stroke="#30363d"/>
-<text x="402" y="221" fill="#e6edf3" font-size="13" font-weight="600">ux-researcher</text>
-<text x="402" y="239" fill="#7d8590" font-size="11">ux-researcher ×3–5 · 1 check</text>
+<rect x="389" y="200" width="216" height="52" rx="4" fill="#161b22" stroke="#30363d"/>
+<text x="403" y="221" fill="#e6edf3" font-size="13" font-weight="600">ux-researcher</text>
+<text x="403" y="239" fill="#7d8590" font-size="11">ux-researcher ×3–5 · 1 check</text>
 <rect x="908" y="202" width="232" height="48" rx="4" fill="#1c1a11" stroke="#7a6a2a"/>
 <text x="920" y="221" fill="#d4b352" font-size="11" font-weight="600">▸ shown, continues</text>
 <text x="920" y="239" fill="#8b949e" font-size="11">audience profile</text>
 <line x1="40" y1="280" x2="1140" y2="280" stroke="#21262d" stroke-width="1"/>
 <text x="40" y="306" fill="#7d8590" font-size="11" letter-spacing="1.4">RESEARCH</text>
-<rect x="172" y="292" width="211" height="52" rx="4" fill="#161b22" stroke="#30363d"/>
+<rect x="172" y="292" width="241" height="52" rx="4" fill="#161b22" stroke="#30363d"/>
 <text x="186" y="313" fill="#e6edf3" font-size="13" font-weight="600">design-researcher</text>
 <text x="186" y="331" fill="#7d8590" font-size="11">design-researcher ×3–5 · 1 check</text>
 <line x1="40" y1="372" x2="1140" y2="372" stroke="#21262d" stroke-width="1"/>
 <text x="40" y="398" fill="#7d8590" font-size="11" letter-spacing="1.4">ANALYSE</text>
-<rect x="172" y="384" width="202" height="52" rx="4" fill="#161b22" stroke="#30363d"/>
+<rect x="172" y="384" width="209" height="52" rx="4" fill="#161b22" stroke="#30363d"/>
 <text x="186" y="405" fill="#e6edf3" font-size="13" font-weight="600">business-analyst</text>
 <text x="186" y="423" fill="#7d8590" font-size="11">business-analyst · 8 checks</text>
-<rect x="388" y="384" width="220" height="52" rx="4" fill="#161b22" stroke="#30363d"/>
-<text x="402" y="405" fill="#e6edf3" font-size="13" font-weight="600">solution-architect</text>
-<text x="402" y="423" fill="#7d8590" font-size="11">solution-architect · 1 check</text>
-<rect x="622" y="384" width="193" height="52" rx="4" fill="#161b22" stroke="#30363d"/>
-<text x="636" y="405" fill="#e6edf3" font-size="13" font-weight="600">systems-analyst</text>
-<text x="636" y="423" fill="#7d8590" font-size="11">systems-analyst · 4 checks</text>
+<rect x="395" y="384" width="220" height="52" rx="4" fill="#161b22" stroke="#30363d"/>
+<text x="409" y="405" fill="#e6edf3" font-size="13" font-weight="600">solution-architect</text>
+<text x="409" y="423" fill="#7d8590" font-size="11">solution-architect · 1 check</text>
+<rect x="629" y="384" width="203" height="52" rx="4" fill="#161b22" stroke="#30363d"/>
+<text x="643" y="405" fill="#e6edf3" font-size="13" font-weight="600">systems-analyst</text>
+<text x="643" y="423" fill="#7d8590" font-size="11">systems-analyst · 4 checks</text>
 <rect x="908" y="386" width="232" height="48" rx="4" fill="#1c1a11" stroke="#7a6a2a"/>
 <text x="920" y="405" fill="#d4b352" font-size="11" font-weight="600">▸ shown, continues</text>
 <text x="920" y="423" fill="#8b949e" font-size="11">the problem, restated</text>
 <line x1="40" y1="464" x2="1140" y2="464" stroke="#21262d" stroke-width="1"/>
 <text x="40" y="490" fill="#7d8590" font-size="11" letter-spacing="1.4">DESIGN</text>
-<rect x="172" y="476" width="202" height="52" rx="4" fill="#161b22" stroke="#30363d"/>
+<rect x="172" y="476" width="209" height="52" rx="4" fill="#161b22" stroke="#30363d"/>
 <text x="186" y="497" fill="#e6edf3" font-size="13" font-weight="600">content-designer</text>
 <text x="186" y="515" fill="#7d8590" font-size="11">content-designer · 2 checks</text>
-<rect x="388" y="476" width="150" height="52" rx="4" fill="#161b22" stroke="#30363d"/>
-<text x="402" y="497" fill="#e6edf3" font-size="13" font-weight="600">design-ops</text>
-<text x="402" y="515" fill="#7d8590" font-size="11">design-ops · 2 checks</text>
-<rect x="552" y="476" width="150" height="52" rx="4" fill="#161b22" stroke="#30363d"/>
-<text x="566" y="497" fill="#e6edf3" font-size="13" font-weight="600">evaluator</text>
-<text x="566" y="515" fill="#7d8590" font-size="11">evaluator ×3–5 · 2 checks</text>
-<rect x="716" y="476" width="193" height="52" rx="4" fill="#161b22" stroke="#30363d"/>
-<text x="730" y="497" fill="#e6edf3" font-size="13" font-weight="600">product-manager</text>
-<text x="730" y="515" fill="#7d8590" font-size="11">product-manager · 2 checks</text>
-<rect x="923" y="476" width="157" height="52" rx="4" fill="#161b22" stroke="#30363d"/>
-<text x="937" y="497" fill="#e6edf3" font-size="13" font-weight="600">ui-designer</text>
-<text x="937" y="515" fill="#7d8590" font-size="11">ui-designer · 2 checks</text>
-<rect x="1094" y="476" width="157" height="52" rx="4" fill="#161b22" stroke="#30363d"/>
-<text x="1108" y="497" fill="#e6edf3" font-size="13" font-weight="600">ux-designer</text>
-<text x="1108" y="515" fill="#7d8590" font-size="11">ux-designer · 2 checks</text>
-<rect x="1265" y="476" width="157" height="52" rx="4" fill="#161b22" stroke="#30363d"/>
-<text x="1279" y="497" fill="#e6edf3" font-size="13" font-weight="600">ux-engineer</text>
-<text x="1279" y="515" fill="#7d8590" font-size="11">ux-engineer · 21 checks</text>
+<rect x="395" y="476" width="171" height="52" rx="4" fill="#161b22" stroke="#30363d"/>
+<text x="409" y="497" fill="#e6edf3" font-size="13" font-weight="600">design-ops</text>
+<text x="409" y="515" fill="#7d8590" font-size="11">design-ops · 2 checks</text>
+<rect x="580" y="476" width="196" height="52" rx="4" fill="#161b22" stroke="#30363d"/>
+<text x="594" y="497" fill="#e6edf3" font-size="13" font-weight="600">evaluator</text>
+<text x="594" y="515" fill="#7d8590" font-size="11">evaluator ×3–5 · 2 checks</text>
+<rect x="172" y="542" width="203" height="52" rx="4" fill="#161b22" stroke="#30363d"/>
+<text x="186" y="563" fill="#e6edf3" font-size="13" font-weight="600">product-manager</text>
+<text x="186" y="581" fill="#7d8590" font-size="11">product-manager · 2 checks</text>
+<rect x="389" y="542" width="177" height="52" rx="4" fill="#161b22" stroke="#30363d"/>
+<text x="403" y="563" fill="#e6edf3" font-size="13" font-weight="600">ui-designer</text>
+<text x="403" y="581" fill="#7d8590" font-size="11">ui-designer · 2 checks</text>
+<rect x="580" y="542" width="177" height="52" rx="4" fill="#161b22" stroke="#30363d"/>
+<text x="594" y="563" fill="#e6edf3" font-size="13" font-weight="600">ux-designer</text>
+<text x="594" y="581" fill="#7d8590" font-size="11">ux-designer · 2 checks</text>
+<rect x="172" y="608" width="184" height="52" rx="4" fill="#161b22" stroke="#30363d"/>
+<text x="186" y="629" fill="#e6edf3" font-size="13" font-weight="600">ux-engineer</text>
+<text x="186" y="647" fill="#7d8590" font-size="11">ux-engineer · 21 checks</text>
 <rect x="908" y="478" width="232" height="48" rx="4" fill="#2d1618" stroke="#8b3a3a"/>
 <text x="920" y="497" fill="#f0857d" font-size="11" font-weight="600">⏸ STOPS HERE</text>
 <text x="920" y="515" fill="#8b949e" font-size="11">the design system</text>
-<line x1="40" y1="556" x2="1140" y2="556" stroke="#21262d" stroke-width="1"/>
-<text x="40" y="582" fill="#7d8590" font-size="11" letter-spacing="1.4">SCOPE</text>
-<rect x="172" y="568" width="193" height="52" rx="4" fill="#161b22" stroke="#30363d"/>
-<text x="186" y="589" fill="#e6edf3" font-size="13" font-weight="600">product-manager</text>
-<text x="186" y="607" fill="#7d8590" font-size="11">product-manager · 1 check</text>
-<rect x="908" y="570" width="232" height="48" rx="4" fill="#2d1618" stroke="#8b3a3a"/>
-<text x="920" y="589" fill="#f0857d" font-size="11" font-weight="600">⏸ STOPS HERE</text>
-<text x="920" y="607" fill="#8b949e" font-size="11">PRD · scope · demo</text>
-<line x1="40" y1="648" x2="1140" y2="648" stroke="#21262d" stroke-width="1"/>
-<text x="40" y="674" fill="#7d8590" font-size="11" letter-spacing="1.4">CLOSE</text>
-<rect x="172" y="660" width="193" height="52" rx="4" fill="#161b22" stroke="#30363d"/>
-<text x="186" y="681" fill="#e6edf3" font-size="13" font-weight="600">product-manager</text>
-<text x="186" y="699" fill="#7d8590" font-size="11">product-manager · 1 check</text>
-<rect x="379" y="660" width="157" height="52" rx="4" fill="#161b22" stroke="#30363d"/>
-<text x="393" y="681" fill="#e6edf3" font-size="13" font-weight="600">ui-designer</text>
-<text x="393" y="699" fill="#7d8590" font-size="11">ui-designer · 1 check</text>
-<line x1="40" y1="740" x2="1140" y2="740" stroke="#21262d"/>
-<text x="40" y="768" fill="#7d8590" font-size="11" letter-spacing="1.4">UNDERNEATH</text>
-<text x="172" y="768" fill="#8b949e" font-size="12">core: the state schema, every gate, pica-verify, intake, the freeze and the close. Not a step; everything depends on it.</text>
-<text x="40" y="798" fill="#6e7681" font-size="11">Regenerate with scripts/flow-diagram.mjs. A diagram nobody generates is a diagram that disagrees with the code and looks authoritative doing it.</text>
+<line x1="40" y1="688" x2="1140" y2="688" stroke="#21262d" stroke-width="1"/>
+<text x="40" y="714" fill="#7d8590" font-size="11" letter-spacing="1.4">SCOPE</text>
+<rect x="172" y="700" width="196" height="52" rx="4" fill="#161b22" stroke="#30363d"/>
+<text x="186" y="721" fill="#e6edf3" font-size="13" font-weight="600">product-manager</text>
+<text x="186" y="739" fill="#7d8590" font-size="11">product-manager · 1 check</text>
+<rect x="908" y="702" width="232" height="48" rx="4" fill="#2d1618" stroke="#8b3a3a"/>
+<text x="920" y="721" fill="#f0857d" font-size="11" font-weight="600">⏸ STOPS HERE</text>
+<text x="920" y="739" fill="#8b949e" font-size="11">PRD · scope · demo</text>
+<line x1="40" y1="780" x2="1140" y2="780" stroke="#21262d" stroke-width="1"/>
+<text x="40" y="806" fill="#7d8590" font-size="11" letter-spacing="1.4">BUILD</text>
+<rect x="172" y="792" width="171" height="52" rx="4" fill="#161b22" stroke="#30363d"/>
+<text x="186" y="813" fill="#e6edf3" font-size="13" font-weight="600">ux-engineer</text>
+<text x="186" y="831" fill="#7d8590" font-size="11">ux-engineer · 1 check</text>
+<line x1="40" y1="872" x2="1140" y2="872" stroke="#21262d" stroke-width="1"/>
+<text x="40" y="898" fill="#7d8590" font-size="11" letter-spacing="1.4">CLOSE</text>
+<rect x="172" y="884" width="196" height="52" rx="4" fill="#161b22" stroke="#30363d"/>
+<text x="186" y="905" fill="#e6edf3" font-size="13" font-weight="600">product-manager</text>
+<text x="186" y="923" fill="#7d8590" font-size="11">product-manager · 1 check</text>
+<rect x="382" y="884" width="171" height="52" rx="4" fill="#161b22" stroke="#30363d"/>
+<text x="396" y="905" fill="#e6edf3" font-size="13" font-weight="600">ui-designer</text>
+<text x="396" y="923" fill="#7d8590" font-size="11">ui-designer · 1 check</text>
+<line x1="40" y1="964" x2="1140" y2="964" stroke="#21262d"/>
+<text x="40" y="992" fill="#7d8590" font-size="11" letter-spacing="1.4">UNDERNEATH</text>
+<text x="172" y="992" fill="#8b949e" font-size="12">core: the state schema, every gate, pica-verify, intake, the freeze and the close. Not a step; everything depends on it.</text>
+<text x="40" y="1022" fill="#6e7681" font-size="11">Regenerate with scripts/flow-diagram.mjs. A diagram nobody generates is a diagram that disagrees with the code and looks authoritative doing it.</text>
 </svg>

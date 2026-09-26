@@ -316,6 +316,7 @@ convention: nothing can guess that the dialog is `[role=dialog]` or that the rev
 `.devbar`. The project says so once, in `.pica/runners.json`, written the day the demo first
 serves.
 
-Skip it and the checks do not disappear — they abstain, which reads as "not applicable" and is
-counted as such in the closing report. On one project fifteen of them were running and passing
-under the demo's own npm scripts the whole time.
+Skip it and the checks do not disappear. They used to abstain, which read as "not applicable" and
+was counted as such in the closing report; on one project fifteen of them were running and passing
+under the demo's own npm scripts the whole time. Now they show as `UNSET`, are not run, and the
+run fails until the project declares them, or declares one `null` because it genuinely has none.

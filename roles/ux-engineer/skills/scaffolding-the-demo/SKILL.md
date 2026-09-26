@@ -94,6 +94,12 @@ the closing report said twenty-one of twenty-nine design checks abstained, becau
 way to fill `<servedDemo>` or guess a selector. **Evidence that exists only in a side channel is
 evidence nobody will find.**
 
+`serve.url` fills `<servedDemo>` and the `build` block fills `<buildCmd>`, `<buildCwd>` and
+`<buildOut>`, so they need not be repeated under `substitutions`. Where the project genuinely has
+none of something, no dialog, say, write it as `null`: `"<dialog>": null`. The runner leaves that
+option off the check's command line and prints the decision. A placeholder left out is not the
+same thing: that check does not run, and the run fails until somebody says.
+
 `<targetFloor>` comes from the audience profile, not from a default. `<harnessChrome>` is whatever
 the demo's own screen and state pickers live in — without it, target-size-check measures the review
 toolbar and reports a dozen defects in chrome the client never sees.

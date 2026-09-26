@@ -611,6 +611,54 @@ const M = [
      * pad 24 and gap 16 and 12, so a scale of 24 alone isolates the gap. */
     fs.writeFileSync(path.join(DIR, ".pica", "mutant-tokens.json"), JSON.stringify({ "--s-1": "24px" }));
   }],
+
+  /* ---- 3.17.0: the checks mutation-coverage-check listed as proven in neither direction ------
+   * Each of these ran on no fixture, or abstained on this one, so nothing had ever seen it fire.
+   * architecture-check was the case study in that file's own header; its integrations assertion
+   * turned out to read a key that could not exist, and was fixed in the same change as this. */
+  ["stack-named",      "solution-architect/scripts/architecture-check.mjs", [S], "architecture", (s) => { s.architecture.stack[0].choice = "TBD"; }],
+  ["nfr-met",          "solution-architect/scripts/architecture-check.mjs", [S], "architecture", (s) => { s.architecture.meets = []; }],
+  // two shapes: a contract with no failure behaviour, and a named system with no contract at all
+  ["integrations",     "solution-architect/scripts/architecture-check.mjs", [S], "architecture", (s) => { delete s.architecture.integrations[0].onFailure; }],
+  ["integrations",     "solution-architect/scripts/architecture-check.mjs", [S], "architecture", (s) => { s.integrationsNamed.push({ system: "sanctions screening", direction: "read" }); }],
+  ["environments",     "solution-architect/scripts/architecture-check.mjs", [S], "architecture", (s) => { s.architecture.environments = s.architecture.environments.slice(0, 1); }],
+  ["choice-argued",    "solution-architect/scripts/architecture-check.mjs", [S], "architecture", (s) => { delete s.architecture.stack[0].because; }],
+  ["env-purpose",      "solution-architect/scripts/architecture-check.mjs", [S], "architecture", (s) => { delete s.architecture.environments[0].purpose; }],
+  ["exclusions-named", "solution-architect/scripts/architecture-check.mjs", [S], "architecture", (s) => { s.architecture.excludes = []; }],
+  ["data-governed",    "solution-architect/scripts/architecture-check.mjs", [S], "architecture", (s) => { delete s.architecture.data[0].retention; }],
+  ["lock-in",          "solution-architect/scripts/architecture-check.mjs", [S], "architecture", (s) => { delete s.architecture.stack[0].replaceable; }],
+
+  ["unhappy-paths",    "ux-designer/scripts/flow-paths-check.mjs", [S], "flows", (s) => { s.flows[0].branches = []; }],
+  ["dead-ends",        "ux-designer/scripts/flow-paths-check.mjs", [S], "flows", (s) => { delete s.flows[0].branches[1].exit; }],
+  ["ia-evidenced",     "ux-designer/scripts/flow-paths-check.mjs", [S], "flows", (s) => { delete s.navigation.noEvidenceBecause; }],
+
+  ["pre-gate-lens",    "evaluator/scripts/pre-gate-lens-check.mjs", [S], "workPackages", (s) => { delete s.workPackages.approvals.preGateLens; }],
+  ["pre-gate-lens",    "evaluator/scripts/pre-gate-lens-check.mjs", [S], "workPackages", (s) => { s.workPackages.approvals.preGateLens.on = "2026-09-05"; }],
+  ["pre-gate-lens",    "evaluator/scripts/pre-gate-lens-check.mjs", [S], "workPackages", (s) => { s.workPackages.approvals.preGateLens.report = "docs/reviews/nobody-wrote-this.md"; }],
+
+  ["palette-declared",   "ui-designer/scripts/palette-check.mjs", [S], "directions", (s) => { delete s.directions[0].palette; }],
+  ["pairs-stated",       "ui-designer/scripts/palette-check.mjs", [S], "directions", (s) => { s.directions[0].pairs = []; }],
+  ["contrast-proved",    "ui-designer/scripts/palette-check.mjs", [S], "directions", (s) => { s.directions[0].palette.inkMuted = "#b8bcb9"; }],
+  ["tile-complete",      "ui-designer/scripts/palette-check.mjs", [S], "directions", (s) => { s.directions[0].tile = ["colour swatches", "a type specimen"]; }],
+  ["tradeoff-stated",    "ui-designer/scripts/palette-check.mjs", [S], "directions", (s) => { delete s.directions[0].servesBadly; }],
+  ["choice-recorded",    "ui-designer/scripts/palette-check.mjs", [S], "directions", (s) => { delete s.direction.recommended; }],
+  // green is reserved in finance for "settled or in credit"; spending it on a brand role is the defect
+  ["reserved-respected", "ui-designer/scripts/palette-check.mjs", [S], "directions", (s) => { s.directions[0].palette.green = "#1a7f37"; }],
+
+  // the audience's floor is the floor: raising it past the fixture's 48px controls must fire
+  ["target-size",      "ux-engineer/scripts/a11y-check.mjs", [REF, S], "capture", (s) => { s.a11y = { ...(s.a11y || {}), targetMin: 60 }; }],
+  // a viewport the specification declares and no frame was built at
+  ["parity-nominal",   "ux-engineer/scripts/parity-check.mjs", [REF, S], "capture", (s) => { s.viewports.push({ name: "watch", w: 198, h: 242, idiom: "watch", pointer: "coarse" }); }],
+  ["glossary-terms",   "content-designer/scripts/copy-check.mjs", [REF, S], "capture", (s) => { s.glossary[0].notOurTerm = ["Release"]; }],
+  // a flow whose entry file does not exist is a prototype nobody can open
+  ["flow-declared",    "ux-engineer/scripts/flow-check.mjs", ["--dir", "html", "--state", S], "flows", (s) => { s.flows[0].entry = "app-that-was-never-built.html"; }],
+  ["zoom",             "ux-engineer/scripts/shell-check.mjs", ["html/review.html", S], "@html/review.html",
+    { files: [{ file: path.join("html", "review.html"), content: fs.existsSync(path.join(DIR, "html", "review.html"))
+        ? fs.readFileSync(path.join(DIR, "html", "review.html"), "utf8")
+            .replace(/<button[^>]*data-zoom="screen"[^>]*>[^<]*<\/button>/, "")
+        : "" }] }],
+  ["raw-colour",       "ux-engineer/scripts/code-tokens-check.mjs", [SRC, "tokens/tokens.json", S], "@" + SRC,
+    { files: [{ file: path.join(SRC, "__mut-colour__.ts"), content: 'export const warning = "#ff00ff";\n' }] }],
 ];
 
 const results = [];

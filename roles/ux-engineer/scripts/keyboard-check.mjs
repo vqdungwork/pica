@@ -159,6 +159,7 @@ const pageIsDead = async (page, FRAME) => await page.evaluate((F) => {
 const browser = await chromium.launch();
 const page = await browser.newPage({ viewport: { width: VW, height: VH } });
 const findings = [];
+const unopened = [];
 const sep = (u) => (u.includes("?") ? "&" : "?");
 
 try {
@@ -211,12 +212,15 @@ try {
     }
 
     if (!OPEN) continue;
-    const opener = await page.locator(OPEN).first();
-    if (!(await opener.count())) continue;
+    /* The first VISIBLE opener: a prototype keeps hidden screens in the page, and clicking a hidden
+     * match waited thirty seconds and threw instead of reporting. A route where the opener is absent,
+     * or opens nothing, is NAMED below rather than passed over in silence. */
+    const opener = page.locator(`${OPEN} >> visible=true`).first();
+    if (!(await opener.count())) { unopened.push(q || "index"); continue; }
     const openerSig = (await active(page).catch(() => null));
-    await opener.click();
+    try { await opener.click({ timeout: 5000 }); } catch { unopened.push(q || "index"); continue; }
     await page.waitForTimeout(350);
-    if (!(await page.locator(MODAL).count())) continue;
+    if (!(await page.locator(MODAL).count())) { unopened.push(q || "index"); continue; }
 
     /* modal-traps-focus — while a sheet is open, Tab must not walk out behind it. */
     const inModal = await walk(page, 25);
@@ -249,6 +253,9 @@ try {
   await browser.close();
 }
 
+if (OPEN && unopened.length)
+  console.log(`NOTE  ${OPEN} did not open ${MODAL} on ${unopened.length} route(s) (${unopened.join(", ")}), ` +
+    "so modal-traps-focus, escape-closes and focus-returns were not measured there.");
 if (!findings.length) {
   console.log(`keyboard-check: ${routes.length || 1} route(s) operated by keyboard, 0 findings (${CHECKS.join(", ")})`);
   console.log("NOTE  this walks the page; it does not run a screen reader. Announcements, reading order and");

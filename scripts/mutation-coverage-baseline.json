@@ -1,20 +1,10 @@
 {
-  "uncovered": 15,
+  "uncovered": 5,
   "checks": [
-    "content-designer/copy-check",
     "design-ops/figma-audit.js",
     "design-ops/frame-inventory-check",
     "design-ops/geometry-diff",
     "design-ops/source-parity.js",
-    "evaluator/build-diff",
-    "evaluator/pre-gate-lens-check",
-    "solution-architect/architecture-check",
-    "ui-designer/palette-check",
-    "ux-designer/flow-paths-check",
-    "ux-engineer/a11y-check",
-    "ux-engineer/code-tokens-check",
-    "ux-engineer/flow-check",
-    "ux-engineer/parity-check",
-    "ux-engineer/shell-check"
+    "evaluator/build-diff"
   ]
 }

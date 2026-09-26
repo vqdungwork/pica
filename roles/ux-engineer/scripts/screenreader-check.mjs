@@ -81,6 +81,7 @@ const OPERABLE = new Set(["button", "link", "checkbox", "radio", "textbox", "com
 const browser = await chromium.launch();
 const page = await browser.newPage({ viewport: { width: VW, height: VH } });
 const findings = [];
+const unacted = [];
 const sep = (u) => (u.includes("?") ? "&" : "?");
 
 /** Watch every live region for the duration of `fn`, and return what would have been spoken. */
@@ -215,11 +216,18 @@ try {
     }
 
     /* dialog-unnamed, and silent-change. */
-    if (ACT && (await page.locator(ACT).count())) {
+    /* The first VISIBLE match, never the first match: a prototype keeps every screen in the page and
+     * hides all but one, so `.first()` resolved to a hidden row and click() waited thirty seconds and
+     * threw — an uncaught stack trace in place of a result. */
+    const actor = ACT ? page.locator(`${ACT} >> visible=true`).first() : null;
+    if (actor && !(await actor.count())) unacted.push(q || "index");
+    else if (actor) {
+      let clicked = true;
       const spoken = await announcements(page, async () => {
-        await page.locator(ACT).first().click();
+        try { await actor.click({ timeout: 5000 }); } catch { clicked = false; }
         await page.waitForTimeout(500);
       });
+      if (!clicked) { unacted.push(q || "index"); await client.detach().catch(() => {}); continue; }
       if (await page.locator(MODAL).count()) {
         const named = await page.locator(MODAL).first().evaluate((el) =>
           !!(el.getAttribute("aria-label") || el.getAttribute("aria-labelledby") ||
@@ -256,6 +264,9 @@ const LIMIT =
   "      in the product's own language, and whether a widget behaves the way its role promises still\n" +
   "      need a person with VoiceOver or NVDA on. A page can pass every rule here and be unusable.";
 
+if (ACT && unacted.length)
+  console.log(`NOTE  ${ACT} matched nothing visible and clickable on ${unacted.length} route(s) (${unacted.join(", ")}), ` +
+    "so silent-change and dialog-unnamed were not measured there.");
 if (!findings.length) {
   console.log(`screenreader-check: ${routes.length || 1} route(s), 0 findings (${CHECKS.join(", ")})`);
   console.log(LIMIT);

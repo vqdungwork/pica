@@ -127,6 +127,32 @@ for (const p of proposals) {
   byId.set(String(p.slot || "").toUpperCase(), p);
 }
 
+/* Where a sibling package's data file is, in either layout, and never by string sort.
+ *
+ * In the repository the packages are roles/<name>; installed, each is pica-<name>/<version>.
+ * This used to look for roles/analyst — a directory renamed to business-analyst long ago — so from
+ * the repository the sector base was never found, and in the cache it sorted versions as strings,
+ * which picks 3.16.0 over 3.16.1 and 3.2.1 over 3.15.1. A stale sector base is read silently. */
+const vcmp = (a, b) => {
+  const pa = String(a).split(/[.-]/).map((x) => (/^\d+$/.test(x) ? Number(x) : -1));
+  const pb = String(b).split(/[.-]/).map((x) => (/^\d+$/.test(x) ? Number(x) : -1));
+  for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
+    const d = (pa[i] ?? -1) - (pb[i] ?? -1);
+    if (d) return d;
+  }
+  return 0;
+};
+const siblingData = (pkg, rel) => {
+  const here = path.dirname(fileURLToPath(import.meta.url));
+  const repo = path.join(here, "..", "..", pkg, rel);
+  if (fs.existsSync(repo)) return repo;
+  const dir = path.join(here, "..", "..", "..", `pica-${pkg}`);
+  try {
+    const vs = fs.readdirSync(dir).filter((v) => fs.existsSync(path.join(dir, v, rel))).sort(vcmp);
+    return vs.length ? path.join(dir, vs[vs.length - 1], rel) : null;
+  } catch { return null; }
+};
+
 /* ---- the sector's forbidden list, for check 5 ---------------------------- *
  * Read from the analyst package when it is installed. When it is not, check 5 cannot run
  * and says so rather than passing: that distinction is the one this project exists to
@@ -137,24 +163,7 @@ const key = String((state.industry || {}).key || "").toLowerCase().trim();
 if (!key) {
   forbiddenScope = "no sector resolved, so nothing could be compared. NOT a pass";
 } else {
-  const here = path.dirname(fileURLToPath(import.meta.url));
-  const candidates = [
-    path.join(here, "..", "..", "analyst", "data", "industries.json"),
-    ...(() => {
-      /* An install puts each package in pica-<name>/<version>/, so a sibling is two
-       * levels up and one across: the layout that made every cross-package path in
-       * this repository resolve to nothing until 0.9.0. */
-      const cacheRoot = path.join(here, "..", "..", "..");
-      try {
-        return fs.readdirSync(cacheRoot)
-          .filter((d) => d === "pica-business-analyst")
-          .flatMap((d) => fs.readdirSync(path.join(cacheRoot, d))
-            .map((v) => path.join(cacheRoot, d, v, "data", "industries.json")))
-          .sort();
-      } catch { return []; }
-    })(),
-  ];
-  const found = candidates.find((c) => fs.existsSync(c));
+  const found = siblingData("business-analyst", path.join("data", "industries.json"));
   if (!found) {
     forbiddenScope = "pica-business-analyst is not installed, so the sector's forbidden list could not be read. NOT a pass";
   } else {
