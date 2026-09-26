@@ -1,5 +1,63 @@
 # Changelog
 
+## 3.1.0
+
+### The question: does pica actually test after it builds?
+
+It did not. It measured geometry and tokens, and it ran heuristic evaluators. Nothing operated the
+thing. This release adds the kinds of testing a build should pass before a client opens it, each
+researched rather than guessed at, and each proven on a real build — where every one of them found
+defects that had already shipped.
+
+**`ux-engineer/keyboard-check`** — operate the demo with Tab and nothing else. `a11y-check` asks
+five questions of a capture and every one is a property of a control *in isolation*; none is a
+property of the sequence, which is what a keyboard user experiences. The first minute of the first
+run found that Tab walked straight out of an open sheet into the list behind it — still there,
+still operable, under a scrim saying otherwise — and that Escape did nothing, so the only exit
+from the dialog was a pointer. This is the documented limit of static scanning: automated scanners
+cannot detect focus traps or broken keyboard interactions. Checks focus order within a scroll
+region, keyboard traps, modal trapping, Escape, focus return, and focus-visible *as painted*.
+
+**`ux-engineer/axe-check`** — axe-core over every route, with its own limit printed beside every
+pass: published estimates put automated coverage at roughly a third to a half of WCAG success
+criteria, and a page that passes every rule can still be unusable with a screen reader. On a build
+that had already passed every geometric check pica owns it found a `role="tablist"` that was
+asserted and never honoured (every control correct, the *claim* about them false — invisible to
+any screenshot), a scrolling list of seventeen deliberately inert rows that therefore could not be
+scrolled from a keyboard at all, an `aria-label` on a bare div that named nothing, and a contrast
+failure created by this project's own new rule: "done work recedes", implemented as `opacity:.55`
+on text. **Quiet and illegible are not the same thing, and a percentage cannot tell them apart.**
+
+**`ux-engineer/visual-baseline-check`** — a committed screenshot per route. Every other check
+asserts a property; a baseline asserts that nothing changed except what was meant to. The defects
+it catches share one shape: a one-line edit with a second consequence somewhere nobody was
+looking. Flake is designed out along the three axes that cause nearly all of it — animations
+frozen at capture, `document.fonts.ready` awaited, viewport stated rather than inherited — with a
+small per-pixel tolerance for anti-aliasing.
+
+**`evaluator/running-a-cognitive-walkthrough`** — the other half of usability inspection. pica ran
+heuristic evaluation only, which finds broad problems across a surface and never walks a task. Run
+on one real flow, the walkthrough found at step 5, question 1, that a confirm sheet arrives with
+all eleven items **already ticked**, above a sentence reading "choose the ones you actually did"
+and below one reading "this cannot be undone" — a truthful, irreversible, personal attestation,
+pre-filled in the affirmative. No heuristic is violated by that screen. It is consistent, visible,
+has feedback and prevents errors. It simply makes the wrong answer the path of least effort at
+17:30 on a phone. Both methods, always, and the report says plainly that no real user has used it.
+
+### The mutation harness learned two things it needed
+
+Registering these exposed the same gap twice. A mutation could break `.pica/state.json` and
+nothing else, then only one file at a time — so a check that compares two artefacts could not be
+proven at all, because a comparison cannot be broken by writing one side of it. Mutations now take
+`{ files: [...] }` and `base64`, since the artefact some checks read is a PNG.
+
+`visual-baseline-check` also resolved its image libraries from `process.cwd()` alone and therefore
+SKIPPED — silently, and so as a pass — the first time anything invoked it from outside the project
+directory. A plugin's check is run from both places; it resolves against the project now.
+
+Coverage: 46 checks declared (was 42), 31 with a mutation (was 27), 15 proven in neither direction
+— unchanged, because every check added here arrived with its mutation.
+
 ## 3.0.4
 
 ### The gap every previous check left open

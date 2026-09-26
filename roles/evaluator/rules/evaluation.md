@@ -208,3 +208,27 @@ shipped a final screen carrying none of them — no degraded, no stale, no error
 floor passed. `grep` for those words returned nothing. The failure paths the whole analysis worked
 to find arrived in production never having been drawn, and the only thing that noticed was an
 evaluator who read the declaration first.
+
+## Inspection is two methods, and pica only ran one
+
+<!-- enforced-by: none — judgement, not decidable by a script -->
+
+pica's evaluation fans out heuristic evaluators: each takes one lens and reports what a screen
+does wrong against established principles. That finds broad problems across a surface, and it is
+half of the standard pair. The other half is a **cognitive walkthrough**, which never asks whether
+a screen is good — it walks one task, one step at a time, and asks whether a person who has never
+seen this gets through it.
+
+They find different defects, and the difference is not academic. On one project every heuristic
+passed on a screen whose confirm sheet arrived with all eleven items **already ticked**, above a
+sentence reading "choose the ones you actually did" and below one reading "this cannot be undone".
+Nothing about that screen violates a heuristic: it is consistent, it is visible, it has feedback,
+it prevents errors. It simply pre-fills a truthful, irreversible, personal attestation in the
+affirmative, and the walkthrough found it at step 5, question 1, because that is the first moment
+a person has to make the decision the product exists to collect.
+
+Run both, and write in the report that no real user has used it. An inspection method recognises a
+large share of usability problems; it cannot tell you whether anybody wants the thing, and a
+walkthrough written up as "tested" is worse than one never run.
+
+See `running-a-cognitive-walkthrough`.

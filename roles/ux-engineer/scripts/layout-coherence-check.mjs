@@ -183,6 +183,21 @@ const IN_PAGE = ({ FRAME, LIST }) => {
   return out;
 };
 
+
+/* A route that renders nothing is a FINDING, not a skip.
+ *
+ * All three of these checks began by quietly `continue`-ing past a route with no frame. A build
+ * error took the dev server down mid-session and they reported, variously, an uncaught exception,
+ * "0 routes, 0 findings", and a clean pass — on an application that was serving HTTP 500 to every
+ * request. A check that abstains silently when the page is broken reports a pass on a broken
+ * page, which is the exact failure this project exists to prevent. */
+const pageIsDead = async (page, FRAME) => await page.evaluate((F) => {
+  if (document.querySelector("vite-error-overlay")) return "a build error overlay is on screen";
+  if (/Internal Server Error/i.test(document.body.textContent || "")) return "the server returned an error page";
+  if (F && !document.querySelector(F)) return `nothing matching "${F}" rendered`;
+  return null;
+}, FRAME);
+
 const browser = await chromium.launch();
 const page = await browser.newPage({ viewport: { width: VW, height: VH } });
 const findings = [];
@@ -197,6 +212,8 @@ try {
       await browser.close();
       process.exit(0);
     }
+    const dead = await pageIsDead(page, FRAME);
+    if (dead) { findings.push(["ragged-rows", url, `this route rendered nothing to check: ${dead}`]); continue; }
     const r = await page.evaluate(IN_PAGE, { FRAME, LIST });
     if (r.noFrame) continue;
     for (const g of r.ragged) {

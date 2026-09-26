@@ -1,7 +1,7 @@
 {
   "name": "pica-core",
   "description": "pica core: the state schema, the gates, the check runner and the orchestration every other package is built on.",
-  "version": "3.0.4",
+  "version": "3.1.0",
   "author": {
     "name": "Dung Vuong"
   },
