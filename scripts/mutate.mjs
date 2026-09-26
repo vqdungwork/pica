@@ -355,6 +355,15 @@ const M = [
         { file: path.join("__mutation-baseline__", "index.png"), base64: "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==" },
       ] }],
 
+  /* screenreader-check — a page with no heading and a button the tree cannot name. Both are
+   * invisible to every geometric check and to a screenshot: the button has a visible icon, and
+   * the page looks perfectly structured to an eye. */
+  ["no-headings", "ux-engineer/scripts/screenreader-check.mjs",
+    ["--url", "file://" + path.join(DIR, "__mutation-sr__.html"), "--frame", ".frame", "--viewport", "390x844"], "@demo",
+    { file: "__mutation-sr__.html",
+      content: '<!doctype html><html lang="vi"><meta charset="utf-8"><title>m</title>' +
+        '<div class="frame"><p>Không có tiêu đề nào</p><button><svg width="16" height="16"></svg></button></div></html>\n' }],
+
   // foundations-check
   ["contrast-floor",    "ux-engineer/scripts/foundations-check.mjs", ["html/design-system.html", "tokens/tokens.json", S], "direction", (s) => { s.audience.floors.contrastRatio = 21; }],
   ["state-covered",     "ux-engineer/scripts/foundations-check.mjs", ["html/design-system.html", "tokens/tokens.json", S], "direction", (s) => { s.direction.components[0].states.push("pressed"); }],

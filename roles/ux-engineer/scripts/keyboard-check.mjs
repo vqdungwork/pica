@@ -227,7 +227,10 @@ if (!findings.length) {
 }
 const seen = new Set();
 for (const [id, where, detail] of findings) {
-  const k = id + detail;
+  // The route belongs in the key. Keying on the message alone collapsed one finding per
+  // route into one finding total, so a defect on nine screens was reported as a defect on
+  // one — and the eight that went unmentioned looked fixed.
+  const k = id + where + detail;
   if (seen.has(k)) continue;
   seen.add(k);
   console.error(`FINDING  [${id}] ${where}\n         ${detail}`);

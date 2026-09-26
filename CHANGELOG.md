@@ -1,5 +1,46 @@
 # Changelog
 
+## 3.1.1
+
+### A third accessibility channel, and it was not empty
+
+3.1.0 added axe (reads the DOM) and a keyboard walk (operates it). Both passed clean on a build,
+and a third channel was still untouched: the **accessibility tree** — the structure VoiceOver,
+NVDA and JAWS actually consume — and what a **live region** would announce.
+
+**`ux-engineer/screenreader-check`** reads both. On that clean build it found:
+
+- **The product exposed no heading at all.** Most screen reader users move by heading first; the
+  rotor had nothing to land on, so the only route through eleven rows was to read them one at a
+  time from the top. Nothing looks wrong on screen — the group labels *are* visually headings,
+  they were simply `div`s.
+- **The one irreversible action in the product completed and announced nothing.** It drew a
+  receipt. A screen reader user pressed it and heard silence — the same defect as a confirm bar
+  vanishing without a trace, in the channel nobody had checked.
+
+Three corrections while building it, each the same lesson in a new coat. It matched controls to
+tree nodes **by text** and produced confident nonsense — a row button whose `textContent` is an
+avatar initial plus a name plus a project does not equal the platform's computed name, so two
+correct rows were reported missing from the tree; it resolves by `backendNodeId` now. It read the
+**whole document**, and filed the review harness's own viewport `<select>` as an unnamed product
+combobox. And it compared reading order **across a scroll region and its pinned chrome**, which is
+the third time a check in this repo has had to learn that pinned chrome has no place in a scrolling
+reading order.
+
+A fourth, found last: all three new checks **deduplicated findings by message alone**, so one
+defect on nine routes was reported as one defect on one route — and the eight that went unmentioned
+looked fixed. The route is part of the key now.
+
+### It is not a screen reader, and it says so
+
+Driving VoiceOver needs interactive permission and takes over the machine's audio and focus. Ask
+before doing that to somebody. Until they say yes, report the tree as the tree and the gap as a
+gap: whether an announcement is the *right* one, whether the reading order makes sense in the
+product's own language, and whether a widget behaves the way its role promises all still need a
+person with the software on.
+
+Coverage: 47 checks declared, 32 with a mutation, 15 proven in neither direction.
+
 ## 3.1.0
 
 ### The question: does pica actually test after it builds?
