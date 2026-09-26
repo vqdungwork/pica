@@ -33,12 +33,45 @@ let state;
 try { state = JSON.parse(readFileSync(file, "utf8")); }
 catch (e) { console.error(`model-diagram: cannot read ${file} — ${e.message}`); process.exit(1); }
 
+/* The reader's own language, from the project's own glossary.
+ *
+ * Every diagram drew `work item`, `assignee`, `unconfirmed`, `r`, `cru` — English nouns and CRUD
+ * letters — inside a Vietnamese document, for a reader who knows the business and not the
+ * notation. The translations were already in `state.glossary` (`term` → `vi`) and no diagram had
+ * ever looked at them. A permissions matrix reading `cru` with no key anywhere on the page is not
+ * a dense notation, it is an unanswered question printed twenty times.
+ *
+ * The English stays in brackets where a developer will need it, because both readers exist. */
 const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 const arr = (v) => (Array.isArray(v) ? v : []);
 const F = `font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif"`;
 
 /* One palette, read from the project's own tokens when it has them: a diagram that invents its
  * own colours is a second design system nobody approved. */
+const GLOSS = new Map(arr(state.glossary).filter((g) => g.vi).map((g) => [String(g.term).toLowerCase(), g.vi]));
+const GLOSS_SORTED = [...GLOSS.entries()].sort((a, b) => b[0].length - a[0].length);
+const vi = (t) => {
+  const raw = String(t ?? "").trim();
+  const hit = GLOSS.get(raw.toLowerCase());
+  if (hit) return hit;
+  /* A compound the glossary does not hold whole — "snapshot state group" — still contains a term
+   * it does, and leaving it English because the exact string is missing reads as one translation
+   * somebody forgot. Longest match first, so "state group" wins over "state". */
+  for (const [term, viet] of GLOSS_SORTED) {
+    const rx = new RegExp(`\\b${term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "i");
+    if (rx.test(raw)) return raw.replace(rx, viet);
+  }
+  return raw;
+};
+/* CRUD letters, written out. `c r u d` is four words a reader already has. */
+const CRUD = { c: "tạo", r: "xem", u: "sửa", d: "xoá" };
+const crud = (v) => {
+  const t = String(v ?? "").trim();
+  if (!t) return "";
+  if (!/^[crud]+$/i.test(t)) return t;
+  return t.toLowerCase().split("").map((ch) => CRUD[ch]).filter(Boolean).join(" · ");
+};
+
 const T = state.direction?.tokens || {};
 const C = {
   bg:     "transparent",
@@ -96,7 +129,7 @@ function stateDiagram(entity) {
   const L = [`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" ${F} role="img" aria-label="${esc(entity.entity || entity.name)} lifecycle">`];
   L.push(`<defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="${C.line}"/></marker>
   <marker id="x" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="${C.warn}"/></marker></defs>`);
-  L.push(`<text x="20" y="30" font-size="15" font-weight="700" fill="${C.ink}">${esc(entity.entity || entity.name)}</text>`);
+  L.push(`<text x="20" y="30" font-size="15" font-weight="700" fill="${C.ink}">${esc(vi(entity.entity || entity.name))}</text>`);
   L.push(`<text x="20" y="50" font-size="12" fill="${C.muted}">${states.length} trạng thái · ${arr(entity.neverTransitions).length} chuyển đổi bị cấm</text>`);
 
   for (const s of states) {
@@ -126,9 +159,9 @@ function stateDiagram(entity) {
   }
   for (const s of states) {
     const p = pos.get(s.name);
-    const label = wrap(s.name, 14, 2);
+    const label = wrap(vi(s.name), 14, 2);
     const w = Math.max(88, label[0].length * 8 + 26), h = 20 + label.length * 15;
-    L.push(`<g data-node="${esc(s.name)}" tabindex="0" role="button" aria-label="${esc(s.name)}">`);
+    L.push(`<g data-node="${esc(s.name)}" tabindex="0" role="button" aria-label="${esc(vi(s.name))}">`);
     L.push(`<rect x="${(p.x - w / 2).toFixed(1)}" y="${(p.y - h / 2).toFixed(1)}" width="${w}" height="${h}" rx="6" fill="${C.card}" stroke="${C.line}"/>`);
     label.forEach((ln, i) =>
       L.push(`<text x="${p.x.toFixed(1)}" y="${(p.y - h / 2 + 15 + i * 15).toFixed(1)}" text-anchor="middle" font-size="12" font-weight="600" fill="${C.ink}">${esc(ln)}</text>`));
@@ -162,7 +195,7 @@ function permissionsDiagram(rp) {
   L.push(`<text x="20" y="50" font-size="12" fill="${C.muted}">${roles.length} vai trò × ${objects.length} đối tượng — mọi ô phải có câu trả lời</text>`);
   objects.forEach((o, i) => {
     const x = left + i * colW + colW / 2;
-    wrap(o, 17, 2).forEach((ln, k) =>
+    wrap(vi(o), 17, 2).forEach((ln, k) =>
       L.push(`<text x="${x}" y="${top - 26 + k * 14}" text-anchor="middle" font-size="11" font-weight="600" fill="${C.muted}">${esc(ln)}</text>`));
   });
   roles.forEach((r, ri) => {
@@ -177,13 +210,13 @@ function permissionsDiagram(rp) {
        * gap to chase and the other is a decision to respect. */
       const unanswered = v == null;
       const none = !unanswered && String(v).trim() === "";
-      const txt = unanswered ? "?" : none ? "không có quyền" : Array.isArray(v) ? v.join(" ") : String(v);
+      const txt = unanswered ? "?" : none ? "không có quyền" : crud(Array.isArray(v) ? v.join("") : v);
       const empty = unanswered;
       L.push(`<rect x="${x + 4}" y="${y + 3}" width="${colW - 8}" height="${rowH - 6}" rx="5" fill="${empty ? "none" : C.card}" stroke="${empty ? C.warn : C.line}" ${empty ? 'stroke-dasharray="4 3"' : ""}/>`);
       L.push(`<text x="${x + colW / 2}" y="${y + 21}" text-anchor="middle" font-size="11" fill="${unanswered ? C.warn : none ? C.muted : C.ink}" font-style="${none ? "italic" : "normal"}">${esc(wrap(txt, 18, 1)[0])}</text>`);
     });
   });
-  L.push(`<text x="20" y="${H - 16}" font-size="11" fill="${C.muted}">“?” viền đứt = chưa ai trả lời. “không có quyền” = đã trả lời, và câu trả lời là không. Hai thứ khác nhau.</text>`);
+  L.push(`<text x="20" y="${H - 16}" font-size="11" fill="${C.muted}">“?” viền đứt = chưa ai trả lời. “không có quyền” = đã trả lời, và câu trả lời là không.</text>`);
   L.push("</svg>");
   return L.join("\n");
 }
@@ -369,10 +402,14 @@ function erdDiagram(entities) {
     const own = owned(e);
     L.push(`<g data-node="${esc(e.entity)}" tabindex="0" role="button" aria-label="${esc(e.entity)}">`);
     L.push(`<rect x="${b.x}" y="${b.y}" width="${b.w}" height="${b.h}" rx="8" fill="${own ? "#eaf2f8" : C.card}" stroke="${own ? C.accent : C.line}" stroke-width="${own ? 1.8 : 1.2}"/>`);
-    L.push(`<text x="${b.x + 14}" y="${b.y + 24}" font-size="13.5" font-weight="700" fill="${C.ink}">${esc(e.entity)}</text>`);
+    L.push(`<text x="${b.x + 14}" y="${b.y + 24}" font-size="13.5" font-weight="700" fill="${C.ink}">${esc(vi(e.entity))}</text>`);
+    if (vi(e.entity) !== e.entity) L.push(`<text x="${b.x + b.w - 14}" y="${b.y + 24}" text-anchor="end" font-size="10" fill="${C.muted}" font-family="ui-monospace,Menlo,monospace">${esc(e.entity)}</text>`);
     L.push(`<text x="${b.x + 14}" y="${b.y + 41}" font-size="10.5" fill="${own ? C.accent : C.muted}">${own ? "app này sở hữu" : "bản soi từ 8project — chỉ đọc"}</text>`);
     arr(e.attributes).slice(0, 6).forEach((a, i) => {
-      const nm = typeof a === "string" ? a : (a.name || "");
+      // An attribute that names another entity is a reference to it, so it reads in the same
+      // language the entity does. A box headed "xác nhận cuối ngày" listing a field called
+      // "work item" reads as one translation somebody forgot.
+      const nm = vi(typeof a === "string" ? a : (a.name || ""));
       L.push(`<text x="${b.x + 14}" y="${b.y + 60 + i * 16}" font-size="11" fill="${C.muted}">${esc(String(nm).slice(0, 34))}</text>`);
     });
     if (arr(e.attributes).length > 6) {

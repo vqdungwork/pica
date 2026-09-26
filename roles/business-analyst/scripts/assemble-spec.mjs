@@ -34,6 +34,26 @@ catch (e) { console.error(`assemble-spec: cannot read ${file} — ${e.message}`)
 
 const arr = (v) => (Array.isArray(v) ? v : []);
 const esc = (s) => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+/* The reader's own language, and their own voice.
+ *
+ * Three habits of an analyst's notes survive into a client's document unless something removes
+ * them: English nouns for entities the glossary already translates; text cut mid-word because a
+ * slice was easier than a word boundary; and EMPHASIS BY SHOUTING, which is how a register gets
+ * read back by someone who wrote it and not how anyone wants to be spoken to. */
+const GLOSS = arr(S.glossary).filter((g) => g.vi && g.term)
+  .sort((a, b) => String(b.term).length - String(a.term).length);
+const toVi = (text) => {
+  let out = String(text ?? "");
+  for (const g of GLOSS) {
+    out = out.replace(new RegExp(`\\b${String(g.term).replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "gi"), g.vi);
+  }
+  return out;
+};
+/* Shouting, turned back into emphasis. An id keeps its capitals; a word does not. */
+const unshout = (text) => String(text ?? "").replace(/\b(?![A-Z]{2,4}-\d)[A-ZÀ-Ỹ]{4,}(?:\s+[A-ZÀ-Ỹ]{2,})*\b/g,
+  (m) => m.charAt(0) + m.slice(1).toLowerCase());
+const human = (text) => unshout(toVi(text));
+
 const bare = (x) => String(x).includes(":") ? String(x).split(":").pop() : String(x);
 const ids = (v) => arr(v).map((x) => (typeof x === "string" ? x : x?.id)).filter(Boolean).map(bare);
 
@@ -97,7 +117,10 @@ const DOC_META = {
 };
 const docCount = (d) => built.filter((r) => r.docs.includes(d)).reduce((n, r) => n + r.items.length, 0);
 
-const title = arg("--title", `${S.problem?.whose ? "" : ""}Đặc tả — ${esc(S.field ?? "dự án")}`);
+/* The product's own name, never the sector key. "Đặc tả — professional services" is a machine
+ * field printed as a headline, and the first thing a reader meets: they look for their own
+ * product and find an industry classification. */
+const title = arg("--title", S.specTitle || arr(S.applications).map((a) => a.name).join(" & ") || "Đặc tả");
 const openCount = built.reduce((n, r) => n + r.items.filter((i) => i.open).length, 0);
 
 /* The chain drawn as a chain. The first version made every id a link and called that "the matrix
@@ -265,7 +288,7 @@ section.part{margin-bottom:58px;scroll-margin-top:16px}
 .lane-h .n{font:500 11.5px/1 var(--mono);color:var(--ink3)}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px}
 .step{background:var(--card);border:1px solid var(--rule);border-left:3px solid var(--rule);border-radius:9px;padding:11px 13px;min-height:84px;display:flex;flex-direction:column;gap:5px}
-.step .no{font:500 10px/1 var(--mono);color:var(--ink3);letter-spacing:.04em}
+.step .no{font:500 9.5px/1 var(--sans);color:var(--ink3);letter-spacing:.06em;text-transform:uppercase}
 .step .nm{font-size:13.5px;line-height:1.38;font-weight:500}
 .step .tail{margin-top:auto;font-size:11.5px;color:var(--ink3);display:flex;align-items:center;gap:6px}
 .step.k-mirror{border-left-color:var(--mirror);background:var(--mirror-bg)}
@@ -341,9 +364,10 @@ details.app tr[data-open]{background:var(--open-bg)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
 </style></head><body><div class="wrap">
 
-<p class="eyebrow">${esc(S.field ?? "Dự án")} · tài liệu tham chiếu</p>
+<p class="eyebrow">Tài liệu tham chiếu · ${esc(S.applications?.length ?? 2)} ứng dụng</p>
 <h1>${esc(title)}</h1>
-<p class="deck">${esc(String(S.asIs || S.problem?.statement || "").slice(0, 300))}</p>
+${(S.specLede || S.problem?.statement || S.asIs || "").split("\n\n").map((para) =>
+    `<p class="deck">${esc(para).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>")}</p>`).join("")}
 <p class="meta"><b>Phạm vi</b> ${arr(S.applications).map((a) => esc(a.name)).join(" · ") || "—"} &nbsp;·&nbsp; <b>Trạng thái</b> ${S.scopeFrozen ? "đã chốt phạm vi" : "chưa chốt phạm vi"}${openCount ? ` · ${openCount} điểm chưa xác nhận` : ""}</p>
 <hr>
 
@@ -361,14 +385,28 @@ ${journey.length ? `<section class="part">
   <p class="eyebrow">Phần 1</p>
   <h2>Một ngày chạy thế nào</h2>
   <p class="deck">${jNodes.length} bước, chia theo ai làm. Xám là việc 8project đã làm sẵn; xanh là việc app này thêm vào; ô-liu là việc con người làm và không hệ thống nào chạm tới.</p>
+  <p class="deck" style="font-size:14px">Thẻ ghi <b>bắt đầu</b> là chỗ một chuỗi bắt đầu — không phải bước đầu tiên của mọi thứ. Các thẻ cùng <b>giai đoạn</b> xảy ra song song, không theo thứ tự trước sau.</p>
   ${journey.map((g) => `<div class="lane">
     <div class="lane-h"><span class="who">${esc(g.lane.name || g.lane.id)}</span><span class="n">${g.steps.length} bước</span></div>
-    <div class="grid">${g.steps.map((n, i) => {
+    <div class="grid">${g.steps.map((n) => {
       const nx = nextOf(n.id);
+      /* The number is the STAGE, not the position in the list. Numbering cards 01..07 down a lane
+         told the reader that "việc bị xoá trong 8project" happens after "việc được tạo" and before
+         "việc bị gán lại" — three independent triggers, presented as steps two, three and four of
+         a process. Things that can happen at the same time share a number, and the ones that
+         start a chain say so. */
+      const dep = depthOf.get(n.id) ?? 0;
       return `<div class="step ${KIND[g.kind].css}${isGateway(n) ? " gate" : ""}">
-        <span class="no">${String(i + 1).padStart(2, "0")}</span>
+        <span class="no">${dep === 0 ? "bắt đầu" : `giai đoạn ${dep}`}</span>
         <span class="nm">${esc(String(n.name || n.id).replace(/\s*\([^)]*\)\s*$/, ""))}</span>
-        ${nx.length ? `<span class="tail">→ ${esc(nx.map((x) => String(x.name || x.id).split(/[,(—-]/)[0].trim()).slice(0, 2).join(" · ").slice(0, 44))}</span>` : `<span class="tail">kết thúc</span>`}
+        ${nx.length ? (() => {
+          // One next step, written out whole, and a count for the rest. Two half-labels joined by
+          // a middot and both ending in "…" is not a summary of where this leads; it is two
+          // sentences broken in the middle, and every branching card carried a pair of them.
+          const first = String(nx[0].name || nx[0].id).split(/[,(—-]/)[0].trim();
+          const more = nx.length - 1;
+          return `<span class="tail">→ ${esc(first)}${more ? ` <span style="color:var(--ink3)">+${more} nhánh nữa</span>` : ""}</span>`;
+        })() : `<span class="tail">kết thúc</span>`}
       </div>`;
     }).join("")}</div>
   </div>`).join("")}
@@ -384,7 +422,7 @@ ${arr(S.discovery?.segments).length ? `<section class="part">
     return `<div class="seg">
       <div class="who">${esc(sg.name)}</div>
       <div class="jtbd">${esc(sg.jobToBeDone || "")}</div>
-      ${pains.map((pp) => `<div class="pain"><span class="pid">${esc(pp.id)}</span><span>${esc(String(pp.statement).slice(0, 150))}</span></div>`).join("")}
+      ${pains.map((pp) => `<div class="pain"><span class="pid">${esc(pp.id)}</span><span>${esc(human(String(pp.statement)).slice(0, 150))}</span></div>`).join("")}
     </div>`;
   }).join("")}
   </div>
@@ -406,7 +444,7 @@ ${arr(S.screens).length ? `<section class="part">
     <span class="id">${esc(s.id)}</span>
     <span class="nm">${esc(s.name)}</span>
     <span class="sts">${arr(s.states).length} trạng thái · ${esc(s.application || "")}</span>
-    <ul>${screenKinds(s).slice(0, 4).map((x) => `<li><span class="dot ${KIND[x.kind].css}"></span><span>${esc(String(x.text).slice(0, 62))}${x.computed ? " <i>(tính ra)</i>" : ""}</span></li>`).join("")}</ul>
+    <ul>${screenKinds(s).slice(0, 4).map((x) => `<li><span class="dot ${KIND[x.kind].css}"></span><span>${esc(human(x.text).replace(/\s*—\s*lọc theo [A-Z]{2,4}-\d+/i, "").slice(0, 64))}${x.computed ? " <i>(tính ra)</i>" : ""}</span></li>`).join("")}</ul>
   </div>`).join("")}
   </div>
 </section>` : ""}
@@ -437,7 +475,7 @@ ${diagrams.length ? `<section class="part">
   <h2>Vòng đời và quyền</h2>
   <p class="deck">Một việc đi qua những trạng thái nào, ai được làm gì. Bấm một trạng thái để chỉ xem đường đi của nó.</p>
   ${diagrams.filter((d) => !["process", "erd", "usecases"].includes(d.name)).map((d) => {
-    const label = d.name.startsWith("state-") ? `Vòng đời · ${d.name.replace(/^state-/, "").replace(/-/g, " ")}`
+    const label = d.name.startsWith("state-") ? `Vòng đời · ${human(d.name.replace(/^state-/, "").replace(/-/g, " "))}`
       : d.name === "permissions" ? "Ma trận quyền · vai trò × đối tượng" : d.name;
     return `<figure class="fig" data-label="${esc(label)}">${d.svg}<figcaption>${esc(label)}</figcaption>
       <div class="fbar"><span class="fname"></span><button data-back>← trước</button><button data-fwd>sau →</button><button data-clear>bỏ chọn</button></div></figure>`;
@@ -448,7 +486,7 @@ ${openThings.length ? `<section class="part">
   <p class="eyebrow">Phần 6</p>
   <h2>Chưa chốt</h2>
   <p class="deck">Ghi ra thay vì điền đại. Mọi thứ đứng trên những điểm này đều là tạm.</p>
-  <div class="openlist">${openThings.map((o) => `<div class="openc"><span class="id">${esc(o.id)}</span><p>${esc(String(o.t).slice(0, 240))}</p></div>`).join("")}</div>
+  <div class="openlist">${openThings.map((o) => `<div class="openc"><span class="id">${esc(o.id)}</span><p>${esc(human(String(o.t)).slice(0, 240))}</p></div>`).join("")}</div>
 </section>` : ""}
 
 ${appendix.length ? `<section class="part">
@@ -458,7 +496,7 @@ ${appendix.length ? `<section class="part">
   ${appendix.map((reg) => `<details class="app"><summary>${esc(reg.title)}<span class="n">${reg.items.length}</span></summary>
     <table><tbody>${reg.items.map((it) => `<tr id="${esc(it.id)}"${it.open ? " data-open" : ""}>
       <td><b>${esc(it.id)}</b></td>
-      <td>${esc(String(it.body).slice(0, 400))}${arr(it.refs).filter((r) => defined.has(r)).length ? `<br><span style="font:500 10.5px/1.6 var(--mono);color:var(--ink3)">${arr(it.refs).filter((r) => defined.has(r)).map(esc).join(" · ")}</span>` : ""}</td>
+      <td>${esc(human(String(it.body)).slice(0, 400))}${arr(it.refs).filter((r) => defined.has(r)).length ? `<br><span style="font:500 10.5px/1.6 var(--mono);color:var(--ink3)">${arr(it.refs).filter((r) => defined.has(r)).map(esc).join(" · ")}</span>` : ""}</td>
     </tr>`).join("")}</tbody></table></details>`).join("")}
 </section>` : ""}
 
