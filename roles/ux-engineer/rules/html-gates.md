@@ -314,3 +314,17 @@ read a word.
 Sweep from 320 to 2560. `scrollWidth === clientWidth` at **every** width, not at the two you
 declared. A fix that makes a number read zero at one width and hard-codes the breakage everywhere
 else is worse than the defect, because now it is invisible.
+
+## A rule in the stylesheet is not a rule on the screen
+
+<!-- enforced-by: none — render and look -->
+
+`.list > * + *` and `.lrow-btn` have the same specificity, and the button reset was written later
+in the file, so a row divider that existed in the source, passed review as source, and would be
+quoted in any summary of what was built, drew nothing. Reading the CSS confirmed the divider was
+there. Only rendering showed it was not.
+
+This is the general shape: a declaration losing a cascade it was never checked against fails
+**silently and selectively** — present at some call sites, absent at others, invisible to every
+check that reads files instead of pixels. Whenever a style is asserted as done, the evidence is the
+rendered pixel or the computed value from the live element, never the line in the stylesheet.

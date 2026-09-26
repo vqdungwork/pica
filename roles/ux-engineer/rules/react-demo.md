@@ -159,3 +159,19 @@ a number someone worked out.
 A phone-shaped frame also makes the review honest in a way a tall column cannot: a client opening
 the demo sees what a person holding a phone sees, instead of a layout they have to imagine cropped.
 
+
+## An unrecognised URL parameter must fail loudly, or the reviewer reviews the wrong screen
+
+<!-- enforced-by: url-param-guard -->
+
+A demo addressed by URL is also **reviewed** by URL, and a silently-ignored parameter hands the
+reviewer a confident screenshot of the wrong thing. `?viewport=mobile` where the app reads `vp`
+returned the desktop frame, at a narrow window, with no warning — and it was captured, looked at,
+and reasoned about as if it were the phone. In one engagement that happened three times, twice
+while the reviewer was specifically checking a claim that mobile had never been reviewed. The
+screenshot is not evidence of the state you asked for; it is evidence of the state the app chose.
+
+Unknown parameters are a hard error: render a full-bleed panel naming the parameter and listing
+the ones that exist, and log it. An unknown **value** for a known parameter is the same defect —
+`state=sucess` must not fall through to the default. The cost of a loud failure is one re-run; the
+cost of a quiet one is a review of a screen nobody asked to see, presented as fact.
