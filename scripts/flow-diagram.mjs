@@ -95,9 +95,29 @@ const STOPS = [
 ];
 
 /* ---- render -------------------------------------------------------------- */
-const W = 1180, LANE_H = 92, PAD = 40, TOP = 96;
-const H = TOP + used.length * LANE_H + 96;
+const W = 1180, PAD = 40, TOP = 96, BOX_H = 52, ROW_H = 66, LANE_PAD = 26, STOP_W = 232;
 const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+const subOf = (p) => `${p.agent ? `${p.agent.replace("pica-", "")}${p.fanOut ? " ×3–5" : ""}` : "main thread"} · ${p.checks} check${p.checks === 1 ? "" : "s"}`;
+// wide enough for whichever line is longer: the name at 13px bold, or the subtitle at 11px
+const boxW = (p) => Math.ceil(Math.max(150, p.name.length * 9 + 58, subOf(p).length * 6.4 + 36));
+
+/* Boxes WRAP inside their lane. They used to run on in one line, and when design grew to seven
+   packages the row ran under the stop card and off the right edge of the drawing: a generated
+   diagram that --check called current while half a lane was unreadable. */
+const lanes = used.map((phase) => {
+  const stop = STOPS.find((s) => s.after === phase);
+  const right = stop ? W - PAD - STOP_W - 14 : W - PAD;
+  const rows = [[]];
+  let x = PAD + 132;
+  for (const p of visible(phase)) {
+    const w = boxW(p);
+    if (x + w > right && rows[rows.length - 1].length) { rows.push([]); x = PAD + 132; }
+    rows[rows.length - 1].push({ p, x, w });
+    x += w + 14;
+  }
+  return { phase, stop, rows, h: rows.length * ROW_H + LANE_PAD };
+});
+const H = TOP + lanes.reduce((a, l) => a + l.h, 0) + 96;
 
 const L = [];
 L.push(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">`);
@@ -105,33 +125,31 @@ L.push(`<rect width="${W}" height="${H}" fill="#0d1117"/>`);
 L.push(`<text x="${PAD}" y="46" fill="#e6edf3" font-size="22" font-weight="600">pica ${manifests.length} packages · ${manifests.reduce((a, j) => a + (((j.owns || {}).agents || []).length), 0)} agents · ${used.length} phases</text>`);
 L.push(`<text x="${PAD}" y="70" fill="#8b949e" font-size="13">Generated from the package manifests. Lanes are phases, boxes are packages, stops are where a human decides.</text>`);
 
-used.forEach((phase, i) => {
-  const y = TOP + i * LANE_H;
+let y = TOP;
+for (const { phase, stop, rows, h } of lanes) {
   L.push(`<line x1="${PAD}" y1="${y}" x2="${W - PAD}" y2="${y}" stroke="#21262d" stroke-width="1"/>`);
   L.push(`<text x="${PAD}" y="${y + 26}" fill="#7d8590" font-size="11" letter-spacing="1.4">${esc(phase.toUpperCase())}</text>`);
 
-  const inPhase = visible(phase);
-  let x = PAD + 132;
-  for (const p of inPhase) {
-    const w = Math.max(150, p.name.length * 9 + 58);
-    L.push(`<rect x="${x}" y="${y + 12}" width="${w}" height="52" rx="4" fill="#161b22" stroke="#30363d"/>`);
-    L.push(`<text x="${x + 14}" y="${y + 33}" fill="#e6edf3" font-size="13" font-weight="600">${esc(p.name)}</text>`);
-    const sub = p.agent ? `${p.agent.replace("pica-", "")}${p.fanOut ? " ×3–5" : ""}` : "main thread";
-    L.push(`<text x="${x + 14}" y="${y + 51}" fill="#7d8590" font-size="11">${esc(sub)} · ${p.checks} check${p.checks === 1 ? "" : "s"}</text>`);
-    x += w + 14;
-  }
+  rows.forEach((row, r) => {
+    const by = y + 12 + r * ROW_H;
+    for (const { p, x, w } of row) {
+      L.push(`<rect x="${x}" y="${by}" width="${w}" height="${BOX_H}" rx="4" fill="#161b22" stroke="#30363d"/>`);
+      L.push(`<text x="${x + 14}" y="${by + 21}" fill="#e6edf3" font-size="13" font-weight="600">${esc(p.name)}</text>`);
+      L.push(`<text x="${x + 14}" y="${by + 39}" fill="#7d8590" font-size="11">${esc(subOf(p))}</text>`);
+    }
+  });
 
-  const stop = STOPS.find((s) => s.after === phase);
   if (stop) {
     const hard = stop.kind === "hard";
-    const sx = W - PAD - 232;
-    L.push(`<rect x="${sx}" y="${y + 14}" width="232" height="48" rx="4" fill="${hard ? "#2d1618" : "#1c1a11"}" stroke="${hard ? "#8b3a3a" : "#7a6a2a"}"/>`);
+    const sx = W - PAD - STOP_W;
+    L.push(`<rect x="${sx}" y="${y + 14}" width="${STOP_W}" height="48" rx="4" fill="${hard ? "#2d1618" : "#1c1a11"}" stroke="${hard ? "#8b3a3a" : "#7a6a2a"}"/>`);
     L.push(`<text x="${sx + 12}" y="${y + 33}" fill="${hard ? "#f0857d" : "#d4b352"}" font-size="11" font-weight="600">${hard ? "⏸ STOPS HERE" : "▸ shown, continues"}</text>`);
     L.push(`<text x="${sx + 12}" y="${y + 51}" fill="#8b949e" font-size="11">${esc(stop.label)}</text>`);
   }
-});
+  y += h;
+}
 
-const yEnd = TOP + used.length * LANE_H;
+const yEnd = y;
 L.push(`<line x1="${PAD}" y1="${yEnd}" x2="${W - PAD}" y2="${yEnd}" stroke="#21262d"/>`);
 L.push(`<text x="${PAD}" y="${yEnd + 28}" fill="#7d8590" font-size="11" letter-spacing="1.4">UNDERNEATH</text>`);
 L.push(`<text x="${PAD + 132}" y="${yEnd + 28}" fill="#8b949e" font-size="12">core: the state schema, every gate, pica-verify, intake, the freeze and the close. Not a step; everything depends on it.</text>`);

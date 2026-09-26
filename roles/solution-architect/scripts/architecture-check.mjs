@@ -83,11 +83,17 @@ for (const n of nfrs) {
 
 /* 3. INTEGRATIONS */
 const ints = Array.isArray(arch.integrations) ? arch.integrations : [];
-const declared = Array.isArray(state.domainConstraints?.integrations)
-  ? state.domainConstraints.integrations : [];
+/* The systems the specification names. This used to read `domainConstraints.integrations`, but
+ * domainConstraints is an ARRAY — domain-check holds it to one — so the property was always
+ * undefined, the scope was always zero, and this assertion could not fire on any valid state. It
+ * reads `integrationsNamed`, the key the context diagram already draws its external systems from,
+ * so the diagram and the gate are about the same list. */
+const declared = Array.isArray(state.integrationsNamed) ? state.integrationsNamed
+  : Array.isArray(state.domainConstraints?.integrations) ? state.domainConstraints.integrations : [];
 let uncontracted = 0;
 for (const sys of declared) {
-  const name = typeof sys === "string" ? sys : sys?.name;
+  // `system` is the field in integrationsNamed and in the contracts; `name` is the older spelling
+  const name = typeof sys === "string" ? sys : (sys?.system ?? sys?.name);
   const c = ints.find((i) => i?.system === name);
   if (!c || EMPTY(c.protocol) || EMPTY(c.onFailure)) { uncontracted++; add("integrations", name || "(unnamed)",
     "no contract: needs direction, protocol, and what happens when it is unavailable"); }

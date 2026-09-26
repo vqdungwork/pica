@@ -57,8 +57,8 @@
 
     /* A task is not a place: inside one, the tab bar goes away rather than inviting the
      * user to abandon what they started. */
-    const nav = document.querySelector("[data-navbar]");
-    if (nav) nav.hidden = Boolean(cur && cur.hasAttribute("data-flow"));
+    for (const nav of document.querySelectorAll("[data-navbar]"))
+      nav.hidden = Boolean(cur && cur.hasAttribute("data-flow"));
 
     /* Back exists only when there is somewhere to go back to, and it says where. */
     for (const b of document.querySelectorAll("[data-popback]")) {
@@ -67,13 +67,30 @@
       const label = prev && byId(prev) ? (byId(prev).dataset.title || prev) : "";
       if (label) b.setAttribute("aria-label", `Back to ${label}`);
     }
-    document.documentElement.dataset.scr = id;
+    /* data-current, never data-scr: an <html data-scr> is itself a screen to every
+     * `[data-scr]` query in this file, so after the first move byId() returned the document
+     * root and paint() hid it. The prototype went blank on its second click, and every check
+     * still passed, because each loads a route fresh and none clicks twice. */
+    document.documentElement.dataset.current = id;
   }
+
+  /* A screen that changes without a word is a screen change a screen-reader user never hears
+   * about: the click "did nothing". One polite region, told the new screen's title on every move. */
+  const live = document.createElement("div");
+  live.setAttribute("aria-live", "polite");
+  live.setAttribute("role", "status");
+  live.style.cssText = "position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap";
+  document.body.append(live);
+  const announce = () => {
+    const cur = byId(stack[stack.length - 1] || HOME);
+    live.textContent = cur ? `Now on ${cur.dataset.title || cur.dataset.scr}` : "";
+  };
 
   function go(id, { reset = false } = {}) {
     if (!byId(id)) { console.warn(`proto: no screen "${id}"`); return; }
     stack = reset ? [id] : stack.concat(id);
     paint();
+    announce();
   }
 
   function sheet(id) {
@@ -100,20 +117,41 @@
       return;
     }
     if (d.sheetClose !== undefined) { t.closest("[data-sheetwrap]").hidden = true; return; }
-    if (d.popback !== undefined) { if (stack.length > 1) stack.pop(); paint(); }
+    if (d.popback !== undefined) { if (stack.length > 1) stack.pop(); paint(); announce(); }
   });
 
   document.addEventListener("keydown", (e) => {
     if (e.key !== "Escape") return;
     const open = sheets().find((s) => !s.hidden);
     if (open) { open.hidden = true; return; }
-    if (stack.length > 1) { stack.pop(); paint(); }
+    if (stack.length > 1) { stack.pop(); paint(); announce(); }
   });
 
   /* ?scr=id lands deep, which is what a cross-application link does. The stack is seeded
    * with the owning root beneath it, so back goes somewhere that makes sense rather than
    * nowhere: a deep link that bounced through the launcher was a real defect. */
-  const want = new URLSearchParams(location.search).get("scr");
+  const params = new URLSearchParams(location.search);
+  const want = params.get("scr");
+
+  /* The URL is the review instrument, so a parameter this router does not read, or a screen it
+   * does not have, is REFUSED rather than answered with the home screen. Falling back quietly
+   * hands a reviewer who typed `?viewport=mobile` a confident screenshot of the wrong state.
+   * `fit` is read by pica's browser checks; a project adds its own with data-params="a,b". */
+  const KNOWN = ["scr", "fit", ...(tag.getAttribute("data-params") || "").split(",").map((p) => p.trim()).filter(Boolean)];
+  const unknown = [...params.keys()].filter((k) => !KNOWN.includes(k));
+  const refusal = unknown.length ? `This prototype does not read ${unknown.map((k) => `"${k}"`).join(", ")}. It reads: ${KNOWN.join(", ")}.`
+    : want && !byId(want) ? `There is no screen "${want}". Screens: ${[...new Set(screens().map((s) => s.dataset.scr))].join(", ")}.`
+    : "";
+  if (refusal) {
+    const main = document.createElement("main");
+    main.setAttribute("role", "alert");
+    main.className = "scr";
+    main.innerHTML = "<h1>Not a route</h1><p></p>";
+    main.querySelector("p").textContent = refusal;
+    document.body.replaceChildren(main);
+    return;
+  }
+
   for (const s of sheets()) s.hidden = true;
   if (want && byId(want)) {
     const owner = byId(want).dataset.owner;

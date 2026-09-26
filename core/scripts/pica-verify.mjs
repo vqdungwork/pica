@@ -128,8 +128,11 @@ catch (e) {
 const PROJECT = path.dirname(path.dirname(path.resolve(statePath)));
 /* 2.0.0 deleted four: value, estimate, architect and build. A phase nothing can be in is a
  * lane --phase still accepts and a heading the table still prints empty, which reads as
- * "nothing to do here" rather than "this no longer exists". */
-const PHASES = ["intake", "discover", "research", "analyse", "design", "scope", "close"];
+ * "nothing to do here" rather than "this no longer exists".
+ *
+ * `build` came back: code-tokens-check declares it, and while it was missing here the table
+ * printed a BUILD heading that `--phase build` then refused as "not a phase". */
+const PHASES = ["intake", "discover", "research", "analyse", "design", "scope", "build", "close"];
 
 /* ---- collect the checks the packages declare ---------------------------- */
 const checks = [];
@@ -189,7 +192,7 @@ const SUB = { "<state>": path.relative(PROJECT, path.resolve(statePath)) || ".pi
    * the literal string "<designSystem>" as a path, could not read it, printed its own
    * "This is an abstention, not a pass", and exited 0 — which this runner rendered as
    * `pass`. Given its real arguments on the project that found this, it returns 111
-   * findings. A placeholder with no substitution is a bug in THIS file, so `argsOf`
+   * findings. A placeholder with no substitution is a bug in THIS file, so `resolveArgs`
    * now refuses rather than passing the angle brackets through as a filename. */
   "<designSystem>": "html/design-system.html", "<structureDir>": "html/structure" };
 
@@ -213,8 +216,16 @@ if (fs.existsSync(runnersPath)) {
   try { RUNNERS = JSON.parse(fs.readFileSync(runnersPath, "utf8")); }
   catch (e) { console.error(`FAIL  .pica/runners.json does not parse: ${e.message}`); process.exit(2); }
 }
-Object.assign(SUB, state.runners ?? {}, RUNNERS.substitutions ?? {});
-const unsubstituted = [];
+/* The skill that teaches runners.json declares the build under "build" and the server under
+ * "serve", and the checks ask for <buildCmd> and <servedDemo>. A project that followed the skill
+ * to the letter was still told its build was undeclared. The blocks fill the placeholders unless
+ * a substitution says otherwise. */
+const derived = {};
+if (RUNNERS.build?.cmd) derived["<buildCmd>"] = RUNNERS.build.cmd;
+if (RUNNERS.build?.cwd) derived["<buildCwd>"] = RUNNERS.build.cwd;
+if (RUNNERS.build?.out) derived["<buildOut>"] = RUNNERS.build.out;
+if (RUNNERS.serve?.url) derived["<servedDemo>"] = RUNNERS.serve.url;
+Object.assign(SUB, derived, state.runners ?? {}, RUNNERS.substitutions ?? {});
 /* A placeholder with a SPACE in it — "<every screen>" — is split by the whitespace tokeniser into
  * two fragments, neither of which matches a placeholder, so one is passed through as a literal
  * argument and the check silently receives rubbish. Four checks were declared that way and each
@@ -227,13 +238,35 @@ for (const c of checks) {
     process.exit(2);
   }
 }
-const argsOf = (c) => c.args.split(/\s+/).map((a) => {
-  if (/^<[^>]+>$/.test(a) && !(a in SUB)) {
-    unsubstituted.push(`${c.pkg}/${c.run} needs ${a} — declare it in .pica/runners.json under "substitutions"`);
-    return null;
+/* Resolve a check's arguments BEFORE anything runs, and never hand a check a placeholder it was
+ * not given. This used to substitute inside the runner call and return null for a missing one,
+ * which execFile passed on as the four-letter string "null": build-check tried to execute a
+ * program called null and reported a build FAILURE, and six browser checks tried to load
+ * "null?null" and reported that nothing answered. A check with an undeclared placeholder is not
+ * run at all; it is listed, by name, with what it lacks.
+ *
+ * A substitution declared as null means "this project has none" — no dialog, no build. The
+ * placeholder is dropped together with the flag in front of it, so the check sees the option as
+ * absent and says for itself what it did not measure. That is a declaration, made in writing,
+ * and it is printed; it is not the same thing as nobody having said. */
+const declaredNone = new Set();
+const resolveArgs = (c) => {
+  const toks = c.args.split(/\s+/).filter(Boolean);
+  const out = [], missing = [];
+  for (const a of toks) {
+    if (!/^<[^>]+>$/.test(a)) { out.push(a); continue; }
+    if (!(a in SUB)) { missing.push(a); continue; }
+    if (SUB[a] === null) {
+      declaredNone.add(a);
+      if (out.length && out[out.length - 1].startsWith("--")) out.pop();
+      continue;
+    }
+    out.push(String(SUB[a]));
   }
-  return SUB[a] ?? a;
-});
+  return { argv: out, missing };
+};
+for (const c of checks) Object.assign(c, resolveArgs(c));
+
 
 /* Matches the abstention notice the checks themselves emit. */
 const ABSTAINED_RE = /\bthis is an abstention,? not a pass\b|\bNOT a pass\b|\bdid NOT run\b|\bcould not be (read|parsed)\b/i;
@@ -241,7 +274,9 @@ let internallyAbstained = 0;
 
 /* The versions this run is actually made of. Printed before any result, because a reader who
  * cannot see which pica ran cannot tell a fixed defect from a stale one. */
-if (resolved.length) {
+/* Not in --json: a header line in front of the document made every pipeline's JSON.parse throw on
+ * an installed pica, where the header is always printed. The versions go inside the document. */
+if (resolved.length && !JSON_OUT) {
   const stale = resolved.filter((r) => r.others > 0);
   const vs = [...new Set(resolved.map((r) => r.version))];
   console.log(`pica ${vs.length === 1 ? vs[0] : vs.join(" + ")} — ${resolved.length} package(s)` +
@@ -262,7 +297,7 @@ if (ONLY_PHASE && !PHASES.includes(ONLY_PHASE)) {
  * Sequentially this was 28 node processes each re-reading the same state and the same
  * capture, which was slow enough that people ran a subset instead. */
 const run = (c) => new Promise((resolve) => {
-  execFile("node", [c.script, ...argsOf(c)], { cwd: PROJECT, maxBuffer: 64 * 1024 * 1024 },
+  execFile("node", [c.script, ...c.argv], { cwd: PROJECT, maxBuffer: 64 * 1024 * 1024 },
     (err, stdout, stderr) => {
       const out = (stdout || "") + (stderr || "");
       const code = err ? (typeof err.code === "number" ? err.code : 1) : 0;
@@ -274,7 +309,7 @@ const run = (c) => new Promise((resolve) => {
  * skipped because nothing started the app is not a check, it is a gap with a green tick beside it. */
 let server = null;
 const serveCfg = RUNNERS.serve;
-const needsServer = scoped.some((c) => /<served|<url/.test(c.args || ""));
+const needsServer = scoped.some((c) => !c.missing.length && /<served|<url/.test(c.args || ""));
 if (serveCfg && needsServer) {
   const { spawn } = await import("node:child_process");
   const [cmd, ...rest] = String(serveCfg.cmd).split(/\s+/);
@@ -295,8 +330,13 @@ if (serveCfg && needsServer) {
 const stopServer = () => { if (server) { try { server.kill("SIGTERM"); } catch {} server = null; } };
 process.on("exit", stopServer);
 
-const todo = scoped.filter(applicable);
+const todo = scoped.filter((c) => applicable(c) && !c.missing.length);
 const abstained = scoped.filter((c) => !applicable(c));
+const undeclared = scoped.filter((c) => applicable(c) && c.missing.length);
+/* Only what is in scope and applicable: a check in another phase, or one this project cannot
+ * reach yet, lacking a declaration is not this run's fault. */
+const unsubstituted = undeclared
+  .flatMap((c) => c.missing.map((a) => `${c.pkg}/${c.run} needs ${a} — declare it in .pica/runners.json under "substitutions"`));
 const results = await Promise.all(todo.map(run));
 
 /* Each check prints its own table of `pass  <id>  N finding(s)   (scope)` rows. Those
@@ -323,21 +363,29 @@ for (const c of abstained) {
   if (!byPhase.has(c.phase)) byPhase.set(c.phase, []);
   byPhase.get(c.phase).push({ ...c, code: null, out: "", assertions: [] });
 }
+for (const c of undeclared) {
+  if (!byPhase.has(c.phase)) byPhase.set(c.phase, []);
+  byPhase.get(c.phase).push({ ...c, code: null, undeclared: true, out: "", assertions: [] });
+}
 
 if (JSON_OUT) {
   console.log(JSON.stringify({
     project: PROJECT, phase: ONLY_PHASE || "all",
-    checks: { total: scoped.length, ran: results.length, passed, failed, abstained: abstained.length },
+    pica: resolved.map((r) => ({ pkg: r.pkg, version: r.version })),
+    checks: { total: scoped.length, ran: results.length, passed, failed,
+      abstained: abstained.length + internallyAbstained, undeclared: undeclared.length },
+    declaredNone: [...declaredNone],
     assertions: { passed: assertPass, failed: assertFail },
     results: [...byPhase.entries()].map(([phase, rows]) => ({ phase, rows: rows.map((r) => ({
-      pkg: r.pkg, run: r.run, verdict: r.code === null ? "abstain" : r.code === 0 ? "pass" : "fail",
+      pkg: r.pkg, run: r.run, verdict: r.undeclared ? "undeclared" : r.code === null || r.abstainedInternally ? "abstain"
+        : r.code === 0 ? "pass" : "fail",
       needs: r.needs, assertions: r.assertions })) })),
   }, null, 2));
-  process.exit(failed ? 1 : 0);
+  process.exit(failed || undeclared.length ? 1 : 0);
 }
 
 /* ---- the table ---------------------------------------------------------- */
-const mark = (code, row) => row && row.abstainedInternally ? "ABSTAIN"
+const mark = (code, row) => row && row.undeclared ? "UNSET" : row && row.abstainedInternally ? "ABSTAIN"
   : code === null ? "abstain" : code === 0 ? "pass" : (code === 2 ? "no input" : "FAIL");
 console.log("");
 /* PHASES is a display order, not a filter. Three checks declared phases absent from it
@@ -352,7 +400,9 @@ for (const phase of [...PHASES, ...EXTRA_PHASES]) {
   console.log(`${phase.toUpperCase()}`);
   for (const r of rows.sort((a, b) => a.run.localeCompare(b.run))) {
     const n = r.assertions.filter((x) => x.verdict === "FAIL").reduce((s, x) => s + x.n, 0);
-    const detail = r.code === null
+    const detail = r.undeclared
+      ? `not run: ${r.missing.join(" ")} undeclared in .pica/runners.json`
+      : r.code === null
       ? `needs ${why(r.needs)}`
       : r.code === 2
         ? (r.out.trim().split("\n")[0] || "").replace(/^FAIL\s+/, "").slice(0, 62)
@@ -423,15 +473,18 @@ if (mute.length)
   runFaults.push(`${mute.length} check(s) failed and printed no row this runner could parse, so their `
     + `findings are reported as zero: ${mute.map((r) => r.run.replace(/\.mjs$/, "")).join(", ")}. `
     + `Every check prints \`pass|FAIL  <id>  N finding(s)   (scope)\``);
-if (rowsPrinted !== results.length + abstained.length)
-  runFaults.push(`${results.length + abstained.length} check(s) resolved and ${rowsPrinted} row(s) printed. A check that is registered and never shown is indistinguishable from one that passed`);
+if (rowsPrinted !== results.length + abstained.length + undeclared.length)
+  runFaults.push(`${results.length + abstained.length + undeclared.length} check(s) resolved and ${rowsPrinted} row(s) printed. A check that is registered and never shown is indistinguishable from one that passed`);
 
-const line = `${passed} passed, ${failed} failed, ${abstained.length + internallyAbstained} abstained`;
+const line = `${passed} passed, ${failed} failed, ${abstained.length + internallyAbstained} abstained` +
+  (undeclared.length ? `, ${undeclared.length} not run for want of a declaration` : "");
 const asserts = `${assertPass} assertion(s) verified${assertFail ? `, ${assertFail} breached` : ""}`;
 console.log(`${scoped.length} check(s)${ONLY_PHASE ? ` in phase ${ONLY_PHASE}` : ""}: ${line}.`);
 console.log(`${asserts}.`);
 if (internallyAbstained)
   console.log(`${internallyAbstained} check(s) ran, could not read their input, and said so. Shown as ABSTAIN, never as pass.`);
+if (declaredNone.size)
+  console.log(`Declared as none in .pica/runners.json: ${[...declaredNone].join(", ")}. The checks that take them ran without that option.`);
 if (abstained.length && !ADOPT)
   console.log(`Run with --adopt to see what ${abstained.length} abstention(s) would need. An abstention is not a pass.`);
 if (!failed && !EVIDENCE && assertPass)

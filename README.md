@@ -5,7 +5,7 @@
 **Describe the product you want. Get requirements your team recognises and a demo your client can use.**
 <br>An expert team for Claude Code, with the checking built in.
 
-[![version](https://img.shields.io/badge/version-3.16.1-1f2328)](https://github.com/vqdungwork/pica/releases)
+[![version](https://img.shields.io/badge/version-3.17.0-1f2328)](https://github.com/vqdungwork/pica/releases)
 [![checks](https://img.shields.io/badge/checks-156%20fail--closed-1f2328)](#what-gets-checked)
 [![agents](https://img.shields.io/badge/specialists-12-1f2328)](#who-does-the-work)
 [![sectors](https://img.shields.io/badge/industries-28-1f2328)](#it-already-knows-your-industry)
@@ -193,11 +193,15 @@ wrong, and quietly makes design decisions that were never theirs to make.
 structural parity wherever two or more viewports are declared, and Figma position against the HTML
 reference.
 
-Every one has been seen to fail on the defect it was written for, and you can watch it happen:
+Every check that runs in node has been seen to fail on the defect it was written for, except three that
+read what the worked example cannot carry, a Figma dump or a capture of a built demo (`geometry-diff`,
+`frame-inventory-check`, `build-diff`). `mutation-coverage-check` names them on every run and fails if
+the list grows. You can watch the rest happen:
 
 ```bash
-node scripts/mutate.mjs examples/approvals   # 100 caught, 0 missed, 0 skipped
+node scripts/mutate.mjs --fixture            # 169 caught, 0 missed, 0 skipped
 node scripts/mutate.mjs <your-project-dir>
+node scripts/example-verify.mjs              # the worked example through pica-verify: 0 failed
 ```
 
 It reintroduces the defect each check was written for and reports whether that check fires, whether

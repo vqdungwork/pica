@@ -780,7 +780,14 @@
           "dropped": true,
           "why": "it hides how many are waiting, which is the number the fraud analyst needs first"
         }
-      ]
+      ],
+      "approvedOn": "2026-09-04",
+      "preGateLens": {
+        "lens": "Error prevention, recovery, undo",
+        "on": "2026-09-03",
+        "findings": 1,
+        "report": "docs/reviews/approvals-pre-gate.md"
+      }
     }
   },
   "scopeFrozen": true,
@@ -953,6 +960,8 @@
     "name": "Ledger",
     "field": "retail banking",
     "mode": "propose",
+    "recommended": "C",
+    "recommendedWhy": "the sector baseline: every precedent measured runs a single dense column, and the queue is worked top to bottom",
     "precedent": [
       {
         "product": "Starling",
@@ -970,7 +979,7 @@
     "rationale": "The age of a held payment is the content. Large radii and a wide palette both cost row scannability.",
     "assert": {
       "radius.max": 8,
-      "control.height.min": 32,
+      "control.height.min": 44,
       "numerals.tabular": true,
       "hue.count.max": 3,
       "type.roles.max": 5
@@ -1183,6 +1192,36 @@
       "owns": [
         "held payments",
         "approval records"
+      ],
+      "name": "release-a-held-payment",
+      "steps": [
+        {
+          "name": "open-the-queue",
+          "state": "held"
+        },
+        {
+          "name": "open-the-oldest-payment",
+          "state": "default"
+        },
+        {
+          "name": "release-and-record",
+          "state": "success",
+          "completes": true
+        }
+      ],
+      "branches": [
+        {
+          "name": "already-released",
+          "when": "another approver released it first",
+          "kind": "conflict",
+          "exit": "back to the queue, with the row gone and a note naming who released it"
+        },
+        {
+          "name": "release-rejected",
+          "when": "the limit rule rejects the release",
+          "kind": "error",
+          "exit": "stays on the payment, naming the rule and who can override it"
+        }
       ]
     }
   ],
@@ -1505,6 +1544,212 @@
       "tracesTo": [
         "UC-01"
       ]
+    }
+  ],
+  "navigation": {
+    "approvals": {
+      "structure": "two tabs",
+      "destinations": [
+        "queue",
+        "audit"
+      ]
+    },
+    "noEvidenceBecause": "two destinations, both named in the brief (docs/brief.md): there is nothing for a card sort to group and no tree for a tree test to search. Revisit if a third destination is added."
+  },
+  "directions": [
+    {
+      "id": "A",
+      "name": "single column",
+      "tradition": "International / Swiss",
+      "isSectorBaseline": false,
+      "palette": {
+        "ground": "#ffffff",
+        "ink": "#141816",
+        "inkMuted": "#525854",
+        "accent": "#1f3a5f",
+        "accentInk": "#ffffff"
+      },
+      "pairs": [
+        {
+          "fg": "ink",
+          "bg": "ground",
+          "use": "body"
+        },
+        {
+          "fg": "inkMuted",
+          "bg": "ground",
+          "use": "body"
+        },
+        {
+          "fg": "accentInk",
+          "bg": "accent",
+          "use": "body"
+        }
+      ],
+      "tile": [
+        "primary button control (Release)",
+        "search input for the queue",
+        "row container (age, name, action)",
+        "status icons for held and released",
+        "a fragment of the queue at 1440"
+      ],
+      "servesBadly": "a branch manager looking for one branch's payments scrolls past everyone else's"
+    },
+    {
+      "id": "B",
+      "name": "grouped by branch",
+      "tradition": "Material",
+      "isSectorBaseline": false,
+      "palette": {
+        "ground": "#f7f8fa",
+        "surface": "#ffffff",
+        "ink": "#16181d",
+        "inkMuted": "#4d535c",
+        "accent": "#1d4ed8",
+        "accentInk": "#ffffff"
+      },
+      "pairs": [
+        {
+          "fg": "ink",
+          "bg": "surface",
+          "use": "body"
+        },
+        {
+          "fg": "inkMuted",
+          "bg": "ground",
+          "use": "body"
+        },
+        {
+          "fg": "accentInk",
+          "bg": "accent",
+          "use": "body"
+        }
+      ],
+      "tile": [
+        "primary button control (Release)",
+        "search input for the queue",
+        "row container (age, name, action)",
+        "status icons for held and released",
+        "a fragment of the queue at 1440"
+      ],
+      "servesBadly": "the oldest payment can sit inside a collapsed group, so its age is hidden from the person who has to act on it"
+    },
+    {
+      "id": "C",
+      "name": "dense ledger",
+      "tradition": "Minimalism",
+      "isSectorBaseline": true,
+      "palette": {
+        "ground": "#fbfcfa",
+        "ink": "#1b1f1d",
+        "inkMuted": "#525854",
+        "rule": "#d7dcd8",
+        "accent": "#12433d",
+        "accentInk": "#ffffff"
+      },
+      "pairs": [
+        {
+          "fg": "ink",
+          "bg": "ground",
+          "use": "body"
+        },
+        {
+          "fg": "inkMuted",
+          "bg": "ground",
+          "use": "body"
+        },
+        {
+          "fg": "accentInk",
+          "bg": "accent",
+          "use": "body"
+        }
+      ],
+      "tile": [
+        "primary button control (Release)",
+        "search input for the queue",
+        "row container (age, name, action)",
+        "status icons for held and released",
+        "a fragment of the queue at 1440"
+      ],
+      "servesBadly": "eighteen rows at once is a lot for someone who approves two payments a week"
+    }
+  ],
+  "architecture": {
+    "stack": [
+      {
+        "layer": "interface",
+        "choice": "TypeScript, server-rendered pages",
+        "because": "N-01 is a render budget on a cold cache; a page that arrives rendered spends none of it on a client bundle",
+        "replaceable": "yes, per screen; nothing below depends on it"
+      },
+      {
+        "layer": "service",
+        "choice": "Node.js on the bank's existing container platform",
+        "because": "the bank's platform team already runs and patches it, so nobody new has to maintain a runtime",
+        "replaceable": "with effort; the approval rules in src/approve.ts are plain functions with no framework in them"
+      },
+      {
+        "layer": "data",
+        "choice": "PostgreSQL, the bank's managed instance",
+        "because": "the audit trail must never lose a write, and the bank already backs this instance up under its retention policy",
+        "replaceable": "costly; the audit trail's history would have to migrate with it"
+      }
+    ],
+    "meets": [
+      {
+        "nfr": "N-01",
+        "metBy": "server-rendered queue, an index on held_since, and a page of 50 rows rather than all 500"
+      }
+    ],
+    "integrations": [
+      {
+        "system": "core banking ledger",
+        "direction": "write: posts the released payment",
+        "protocol": "ISO 20022 pacs.008 over the bank's internal message queue",
+        "onFailure": "the release is recorded as pending posting and the payment stays in the queue marked not yet posted, with the approver told; the queue retries, and nothing is posted twice because each message carries the approval's id"
+      }
+    ],
+    "environments": [
+      {
+        "name": "dev",
+        "host": "the bank's container platform, dev namespace",
+        "purpose": "every merge, synthetic data only"
+      },
+      {
+        "name": "staging",
+        "host": "the bank's container platform, staging namespace",
+        "purpose": "the N-01 synthetic run and the compliance walkthrough, on masked production volumes"
+      },
+      {
+        "name": "production",
+        "host": "the bank's container platform, production namespace",
+        "purpose": "approvers releasing real payments"
+      }
+    ],
+    "excludes": [
+      "no mobile app: the queue is worked at a desk",
+      "no offline mode",
+      "no approval by email or chat link"
+    ],
+    "data": [
+      {
+        "entity": "payment",
+        "owner": "payments operations",
+        "location": "the bank's managed PostgreSQL, in-country",
+        "retention": "seven years after settlement, per the compliance register"
+      },
+      {
+        "entity": "approval",
+        "owner": "payments operations",
+        "location": "the bank's managed PostgreSQL, in-country",
+        "retention": "seven years, with the payment it approved"
+      }
+    ]
+  },
+  "integrationsNamed": [
+    {
+      "system": "core banking ledger",
+      "direction": "write"
     }
   ]
 }

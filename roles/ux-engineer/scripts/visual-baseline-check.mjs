@@ -156,8 +156,16 @@ if (UPDATE) {
   process.exit(0);
 }
 if (created.length) missing.push(...created);
+/* A run that WROTE every baseline compared nothing. Reporting it as "0 changed" was a pass over an
+ * empty comparison — on a fresh clone, where baselines are not committed yet, every run was green. */
+const compared = (routes.length || 1) - created.length;
+if (!changed.length && !compared) {
+  console.log(`visual-baseline-check: ${created.length} baseline(s) written to ${DIR} and nothing compared. ` +
+    "Commit them and run again. This is an abstention, not a pass.");
+  process.exit(0);
+}
 if (!changed.length) {
-  console.log(`visual-baseline-check: ${routes.length || 1} route(s), 0 changed` +
+  console.log(`visual-baseline-check: ${compared} route(s) compared, 0 changed` +
     (missing.length ? ` (${missing.length} new baseline(s) written)` : ""));
   process.exit(0);
 }

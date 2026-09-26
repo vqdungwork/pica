@@ -34,15 +34,15 @@ These eight rules hold for the whole session. They are not suggestions and they 
    decision; the flow is what the human uses, and it is where the defects nothing can measure live. One
    prototype per application, linked to each other for real.
 
-**`/picaflow <brief>` runs the whole chain**, stopping only at the four points where a person has to
-decide: whether it is worth building, the design, the scope and deadline, and the finished product. Everything it cannot derive in
-between becomes a labelled assumption the client corrects, because reacting to a built thing is far
-cheaper than specifying one.
+**`/picaflow <brief>` runs the whole chain**, stopping only at the three points where a person has to
+decide: the engagement scope, the design system, and the PRD, scope of work and demo together.
+Everything it cannot derive in between becomes a labelled assumption the client corrects, because
+reacting to a built thing is far cheaper than specifying one.
 
-`--to design` ends at a measured, clickable `review.html`. `--to figma` adds the ported file, verified
-frame by frame. `--to product` adds working front end and back end, tested and released. **Each is a
-complete project, and Figma is off the critical path.** Every step runs as the agent that owns it, and
-each agent reads the sector entry before it starts.
+`--to design` (the default) ends at a confirmed PRD, an agreed scope and a measured, interactive demo.
+`--to figma` adds the ported file, verified frame by frame. **What it costs to build from there is
+your estimate to make, outside pica, and Figma is off the critical path.** Every step runs as the
+agent that owns it, and each agent reads the sector entry before it starts.
 
 Or run the steps yourself:
 

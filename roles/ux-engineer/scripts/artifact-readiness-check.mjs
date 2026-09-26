@@ -24,7 +24,7 @@ const fails = [];
 const fail = (id, msg) => fails.push(`  [${id}] ${msg}`);
 
 if (!dir || !existsSync(dir)) {
-  console.log(`artifact-readiness-check: SKIPPED — ${dir || "no --dir"} does not exist, so nothing was read. This is not a pass.`);
+  console.log(`artifact-readiness-check: SKIPPED — ${dir ? `${dir} does not exist` : "no --dir given"}, so nothing was read. This is not a pass.`);
   process.exit(0);
 }
 

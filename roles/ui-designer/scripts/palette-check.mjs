@@ -47,6 +47,8 @@
  * Usage: node palette-check.mjs <state.json> [industries.json]
  */
 import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 
 const statePath = process.argv[2];
 if (!statePath) { console.error("usage: palette-check.mjs <state.json> [industries.json]"); process.exit(2); }
@@ -77,9 +79,38 @@ const FLOOR = { body: 4.5, "large-text": 3, ui: 3, graphic: 3 };
 const findings = [];
 const add = (check, where, detail) => findings.push({ check, where, detail });
 
+/* Where a sibling package's data file is, in either layout, and never by string sort.
+ *
+ * In the repository the packages are roles/<name>; installed, each is pica-<name>/<version>.
+ * This used to look for roles/analyst — a directory renamed to business-analyst long ago — so from
+ * the repository the sector base was never found, and in the cache it sorted versions as strings,
+ * which picks 3.16.0 over 3.16.1 and 3.2.1 over 3.15.1. A stale sector base is read silently. */
+const vcmp = (a, b) => {
+  const pa = String(a).split(/[.-]/).map((x) => (/^\d+$/.test(x) ? Number(x) : -1));
+  const pb = String(b).split(/[.-]/).map((x) => (/^\d+$/.test(x) ? Number(x) : -1));
+  for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
+    const d = (pa[i] ?? -1) - (pb[i] ?? -1);
+    if (d) return d;
+  }
+  return 0;
+};
+const siblingData = (pkg, rel) => {
+  const here = path.dirname(fileURLToPath(import.meta.url));
+  const repo = path.join(here, "..", "..", pkg, rel);
+  if (fs.existsSync(repo)) return repo;
+  const dir = path.join(here, "..", "..", "..", `pica-${pkg}`);
+  try {
+    const vs = fs.readdirSync(dir).filter((v) => fs.existsSync(path.join(dir, v, rel))).sort(vcmp);
+    return vs.length ? path.join(dir, vs[vs.length - 1], rel) : null;
+  } catch { return null; }
+};
+
 /* the sector's reserved hues, if the knowledge base is reachable */
 let reserved = [];
-const indPath = process.argv[3] || "../business-analyst/data/industries.json";
+/* Resolved from where this script is installed, not from the project: the old default was a path
+ * relative to the working directory, which is the project, so on every real project the sector's
+ * reserved hues were never read and reserved-respected checked nothing. */
+const indPath = process.argv[3] || siblingData("business-analyst", path.join("data", "industries.json"));
 try {
   const ind = JSON.parse(fs.readFileSync(indPath, "utf8")).industries[state.industry?.key];
   reserved = (ind?.colour?.reserved || []).map((r) => String(r.hue).toLowerCase());
