@@ -57,6 +57,26 @@ for (const f of svgs) {
       `${smallest.toFixed(1)}px. Draw it along the page's long axis — down, not across — or split it`);
 }
 
+// A generated SVG carries whatever colours the generator wrote. Inlined into a page that has a
+// dark theme, a literal hex is a light-mode drawing pasted onto a dark document: #16191d text on
+// a #ffffff card, both of which the dark surface then renders as black on black. The page is
+// correct, the contrast checks look at CSS and see nothing, and every diagram is unreadable.
+//
+// The fix is a variable with the light value as its fallback — var(--fig-ink, #16191d) — so the
+// host page can retheme it and a standalone .svg still opens correctly. So a bare literal is the
+// defect, and a literal inside a var() fallback is not.
+for (const f of svgs) {
+  const src = readFileSync(join(dir, f), "utf8");
+  const bare = [...src.matchAll(/(?:fill|stroke|stop-color)="(#[0-9a-fA-F]{3,8}|rgba?\([^)]*\))"/g)]
+    .map((m) => m[1])
+    // white and black ON a coloured shape are legitimate: they follow that shape, not the theme
+    .filter((c) => !/^#(fff|ffffff|000|000000)$/i.test(c));
+  if (bare.length)
+    fail("figure-hardcodes-a-colour",
+      `${f} paints ${[...new Set(bare)].slice(0, 4).join(", ")} as a literal. In a themed page that is a ` +
+      `light drawing on whatever background the reader has. Use var(--fig-<role>, <light hex>)`);
+}
+
 // and the reverse: a figure the page frames but has no caption is a picture with no question
 const framed = [...html.matchAll(/<figure[^>]*>/g)];
 for (const tag of framed) {

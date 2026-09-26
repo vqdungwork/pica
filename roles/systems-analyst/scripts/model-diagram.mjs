@@ -67,14 +67,35 @@ const crud = (v) => {
 };
 
 const T = state.direction?.tokens || {};
+/* Every colour is a CSS variable with the light value as its fallback.
+ *
+ * An SVG generated with baked-in hex is a light-mode drawing wherever it is pasted. Inlined into
+ * a page that had switched to dark, these diagrams kept painting #16191d text on #ffffff cards —
+ * which the dark figure background then rendered as near-black on near-black. The page was
+ * correct, every check passed, and not one diagram was readable.
+ *
+ * `var()` works in a presentation attribute only when the SVG is INLINE in the document, which is
+ * exactly how the spec page carries it. Opened on its own as a file, nothing defines the
+ * variables and the fallback applies, so the standalone .svg stays a correct light drawing. The
+ * host page overrides --fig-* under its own dark block; it does not have to know these names
+ * beyond that. */
+const v = (name, fallback) => `var(--fig-${name}, ${fallback})`;
 const C = {
   bg:     "transparent",
-  card:   T.surface   || "#ffffff",
-  line:   T.border    || "#c9ccd1",
-  ink:    T.ink       || "#16191d",
-  muted:  T.inkMuted  || "#606670",
-  accent: T.accent    || "#006399",
-  warn:   T.attention || "#c0392b",
+  card:   v("card",   T.surface   || "#ffffff"),
+  line:   v("line",   T.border    || "#c9ccd1"),
+  ink:    v("ink",    T.ink       || "#16191d"),
+  muted:  v("muted",  T.inkMuted  || "#606670"),
+  accent: v("accent", T.accent    || "#006399"),
+  warn:   v("warn",   T.attention || "#c0392b"),
+  band:   v("band",   "rgba(0,0,0,.028)"),   // the alternating swimlane stripe
+  own:    v("own",    "#eaf2f8"),            // an entity this system owns
+  head:   v("head",   "#f2f1ef"),            // the title strip of one it only mirrors
+  /* Ink that sits ON the accent, not beside it. White works on a dark blue and fails on a light
+   * one — and the accent flips between the two with the theme, so a fixed #fff is a contrast
+   * failure waiting for the reader to switch. It is a token for the same reason the accent is. */
+  onAccent:  v("on-accent",  "#ffffff"),
+  onAccent2: v("on-accent-2", "rgba(255,255,255,.78)"),
 };
 
 /** Wrap a label to `w` characters, at most `max` lines, the last one elided. */
@@ -300,7 +321,7 @@ function processDiagram(toBe) {
   const laneBands = [];
   laneNames.forEach((ln, li) => {
     const w = laneCols[li] * nodeW + 16;
-    laneBands.push(`<rect x="${laneX[li] - 8}" y="${topPad - 34}" width="${w}" height="${H - topPad + 22}" rx="10" fill="${li % 2 ? "rgba(0,0,0,.028)" : "none"}"/>`);
+    laneBands.push(`<rect x="${laneX[li] - 8}" y="${topPad - 34}" width="${w}" height="${H - topPad + 22}" rx="10" fill="${li % 2 ? C.band : "none"}"/>`);
     wrap(ln, Math.floor(w / 7.2), 2).forEach((t, k) =>
       laneBands.push(`<text x="${laneX[li] + w / 2 - 8}" y="${topPad - 14 + k * 14}" text-anchor="middle" font-size="12" font-weight="700" fill="${C.muted}">${esc(t)}</text>`));
   });
@@ -474,11 +495,11 @@ function erdDiagram(entities) {
   for (const e of ordered) {
     const b = pos.get(e.entity); if (!b) continue;
     const own = owned(e);
-    L.push(`<rect x="${b.x}" y="${b.y}" width="${b.w}" height="${b.h}" rx="6" fill="${own ? "#eaf2f8" : C.card}" stroke="${own ? C.accent : C.line}" stroke-width="${own ? 1.8 : 1.2}"/>`);
-    L.push(`<rect x="${b.x}" y="${b.y}" width="${b.w}" height="30" rx="6" fill="${own ? C.accent : "#f2f1ef"}"/>`);
-    L.push(`<rect x="${b.x}" y="${b.y + 22}" width="${b.w}" height="8" fill="${own ? C.accent : "#f2f1ef"}"/>`);
-    L.push(`<text x="${b.x + 12}" y="${b.y + 20}" font-size="12.5" font-weight="700" fill="${own ? "#fff" : C.ink}">${esc(vi(e.entity))}</text>`);
-    L.push(`<text x="${b.x + b.w - 12}" y="${b.y + 20}" text-anchor="end" font-size="9.5" fill="${own ? "rgba(255,255,255,.75)" : C.muted}" font-family="ui-monospace,Menlo,monospace">${esc(e.entity)}</text>`);
+    L.push(`<rect x="${b.x}" y="${b.y}" width="${b.w}" height="${b.h}" rx="6" fill="${own ? C.own : C.card}" stroke="${own ? C.accent : C.line}" stroke-width="${own ? 1.8 : 1.2}"/>`);
+    L.push(`<rect x="${b.x}" y="${b.y}" width="${b.w}" height="30" rx="6" fill="${own ? C.accent : C.head}"/>`);
+    L.push(`<rect x="${b.x}" y="${b.y + 22}" width="${b.w}" height="8" fill="${own ? C.accent : C.head}"/>`);
+    L.push(`<text x="${b.x + 12}" y="${b.y + 20}" font-size="12.5" font-weight="700" fill="${own ? C.onAccent : C.ink}">${esc(vi(e.entity))}</text>`);
+    L.push(`<text x="${b.x + b.w - 12}" y="${b.y + 20}" text-anchor="end" font-size="9.5" fill="${own ? C.onAccent2 : C.muted}" font-family="ui-monospace,Menlo,monospace">${esc(e.entity)}</text>`);
     arr(e.attributes).slice(0, 6).forEach((a, i) => {
       const nm = vi(typeof a === "string" ? a : (a.name || ""));
       L.push(`<text x="${b.x + 12}" y="${b.y + 48 + i * 15}" font-size="10.5" fill="${C.muted}">${esc(String(nm).slice(0, 36))}</text>`);
@@ -572,9 +593,9 @@ function contextDiagram(state) {
 
   // the system under discussion, in the middle
   L.push(`<rect x="${cx - coreW / 2}" y="${cy - coreH / 2}" width="${coreW}" height="${coreH}" rx="10" fill="${C.accent}"/>`);
-  L.push(`<text x="${cx}" y="${cy - coreH / 2 + 26}" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">Hệ thống sẽ xây</text>`);
+  L.push(`<text x="${cx}" y="${cy - coreH / 2 + 26}" text-anchor="middle" font-size="13" font-weight="700" fill="${C.onAccent}">Hệ thống sẽ xây</text>`);
   apps.forEach((a, i) =>
-    L.push(`<text x="${cx}" y="${cy - coreH / 2 + 52 + i * 24}" text-anchor="middle" font-size="14" font-weight="600" fill="rgba(255,255,255,.92)">${esc(a)}</text>`));
+    L.push(`<text x="${cx}" y="${cy - coreH / 2 + 52 + i * 24}" text-anchor="middle" font-size="14" font-weight="600" fill="${C.onAccent}">${esc(a)}</text>`));
 
   const side = (items, x, anchor, dirLabel) => items.forEach((it, i) => {
     const y = pad + i * rowH + 18;

@@ -384,3 +384,19 @@ axis. Two per lane, and the third drops to a half-row below.
 diacritics stop resolving and the diagram is decoration.
 
 Horizontal scrolling is not the fix. The reader will not do it.
+
+
+## read the assembled page, not the generator
+
+<!-- enforced-by: sections-out-of-order, duplicate-section-number -->
+
+The spec is produced by a script, so the natural way to add a section is to edit the script. A
+section inserted that way lands wherever the edit landed, and the rendered document came out
+"Phần 1, 2, 2b, 3, 4, 3b, 5" — correct in every check, and nonsense to anybody counting along.
+
+The generator is where the work happens and the page is where the reading happens, and they are
+not the same artefact. Every defect this session was of that shape: a diagram rendered and never
+placed, a diagram placed and unreadable, a part number out of sequence. None was visible in the
+source; all three were obvious on the page.
+
+**How to know it is wrong:** open the page and read the part numbers in order.
