@@ -255,6 +255,51 @@ for (const f of svgs) {
       "A step with no incoming line is a step the reader cannot get to, however tidy the drawing is");
 }
 
+/* A node nobody can click, in a figure that says it is clickable.
+ *
+ * An actor in the use case model is a stick figure: strokes with fill="none", so it has no
+ * interior and a click passes straight through it to the canvas. The node was focusable, the
+ * figure was marked interrogable, and there was no surface to hit — the same failure as a control
+ * that does nothing, reached from geometry instead of from the graph. Only trying to click it
+ * found it.
+ *
+ * Every node in an interrogable figure needs a filled shape, transparent or not. */
+for (const f of svgs) {
+  const src = readFileSync(join(dir, f), "utf8");
+  if (!/data-interrogable="yes"/.test(src)) continue;
+  const noFill = [];
+  for (const g of src.matchAll(/<g data-node="([^"]+)"[\s\S]*?<\/g>/g)) {
+    const filled = [...g[0].matchAll(/<(?:rect|circle|ellipse|polygon|path)[^>]*fill="([^"]+)"/g)]
+      .some((m) => m[1] !== "none");
+    if (!filled) noFill.push(g[1]);
+  }
+  if (noFill.length)
+    fail("figure-node-has-no-hit-area",
+      `${f}: ${noFill.length} clickable node(s) are drawn with strokes only and no fill ` +
+      `(${noFill.slice(0, 3).join(", ")}), so a click passes through them. Give them a ` +
+      "transparent rect — a shape with no interior cannot be hit");
+}
+
+/* Structure drawn as ink and never declared.
+ *
+ * The use case model drew every actor and every permission line and tagged none of them. Ten
+ * nodes reported as isolated, the figure was ruled not worth making clickable on the strength of
+ * having no edges it had simply never labelled, and no check here could see its shape at all. A
+ * diagram whose structure exists only as ink is a picture, not a model. */
+for (const f of svgs) {
+  const src = readFileSync(join(dir, f), "utf8");
+  const nodes = [...src.matchAll(/data-node="/g)].length;
+  if (nodes < 2) continue;
+  const edges = [...src.matchAll(/data-edge="/g)].length;
+  // count the lines that look like connectors: a stroked path with no fill
+  const strokes = [...src.matchAll(/<path [^>]*stroke="[^"]+"[^>]*fill="none"/g)].length
+                + [...src.matchAll(/<path [^>]*fill="none"[^>]*stroke="[^"]+"/g)].length;
+  if (!edges && strokes > nodes / 2)
+    fail("figure-structure-not-declared",
+      `${f} draws about ${strokes} connector(s) between ${nodes} nodes and declares none of them ` +
+      "as data-edge. Structure that exists only as ink is invisible to every check and to the reader's cursor");
+}
+
 // and the reverse: a figure the page frames but has no caption is a picture with no question
 const framed = [...html.matchAll(/<figure[^>]*>/g)];
 for (const tag of framed) {

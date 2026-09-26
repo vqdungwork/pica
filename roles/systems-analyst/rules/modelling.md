@@ -416,3 +416,74 @@ it measures the picture and not the thing the picture is for, and it is why reac
 separately and by id rather than by geometry.
 
 
+
+
+## spend width where the branching is
+
+<!-- enforced-by: none — a layout budget; its effects are measured by figure-edge-through-node and figure-steps-overlap -->
+
+Every lane had two columns, flat, because width is scarce. That is why a four-way fork came out as
+a 2x2 block: two of its targets sat a row below the other two, so two of the four routes had to
+leave the fork, run down past the first row, and come back in.
+
+Five rounds of routing work went into making those two routes clean, then a round into deleting
+them, then a round into restoring them. **The tangle was never in the lines. It was in the layout.**
+
+Columns are a budget. Lanes that merely run two steps at the same time give their column back and
+stack — a stack costs height, which a page has to spare. The lane that branches spends what they
+saved, its fan lands in one row, and every route out of the fork is a short straight drop. Same
+total width; it is just spent where it buys something.
+
+And the biggest unfinished fan is served first: the fourth branch of a four-way fan routes around
+three boxes, while the second branch of a two-way fan routes around one. Ranked only by how many
+columns were missing, a fan of two took the column a fan of four was one short of, and the
+expensive route was the one left unbuilt.
+
+## a shape with no interior cannot be clicked
+
+<!-- enforced-by: figure-node-has-no-hit-area -->
+
+An actor in a use case model is a stick figure: strokes, `fill="none"`. It was tagged as a node,
+given a tabindex, and counted in a figure marked interrogable — and a click passed straight through
+it to the canvas behind. Nothing that inspected the drawing could see this. Only trying to click it
+found it.
+
+Every clickable node needs a filled shape, transparent if it must be.
+
+## structure that exists only as ink is not a model
+
+<!-- enforced-by: figure-structure-not-declared -->
+
+The use case model drew an actor for every role and a line for every permission, and tagged none
+of them. Consequences, all of them silent: ten nodes reported as isolated, the figure was ruled not
+worth making clickable because it had no edges it had simply never labelled, and no check could see
+its shape at all.
+
+A model is data before it is a picture. If the picture carries structure the data does not declare,
+the checks are reading a different diagram from the one the reader sees.
+
+## measure every diagram, not the one you are working on
+
+<!-- enforced-by: none — a review discipline; the checks run over the whole directory, a person's attention does not -->
+
+Six rounds of measurement were spent on one process diagram. The other six diagrams in the same
+document had never been measured at all, and when they finally were, the use case model had ten
+isolated nodes and an unclickable actor — both shipped, both there the whole time.
+
+The harness takes a directory. Point it at the directory.
+
+## a harness that cannot see everything it scores is agreement, not measurement
+
+<!-- enforced-by: none — judgement about verification, which no script can hold -->
+
+Three separate times in this work the measurement was the thing that was wrong.
+
+It parsed cubic Béziers by hand, so when routes became orthogonal it silently dropped eight of them
+and reported a large improvement that was partly edges vanishing from the measurement. It compared
+label text against the first shape in each group, so the step-number badge — drawn outside its box
+on purpose — was reported as fourteen labels overflowing, and every label in the diagram was
+narrowed to fix a defect that did not exist. It compared an actor's name against the actor's stick
+figure, and called two correct labels overflowing.
+
+Each time, the numbers were confident and specific. **Before believing a measurement that tells you
+to change something, check that it can see what it claims to score.**

@@ -351,11 +351,18 @@ function processDiagram(toBe) {
 
   const stages = Math.max(0, ...order.values()) + 1;
   const nodeW = 142, nodeH = 54, rowH = 96, left = 16, topPad = 96;
-  /* A lane is capped at TWO columns. Laying every simultaneous step side by side made the drawing
-   * 1538px wide, which the page then scaled to 60% and the labels became unreadable — the same
-   * failure as drawing it sideways, arrived at from the other direction. Width is the scarce axis;
-   * height is not. So the third and later step in one cell drops to a half-row below. */
-  const MAXCOL = 2;
+  /* Columns are a BUDGET, spent where branching happens.
+   *
+   * Every lane used to get two columns, flat. That is why a four-way fork came out as a 2x2 block:
+   * two of its targets sat a row below the other two, so two of the four routes had to leave the
+   * fork, run down past the first row and come back in — and no amount of routing work fixed that,
+   * because the tangle was in the layout, not the lines.
+   *
+   * Width is the scarce axis and height is free, so the lanes that merely run two steps at the same
+   * time give their column back and stack instead. The lane that branches spends what they saved,
+   * its fan lands in one row, and every route out of the fork is a short straight drop. Same total
+   * width, because the budget is the same — it is just spent where it buys something. */
+  const WIDTH_BUDGET = 980;
 
   // how many nodes share one (lane, stage) cell — that decides how wide the lane must be
   const cell = new Map();
@@ -363,13 +370,56 @@ function processDiagram(toBe) {
     const k = `${laneIndex(n.lane)}:${order.get(n.id)}`;
     cell.set(k, (cell.get(k) || 0) + 1);
   }
-  const laneCols = laneNames.map((_, li) =>
-    Math.min(MAXCOL, Math.max(1, ...[...cell.entries()].filter(([k]) => k.startsWith(`${li}:`)).map(([, v]) => v))));
+  const need = laneNames.map((_, li) =>
+    Math.max(1, ...[...cell.entries()].filter(([k]) => k.startsWith(`${li}:`)).map(([, v]) => v)));
+  /* A column bought for a FAN is worth more than a column bought for a crowded cell.
+   *
+   * Widening a lane so a fork's targets sit in one row turns every route out of that fork into a
+   * short straight drop. Widening a lane so two unrelated simultaneous steps sit side by side only
+   * saves a stack — and a stack costs height, which this drawing has to spare. Ranked by general
+   * need alone, a lane with three busy steps took a column that a four-way fork needed, and the
+   * fourth branch fell to a second row and had to be routed around the other three.
+   *
+   * So fans are satisfied first, and whatever is left goes to general crowding. */
+  const fanNeed = laneNames.map(() => 1);
+  for (const id of [...outs.keys()]) {
+    if ((outs.get(id) || 0) < 2) continue;
+    const byLane = new Map();
+    for (const e of edges) {
+      if (e.from !== id) continue;
+      const t = nodes.find((n) => n.id === e.to);
+      if (!t) continue;
+      const li = laneIndex(t.lane);
+      byLane.set(li, (byLane.get(li) || 0) + 1);
+    }
+    for (const [li, n] of byLane) fanNeed[li] = Math.max(fanNeed[li], n);
+  }
+  const budget = Math.max(laneNames.length,
+    Math.floor((WIDTH_BUDGET - 2 * left - 28 * laneNames.length) / nodeW));
+  const laneCols = laneNames.map(() => 1);
+  for (let spare = budget - laneNames.length; spare > 0; spare--) {
+    let pick = -1, best = 0;
+    laneNames.forEach((_, li) => {
+      /* An unfinished fan outranks any crowding, and the BIGGEST unfinished fan goes first: the
+       * fourth branch of a four-way fan has to route around three boxes, while the second branch
+       * of a two-way fan routes around one. Ranked only by how many columns were still missing,
+       * a fan of two took the column a fan of four was one short of, and the expensive route was
+       * the one left unbuilt. */
+      const rank = fanNeed[li] > laneCols[li]
+        ? 1e6 + fanNeed[li] * 1000 + (fanNeed[li] - laneCols[li])
+        : need[li] - laneCols[li];
+      if (rank > best) { best = rank; pick = li; }
+    });
+    if (pick < 0) break;
+    laneCols[pick]++;
+  }
+  const MAXCOL_OF = (li) => laneCols[li];
+  if (process.env.PICA_DEBUG_LANES) console.error("lanes:", laneNames.map((n, i) => `${n}: need ${need[i]}, fan ${fanNeed[i]} -> ${laneCols[i]} col`).join(" | "), "budget", budget);
   // a cell that overflows its columns needs vertical room, so the stage it sits in grows
   const stageRows = new Array(stages).fill(1);
   for (const [k, v] of cell) {
     const d = Number(k.split(":")[1]);
-    stageRows[d] = Math.max(stageRows[d], Math.ceil(v / MAXCOL));
+    stageRows[d] = Math.max(stageRows[d], Math.ceil(v / MAXCOL_OF(Number(k.split(":")[0]))));
   }
   // a stage holding a legend needs room for it, or the legend lands on the next row of steps
   // a legend used to reserve a band inside the flow, which is what pushed it between a fork and
@@ -864,11 +914,22 @@ function useCaseDiagram(useCases) {
   for (const g of byActor) {
     const ay = y + (g.ucs.length * rowH) / 2 - 6;
     L.push(`<circle cx="60" cy="${ay - 16}" r="9" fill="none" stroke="${C.accent}" stroke-width="1.6"/>`);
+    /* The actor and its permission lines were drawn and never declared. Every check here reads
+     * data-node and data-edge, so a diagram whose structure exists only as ink is a diagram no
+     * check can see — this one reported ten isolated nodes and was excluded from being
+     * interrogable on the strength of having no edges it had simply never labelled. */
+    /* A stick figure is strokes with no fill, so it has no interior and a click passes straight
+     * through it to the canvas behind. The node was focusable, listed as interrogable, and had no
+     * surface to hit — the same failure as a control that does nothing, arrived at from geometry
+     * rather than from the graph. Every clickable node needs a filled hit area, visible or not. */
+    L.push(`<g data-node="actor:${esc(g.actor)}" tabindex="0" role="button" aria-label="${esc(g.actor)}">`);
+    L.push(`<rect x="10" y="${ay - 18}" width="100" height="62" fill="transparent"/>`);
     L.push(`<path d="M60 ${ay - 7} L60 ${ay + 10} M51 ${ay} L69 ${ay} M60 ${ay + 10} L52 ${ay + 21} M60 ${ay + 10} L68 ${ay + 21}" stroke="${C.accent}" stroke-width="1.6" fill="none"/>`);
     L.push(`<text x="60" y="${ay + 38}" text-anchor="middle" font-size="11.5" font-weight="600" fill="${C.ink}">${esc(wrap(g.actor, 16, 1)[0])}</text>`);
+    L.push(`</g>`);
     g.ucs.forEach((u, i) => {
       const uy = y + i * rowH;
-      L.push(`<path d="M78 ${ay} C150 ${ay} 150 ${uy + 15} 230 ${uy + 15}" stroke="${C.line}" stroke-width="1.2" fill="none"/>`);
+      L.push(`<path data-edge="actor:${esc(g.actor)}|${esc(u.id)}" d="M78 ${ay} C150 ${ay} 150 ${uy + 15} 230 ${uy + 15}" stroke="${C.line}" stroke-width="1.2" fill="none"/>`);
       L.push(`<g data-node="${esc(u.id)}" tabindex="0" role="button" aria-label="${esc(u.name)}">`);
       // Two lines rather than an ellipsis: a use case whose name is cut off is the one thing on
       // this diagram a reader most needs to read, and "Phát hiện người trống việc hoặc việ…" is
