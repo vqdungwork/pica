@@ -388,6 +388,15 @@ table.rtm tr.warn td{background:var(--open-bg)}
    two sources that will drift — the figure keeps a light card under them in both
    themes, which is what a printed diagram does on a dark page anyway. */
 
+/* A 968px drawing in a 358px phone column renders its labels at 3.7px. Shrinking a diagram until
+   it is unreadable is not responsive design, it is decoration — and the whole-page no-horizontal-
+   scroll rule was never an argument for that. The page still never scrolls sideways; the FIGURE
+   does, inside its own frame, on screens too narrow to hold it. */
+@media (max-width:760px){
+  .fig{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .fig svg{width:auto;max-width:none;height:auto}
+  .fig figcaption::after{content:" · vuốt ngang để xem hết";color:var(--ink3)}
+}
 .fig figcaption{font-size:11.5px;color:var(--ink3);margin-top:9px}
 .fig svg[data-interrogable="yes"] [data-node]{cursor:pointer}
 

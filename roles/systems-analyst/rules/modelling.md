@@ -336,3 +336,55 @@ Rewriting it to load the real SVG in a browser and walk each path with `getPoint
 the parser and its blind spot at once: eight edges reappeared, and two of the numbers got worse.
 
 If a harness cannot see everything it claims to score, it is not a harness. It is agreement.
+
+
+## a label that is not on its line is not a label
+
+<!-- enforced-by: figure-labels-collide -->
+
+The first collision pass pushed branch labels apart vertically until nothing intersected. It was a
+fine way to stop them colliding and a terrible way to keep them meaningful: one "Không" ended up
+floating in white space with no line touching it, while the branch it named ran somewhere else.
+The measurement said zero overlaps. The label named nothing.
+
+A label may only ever occupy a point **on its own route**. Sample the route, score each point
+against the steps and the labels already placed, take the cleanest, prefer positions near the fork
+where the reader is already looking. If every point collides, the least bad one is still on the
+line, which is the property that matters.
+
+Free movement plus a collision count will always converge on something that satisfies the count
+and means nothing. Constrain the search space to positions that are correct by construction, and
+let the score choose among those.
+
+## measure the boxes too, not only the lines
+
+<!-- enforced-by: figure-steps-overlap -->
+
+Routing was measured to zero edges through boxes and five crossings, and the drawing still looked
+cramped — because nothing had measured the boxes against each other.
+
+The half-row used when a cell overflows its columns dropped a step by 59px for a box 54 tall: five
+pixels of air, and the step-number badge overhangs nine pixels above its own box, so the badge of
+the lower step was drawn on top of the box above it. Three pairs overlapped and nine sat closer
+than fourteen pixels.
+
+**Height is the axis a page has to spare.** Width is fixed and every column fights for it; vertical
+room costs a scroll nobody minds. When a layout is tight, the answer is almost always to spend
+height, and almost never to shave the gaps.
+
+
+## measure at the width the reader has, not the width you designed for
+
+<!-- enforced-by: figure-unreadable-on-a-phone -->
+
+Every number about this diagram was taken in a 900px column: labels at 10px, no edge through a box,
+no label off its line. In a 358px phone column the same drawing rendered its smallest label at
+**3.7px**, and no check had ever looked, because the check took the design width as the width.
+
+Shrinking a diagram until it is unreadable is not responsive design. A page that must never scroll
+sideways is not an argument for it either — the page still does not, the FIGURE does, inside its
+own frame, on screens too narrow to hold it.
+
+And that is a mitigation, not a fix. A three-lane swimlane on a phone is a poor artefact however it
+is handled: readable-and-scrollable beats shrunk-into-a-texture, and neither is good. Say so rather
+than reporting the narrow case as solved.

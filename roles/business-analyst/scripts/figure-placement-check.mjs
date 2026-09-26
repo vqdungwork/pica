@@ -43,6 +43,12 @@ for (const f of svgs) {
 //
 // The threshold is 9px because that is roughly where Vietnamese diacritics stop resolving.
 const COLUMN = Number(process.env.PICA_FIGURE_COLUMN ?? 900);
+/* The narrow case has to be measured too, and was not. Everything about this figure was verified
+   at 900px and the same drawing rendered its labels at 3.7px in a phone column — a check that only
+   looks at the width you designed for will never see the width the reader has. A figure that
+   cannot fit legibly on a phone must be allowed to scroll inside its own frame; what it must not
+   do is shrink into a grey texture. */
+const NARROW = Number(process.env.PICA_FIGURE_NARROW ?? 358);
 for (const f of svgs) {
   const src = readFileSync(join(dir, f), "utf8");
   const w = Number((src.match(/viewBox="0 0 ([\d.]+)/) || [])[1]);
@@ -51,6 +57,11 @@ for (const f of svgs) {
   if (!sizes.length) continue;
   const scale = Math.min(1, COLUMN / w);
   const smallest = Math.min(...sizes) * scale;
+  const onPhone = Math.min(...sizes) * Math.min(1, NARROW / w);
+  if (onPhone < 9 && !/data-scrolls-when-narrow="yes"/.test(src))
+    fail("figure-unreadable-on-a-phone",
+      `${f} renders its smallest label at ${onPhone.toFixed(1)}px in a ${NARROW}px column. Let the ` +
+      "figure scroll inside its own frame on narrow screens, or split it — do not shrink it into a texture");
   if (smallest < 9)
     fail("figure-too-wide-to-read",
       `${f} is ${Math.round(w)}px wide in a ${COLUMN}px column, so its smallest label renders at ` +
@@ -158,6 +169,47 @@ for (const f of svgs) {
     fail("figure-edge-through-node",
       `${f}: the router could not clear ${n} edge(s) of a box they do not touch. A line drawn ` +
       "through an unrelated step reads as a connection to it");
+}
+
+/* Two steps drawn on top of each other.
+ *
+ * Unlike an edge route, a node's footprint is a rectangle and a circle in the source, so this
+ * re-derives the answer instead of trusting a number the generator reports about itself — which
+ * is the stronger form, and is available here precisely because the geometry is simple.
+ *
+ * It found a real one: the half-row used for a cell that overflows its columns dropped a box by
+ * 59px when the box is 54 tall, leaving 5px of air — and the step-number badge overhangs 9px
+ * above its box, so the badge of the lower step was drawn on top of the box above it. Everything
+ * measured about routing was clean and the drawing still looked cramped, because nothing had
+ * measured the boxes. */
+for (const f of svgs) {
+  const src = readFileSync(join(dir, f), "utf8");
+  const boxes = [];
+  for (const g of src.matchAll(/<g data-node="([^"]+)"[\s\S]*?<\/g>/g)) {
+    const body = g[0];
+    const parts = [];
+    for (const r of body.matchAll(/<rect x="(-?[\d.]+)" y="(-?[\d.]+)" width="([\d.]+)" height="([\d.]+)"/g))
+      parts.push({ x: +r[1], y: +r[2], x2: +r[1] + +r[3], y2: +r[2] + +r[4] });
+    for (const c of body.matchAll(/<circle cx="(-?[\d.]+)" cy="(-?[\d.]+)" r="([\d.]+)"/g))
+      parts.push({ x: +c[1] - +c[3], y: +c[2] - +c[3], x2: +c[1] + +c[3], y2: +c[2] + +c[3] });
+    for (const d of body.matchAll(/<path d="M(-?[\d.]+) (-?[\d.]+) L(-?[\d.]+) (-?[\d.]+) L(-?[\d.]+) (-?[\d.]+) L(-?[\d.]+) (-?[\d.]+)/g)) {
+      const xs = [+d[1], +d[3], +d[5], +d[7]], ys = [+d[2], +d[4], +d[6], +d[8]];
+      parts.push({ x: Math.min(...xs), y: Math.min(...ys), x2: Math.max(...xs), y2: Math.max(...ys) });
+    }
+    if (parts.length) boxes.push({ id: g[1],
+      x: Math.min(...parts.map((q) => q.x)), y: Math.min(...parts.map((q) => q.y)),
+      x2: Math.max(...parts.map((q) => q.x2)), y2: Math.max(...parts.map((q) => q.y2)) });
+  }
+  const bad = [];
+  for (let i = 0; i < boxes.length; i++)
+    for (let j = i + 1; j < boxes.length; j++) {
+      const a = boxes[i], b = boxes[j];
+      if (a.x < b.x2 - 0.5 && b.x < a.x2 - 0.5 && a.y < b.y2 - 0.5 && b.y < a.y2 - 0.5) bad.push(`${a.id}/${b.id}`);
+    }
+  if (bad.length)
+    fail("figure-steps-overlap",
+      `${f} draws ${bad.length} pair(s) of steps on top of each other (${bad.slice(0, 4).join(", ")}). ` +
+      "Height is the axis a page has to spare — give them room rather than crowding the width");
 }
 
 // and the reverse: a figure the page frames but has no caption is a picture with no question
