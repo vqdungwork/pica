@@ -402,6 +402,30 @@ const M = [
             '<rect x="60" y="44" width="70" height="19" rx="9.5" fill="var(--fig-card, #fff)"/><text font-size="11">x</text></svg>\n' },
       ] }],
 
+  /* figure-control-does-nothing — both live failures. One claims to be interrogable with no edges
+   * at all; the other lights almost everything for the node you click. Each shipped, each looked
+   * correct in the source, and each was a control the reader spent attention discovering was inert. */
+  ["figure-control-does-nothing", "business-analyst/scripts/figure-placement-check.mjs",
+    [path.join(DIR, "__mut-fig5__.html"), path.join(DIR, "__mut-figs5__")], "always",
+    { files: [
+        { file: "__mut-fig5__.html", content: '<!doctype html><title>m</title><figure data-figure="dead" data-label="Dead"><svg viewBox="0 0 400 300"></svg></figure>\n' },
+        { file: path.join("__mut-figs5__", "dead.svg"), content:
+            '<svg data-interrogable="yes" viewBox="0 0 400 300">' +
+            [1,2,3,4,5,6,7].map((i) => `<g data-node="n${i}"><text font-size="12">n${i}</text></g>`).join("") +
+            '</svg>\n' },
+      ] }],
+  ["figure-control-does-nothing", "business-analyst/scripts/figure-placement-check.mjs",
+    [path.join(DIR, "__mut-fig6__.html"), path.join(DIR, "__mut-figs6__")], "always",
+    { files: [
+        { file: "__mut-fig6__.html", content: '<!doctype html><title>m</title><figure data-figure="wide2" data-label="Wide"><svg viewBox="0 0 400 300"></svg></figure>\n' },
+        // a star: every node touches the hub, so the median neighbourhood is most of the graph
+        { file: path.join("__mut-figs6__", "wide2.svg"), content:
+            '<svg data-interrogable="yes" viewBox="0 0 400 300"><g data-node="hub"><text font-size="12">hub</text></g>' +
+            [1,2,3,4,5].map((i) => `<g data-node="n${i}"><text font-size="12">n${i}</text></g><path data-edge="hub|n${i}"/><path data-edge="n${i}|hub"/>` +
+              [1,2,3,4,5].filter((j) => j !== i).map((j) => `<path data-edge="n${i}|n${j}"/>`).join("")).join("") +
+            '</svg>\n' },
+      ] }],
+
   /* branch-unlabelled / branch-half-labelled — a decision whose branches carry no condition, and
    * a fork where only some do. The second is worse: the renderer has to guess whether it is a
    * choice or parallel work, and it will guess consistently and wrongly. */

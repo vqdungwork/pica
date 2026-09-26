@@ -98,6 +98,32 @@ const C = {
   onAccent2: v("on-accent-2", "rgba(255,255,255,.78)"),
 };
 
+/* Whether a figure is worth making clickable is a property OF THE GRAPH, not a guess about the
+ * kind of diagram it is. That guess was made once and was exactly backwards: the lifecycle models
+ * were made interrogable and the use case model was not, when focusing a state in a cyclical
+ * lifecycle lights 100% of it — every state reaches every other — and focusing an actor in a use
+ * case model narrows to a tenth.
+ *
+ * A control that looks interactive and changes nothing is worse than no control. So: measure it.
+ * A figure is interrogable when it is big enough to need help AND focusing the median node leaves
+ * most of it dimmed. */
+function interrogable(nodeIds, edgePairs) {
+  if (nodeIds.length < 6) return false;               // small enough to read whole
+  const near = (id) => {
+    const set = new Set([id]);
+    for (const [a, b] of edgePairs) { if (a === id) set.add(b); if (b === id) set.add(a); }
+    return set.size;
+  };
+  const sizes = nodeIds.map(near).sort((a, b) => a - b);
+  const med = sizes[Math.floor(sizes.length / 2)];
+  /* Two ways to fail. Lighting most of the diagram answers nothing — and lighting only the node
+   * you clicked answers nothing either. The use case model has ten nodes and, as drawn, no tagged
+   * edges at all, so every neighbourhood is the node alone: it passed a "does it narrow" test by
+   * narrowing to nothing, and clicking it just dimmed the other nine. A graph with no edges is a
+   * list, and a list is not interrogable. */
+  return med >= 2 && med / nodeIds.length <= 0.5;
+}
+
 /** Wrap a label to `w` characters, at most `max` lines, the last one elided. */
 function wrap(text, w, max = 3) {
   const words = String(text).split(/\s+/);
@@ -787,6 +813,18 @@ if (!Object.keys(built).length) {
   console.log("model-diagram: SKIPPED — state carries no stateModel, rolesPermissions or toBe to draw. This is not a pass.");
   process.exit(0);
 }
+/* Every built diagram is asked, once, whether focusing one of its nodes would narrow anything.
+ * Doing it here rather than inside each renderer means the six of them cannot drift apart, and
+ * the answer is read off the SVG the reader will actually get rather than off the model it was
+ * drawn from. */
+for (const name of Object.keys(built)) {
+  const ids = [...built[name].matchAll(/data-node="([^"]+)"/g)].map((m) => m[1]);
+  const pairs = [...built[name].matchAll(/data-edge="([^"|]+)\|([^"]+)"/g)].map((m) => [m[1], m[2]]);
+  built[name] = built[name].replace(/<svg /, `<svg data-interrogable="${interrogable(ids, pairs) ? "yes" : "no"}" `);
+}
+
 mkdirSync(OUT, { recursive: true });
 for (const [name, svg] of Object.entries(built)) writeFileSync(join(OUT, `${name}.svg`), svg + "\n");
+const q = Object.entries(built).filter(([, v]) => /data-interrogable="yes"/.test(v)).map(([k]) => k);
 console.log(`model-diagram: wrote ${Object.keys(built).length} diagram(s) to ${OUT} — ${Object.keys(built).join(", ")}`);
+console.log(`model-diagram: ${q.length} worth making clickable (${q.join(", ") || "none"}); the rest are drawings, and saying so is the point`);
