@@ -94,5 +94,5 @@ for you to find.
 ## The numbers
 
 Whatever `example-verify` prints is the number; the ones last written here were several releases out
-of date. On 3.19.0 in CI: 55 checks, 52 passing, 0 failing, 3 abstaining (the visual baselines and
+of date. On 3.19.1 in CI: 55 checks, 52 passing, 0 failing, 3 abstaining (the visual baselines and
 the Figma pair). On a machine without axe-core, 51 and 4.

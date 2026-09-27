@@ -1,5 +1,34 @@
 # Changelog
 
+## 3.19.1
+
+### It works on a project's first day, and it works as installed
+
+**The repository's history was rewritten** to remove three client identifiers from every past
+commit and message. Every tag was re-pointed at its rewritten commit; the tree of every release is
+unchanged apart from those words, and the current tree is byte-identical. A clone taken before today
+has to be taken again.
+
+**pica-verify failed a brand-new project.** Every check that drives a served demo or a build had no
+`needs`, so on an empty state they all applied, all lacked their placeholders, and the run printed
+"THIS RUNNER IS NOT REPORTING HONESTLY" and exited 1 before intake had started. They need a `demo/`,
+`html/` or `src/` directory or a `runners.json` now: until one exists they abstain and say so, and
+from then on a missing declaration is still `UNSET`.
+
+**pica-status was wrong in both layouts.** Installed, after a single update, `pica-core/` holds two
+versions and qualified as the package root: the table said "READY core" five times and named nothing
+else. In the repository it listed the worked example as a package and reported every
+business-analyst file missing. It names both layouts now, the way pica-verify does, and takes the
+highest version by number.
+
+**geometry-diff threw ENOENT** when the capture or the dump did not exist yet. It abstains.
+
+**Two suites that run pica the way users have it.** `layout-check` builds an installed cache from
+this repository with a stale decoy version beside every package, and runs pica-status, pica-run,
+pica-verify and a cross-package read from it, plus pica-verify and pica-status on an empty project.
+Reverting pica-status makes it fail. `thin-state-check` runs every check on an empty state and on
+the state left by intake, discovery and analysis, and fails on a crash. Both run in CI.
+
 ## 3.19.0
 
 ### Every check proven, the example built, and a specification generator that was one project's

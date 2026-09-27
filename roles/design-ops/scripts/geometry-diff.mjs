@@ -41,8 +41,17 @@ if (!refPath || !figPath || !statePath) {
   process.exit(2);
 }
 
-const ref = JSON.parse(fs.readFileSync(refPath, "utf8"));
-const fig = JSON.parse(fs.readFileSync(figPath, "utf8"));
+/* A missing input is an abstention, as in frame-inventory-check, never an uncaught ENOENT: pica-verify
+ * guards this with `needs`, and anyone calling the script directly got a stack trace. */
+for (const [p, what] of [[refPath, "the capture"], [figPath, "the Figma dump"], [statePath, "the state"]]) {
+  if (fs.existsSync(p)) continue;
+  console.log(`NOT APPLICABLE  ${p} does not exist, so ${what} has not been taken.`);
+  console.log("                Nothing was compared. This is an abstention, not a pass.");
+  process.exit(0);
+}
+let ref, fig;
+try { ref = JSON.parse(fs.readFileSync(refPath, "utf8")); fig = JSON.parse(fs.readFileSync(figPath, "utf8")); }
+catch (e) { console.error(`FAIL  an input could not be parsed (${e.message}). Nothing was compared, and that is not a pass.`); process.exit(2); }
 
 /* The dump is an ARRAY of frames. Handed an object it threw "fig.map is not a function",
  * which is a stack trace where a sentence naming the file belongs. Every other script here

@@ -194,6 +194,15 @@ jobs:
       - name: the in-Figma checks, outside Figma
         run: node roles/design-ops/scripts/mock-figma.mjs
 
+      # Everything above runs from this repository's layout, which no user has. This runs the
+      # entry points from an installed layout with a stale version beside the current one, and on a
+      # project on its first day.
+      - name: every check on a project in its first weeks
+        run: node scripts/thin-state-check.mjs
+
+      - name: run as installed
+        run: node scripts/layout-check.mjs
+
       - name: verify the worked example
         run: node scripts/example-verify.mjs
 

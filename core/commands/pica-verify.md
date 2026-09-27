@@ -78,6 +78,10 @@ option is left off the check's command line, the check says for itself what it t
 not measure, and the run lists every placeholder declared as none. That is a decision made in
 writing. A placeholder nobody declared is `UNSET`, and a check is never handed one.
 
+`UNSET` is only possible once there is something to serve: a `demo/`, `html/` or `src/` directory,
+or a `runners.json`. On a project's first day those checks abstain, naming that as what they need,
+and the run exits 0.
+
 ---
 
 ## What it will not do

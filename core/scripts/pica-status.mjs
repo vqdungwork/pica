@@ -54,74 +54,51 @@ const statePath = process.argv[2] || ".pica/state.json";
 // manifest and which wins on its own structure. A resolver that cannot find a
 // qualifying candidate says so and exits 2; it never prints a package list
 // derived from a directory that did not qualify.
-const CHILD_MANIFEST_FIELDS = ["name", "status", "owns", "requires", "produces"];
-
-// Existence only: the FIRST of <child>/package.json or <child>/<anything>/package.json
-// that exists on disk, regardless of whether it parses or has the fields above.
-function locateManifestPath(childDir) {
-  const direct = path.join(childDir, "package.json");
-  if (fs.existsSync(direct)) return direct;
-  let entries;
-  try { entries = fs.readdirSync(childDir, { withFileTypes: true }); } catch { return null; }
-  for (const e of entries) {
-    if (!e.isDirectory()) continue;
-    const nested = path.join(childDir, e.name, "package.json");
-    if (fs.existsSync(nested)) return nested;
-  }
-  return null;
-}
-
-// A child "yields a manifest" only when the located file also parses and carries every
-// field pica-status.mjs and the qualifying rule depend on.
-function readChildManifest(childDir) {
-  const mp = locateManifestPath(childDir);
-  if (!mp) return null;
-  let m;
-  try { m = JSON.parse(fs.readFileSync(mp, "utf8")); } catch { return null; }
-  if (!m || typeof m !== "object" || Array.isArray(m)) return null;
-  return { path: mp, data: m };
-}
-
-function qualifies(dir) {
-  let entries;
-  try { entries = fs.readdirSync(dir, { withFileTypes: true }); } catch { return false; }
-  let matches = 0;
-  for (const e of entries) {
-    if (!e.isDirectory()) continue;
-    const found = readChildManifest(path.join(dir, e.name));
-    if (found && CHILD_MANIFEST_FIELDS.every((f) => f in found.data)) matches++;
-    if (matches >= 2) return true;
-  }
-  return false;
-}
-
-function findPackagesDir(startDir) {
-  const tried = [];
-  let dir = path.resolve(startDir);
-  for (;;) {
-    for (const c of [dir, path.join(dir, "packages")]) {
-      if (tried.includes(c)) continue;
-      tried.push(c);
-      if (fs.existsSync(c) && qualifies(c)) return { dir: c, tried };
-    }
-    const parent = path.dirname(dir);
-    if (parent === dir) break; // reached the filesystem root
-    dir = parent;
-  }
-  return { dir: null, tried };
-}
-
+/* 3.19.0: every inference above failed again, both ways at once.
+ *
+ * Installed, a machine that has updated once holds pica-core/3.18.0 AND pica-core/3.19.0, so
+ * pica-core/ has two children that each yield a manifest and QUALIFIED as the package root: the
+ * table read "READY core" five times and named no other package. In the repository the walk
+ * stopped at the root, where core/ yields a manifest, roles/ yields the first role's manifest from
+ * one level down, and examples/ yields the worked example's: the table listed "approvals" as a
+ * package and reported every business-analyst file missing from roles/.
+ *
+ * So nothing is inferred. The two layouts are named, as pica-verify names them, and within an
+ * installed package the highest version wins by NUMBER, never by string sort. */
+const vcmp = (a, b) => {
+  const pa = String(a).split(/[.-]/).map((x) => (/^\d+$/.test(x) ? Number(x) : -1));
+  const pb = String(b).split(/[.-]/).map((x) => (/^\d+$/.test(x) ? Number(x) : -1));
+  for (let i = 0; i < Math.max(pa.length, pb.length); i++) { const d = (pa[i] ?? -1) - (pb[i] ?? -1); if (d) return d; }
+  return 0;
+};
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
-const { dir: PKG_DIR, tried } = findPackagesDir(SCRIPT_DIR);
-
-if (!PKG_DIR) {
-  console.error("no roles/ directory found: no candidate qualified.");
-  console.error("A candidate must contain at least two subdirectories that each yield a package.json");
-  console.error('(at <child>/package.json or <child>/<anything>/package.json) parsing with "name",');
-  console.error('"status", "owns", "requires" and "produces" as fields. Walking up from:');
-  console.error(`  ${SCRIPT_DIR}`);
-  console.error("Checked:");
-  for (const t of tried) console.error(`  ${t}`);
+const hasManifest = (d) => fs.existsSync(path.join(d, "package.json"));
+function packageDirs() {
+  // repository: <root>/core/scripts, with the roles beside core under <root>/roles
+  const root = path.resolve(SCRIPT_DIR, "..", "..");
+  if (hasManifest(path.join(root, "core")) && fs.existsSync(path.join(root, "roles"))) {
+    const roles = fs.readdirSync(path.join(root, "roles"), { withFileTypes: true })
+      .filter((e) => e.isDirectory() && !e.name.startsWith("_")).map((e) => path.join(root, "roles", e.name)).filter(hasManifest);
+    return { where: root, dirs: [path.join(root, "core"), ...roles] };
+  }
+  // installed: <cache>/<marketplace>/pica-core/<version>/scripts, siblings pica-<name>/<version>
+  const cache = path.resolve(SCRIPT_DIR, "..", "..", "..");
+  const dirs = [];
+  let entries = [];
+  try { entries = fs.readdirSync(cache, { withFileTypes: true }); } catch {}
+  for (const e of entries) {
+    if (!e.isDirectory() || !e.name.startsWith("pica-")) continue;
+    const pkg = path.join(cache, e.name);
+    const versions = fs.readdirSync(pkg).filter((v) => hasManifest(path.join(pkg, v))).sort(vcmp);
+    if (versions.length) dirs.push(path.join(pkg, versions[versions.length - 1]));
+  }
+  return { where: cache, dirs };
+}
+const { where: PKG_WHERE, dirs: PKG_DIRS } = packageDirs();
+if (PKG_DIRS.length < 2) {
+  console.error("FAIL  could not locate pica's packages from " + SCRIPT_DIR + ".");
+  console.error(`      Looked for <root>/core + <root>/roles, then pica-*/<version> under ${PKG_WHERE}.`);
+  console.error("      Nothing was reported, and that is not an answer.");
   process.exit(2);
 }
 
@@ -203,12 +180,9 @@ if (stateError) {
 
 // Reported by MANIFEST name ("core", "html"), not directory name ("pica-core"), so
 // output is identical whether this runs against the repo layout or an installed one.
-for (const dirName of fs.readdirSync(PKG_DIR, { withFileTypes: true })
-    .filter((d) => d.isDirectory() && !d.name.startsWith("_"))
-    .map((d) => d.name)) {
-  const childDir = path.join(PKG_DIR, dirName);
-  const mp = locateManifestPath(childDir);
-  if (!mp) continue;
+for (const childDir of PKG_DIRS) {
+  const dirName = path.basename(childDir);
+  const mp = path.join(childDir, "package.json");
 
   let m;
   try {

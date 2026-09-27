@@ -49,7 +49,9 @@
       "passes": "0 findings",
       "args": "<srcDir>",
       "phase": "design",
-      "needs": []
+      "needs": [
+        "@demo|@html|@src|@.pica/runners.json"
+      ]
     }
   ],
   "definitionOfDone": [

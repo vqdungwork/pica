@@ -205,70 +205,90 @@
       "passes": "0 findings",
       "args": "--url <servedDemo> --valid <knownRoute>",
       "phase": "design",
-      "needs": []
+      "needs": [
+        "@demo|@html|@src|@.pica/runners.json"
+      ]
     },
     {
       "run": "layout-coherence-check.mjs",
       "passes": "0 findings",
       "args": "--url <servedDemo> --routes <everyScreenAndState>",
       "phase": "design",
-      "needs": []
+      "needs": [
+        "@demo|@html|@src|@.pica/runners.json"
+      ]
     },
     {
       "run": "keyboard-check.mjs",
       "passes": "0 findings",
       "args": "--url <servedDemo> --routes <everyScreenAndState> --open <opener> --modal <dialog>",
       "phase": "design",
-      "needs": []
+      "needs": [
+        "@demo|@html|@src|@.pica/runners.json"
+      ]
     },
     {
       "run": "axe-check.mjs",
       "passes": "0 violations",
       "args": "--url <servedDemo> --routes <everyScreenAndState> --include <frame>",
       "phase": "design",
-      "needs": []
+      "needs": [
+        "@demo|@html|@src|@.pica/runners.json"
+      ]
     },
     {
       "run": "visual-baseline-check.mjs",
       "passes": "0 changed",
       "args": "--url <servedDemo> --routes <everyScreenAndState> --dir <baselines>",
       "phase": "design",
-      "needs": []
+      "needs": [
+        "@demo|@html|@src|@.pica/runners.json"
+      ]
     },
     {
       "run": "screenreader-check.mjs",
       "passes": "0 findings",
       "args": "--url <servedDemo> --routes <everyScreenAndState> --act <primary> --modal <dialog>",
       "phase": "design",
-      "needs": []
+      "needs": [
+        "@demo|@html|@src|@.pica/runners.json"
+      ]
     },
     {
       "run": "build-check.mjs",
       "passes": "0 findings",
       "args": "--cmd <buildCmd> --cwd <buildCwd> --out <buildOut>",
       "phase": "design",
-      "needs": []
+      "needs": [
+        "@demo|@html|@src|@.pica/runners.json"
+      ]
     },
     {
       "run": "artifact-readiness-check.mjs",
       "passes": "0 findings",
       "args": "--dir <buildOut>",
       "phase": "design",
-      "needs": []
+      "needs": [
+        "@demo|@html|@src|@.pica/runners.json"
+      ]
     },
     {
       "run": "target-size-check.mjs",
       "passes": "0 findings",
       "args": "--url <servedDemo> --routes <everyScreenAndState> --min <targetFloor> --ignore <harnessChrome>",
       "phase": "design",
-      "needs": []
+      "needs": [
+        "@demo|@html|@src|@.pica/runners.json"
+      ]
     },
     {
       "run": "flow-walk-check.mjs",
       "passes": "0 findings: every control, clicked up to three deep from every route, leaves something on screen and throws nothing",
       "args": "--url <servedDemo> --routes <everyScreenAndState> --frame <frame> --ignore <harnessChrome>",
       "phase": "design",
-      "needs": []
+      "needs": [
+        "@demo|@html|@src|@.pica/runners.json"
+      ]
     }
   ],
   "definitionOfDone": [
