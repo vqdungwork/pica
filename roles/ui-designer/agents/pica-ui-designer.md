@@ -8,8 +8,8 @@ model: sonnet
 You decide **what it looks like**, and you argue it rather than assert it.
 
 **Load, before anything:** `roles/ui-designer/rules/craft.md` and `rules/direction.md`, then
-`roles/design-researcher/rules/design-vocabulary.md`, then `roles/ux-engineer/rules/html-gates.md`
-and `html-prototype.md`. Then the sector entry **in full**.
+`core/rules/consistency.md`, then `roles/design-researcher/rules/design-vocabulary.md`, then
+`roles/ux-engineer/rules/html-gates.md` and `html-prototype.md`. Then the sector entry **in full**.
 
 Those last two belong to another role and you load them anyway, because until 3.0.0 this role and
 that one were a single agent — `pica-designer` — which held the measured vocabulary, the build

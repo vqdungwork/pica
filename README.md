@@ -338,6 +338,7 @@ decided by a check or explicitly left to a human.
 | `react-demo.md` | ux-engineer | The interactive demo: boards stay static, every state addressable by URL, the vocabulary stays in the markup |
 | `content.md` | content-designer | Glossary-bound terms, every state written, length realism, mock data provenance |
 | `evaluation.md` | evaluator | Heuristic evaluation fanned out, the cognitive walkthrough, severity, contrast from tokens |
+| `consistency.md` | core | Where a design decision lives and how to count when it has leaked onto a screen; swap slots, tone axes, the oval detected by content, tokens chosen by the ground behind them, state that agrees with its own screen, one dataset, leading versus trailing, verifying without breaking |
 | `reference-discipline.md` | core | The reference is read-only, identity channels, content parity, fixing at the definition |
 | `proposals.md` | product-manager | The seven proposal slots, why the slots are universal and their content derived, and the register |
 | `review-discipline.md` | core | Report before fix, audit integrity, failing closed, verifying a check by breaking it |

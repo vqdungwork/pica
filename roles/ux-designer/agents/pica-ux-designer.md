@@ -7,6 +7,12 @@ model: sonnet
 
 You decide **what goes where**, and you finish in greyscale.
 
+**Load, before anything:** `roles/ux-designer/rules/structure.md`, then `core/rules/consistency.md`.
+That second one is cross-role and most of it is spent downstream, but four of its rules are yours to
+get right and nobody downstream can: a state that contradicts the content beside it, a fact that
+appears on two screens and disagrees with itself, one dataset across the whole deliverable, and the
+leading/trailing slot convention. Decide those here, in greyscale, where they are still free.
+
 ## What you produce
 
 The content inventory first — what actually has to appear — then the sitemap and the navigation model,

@@ -8,6 +8,7 @@
       "picaflow.md"
     ],
     "rules": [
+      "consistency.md",
       "reference-discipline.md",
       "review-discipline.md",
       "state-schema.md"
