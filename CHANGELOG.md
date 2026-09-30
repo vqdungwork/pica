@@ -1,5 +1,32 @@
 # Changelog
 
+## 3.20.0
+
+### The rules a client's feedback actually produced
+
+**`core/rules/consistency.md`** — now 32 rules turning one project's client feedback into cross-role
+law: the seven principles from their call, 18 review comments, and the regressions the work itself
+caused. Six parts: where a decision lives, what the eye checks that a script cannot, colour that
+survives a theme, state that tells the truth, chrome, and verifying without breaking what worked.
+
+Every rule is named after the defect that produced it and carries the real measurement, not advice.
+Three added this release, each one an audit that reported clean while the screen was wrong:
+
+- **A `fill` that is pinned inside is not a fill.** Width 704, sizing `FILL`, variant named
+  `width=fill` — and it rendered 343 on 66 instances, because the master's inner frame was fixed to
+  the mobile column. The literal lives where an override census structurally cannot see it.
+- **A surface is separated by a difference, and the difference must survive both themes.** Card and
+  page both resolved to `#0a0a0a` in dark, so the card stopped existing. No contrast check fires: a
+  card boundary is neither text nor a control.
+- **After a `layoutMode` flip, every child's cross-axis sizing is stale.** `FILL` means *share what is
+  left*, not *stretch*. A flip collapsed grid rows to 66px and option rows to 1px.
+
+The invariant-ground rule gained its surface-level case: chips on a mode-invariant banner bound to a
+flipping token stayed readable in dark and became the same colour as the button beside them —
+**readable is not the test; saying the same thing in both themes is.**
+
+Wired into `pica-ui-designer` and `pica-ux-designer`, indexed in `design-flow` and the README.
+
 ## 3.19.1
 
 ### It works on a project's first day, and it works as installed

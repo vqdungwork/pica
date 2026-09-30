@@ -204,6 +204,22 @@ So: reuse the component, re-decide the density. And when the two references disa
 usually not in conflict — they are answering different questions. Ask which one owns the question
 you are actually asking.
 
+## A `fill` that is pinned inside is not a fill
+
+<!-- enforced-by: none — measure the first child, not the instance -->
+
+Every instance-level measurement agreed: width **704**, `layoutSizingHorizontal = FILL`, variant
+literally named `width=fill`. The screen still rendered a **343px** row with 361px of dead space
+beside it, on 66 instances.
+
+The variant wrapped an inner frame left **FIXED at the mobile column width**. That literal lives in
+the master, where an override census structurally cannot see it — nothing is overridden anywhere, so
+every audit reports clean.
+
+So when a container measures full-width but *looks* narrow, **measure its first child**, not the
+container. And when naming a variant `fill`, assert the claim: the child that carries the content has
+to fill too, or the name is a lie the next person will trust.
+
 ## Anything that clips must be larger than anything it holds
 
 <!-- enforced-by: overflow -->
@@ -235,7 +251,12 @@ does not change between themes requires content that does not change either.** P
 colours, marketing pastels and illustration plates are all theme-invariant grounds, and they need a
 theme-invariant token family of their own.
 
-Read the backdrop, then pick the token. Never read the frame's theme and pick from that.
+Read the backdrop, then pick the token. Never read the frame's theme and pick from that. The same
+mistake runs the other way on a **surface**, not just a glyph: countdown chips on a mode-invariant
+orange banner were bound to the flipping surface token, so in dark they resolved to `#0a0a0a` —
+readable, but now the same colour as the black call-to-action beside them, and the chips stopped
+reading as chips. Readable is not the test. **The test is whether the design still says the same
+thing in both themes.**
 
 ## Measure the resolved value, in every theme, on fill and on stroke
 
@@ -249,6 +270,23 @@ Three ways a contrast audit passes while the screen is unreadable, all observed 
 - **Stroke without fill.** A vector can carry a *bound* stroke and a *raw* fill simultaneously. A
   stroke-only check reported clean while a three-dot button sat at **2.03:1 in both themes** on 136
   instances of the most-opened card in the product.
+
+## A surface is separated by a difference, and the difference must survive both themes
+
+<!-- enforced-by: none — resolve card fill against page fill, per theme -->
+
+A card bound to the primary surface token sat on a page bound to the page token. In light: `#ffffff`
+on `#f7f7f7`, a real if quiet step. In dark both resolved to **`#0a0a0a`** — the same value — and the
+card simply stopped existing. No contrast check fires, because a card boundary is neither text nor a
+control.
+
+The cards that survived the same theme did so on a **border**, not a fill difference: a 1.5px
+quaternary stroke that reads on either ground. The defect was never the token; it was that one card
+had been given no second way to separate.
+
+So: resolve **card fill against page fill in every theme**, and where the step can collapse, carry
+the separation on something that cannot — a border, or a surface token chosen to stay one step above
+the page in both directions.
 
 ## An asset's baked-in ground must match the surface it sits on
 
@@ -393,6 +431,23 @@ have reopened a screen already signed off.
 
 The gate runs **last**, over everything, after the final edit. A screenshot taken before the last
 change is evidence about a file that no longer exists.
+
+## After a `layoutMode` flip, every child's cross-axis sizing is stale
+
+<!-- enforced-by: none — sweep for height <= 2 after any layout change -->
+
+Flipping a grid from vertical to horizontal-with-wrap left its rows at `layoutSizingVertical = FILL`.
+As primary-axis children they had been *dividing* the parent's 274px; as cross-axis children they
+went on dividing it, resolving to **66px** instead of stretching to the line. The same flip on an
+options list collapsed twelve rows to **1px tall** — invisible in the node tree, obvious the moment
+anything was rendered.
+
+`FILL` does not mean "stretch". On the primary axis it means *share what is left*, and a flip silently
+changes which axis a child is on.
+
+So after any `layoutMode` change: **re-set every child's cross-axis sizing explicitly** — hug is
+almost always what was meant — and sweep the subtree for `height <= 2 || width <= 2`, which is the
+cheapest detector of the whole family.
 
 ## Restore by position, never by name
 
